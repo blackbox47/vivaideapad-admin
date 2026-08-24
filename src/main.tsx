@@ -1,10 +1,21 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App.tsx'
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import { Provider } from 'react-redux';
 
-createRoot(document.getElementById('root')!).render(
+import App from '@/App';
+import { store } from '@/store';
+import './index.css';
+
+const rootElement = document.getElementById('root');
+
+if (!rootElement) {
+  throw new Error('[bootstrap] Missing #root element in index.html');
+}
+
+createRoot(rootElement).render(
   <StrictMode>
-    <App />
+    <Provider store={store}>
+      <App />
+    </Provider>
   </StrictMode>,
-)
+);

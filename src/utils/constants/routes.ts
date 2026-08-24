@@ -1,0 +1,16 @@
+export const ADMIN_BASE_PATH = '/admin';
+
+export const ADMIN_ROUTES = {
+  dashboard: ADMIN_BASE_PATH,
+  login: `${ADMIN_BASE_PATH}/login`,
+  signIn: `${ADMIN_BASE_PATH}/sign-in`,
+  topics: `${ADMIN_BASE_PATH}/topics`,
+  applicants: `${ADMIN_BASE_PATH}/applicants`,
+  contentReview: `${ADMIN_BASE_PATH}/content-review`,
+  rewards: `${ADMIN_BASE_PATH}/rewards`,
+  payouts: `${ADMIN_BASE_PATH}/payouts`,
+  leaderboard: `${ADMIN_BASE_PATH}/leaderboard`,
+  reports: `${ADMIN_BASE_PATH}/reports`,
+  auditLog: `${ADMIN_BASE_PATH}/audit-log`,
+  profile: `${ADMIN_BASE_PATH}/profile`,
+} as const;
