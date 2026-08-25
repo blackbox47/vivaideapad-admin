@@ -1,8 +1,10 @@
 import {
   BarChart3,
   CreditCard,
+  FileText,
   Home,
   Layers,
+  Lightbulb,
   Shield,
   SquareCheckBig,
   Trophy,
@@ -11,7 +13,7 @@ import {
 } from 'lucide-react';
 
 import type { NavItem } from '@/models/nav/nav-model';
-import { ADMIN_ROUTES } from '@/utils/constants/routes';
+import { ADMIN_ROUTES, CREATOR_ROUTES } from '@/utils/constants/routes';
 
 export const ADMIN_NAV_ITEMS: NavItem[] = [
   { title: 'Overview', href: ADMIN_ROUTES.dashboard, icon: Home },
@@ -29,6 +31,27 @@ export const ADMIN_NAV_ITEMS: NavItem[] = [
   { title: 'Audit log', href: ADMIN_ROUTES.auditLog, icon: Shield },
 ];
 
+export const CREATOR_NAV_ITEMS: NavItem[] = [
+  { title: 'Dashboard', href: CREATOR_ROUTES.dashboard, icon: Home },
+  {
+    title: 'Opportunities',
+    href: CREATOR_ROUTES.opportunities,
+    icon: Lightbulb,
+  },
+  { title: 'My submissions', href: CREATOR_ROUTES.submissions, icon: FileText },
+  { title: 'Rewards & payouts', href: CREATOR_ROUTES.rewards, icon: Wallet },
+  { title: 'Leaderboard', href: CREATOR_ROUTES.leaderboard, icon: BarChart3 },
+];
+
+export const CREATOR_PAGE_TITLES: Record<string, string> = {
+  [CREATOR_ROUTES.dashboard]: 'Dashboard',
+  [CREATOR_ROUTES.opportunities]: 'Opportunities',
+  [CREATOR_ROUTES.submissions]: 'My submissions',
+  [CREATOR_ROUTES.rewards]: 'Rewards & payouts',
+  [CREATOR_ROUTES.leaderboard]: 'Leaderboard',
+  [CREATOR_ROUTES.submitIdea]: 'Submit a new idea',
+};
+
 export const PAGE_TITLES: Record<string, string> = {
   [ADMIN_ROUTES.dashboard]: 'Overview',
   [ADMIN_ROUTES.topics]: 'Topics & concepts',
@@ -39,4 +62,5 @@ export const PAGE_TITLES: Record<string, string> = {
   [ADMIN_ROUTES.leaderboard]: 'Leaderboard',
   [ADMIN_ROUTES.reports]: 'Reports',
   [ADMIN_ROUTES.auditLog]: 'Audit log',
+  ...CREATOR_PAGE_TITLES,
 };

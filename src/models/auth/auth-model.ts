@@ -1,3 +1,10 @@
+/**
+ * Workspace role discriminator. `AdminUser.role` (below) is a *display* string
+ * ("Platform owner") — `UserRole` is the route-gating claim attached to every
+ * login response. The two are intentionally independent.
+ */
+export type UserRole = 'admin' | 'creator';
+
 export interface AdminUser {
   id: string;
   name: string;
@@ -14,4 +21,5 @@ export interface LoginRequest {
 export interface LoginResponse {
   token: string;
   user: AdminUser;
+  role: UserRole;
 }

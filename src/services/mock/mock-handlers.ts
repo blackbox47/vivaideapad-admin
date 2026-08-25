@@ -34,14 +34,26 @@ import type {
   UpdatePasswordBody,
   UpdateProfileBody,
 } from '@/models/profile/profile-model';
+import type { MyIdea, MyIdeasStatusFilter } from '@/models/creator/my-ideas-model';
+import type { SubmitIdeaBody } from '@/models/creator/submit-idea-model';
+import type {
+  CreatorRewardsOverview,
+  WithdrawRequestBody,
+} from '@/models/creator/creator-rewards-model';
 import {
   mockAdminUser,
   mockApplicants,
   mockAuditLog,
   mockConcepts,
+  mockCreatorDashboardOverview,
+  mockCreatorLeaderboard,
+  mockCreatorRewards,
+  mockCreatorTopics,
+  mockCreatorUser,
   mockDashboardOverview,
   mockLeaderboard,
   mockLedger,
+  mockMyIdeas,
   mockNotifications,
   mockPayouts,
   mockPeopleUsers,
@@ -56,6 +68,14 @@ import {
   AUDIT_LOG_URL,
   AUTH_LOGIN_URL,
   CONCEPTS_URL,
+  CREATOR_DASHBOARD_OVERVIEW_URL,
+  CREATOR_IDEAS_SUBMIT_URL,
+  CREATOR_IDEAS_URL,
+  CREATOR_ME_URL,
+  CREATOR_LEADERBOARD_URL,
+  CREATOR_REWARDS_URL,
+  CREATOR_REWARDS_WITHDRAW_URL,
+  CREATOR_TOPICS_URL,
   DASHBOARD_OVERVIEW_URL,
   LEADERBOARD_RECALCULATE_URL,
   LEADERBOARD_URL,
@@ -81,6 +101,8 @@ let applicantsState: Applicant[] = structuredClone(mockApplicants);
 let usersState: PlatformUser[] = structuredClone(mockPeopleUsers);
 let reviewQueueState: ContentSubmission[] = structuredClone(mockReviewQueue);
 let payoutsState: Payout[] = structuredClone(mockPayouts);
+let myIdeasState: MyIdea[] = structuredClone(mockMyIdeas);
+let rewardsState: CreatorRewardsOverview = structuredClone(mockCreatorRewards);
 const leaderboardState: LeaderboardEntry[] = structuredClone(mockLeaderboard);
 const profileState: ProfileDetails = structuredClone(mockProfile);
 let notificationsState: NotificationPreferences = structuredClone(mockNotifications);
@@ -90,6 +112,27 @@ function peopleSnapshot() {
     applicants: applicantsState,
     users: usersState,
   };
+}
+
+function isWithdrawRequestBody(body: unknown): body is WithdrawRequestBody {
+  return (
+    typeof body === 'object' &&
+    body !== null &&
+    typeof (body as WithdrawRequestBody).amount === 'string' &&
+    typeof (body as WithdrawRequestBody).method === 'string'
+  );
+}
+
+function parseTakaAmount(value: string): number {
+  return Number(value.replace(/[^\d]/g, ''));
+}
+
+function formatTaka(value: number): string {
+  return `৳${value.toLocaleString('en-US')}`;
+}
+
+function formatShortDate(date: Date): string {
+  return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 }
 
 function isDecideApplicantBody(body: unknown): body is DecideApplicantBody {
@@ -195,10 +238,18 @@ type MockHandler = (request: ApiRequest) => unknown;
 const handlers: Record<string, MockHandler> = {
   [`GET ${DASHBOARD_OVERVIEW_URL}`]: () => mockDashboardOverview,
   [`GET ${ADMIN_ME_URL}`]: () => mockAdminUser,
-  [`POST ${AUTH_LOGIN_URL}`]: () => ({
-    token: MOCK_SESSION_TOKEN,
-    user: mockAdminUser,
-  }),
+  [`POST ${AUTH_LOGIN_URL}`]: (request) => {
+    // Synthesize the role from the email domain. Real backend will return
+    // a discriminator field on the response — this is mock-only.
+    const body = request.body as { email?: string } | undefined;
+    const email = typeof body?.email === 'string' ? body.email.toLowerCase() : '';
+    const isCreator = email.endsWith('@sparkory.demo');
+    return {
+      token: MOCK_SESSION_TOKEN,
+      user: isCreator ? mockCreatorUser : mockAdminUser,
+      role: isCreator ? 'creator' : 'admin',
+    };
+  },
   [`GET ${CONCEPTS_URL}`]: (request) => {
     const status = request.params?.status;
     const search = String(request.params?.search ?? '')
@@ -482,6 +533,122 @@ const handlers: Record<string, MockHandler> = {
     const { dataUrl } = request.body as { dataUrl: string };
     profileState.avatarUrl = dataUrl;
     return profileState;
+  },
+  // ── Creator workspace ────────────────────────────────────────────────────
+  [`GET ${CREATOR_ME_URL}`]: () => mockCreatorUser,
+  [`GET ${CREATOR_DASHBOARD_OVERVIEW_URL}`]: () => mockCreatorDashboardOverview,
+  [`GET ${CREATOR_TOPICS_URL}`]: () => ({ topics: mockCreatorTopics }),
+  [`GET ${CREATOR_REWARDS_URL}`]: () => rewardsState,
+  [`GET ${CREATOR_LEADERBOARD_URL}`]: () => mockCreatorLeaderboard,
+  [`POST ${CREATOR_REWARDS_WITHDRAW_URL}`]: (request) => {
+    if (!isWithdrawRequestBody(request.body)) {
+      throw new Error('Invalid withdrawal payload');
+    }
+
+    const amount = parseTakaAmount(request.body.amount);
+    const available = parseTakaAmount(rewardsState.available);
+
+    if (!Number.isFinite(amount) || amount <= 0) {
+      throw new Error('Enter a valid amount');
+    }
+
+    if (amount > available) {
+      throw new Error('Amount exceeds available balance');
+    }
+
+    const methodLabel = request.body.method.split(' · ')[0] || 'bKash';
+    const reference = `TX${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+    const entry = {
+      id: `wd-${Date.now()}`,
+      description: `${methodLabel} payout · ${reference}`,
+      date: formatShortDate(new Date()),
+      type: 'Withdrawal' as const,
+      amount: `−${formatTaka(amount)}`,
+      status: 'Pending' as const,
+    };
+
+    rewardsState = {
+      ...rewardsState,
+      available: formatTaka(available - amount),
+      entries: [entry, ...rewardsState.entries],
+    };
+
+    return {
+      requestedAt: new Date().toISOString(),
+      entry,
+    };
+  },
+  [`GET ${CREATOR_IDEAS_URL}`]: (request) => {
+    const status = request.params?.status as MyIdeasStatusFilter | undefined;
+    const search = String(request.params?.search ?? '')
+      .trim()
+      .toLowerCase();
+
+    const filtered = myIdeasState
+      .filter((idea) => {
+        const matchesStatus =
+          !status || status === 'all' || idea.status === status;
+        const matchesSearch =
+          search.length === 0 ||
+          idea.title.toLowerCase().includes(search) ||
+          idea.topic.toLowerCase().includes(search);
+        return matchesStatus && matchesSearch;
+      })
+      .sort((a, b) => {
+        // Newest-first using dd-mm-yyyy parsing.
+        const [da, ma, ya] = a.submitted.split('-').map(Number);
+        const [db, mb, yb] = b.submitted.split('-').map(Number);
+        return (
+          new Date(yb, (mb ?? 1) - 1, db ?? 1).getTime() -
+          new Date(ya, (ma ?? 1) - 1, da ?? 1).getTime()
+        );
+      });
+
+    return { ideas: filtered, total: myIdeasState.length };
+  },
+  [`POST ${CREATOR_IDEAS_SUBMIT_URL}`]: (request) => {
+    const body = request.body as Partial<SubmitIdeaBody> | undefined;
+    if (
+      !body ||
+      typeof body.title !== 'string' ||
+      typeof body.topicId !== 'string' ||
+      typeof body.summary !== 'string' ||
+      typeof body.body !== 'string'
+    ) {
+      throw new Error('Invalid idea submission payload');
+    }
+    if (body.title.length === 0 || body.title.length > 80) {
+      throw new Error('Title must be 1-80 characters');
+    }
+    if (body.summary.length === 0 || body.summary.length > 240) {
+      throw new Error('Summary must be 1-240 characters');
+    }
+    if (body.body.length === 0 || body.body.length > 4000) {
+      throw new Error('Body must be 1-4000 characters');
+    }
+
+    const topic = mockCreatorTopics.find((t) => t.id === body.topicId);
+    if (!topic) {
+      throw new Error('Unknown topic');
+    }
+
+    const today = new Date();
+    const dd = String(today.getDate()).padStart(2, '0');
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const yyyy = today.getFullYear();
+
+    const newIdea: MyIdea = {
+      id: `idea_${Date.now()}`,
+      title: body.title,
+      topic: topic.title,
+      submitted: `${dd}-${mm}-${yyyy}`,
+      status: 'Submitted',
+      reward: '—',
+      comments: 0,
+    };
+    myIdeasState = [newIdea, ...myIdeasState];
+
+    return { idea: newIdea, createdAt: today.toISOString() };
   },
 };
 

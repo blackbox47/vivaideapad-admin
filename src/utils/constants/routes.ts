@@ -14,3 +14,17 @@ export const ADMIN_ROUTES = {
   auditLog: `${ADMIN_BASE_PATH}/audit-log`,
   profile: `${ADMIN_BASE_PATH}/profile`,
 } as const;
+
+/**
+ * Contributor workspace lives at the top level (no shared base path) so the
+ * URLs read naturally: `/login`, `/dashboard`, `/opportunities`, …
+ */
+export const CREATOR_ROUTES = {
+  dashboard: '/dashboard',
+  login: '/login',
+  opportunities: '/opportunities',
+  submissions: '/submissions',
+  rewards: '/rewards',
+  leaderboard: '/leaderboard',
+  submitIdea: '/ideas/new',
+} as const;

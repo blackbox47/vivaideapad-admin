@@ -1,52 +1,46 @@
 import { useState, type FormEvent } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import useAuth from '@/hooks/auth/use-auth';
-import { ADMIN_ROUTES } from '@/utils/constants/routes';
-
-interface LocationState {
-  from?: { pathname: string };
-}
-
-interface DemoOption {
-  id: 'admin' | 'contributor';
-  label: string;
-  email: string;
-}
-
-const DEMO_OPTIONS: DemoOption[] = [
-  {
-    id: 'contributor',
-    label: 'Contributor demo',
-    email: 'nora@sparkory.demo',
-  },
-  {
-    id: 'admin',
-    label: 'Admin demo',
-    email: 'maya@ideapad.app',
-  },
-];
-
-const DEFAULT_EMAIL = 'nora@sparkory.demo';
-const DEFAULT_PASSWORD = 'demo1234';
+import type { UserRole } from '@/models/auth/auth-model';
+import { ADMIN_ROUTES, CREATOR_ROUTES } from '@/utils/constants/routes';
 
 const fieldClassName =
   'h-auto w-full rounded-[12px] border-[#dfe7e3] bg-white px-[14px] py-[13px] text-sm shadow-none focus-visible:border-[#70a28d] focus-visible:ring-0 focus-visible:shadow-[0_0_0_3px_#e2f1ea]';
 
-export default function LoginPanel() {
-  const [email, setEmail] = useState(DEFAULT_EMAIL);
-  const [password, setPassword] = useState(DEFAULT_PASSWORD);
+interface LoginPanelProps {
+  role: UserRole;
+}
+
+function homeForRole(role: UserRole): string {
+  return role === 'admin' ? ADMIN_ROUTES.dashboard : CREATOR_ROUTES.dashboard;
+}
+
+function loginForRole(role: UserRole): string {
+  return role === 'admin' ? ADMIN_ROUTES.login : CREATOR_ROUTES.login;
+}
+
+function titleForRole(role: UserRole): string {
+  return role === 'admin' ? 'Sign in' : 'Sign in to your creator workspace';
+}
+
+function descriptionForRole(role: UserRole): string {
+  return role === 'admin'
+    ? 'Enter your account details to continue.'
+    : 'Pick a topic, share your idea, and track it from draft to payout.';
+}
+
+export default function LoginPanel({ role }: LoginPanelProps) {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [validationError, setValidationError] = useState<string | null>(null);
   const { login, isLoggingIn, loginError, resetLoginError } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
 
-  const redirectTo =
-    (location.state as LocationState | null)?.from?.pathname ??
-    ADMIN_ROUTES.dashboard;
+  const loginPath = loginForRole(role);
 
   const handleEmailChange = (value: string) => {
     setEmail(value);
@@ -78,23 +72,15 @@ export default function LoginPanel() {
     }
 
     try {
-      await login({ email, password });
-      navigate(redirectTo, { replace: true });
+      // Trust the panel's `role` over the server's claim. The panel knows it
+      // was mounted on `/login` (creator) or `/admin/login` (admin), so we
+      // pin the role claim in the auth slice accordingly. This matches the
+      // way we navigate below.
+      await login({ email, password }, { asRole: role });
+      navigate(homeForRole(role), { replace: true });
     } catch {
       // Failure surfaced via loginError.
     }
-  };
-
-  const handleDemo = (option: DemoOption) => {
-    setEmail(option.email);
-    setPassword(DEFAULT_PASSWORD);
-    setValidationError(null);
-    resetLoginError();
-    void login({ email: option.email, password: DEFAULT_PASSWORD })
-      .then(() => {
-        navigate(redirectTo, { replace: true });
-      })
-      .catch(() => undefined);
   };
 
   const inlineError = validationError ?? loginError;
@@ -103,7 +89,7 @@ export default function LoginPanel() {
     <section className="flex min-h-svh items-center justify-center bg-[#f6f8f5] p-11 lg:min-h-0">
       <div className="w-full max-w-[380px]">
         <Link
-          to={ADMIN_ROUTES.login}
+          to={loginPath}
           className="inline-flex items-center rounded-full border border-[#dfe7e3] bg-white px-3.5 py-2 text-[13px] font-bold text-foreground no-underline transition-colors hover:bg-white"
         >
           ← Back to home
@@ -113,11 +99,9 @@ export default function LoginPanel() {
           Secure access
         </span>
         <h2 className="mt-2 mb-2 font-heading text-[38px] tracking-[-0.035em] text-[#12231f]">
-          Sign in
+          {titleForRole(role)}
         </h2>
-        <p className="text-[#687773]">
-          Use a demo role below or enter your account details.
-        </p>
+        <p className="text-[#687773]">{descriptionForRole(role)}</p>
 
         <form className="mt-7" onSubmit={handleSubmit} noValidate>
           <div className="mb-3.5">
@@ -173,20 +157,6 @@ export default function LoginPanel() {
             {isLoggingIn ? 'Signing in…' : 'Continue'}
           </Button>
         </form>
-
-        <div className="mt-4 grid grid-cols-2 gap-2.5">
-          {DEMO_OPTIONS.map((option) => (
-            <button
-              key={option.id}
-              type="button"
-              onClick={() => handleDemo(option)}
-              disabled={isLoggingIn}
-              className="rounded-[12px] border border-[#dfe7e3] bg-[#f6f8f5] px-3 py-3 text-[13px] font-bold text-[#12231f] transition-colors hover:bg-[#edf1ec] disabled:opacity-60"
-            >
-              {option.label}
-            </button>
-          ))}
-        </div>
 
         <p className="mt-[22px] text-center text-[12px] text-[#687773]">
           Approved contributors receive a secure activation link by email.

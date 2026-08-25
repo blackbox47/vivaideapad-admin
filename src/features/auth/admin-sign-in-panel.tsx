@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,21 +7,12 @@ import { Label } from '@/components/ui/label';
 import useAuth from '@/hooks/auth/use-auth';
 import { ADMIN_ROUTES } from '@/utils/constants/routes';
 
-interface LocationState {
-  from?: { pathname: string };
-}
-
 export default function AdminSignInPanel() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [validationError, setValidationError] = useState<string | null>(null);
   const { login, isLoggingIn, loginError, resetLoginError } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
-
-  const redirectTo =
-    (location.state as LocationState | null)?.from?.pathname ??
-    ADMIN_ROUTES.dashboard;
 
   const handleEmailChange = (value: string) => {
     setEmail(value);
@@ -54,7 +45,8 @@ export default function AdminSignInPanel() {
 
     try {
       await login({ email, password });
-      navigate(redirectTo, { replace: true });
+      // Always land on the admin dashboard after sign-in.
+      navigate(ADMIN_ROUTES.dashboard, { replace: true });
     } catch {
       // Failure surfaced via loginError.
     }

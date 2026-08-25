@@ -11,7 +11,7 @@ export default function LoginOverview() {
         description="Continue creating, reviewing or shaping the next opportunity."
         footer="Ideapad community platform"
       />
-      <LoginPanel />
+      <LoginPanel role="admin" />
     </div>
   );
 }

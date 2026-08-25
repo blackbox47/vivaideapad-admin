@@ -1,5 +1,11 @@
 import type { AdminUser } from '@/models/auth/auth-model';
 import type { ContentSubmission } from '@/models/content-review/content-review-model';
+import type { CreatorDashboardOverview } from '@/models/creator/creator-dashboard-model';
+import type { CreatorLeaderboardOverview } from '@/models/creator/creator-leaderboard-model';
+import type { CreatorRewardsOverview } from '@/models/creator/creator-rewards-model';
+import type { CreatorUser } from '@/models/creator/creator-user-model';
+import type { IdeaStatus, MyIdea } from '@/models/creator/my-ideas-model';
+import type { CreatorTopic } from '@/models/creator/submit-idea-model';
 import type { DashboardOverview } from '@/models/dashboard/dashboard-model';
 import type { LeaderboardEntry } from '@/models/leaderboard/leaderboard-model';
 import type { Applicant, PlatformUser } from '@/models/people/people-model';
@@ -700,6 +706,185 @@ export const mockLeaderboard: LeaderboardEntry[] = [
   },
 ];
 
+export const mockCreatorLeaderboard: CreatorLeaderboardOverview = {
+  eyebrow: 'Community',
+  title: 'Leaderboard',
+  description:
+    'Celebrating original thinking and consistent positive contribution.',
+  visibility: 'Public',
+  stats: [
+    {
+      id: 'rank',
+      label: 'Your rank',
+      value: '#12',
+      description: 'Top 15%',
+      tone: 'muted',
+    },
+    {
+      id: 'points',
+      label: 'Your points',
+      value: '840',
+      description: '2 approved ideas',
+      tone: 'muted',
+    },
+    {
+      id: 'next',
+      label: 'Points to next rank',
+      value: '140',
+      description: 'Ahead: Meher Das',
+      tone: 'danger',
+    },
+    {
+      id: 'streak',
+      label: 'Current streak',
+      value: '1 week',
+      description: 'Submit again to extend it',
+      tone: 'muted',
+    },
+  ],
+  podium: [
+    {
+      id: 'lb1',
+      rank: 1,
+      rankLabel: '#1',
+      name: 'Amina Rahman',
+      initials: 'AM',
+      points: 2840,
+      approved: 9,
+      streak: '6 weeks',
+      avatarBg: '#dff8eb',
+      visibility: 'Public',
+      medal: '🥇',
+    },
+    {
+      id: 'lb2',
+      rank: 2,
+      rankLabel: '#2',
+      name: 'Jonas Lee',
+      initials: 'JL',
+      points: 2620,
+      approved: 7,
+      streak: '4 weeks',
+      avatarBg: '#e7e3ff',
+      visibility: 'Public',
+      medal: '🥈',
+    },
+    {
+      id: 'lb3',
+      rank: 3,
+      rankLabel: '#3',
+      name: 'Sara Idris',
+      initials: 'SI',
+      points: 2410,
+      approved: 5,
+      streak: '5 weeks',
+      avatarBg: '#ffe6d5',
+      visibility: 'Public',
+      medal: '🥉',
+    },
+  ],
+  standings: [
+    {
+      id: 'lb4',
+      rank: 4,
+      rankLabel: '#4',
+      name: 'Kian Moore',
+      initials: 'KM',
+      points: 2180,
+      approved: 4,
+      streak: '2 weeks',
+      avatarBg: '#dff8eb',
+      visibility: 'Public',
+    },
+    {
+      id: 'lb5',
+      rank: 5,
+      rankLabel: '#5',
+      name: 'Leila Morgan',
+      initials: 'LM',
+      points: 1960,
+      approved: 4,
+      streak: '3 weeks',
+      avatarBg: '#e7e3ff',
+      visibility: 'Public',
+    },
+    {
+      id: 'lb6',
+      rank: 6,
+      rankLabel: '#6',
+      name: 'Tomás Rivera',
+      initials: 'TR',
+      points: 1720,
+      approved: 3,
+      streak: '1 week',
+      avatarBg: '#ffe6d5',
+      visibility: 'Public',
+    },
+    {
+      id: 'lb7',
+      rank: 7,
+      rankLabel: '#7',
+      name: 'Imran Cho',
+      initials: 'IC',
+      points: 1540,
+      approved: 3,
+      streak: '2 weeks',
+      avatarBg: '#dff8eb',
+      visibility: 'Public',
+    },
+    {
+      id: 'lb8',
+      rank: 8,
+      rankLabel: '#8',
+      name: 'Priya Nair',
+      initials: 'PN',
+      points: 1290,
+      approved: 2,
+      streak: '—',
+      avatarBg: '#e7e3ff',
+      visibility: 'Public',
+    },
+    {
+      id: 'lb9',
+      rank: 9,
+      rankLabel: '#9',
+      name: 'Rafi Karim',
+      initials: 'RK',
+      points: 1105,
+      approved: 2,
+      streak: '1 week',
+      avatarBg: '#ffe6d5',
+      visibility: 'Public',
+    },
+    {
+      id: 'lb10',
+      rank: 10,
+      rankLabel: '#10',
+      name: 'Meher Das',
+      initials: 'MD',
+      points: 980,
+      approved: 2,
+      streak: '—',
+      avatarBg: '#dff8eb',
+      visibility: 'Public',
+    },
+    {
+      id: 'lb12',
+      rank: 12,
+      rankLabel: '#12',
+      name: 'Nora Ahmed (you)',
+      initials: 'NA',
+      points: 840,
+      approved: 2,
+      streak: '1 week',
+      avatarBg: '#e8ffc0',
+      visibility: 'Public',
+      isYou: true,
+      showGap: true,
+    },
+  ],
+};
+
 import type { ReportsOverview } from '@/models/reports/reports-model';
 
 export const mockReportsOverview: ReportsOverview = {
@@ -944,4 +1129,253 @@ export const mockProfileOverview: ProfileOverview = {
   notifications: mockNotifications,
   payoutMethod: mockPayoutMethod,
 };
+
+// ─── Creator workspace fixtures ────────────────────────────────────────────
+
+export const mockCreatorUser: CreatorUser = {
+  id: 'usr_nora',
+  name: 'Nora Ahmed',
+  initials: 'NA',
+  email: 'nora@sparkory.demo',
+  bio: 'Community contributor writing about everyday sustainability.',
+  joined: '12-03-2026',
+};
+
+export const mockCreatorDashboardOverview: CreatorDashboardOverview = {
+  eyebrow: 'Thursday, 6 August',
+  description:
+    'You have one draft ready to shape and two fresh opportunities.',
+  stats: [
+    {
+      id: 'stat_approved',
+      label: 'Approved ideas',
+      value: '07',
+      description: '↑ 2 this month',
+      tone: 'positive',
+    },
+    {
+      id: 'stat_balance',
+      label: 'Available balance',
+      value: 'Tk 480',
+      description: 'Ready to withdraw',
+      tone: 'positive',
+    },
+    {
+      id: 'stat_points',
+      label: 'Community points',
+      value: '840',
+      description: 'Rank #12',
+    },
+    {
+      id: 'stat_rate',
+      label: 'Approval rate',
+      value: '78%',
+      description: '↑ 6% vs last month',
+      tone: 'positive',
+    },
+  ],
+  inProgress: [
+    {
+      id: 'progress_1',
+      title: 'Learning beyond screens',
+      detail: 'Draft · Last edited 2 hours ago',
+      icon: '◌',
+      iconTone: 'mint',
+      action: 'continue',
+      progress: 64,
+    },
+    {
+      id: 'progress_2',
+      title: 'A kinder commute',
+      detail: 'Revision requested · Reviewer note available',
+      icon: '⌁',
+      iconTone: 'lavender',
+      action: 'review',
+    },
+  ],
+  activity: [
+    {
+      id: 'activity_1',
+      title: 'Your idea was approved',
+      detail: 'Small rituals, lasting change · +Tk 180',
+      icon: '✓',
+    },
+    {
+      id: 'activity_2',
+      title: 'Revision requested',
+      detail: 'A kinder commute',
+      icon: '✎',
+    },
+    {
+      id: 'activity_3',
+      title: 'Payout completed',
+      detail: 'Tk 240 sent to bKash',
+      icon: '$',
+    },
+  ],
+};
+
+export const mockMyIdeas: MyIdea[] = [
+  {
+    id: 's1',
+    title: 'A Letter Amma Never Got',
+    topic: "মা দিবসের গল্প — Mother's Day Stories",
+    submitted: '06-08-2026',
+    status: 'Draft',
+    reward: '—',
+    comments: 0,
+  },
+  {
+    id: 's2',
+    title: 'The Man Who Taught Me to Ride',
+    topic: "বাবা দিবসের অনুপ্রেরণা — Father's Day Inspiration",
+    submitted: '03-08-2026',
+    status: 'Revision Requested',
+    reward: '—',
+    comments: 1,
+  },
+  {
+    id: 's3',
+    title: "Songs My Grandfather Sang in '71",
+    topic: 'মহান বিজয় দিবস — Victory Day (16 Dec)',
+    submitted: '28-07-2026',
+    status: 'Approved',
+    reward: '৳9,900',
+    comments: 1,
+  },
+  {
+    id: 's4',
+    title: 'Mangal Shobhajatra: A Street Becomes a Story',
+    topic: 'পহেলা বৈশাখ ক্যাম্পেইন — Pohela Boishakh',
+    submitted: '16-07-2026',
+    status: 'Published',
+    reward: '৳13,200',
+    comments: 1,
+  },
+];
+
+export const mockCreatorRewards: CreatorRewardsOverview = {
+  available: '৳26,400',
+  pending: '৳9,900',
+  paidToDate: '৳69,300',
+  payoutMethod: 'bKash · 018•••42',
+  entries: [
+    {
+      id: 'cr1',
+      description: 'Small rituals, lasting change',
+      date: '28 Jul',
+      type: 'Reward',
+      amount: '+৳9,900',
+      status: 'Available',
+    },
+    {
+      id: 'cr2',
+      description: 'bKash payout · TX93K2',
+      date: '15 Jul',
+      type: 'Withdrawal',
+      amount: '−৳13,200',
+      status: 'Paid',
+    },
+    {
+      id: 'cr3',
+      description: 'The repair recipe',
+      date: '08 Jul',
+      type: 'Reward',
+      amount: '+৳13,200',
+      status: 'Available',
+    },
+  ],
+};
+
+export const mockCreatorTopics: CreatorTopic[] = [
+  {
+    id: 't1',
+    title: "মা দিবসের গল্প — Mother's Day Stories",
+    description:
+      "Share a heartfelt story or campaign idea celebrating mothers for the client's Mother's Day seminar content.",
+    reward: '৳3,000',
+    closesOn: '11 May',
+    category: 'Family occasions',
+    icon: '❀',
+    deadline: '10 days',
+  },
+  {
+    id: 't2',
+    title: "বাবা দিবসের অনুপ্রেরণা — Father's Day Inspiration",
+    description:
+      "Contribute a real-life inspired story or seminar talking point honouring fathers for Father's Day content.",
+    reward: '৳3,000',
+    closesOn: '21 Jun',
+    category: 'Family occasions',
+    icon: '⛰',
+    deadline: '15 days',
+  },
+  {
+    id: 't3',
+    title: 'মহান বিজয় দিবস — Victory Day (16 Dec)',
+    description:
+      "Craft content ideas honouring Bijoy Dibosh for the company's national-day seminar and CSR campaign.",
+    reward: '৳5,000',
+    closesOn: '16 Dec',
+    category: 'National days',
+    icon: '★',
+    deadline: '20 days',
+  },
+  {
+    id: 't4',
+    title: 'পহেলা বৈশাখ ক্যাম্পেইন — Pohela Boishakh',
+    description:
+      'Campaign concepts celebrating the Bengali New Year for retail and community activation.',
+    reward: '৳4,000',
+    closesOn: '14 Apr',
+    category: 'Cultural festivals',
+    icon: '✦',
+    deadline: '22 days',
+  },
+  {
+    id: 't7',
+    title: 'ঈদ উৎসব প্যাকেজিং — Eid Festival Packaging',
+    description:
+      "Fresh packaging and gifting concepts for the brand's Eid seasonal line.",
+    reward: '৳3,800',
+    closesOn: '20 Jul',
+    category: 'Cultural festivals',
+    icon: '☾',
+    deadline: '9 days',
+  },
+  {
+    id: 't8',
+    title: 'দুর্গাপূজা অভিজ্ঞতা — Durga Puja Experience',
+    description:
+      'In-store and community experience ideas for Durga Puja celebrations.',
+    reward: '৳4,200',
+    closesOn: '10 Oct',
+    category: 'Cultural festivals',
+    icon: '✺',
+    deadline: '30 days',
+  },
+  {
+    id: 't9',
+    title: 'কর্মক্ষেত্রে নিরাপত্তা — Workplace Safety Month',
+    description:
+      'Practical safety-awareness content ideas for the annual workplace wellbeing drive.',
+    reward: '৳2,800',
+    closesOn: '31 Aug',
+    category: 'Corporate wellbeing',
+    icon: '⚐',
+    deadline: '14 days',
+  },
+];
+
+// Internal list of all status values used in `mockMyIdeas` — kept here so the
+// handler filter below can share them without redeclaring.
+export const mockIdeaStatuses: IdeaStatus[] = [
+  'Draft',
+  'Submitted',
+  'Under Review',
+  'Revision Requested',
+  'Approved',
+  'Published',
+  'Rejected',
+];
 
