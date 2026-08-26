@@ -12,6 +12,23 @@ dist
 dist-ssr
 *.local
 
+# Environment files — keep local overrides out of git, commit shared defaults
+.env
+.env.local
+.env.*.local
+environment/.env
+environment/.env.local
+environment/.env.*.local
+
+# Explicitly allow committing the shared env files
+!.env.develop
+!.env.prod
+!.env.example
+!environment/.env.develop
+!environment/.env.prod
+!environment/.env.example
+!environment/.env.localdev
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

@@ -1,0 +1,178 @@
+import { useEffect, useState, type FormEvent, type MouseEvent } from 'react';
+import { ChevronDown } from 'lucide-react';
+
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { cn } from '@/lib/utils';
+
+const METHODS = [
+  'bKash · 018•••42',
+  'Nagad',
+  'Rocket',
+  'Bank transfer',
+] as const;
+
+const fieldClassName =
+  'h-auto w-full rounded-[12px] border border-border bg-card text-foreground px-[13px] py-3 text-sm shadow-none focus-visible:border-brand-sage-light';
+
+interface WithdrawRequestDialogProps {
+  available: string;
+  defaultMethod: string;
+  isSubmitting: boolean;
+  error: string | null;
+  onClose: () => void;
+  onSubmit: (payload: { amount: string; method: string }) => Promise<void>;
+}
+
+export default function WithdrawRequestDialog({
+  available,
+  defaultMethod,
+  isSubmitting,
+  error,
+  onClose,
+  onSubmit,
+}: WithdrawRequestDialogProps) {
+  const [amount, setAmount] = useState(available);
+  const [method, setMethod] = useState(
+    METHODS.includes(defaultMethod as (typeof METHODS)[number])
+      ? defaultMethod
+      : METHODS[0],
+  );
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && !isSubmitting) {
+        onClose();
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [isSubmitting, onClose]);
+
+  const handleBackdropClick = (event: MouseEvent<HTMLDivElement>) => {
+    if (event.target === event.currentTarget && !isSubmitting) {
+      onClose();
+    }
+  };
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    await onSubmit({ amount: amount.trim(), method });
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-50 grid place-items-center bg-[var(--overlay-scrim)] p-5 backdrop-blur-xs"
+      onClick={handleBackdropClick}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="withdraw-title"
+        className="w-full max-w-[480px] rounded-[24px] border border-[var(--dialog-border)] bg-card p-7 shadow-2xl"
+      >
+        <div className="mb-4 flex items-start justify-between gap-4">
+          <div>
+            <p className="text-[12px] font-extrabold tracking-[0.12em] text-brand-sage uppercase">
+              Rewards
+            </p>
+            <h2
+              id="withdraw-title"
+              className="mt-1.5 font-heading text-[22px] text-foreground"
+            >
+              Request withdrawal
+            </h2>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-[22px] leading-none text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+            aria-label="Close"
+          >
+            ×
+          </button>
+        </div>
+
+        <p className="mb-3.5 text-[13px] text-muted-foreground">
+          Available balance:{' '}
+          <strong className="text-foreground">{available}</strong>. Minimum
+          withdrawal threshold applies.
+        </p>
+
+        <form onSubmit={handleSubmit}>
+          <div className="mb-3">
+            <Label
+              htmlFor="withdraw-amount"
+              className="mb-1.5 block text-[12px] font-bold text-foreground"
+            >
+              Amount
+            </Label>
+            <Input
+              id="withdraw-amount"
+              value={amount}
+              onChange={(event) => setAmount(event.target.value)}
+              required
+              className={fieldClassName}
+            />
+          </div>
+
+          <div className="mb-3">
+            <Label
+              htmlFor="withdraw-method"
+              className="mb-1.5 block text-[12px] font-bold text-foreground"
+            >
+              Payout method
+            </Label>
+            <div className="relative">
+              <select
+                id="withdraw-method"
+                value={method}
+                onChange={(event) => setMethod(event.target.value)}
+                className={cn(fieldClassName, 'appearance-none pr-10')}
+              >
+                {METHODS.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown
+                aria-hidden
+                className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-muted-foreground"
+              />
+            </div>
+          </div>
+
+          {error ? (
+            <p
+              className="mb-2 text-[12px] font-semibold text-destructive"
+              role="alert"
+            >
+              {error}
+            </p>
+          ) : null}
+
+          <div className="mt-2 flex justify-end gap-2.5">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              className="h-auto rounded-full border-border bg-card px-5 py-3 font-bold text-foreground hover:bg-surface-subtle"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="h-auto rounded-full bg-primary px-5 py-3 font-bold text-primary-foreground hover:bg-brand-forest disabled:opacity-60"
+            >
+              {isSubmitting ? 'Submitting…' : 'Submit request'}
+            </Button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
