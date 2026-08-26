@@ -7,7 +7,7 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 export default function CreatorLayout() {
   return (
     <TooltipProvider>
-      <div className="flex min-h-svh bg-[#f5f7f5] text-foreground">
+      <div className="flex min-h-svh bg-background text-foreground">
         <div className="sticky top-0 hidden h-svh md:block">
           <CreatorSidebar />
         </div>

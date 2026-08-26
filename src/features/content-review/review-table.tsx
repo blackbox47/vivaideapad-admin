@@ -29,14 +29,14 @@ export default function ReviewTable({ submissions, onReview }: ReviewTableProps)
             <strong className="font-semibold text-foreground">
               {submission.title}
             </strong>
-            <div className="text-[11px] text-[#687773]">
+            <div className="text-[11px] text-muted-foreground">
               {submission.contributor}
             </div>
           </ProjectTableCell>
-          <ProjectTableCell className="text-[#687773]">
+          <ProjectTableCell className="text-muted-foreground">
             {submission.topic}
           </ProjectTableCell>
-          <ProjectTableCell className="whitespace-nowrap text-[#687773]">
+          <ProjectTableCell className="whitespace-nowrap text-muted-foreground">
             {submission.submitted}
           </ProjectTableCell>
           <ProjectTableCell className="whitespace-nowrap">
@@ -48,7 +48,7 @@ export default function ReviewTable({ submissions, onReview }: ReviewTableProps)
           <ProjectTableCell>
             <button
               type="button"
-              className="rounded-full bg-[#12231f] px-3.5 py-2 text-xs font-bold whitespace-nowrap text-white hover:bg-[#254b40]"
+              className="rounded-full bg-primary px-3.5 py-2 text-xs font-bold whitespace-nowrap text-primary-foreground hover:bg-brand-forest transition-colors cursor-pointer"
               onClick={() => onReview(submission.id)}
             >
               Review

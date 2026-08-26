@@ -124,7 +124,7 @@ export default function CreatorRewardsOverview() {
           <Button
             type="button"
             onClick={() => setIsWithdrawOpen(true)}
-            className="h-auto rounded-full bg-[#12231f] px-5 py-3 font-bold text-white hover:bg-[#254b40]"
+            className="h-auto rounded-full bg-primary px-5 py-3 font-bold text-primary-foreground hover:bg-brand-forest"
           >
             Request withdrawal
           </Button>
@@ -133,7 +133,7 @@ export default function CreatorRewardsOverview() {
 
       <CreatorStatsCards stats={stats} isLoading={isLoading} />
 
-      <section className="mt-[18px] rounded-[20px] border border-[#dfe7e3] bg-white p-[22px]">
+      <section className="mt-[18px] rounded-[20px] border border-border bg-card p-[22px]">
         <div className="mb-[18px] flex items-center justify-between gap-3">
           <h2 className="font-heading text-lg font-semibold text-foreground">
             Transaction history
@@ -143,7 +143,7 @@ export default function CreatorRewardsOverview() {
             variant="outline"
             disabled={!data || data.entries.length === 0}
             onClick={() => exportEntries(data?.entries ?? [])}
-            className="h-auto rounded-full border-[#dfe7e3] bg-white px-3.5 py-2 text-xs font-bold"
+            className="h-auto rounded-full border-border bg-card px-3.5 py-2 text-xs font-bold text-foreground hover:bg-surface-subtle"
           >
             Export
           </Button>
@@ -166,7 +166,7 @@ export default function CreatorRewardsOverview() {
       ) : null}
 
       {toast ? (
-        <div className="fixed bottom-[26px] left-1/2 z-[60] -translate-x-1/2 rounded-full bg-[#12231f] px-[22px] py-3.5 text-[13px] font-semibold text-white shadow-[0_12px_30px_rgba(0,0,0,0.25)]">
+        <div className="fixed bottom-[26px] left-1/2 z-[60] -translate-x-1/2 rounded-full bg-primary px-[22px] py-3.5 text-[13px] font-semibold text-primary-foreground shadow-2xl">
           {toast}
         </div>
       ) : null}

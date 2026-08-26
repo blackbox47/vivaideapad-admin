@@ -122,7 +122,7 @@ export default function CreatorProfileOverview() {
           </div>
         </div>
       ) : (
-        <p className="text-sm text-[#687773]">Loading profile…</p>
+        <p className="text-sm text-muted-foreground">Loading profile…</p>
       )}
 
       {isPayoutOpen && overview ? (

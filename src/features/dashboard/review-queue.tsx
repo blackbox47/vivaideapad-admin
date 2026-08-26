@@ -13,7 +13,7 @@ interface ReviewQueueProps {
 
 export default function ReviewQueue({ items, isLoading }: ReviewQueueProps) {
   return (
-    <section className="rounded-[20px] border border-[#dfe7e3] bg-white p-[22px]">
+    <section className="rounded-[20px] border border-border bg-card p-[22px]">
       <div className="mb-5 flex items-center justify-between gap-3">
         <h2 className="font-heading text-lg font-semibold text-foreground">
           Review queue
@@ -21,7 +21,7 @@ export default function ReviewQueue({ items, isLoading }: ReviewQueueProps) {
         <Button
           render={<Link to={ADMIN_ROUTES.contentReview} />}
           variant="outline"
-          className="h-auto rounded-full border-[#dfe7e3] bg-white px-3.5 py-2 text-xs font-bold"
+          className="h-auto rounded-full border-border bg-card px-3.5 py-2 text-xs font-bold text-foreground hover:bg-surface-subtle transition-colors"
         >
           View all
         </Button>
@@ -35,9 +35,9 @@ export default function ReviewQueue({ items, isLoading }: ReviewQueueProps) {
           : items.map((item) => (
               <article
                 key={item.id}
-                className="mt-2 grid grid-cols-[58px_minmax(0,1fr)_auto] items-center gap-3.5 rounded-[15px] border border-[#dfe7e3] p-3.5"
+                className="mt-2 grid grid-cols-[58px_minmax(0,1fr)_auto] items-center gap-3.5 rounded-[15px] border border-border p-3.5 bg-card"
               >
-                <div className="grid size-[58px] place-items-center rounded-[15px] bg-[#f1f3f2] text-lg text-[#687773]">
+                <div className="grid size-[58px] place-items-center rounded-[15px] bg-surface-subdued text-lg text-muted-foreground">
                   <Diamond className="size-[18px]" strokeWidth={2} />
                 </div>
 
@@ -45,14 +45,14 @@ export default function ReviewQueue({ items, isLoading }: ReviewQueueProps) {
                   <h3 className="truncate font-semibold text-foreground">
                     {item.title}
                   </h3>
-                  <p className="mt-1 text-xs text-[#687773]">
+                  <p className="mt-1 text-xs text-muted-foreground">
                     {item.author} · AI risk: {item.risk}
                   </p>
                 </div>
 
                 <Button
                   render={<Link to={ADMIN_ROUTES.contentReview} />}
-                  className="h-auto rounded-full bg-[#12231f] px-3.5 py-2 text-xs font-bold text-white hover:bg-[#254b40]"
+                  className="h-auto rounded-full bg-primary px-3.5 py-2 text-xs font-bold text-primary-foreground hover:bg-brand-forest"
                 >
                   Review
                 </Button>

@@ -39,7 +39,7 @@ export default function SubmitIdeaOverview() {
           <button
             type="button"
             onClick={() => void refetch()}
-            className="rounded-full bg-[#12231f] px-5 py-2 text-sm font-bold text-white hover:bg-[#254b40]"
+            className="rounded-full bg-primary px-5 py-2 text-sm font-bold text-primary-foreground hover:bg-brand-forest cursor-pointer"
           >
             Try again
           </button>
@@ -65,7 +65,7 @@ export default function SubmitIdeaOverview() {
         selectedTopicId={selectedTopicId}
       />
 
-      <section className="rounded-[20px] border border-[#e3e9e6] bg-white p-6">
+      <section className="rounded-[20px] border border-border bg-card p-6">
         <SubmitIdeaForm
           topics={topics}
           isLoadingTopics={isLoading}

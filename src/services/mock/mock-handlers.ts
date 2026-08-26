@@ -637,7 +637,7 @@ const handlers: Record<string, MockHandler> = {
       {
         id: `n-${Date.now()}`,
         icon: '♔',
-        iconBg: '#f1f3f2',
+        iconBg: 'var(--surface-subtle)',
         title: 'New admin added',
         body: `${name} can now sign in to the admin workspace.`,
         time: 'Just now',

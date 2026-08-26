@@ -3,7 +3,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { formatPoints } from '@/hooks/leaderboard/use-leaderboard';
 import type { LeaderboardEntry } from '@/models/leaderboard/leaderboard-model';
 
-const PODIUM_AVATAR_BG = ['#dff8eb', '#e7e3ff', '#ffe6d5'];
+const PODIUM_AVATAR_BG = ['var(--success-subtle)', 'var(--info-subtle)', 'var(--danger-subtle)'];
 const PODIUM_MEDAL = ['🥇', '🥈', '🥉'];
 
 interface LeaderboardPodiumProps {
@@ -21,7 +21,7 @@ export default function LeaderboardPodium({
         {Array.from({ length: 3 }).map((_, index) => (
           <div
             key={index}
-            className="flex flex-col items-center rounded-[24px] bg-[#173f33] p-7 text-white"
+            className="flex flex-col items-center rounded-[24px] bg-brand-pine-deep p-7 text-white"
           >
             <Skeleton className="mb-4 size-9 rounded-full bg-white/20" />
             <Skeleton className="size-16 rounded-full bg-white/20" />
@@ -43,24 +43,24 @@ export default function LeaderboardPodium({
       {entries.map((entry, index) => (
         <article
           key={entry.id}
-          className="flex flex-col items-center rounded-[24px] bg-[#173f33] p-7 text-white"
+          className="flex flex-col items-center rounded-[24px] bg-brand-pine-deep p-7 text-white"
         >
           <span className="mb-3 text-3xl leading-none" aria-hidden>
             {PODIUM_MEDAL[index] ?? '🏅'}
           </span>
           <Avatar className="size-16 after:border-transparent">
             <AvatarFallback
-              className="text-base font-bold text-[#12231f]"
-              style={{ backgroundColor: PODIUM_AVATAR_BG[index] ?? '#dff8eb' }}
+              className="text-base font-bold text-foreground"
+              style={{ backgroundColor: PODIUM_AVATAR_BG[index] ?? 'var(--success-subtle)' }}
             >
               {entry.initials}
             </AvatarFallback>
           </Avatar>
-          <p className="mt-4 text-[15px] font-semibold">{entry.name}</p>
-          <p className="mt-2 font-heading text-[28px] font-extrabold leading-none tracking-[-0.02em] text-[#c9f36d]">
+          <p className="mt-4 text-[15px] font-semibold text-white">{entry.name}</p>
+          <p className="mt-2 font-heading text-[28px] font-extrabold leading-none tracking-[-0.02em] text-brand-lime">
             {formatPoints(entry.points)}
           </p>
-          <p className="mt-3 text-[12px] text-[#9bb3ac]">
+          <p className="mt-3 text-[12px] text-text-light">
             {entry.approvedIdeas} approved · {entry.visibility}
           </p>
         </article>

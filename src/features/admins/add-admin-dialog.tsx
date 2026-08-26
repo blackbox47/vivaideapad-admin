@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import type { CreateAdminBody } from '@/models/admins/admins-model';
 
 const fieldClassName =
-  'h-auto w-full rounded-[12px] border border-[#dfe7e3] bg-white px-[13px] py-3 text-sm shadow-none';
+  'h-auto w-full rounded-[12px] border border-border bg-card px-[13px] py-3 text-sm text-foreground shadow-none focus-visible:border-ring';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -72,18 +72,18 @@ export default function AddAdminDialog({
 
   return (
     <div
-      className="fixed inset-0 z-50 grid place-items-center bg-[rgba(8,23,18,0.6)] p-5"
+      className="fixed inset-0 z-50 grid place-items-center bg-[var(--overlay-scrim)] p-5 backdrop-blur-xs"
       onClick={handleBackdropClick}
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="add-admin-title"
-        className="max-h-[88vh] w-full max-w-[560px] overflow-auto rounded-[24px] bg-white p-[30px] shadow-[0_20px_60px_rgba(29,65,54,0.12)]"
+        className="max-h-[88vh] w-full max-w-[560px] overflow-auto rounded-[24px] border border-[var(--dialog-border)] bg-card p-[30px] shadow-2xl"
       >
         <div className="mb-4 flex items-start justify-between gap-4">
           <div>
-            <p className="text-[12px] font-extrabold tracking-[0.12em] text-[#527065] uppercase">
+            <p className="text-[12px] font-extrabold tracking-[0.12em] text-brand-sage uppercase">
               Workspace access
             </p>
             <h2
@@ -96,14 +96,14 @@ export default function AddAdminDialog({
           <button
             type="button"
             onClick={onClose}
-            className="text-[22px] leading-none text-[#687773]"
+            className="text-[22px] leading-none text-muted-foreground hover:text-foreground transition-colors"
             aria-label="Close"
           >
             ×
           </button>
         </div>
 
-        <p className="mb-4 text-[13px] text-[#687773]">
+        <p className="mb-4 text-[13px] text-muted-foreground">
           They can sign in on the admin login page with this email and start
           using the workspace immediately.
         </p>
@@ -112,7 +112,7 @@ export default function AddAdminDialog({
           <div className="mb-3">
             <Label
               htmlFor="admin-name"
-              className="mb-1.5 block text-[12px] font-bold"
+              className="mb-1.5 block text-[12px] font-bold text-foreground"
             >
               Name
             </Label>
@@ -131,7 +131,7 @@ export default function AddAdminDialog({
           <div className="mb-3">
             <Label
               htmlFor="admin-email"
-              className="mb-1.5 block text-[12px] font-bold"
+              className="mb-1.5 block text-[12px] font-bold text-foreground"
             >
               Email
             </Label>
@@ -150,7 +150,7 @@ export default function AddAdminDialog({
 
           {inlineError ? (
             <p
-              className="mt-3 text-[12px] font-semibold text-[#b3401f]"
+              className="mt-3 text-[12px] font-semibold text-destructive"
               role="alert"
             >
               {inlineError}
@@ -162,14 +162,14 @@ export default function AddAdminDialog({
               type="button"
               variant="outline"
               onClick={onClose}
-              className="h-auto rounded-full border-[#dfe7e3] bg-white px-5 py-3 font-bold"
+              className="h-auto rounded-full border-border bg-card px-5 py-3 font-bold text-foreground hover:bg-surface-subtle"
             >
               Cancel
             </Button>
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="h-auto rounded-full bg-[#12231f] px-5 py-3 font-bold text-white hover:bg-[#254b40] disabled:opacity-60"
+              className="h-auto rounded-full bg-primary px-5 py-3 font-bold text-primary-foreground hover:bg-brand-forest disabled:opacity-60"
             >
               {isSubmitting ? 'Adding…' : 'Add admin'}
             </Button>

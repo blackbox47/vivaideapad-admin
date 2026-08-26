@@ -37,18 +37,18 @@ export default function RemoveAdminDialog({
 
   return (
     <div
-      className="fixed inset-0 z-50 grid place-items-center bg-[rgba(8,23,18,0.6)] p-5"
+      className="fixed inset-0 z-50 grid place-items-center bg-[var(--overlay-scrim)] p-5 backdrop-blur-xs"
       onClick={handleBackdropClick}
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="remove-admin-title"
-        className="w-full max-w-[480px] rounded-[24px] bg-white p-[30px] shadow-[0_20px_60px_rgba(29,65,54,0.12)]"
+        className="w-full max-w-[480px] rounded-[24px] border border-[var(--dialog-border)] bg-card p-[30px] shadow-2xl"
       >
         <div className="mb-4 flex items-start justify-between gap-4">
           <div>
-            <p className="text-[12px] font-extrabold tracking-[0.12em] text-[#527065] uppercase">
+            <p className="text-[12px] font-extrabold tracking-[0.12em] text-brand-sage uppercase">
               Remove access
             </p>
             <h2
@@ -61,21 +61,21 @@ export default function RemoveAdminDialog({
           <button
             type="button"
             onClick={onClose}
-            className="text-[22px] leading-none text-[#687773]"
+            className="text-[22px] leading-none text-muted-foreground hover:text-foreground transition-colors"
             aria-label="Close"
           >
             ×
           </button>
         </div>
 
-        <p className="text-[13px] leading-6 text-[#687773]">
+        <p className="text-[13px] leading-6 text-muted-foreground">
           {admin.email} will no longer be able to sign in to the admin
           workspace. This does not affect contributor accounts.
         </p>
 
         {error ? (
           <p
-            className="mt-3 text-[12px] font-semibold text-[#b3401f]"
+            className="mt-3 text-[12px] font-semibold text-destructive"
             role="alert"
           >
             {error}
@@ -87,7 +87,7 @@ export default function RemoveAdminDialog({
             type="button"
             variant="outline"
             onClick={onClose}
-            className="h-auto rounded-full border-[#dfe7e3] bg-white px-5 py-3 font-bold"
+            className="h-auto rounded-full border-border bg-card px-5 py-3 font-bold text-foreground hover:bg-surface-subtle"
           >
             Cancel
           </Button>
@@ -97,7 +97,7 @@ export default function RemoveAdminDialog({
             onClick={() => {
               void onConfirm();
             }}
-            className="h-auto rounded-full bg-[#b3401f] px-5 py-3 font-bold text-white hover:bg-[#8c3118] disabled:opacity-60"
+            className="h-auto rounded-full bg-danger px-5 py-3 font-bold text-danger-foreground hover:bg-danger-hover disabled:opacity-60"
           >
             {isSubmitting ? 'Removing…' : 'Remove admin'}
           </Button>

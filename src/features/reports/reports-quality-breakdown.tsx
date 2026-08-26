@@ -12,7 +12,7 @@ export default function ReportsQualityBreakdown({
   isLoading,
 }: ReportsQualityBreakdownProps) {
   return (
-    <section className="rounded-[20px] border border-[#dfe7e3] bg-white p-[22px]">
+    <section className="rounded-[20px] border border-border bg-card p-[22px]">
       <h2 className="mb-3.5 font-heading text-lg font-semibold text-foreground">
         Content review breakdown
       </h2>

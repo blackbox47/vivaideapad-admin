@@ -59,10 +59,10 @@ export default function ConceptFilters({
               data-status-filter={filter.id}
               aria-current={isActive ? 'page' : undefined}
               className={cn(
-                'rounded-full border border-[#dfe7e3] px-4 py-2 text-[13px] font-bold no-underline transition-colors',
+                'rounded-full border border-border px-4 py-2 text-[13px] font-bold no-underline transition-colors',
                 isActive
-                  ? 'bg-[#12231f] text-white'
-                  : 'bg-white text-[#12231f] hover:bg-[#f6f8f5]',
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-card text-foreground hover:bg-surface-subtle',
               )}
             >
               {filter.label}
@@ -72,7 +72,7 @@ export default function ConceptFilters({
       </div>
 
       <div className="flex items-center gap-3.5">
-        <span className="whitespace-nowrap text-[13px] text-[#687773]">
+        <span className="whitespace-nowrap text-[13px] text-muted-foreground">
           {visibleCount} {visibleCount === 1 ? 'concept' : 'concepts'}
         </span>
         <input
@@ -80,7 +80,7 @@ export default function ConceptFilters({
           onChange={(event) => onSearchChange(event.target.value)}
           placeholder="Search by title or category"
           aria-label="Search concepts"
-          className="min-w-[240px] rounded-full border border-[#dfe7e3] bg-white px-[18px] py-2.5 text-[13px] text-foreground outline-none placeholder:text-[#9aa8a3] focus-visible:border-[#70a28d] focus-visible:shadow-[0_0_0_3px_#e2f1ea]"
+          className="min-w-[240px] rounded-full border border-border bg-card px-[18px] py-2.5 text-[13px] text-foreground outline-none placeholder:text-text-subtle focus-visible:border-brand-sage-light focus-visible:ring-2 focus-visible:ring-success-muted"
         />
       </div>
     </div>

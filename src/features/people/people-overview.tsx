@@ -109,7 +109,7 @@ export default function PeopleOverview() {
       />
 
       {isLoading ? (
-        <div className="overflow-hidden rounded-[18px] border border-[#dfe7e3] bg-white p-4">
+        <div className="overflow-hidden rounded-[18px] border border-border bg-card p-4">
           {Array.from({ length: 5 }).map((_, index) => (
             <Skeleton key={index} className="mb-2 h-12 w-full" />
           ))}

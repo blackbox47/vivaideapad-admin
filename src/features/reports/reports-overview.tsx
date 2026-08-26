@@ -81,7 +81,7 @@ export default function ReportsOverview() {
       </div>
 
       <div className="mb-5 grid gap-[18px] lg:grid-cols-2">
-        <div className="rounded-[20px] border border-[#dfe7e3] bg-white p-[22px]">
+        <div className="rounded-[20px] border border-border bg-card p-[22px]">
           <ReportsQualityBreakdown
             rows={data?.qualityBreakdown ?? []}
             isLoading={isLoading}

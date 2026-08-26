@@ -30,7 +30,7 @@ import {
 } from '@/models/topics/topics-model';
 
 const fieldClassName =
-  'h-auto w-full rounded-[12px] border border-[#dfe7e3] bg-white px-[13px] py-3 text-sm shadow-none';
+  'h-auto w-full rounded-[12px] border border-border bg-card text-foreground px-[13px] py-3 text-sm shadow-none focus-visible:border-brand-sage-light';
 
 const STATUS_LABELS: Record<ConceptStatus, string> = {
   draft: 'Draft',
@@ -86,16 +86,16 @@ function DateField({
             id={id}
             className={cn(
               fieldClassName,
-              'justify-between font-normal hover:bg-white',
-              !value && 'text-[#9aa8a3]',
+              'justify-between font-normal hover:bg-card',
+              !value && 'text-text-subtle',
             )}
           />
         }
       >
         <span>{value ? formatConceptDate(value) : placeholder}</span>
-        <CalendarIcon className="size-4 text-[#687773]" />
+        <CalendarIcon className="size-4 text-muted-foreground" />
       </PopoverTrigger>
-      <PopoverContent align="start" className="w-auto p-0">
+      <PopoverContent align="start" className="w-auto p-0 border border-border bg-card">
         <Calendar
           mode="single"
           selected={value}
@@ -135,7 +135,7 @@ function FieldSelect({
       </select>
       <ChevronDown
         aria-hidden
-        className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-[#687773]"
+        className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-muted-foreground"
       />
     </div>
   );
@@ -270,18 +270,18 @@ export default function CreateConceptDialog({
 
   return (
     <div
-      className="fixed inset-0 z-50 grid place-items-center bg-[rgba(8,23,18,0.6)] p-5"
+      className="fixed inset-0 z-50 grid place-items-center bg-[var(--overlay-scrim)] p-5 backdrop-blur-xs"
       onClick={handleBackdropClick}
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="create-concept-title"
-        className="max-h-[88vh] w-full max-w-[560px] overflow-auto rounded-[24px] bg-white p-[30px] shadow-[0_20px_60px_rgba(29,65,54,0.12)]"
+        className="max-h-[88vh] w-full max-w-[560px] overflow-auto rounded-[24px] border border-[var(--dialog-border)] bg-card p-[30px] shadow-2xl"
       >
         <div className="mb-4 flex items-start justify-between gap-4">
           <div>
-            <p className="text-[12px] font-extrabold tracking-[0.12em] text-[#527065] uppercase">
+            <p className="text-[12px] font-extrabold tracking-[0.12em] text-brand-sage uppercase">
               Concept editor
             </p>
             <h2
@@ -294,7 +294,7 @@ export default function CreateConceptDialog({
           <button
             type="button"
             onClick={onClose}
-            className="text-[22px] leading-none text-[#687773]"
+            className="text-[22px] leading-none text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
             aria-label="Close"
           >
             ×
@@ -306,7 +306,7 @@ export default function CreateConceptDialog({
             <div>
               <Label
                 htmlFor="concept-title"
-                className="mb-1.5 block text-[12px] font-bold"
+                className="mb-1.5 block text-[12px] font-bold text-foreground"
               >
                 Title
               </Label>
@@ -322,7 +322,7 @@ export default function CreateConceptDialog({
               <div className="mb-1.5 flex items-center justify-between">
                 <Label
                   htmlFor="concept-category"
-                  className="text-[12px] font-bold"
+                  className="text-[12px] font-bold text-foreground"
                 >
                   Category
                 </Label>
@@ -333,7 +333,7 @@ export default function CreateConceptDialog({
                     setNewCategoryName('');
                     setNewCategoryIcon(CATEGORY_ICON_CHOICES[0]);
                   }}
-                  className="text-[12px] font-bold text-[#527065]"
+                  className="text-[12px] font-bold text-brand-sage hover:underline cursor-pointer"
                 >
                   + New category
                 </button>
@@ -353,7 +353,7 @@ export default function CreateConceptDialog({
                 ))}
               </FieldSelect>
               {isNewCategoryOpen ? (
-                <div className="mt-2.5 flex flex-col gap-2 rounded-[12px] bg-[#f6f8f5] p-3">
+                <div className="mt-2.5 flex flex-col gap-2 rounded-[12px] bg-surface-subtle p-3">
                   <div className="flex flex-wrap gap-1.5">
                     {CATEGORY_ICON_CHOICES.map((icon) => {
                       const isSelected = icon === newCategoryIcon;
@@ -362,12 +362,12 @@ export default function CreateConceptDialog({
                           key={icon}
                           type="button"
                           onClick={() => setNewCategoryIcon(icon)}
-                          className={
-                            'size-8 rounded-[9px] border text-[15px] ' +
-                            (isSelected
-                              ? 'border-[#12231f] bg-[#12231f] text-white'
-                              : 'border-[#dfe7e3] bg-white text-[#12231f]')
-                          }
+                          className={cn(
+                            'size-8 rounded-[9px] border text-[15px] cursor-pointer transition-colors',
+                            isSelected
+                              ? 'border-primary bg-primary text-primary-foreground'
+                              : 'border-border bg-card text-foreground hover:bg-surface-subtle',
+                          )}
                         >
                           {icon}
                         </button>
@@ -381,12 +381,12 @@ export default function CreateConceptDialog({
                         setNewCategoryName(event.target.value)
                       }
                       placeholder="New category name"
-                      className="h-auto flex-1 rounded-[10px] border border-[#dfe7e3] bg-white px-3 py-[9px] text-[13px] shadow-none"
+                      className="h-auto flex-1 rounded-[10px] border border-border bg-card px-3 py-[9px] text-[13px] text-foreground shadow-none"
                     />
                     <Button
                       type="button"
                       onClick={handleAddCategory}
-                      className="h-auto rounded-[10px] bg-[#12231f] px-4 py-[9px] text-[13px] font-bold text-white hover:bg-[#254b40]"
+                      className="h-auto rounded-[10px] bg-primary px-4 py-[9px] text-[13px] font-bold text-primary-foreground hover:bg-brand-forest"
                     >
                       Add
                     </Button>
@@ -398,7 +398,7 @@ export default function CreateConceptDialog({
             <div className="sm:col-span-2">
               <Label
                 htmlFor="concept-description"
-                className="mb-1.5 block text-[12px] font-bold"
+                className="mb-1.5 block text-[12px] font-bold text-foreground"
               >
                 Description
               </Label>
@@ -413,7 +413,7 @@ export default function CreateConceptDialog({
             <div>
               <Label
                 htmlFor="concept-opens"
-                className="mb-1.5 block text-[12px] font-bold"
+                className="mb-1.5 block text-[12px] font-bold text-foreground"
               >
                 Opening date
               </Label>
@@ -433,7 +433,7 @@ export default function CreateConceptDialog({
             <div>
               <Label
                 htmlFor="concept-closes"
-                className="mb-1.5 block text-[12px] font-bold"
+                className="mb-1.5 block text-[12px] font-bold text-foreground"
               >
                 Closing date
               </Label>
@@ -449,7 +449,7 @@ export default function CreateConceptDialog({
             <div>
               <Label
                 htmlFor="concept-reward"
-                className="mb-1.5 block text-[12px] font-bold"
+                className="mb-1.5 block text-[12px] font-bold text-foreground"
               >
                 Reward guidance
               </Label>
@@ -465,7 +465,7 @@ export default function CreateConceptDialog({
             <div>
               <Label
                 htmlFor="concept-status"
-                className="mb-1.5 block text-[12px] font-bold"
+                className="mb-1.5 block text-[12px] font-bold text-foreground"
               >
                 Status
               </Label>
@@ -485,7 +485,7 @@ export default function CreateConceptDialog({
 
           {inlineError ? (
             <p
-              className="mt-3 text-[12px] font-semibold text-[#b3401f]"
+              className="mt-3 text-[12px] font-semibold text-destructive"
               role="alert"
             >
               {inlineError}
@@ -497,14 +497,14 @@ export default function CreateConceptDialog({
               type="button"
               variant="outline"
               onClick={onClose}
-              className="h-auto rounded-full border-[#dfe7e3] bg-white px-5 py-3 font-bold"
+              className="h-auto rounded-full border-border bg-card px-5 py-3 font-bold text-foreground hover:bg-surface-subtle"
             >
               Cancel
             </Button>
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="h-auto rounded-full bg-[#12231f] px-5 py-3 font-bold text-white hover:bg-[#254b40] disabled:opacity-60"
+              className="h-auto rounded-full bg-primary px-5 py-3 font-bold text-primary-foreground hover:bg-brand-forest disabled:opacity-60"
             >
               {isSubmitting ? 'Saving…' : 'Save concept'}
             </Button>

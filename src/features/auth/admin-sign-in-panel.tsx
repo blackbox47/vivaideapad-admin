@@ -55,22 +55,22 @@ export default function AdminSignInPanel() {
   const inlineError = validationError ?? loginError;
 
   return (
-    <section className="flex min-h-svh items-center justify-center bg-[#f6f8f5] p-11 lg:min-h-0">
+    <section className="flex min-h-svh items-center justify-center bg-surface-subtle p-11 lg:min-h-0">
       <div className="w-full max-w-[380px]">
         <Link
           to={ADMIN_ROUTES.login}
-          className="inline-flex items-center rounded-full border border-[#dfe7e3] bg-white px-3.5 py-2 text-[13px] font-bold text-foreground no-underline transition-colors hover:bg-[#f6f8f5]"
+          className="inline-flex items-center rounded-full border border-border bg-card px-3.5 py-2 text-[13px] font-bold text-foreground no-underline transition-colors hover:bg-surface-subtle"
         >
           ← Back to contributor sign in
         </Link>
 
-        <span className="mt-9 block text-[12px] font-extrabold tracking-[0.12em] text-[#527065] uppercase">
+        <span className="mt-9 block text-[12px] font-extrabold tracking-[0.12em] text-brand-sage uppercase">
           Admin console
         </span>
-        <h2 className="mt-2 mb-2 font-heading text-[38px] tracking-[-0.035em]">
+        <h2 className="mt-2 mb-2 font-heading text-[38px] tracking-[-0.035em] text-foreground">
           Admin sign in
         </h2>
-        <p className="text-[#687773]">
+        <p className="text-muted-foreground">
           Authorized administrators only. Enter your credentials to continue.
         </p>
 
@@ -78,7 +78,7 @@ export default function AdminSignInPanel() {
           <div className="mb-3.5">
             <Label
               htmlFor="admin-email"
-              className="mb-1.5 block text-[12px] font-bold"
+              className="mb-1.5 block text-[12px] font-bold text-foreground"
             >
               Admin email
             </Label>
@@ -90,14 +90,14 @@ export default function AdminSignInPanel() {
               autoComplete="username"
               placeholder="admin@ideapad.app"
               aria-invalid={Boolean(inlineError)}
-              className="h-auto w-full rounded-[12px] border-[#dfe7e3] px-[14px] py-[13px] text-sm"
+              className="h-auto w-full rounded-[12px] border-border bg-card px-[14px] py-[13px] text-sm text-foreground shadow-none focus-visible:border-brand-sage-light"
             />
           </div>
 
           <div className="mb-[18px]">
             <Label
               htmlFor="admin-password"
-              className="mb-1.5 block text-[12px] font-bold"
+              className="mb-1.5 block text-[12px] font-bold text-foreground"
             >
               Password
             </Label>
@@ -108,13 +108,13 @@ export default function AdminSignInPanel() {
               onChange={(event) => handlePasswordChange(event.target.value)}
               autoComplete="current-password"
               aria-invalid={Boolean(inlineError)}
-              className="h-auto w-full rounded-[12px] border-[#dfe7e3] px-[14px] py-[13px] text-sm"
+              className="h-auto w-full rounded-[12px] border-border bg-card px-[14px] py-[13px] text-sm text-foreground shadow-none focus-visible:border-brand-sage-light"
             />
           </div>
 
           {inlineError ? (
             <p
-              className="mb-3 text-[12px] font-semibold text-[#b3401f]"
+              className="mb-3 text-[12px] font-semibold text-destructive"
               role="alert"
             >
               {inlineError}
@@ -124,13 +124,13 @@ export default function AdminSignInPanel() {
           <Button
             type="submit"
             disabled={isLoggingIn}
-            className="h-auto w-full rounded-full bg-[#12231f] px-5 py-[14px] font-bold text-white hover:bg-[#254b40] disabled:opacity-60"
+            className="h-auto w-full rounded-full bg-primary px-5 py-[14px] font-bold text-primary-foreground hover:bg-brand-forest disabled:opacity-60"
           >
             {isLoggingIn ? 'Signing in…' : 'Sign in to console'}
           </Button>
         </form>
 
-        <p className="mt-[22px] text-center text-[12px] text-[#687773]">
+        <p className="mt-[22px] text-center text-[12px] text-muted-foreground">
           Need contributor access?{' '}
           <Link
             to={ADMIN_ROUTES.login}

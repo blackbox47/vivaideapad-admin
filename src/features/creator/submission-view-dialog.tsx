@@ -48,18 +48,18 @@ export default function SubmissionViewDialog({
 
   return (
     <div
-      className="fixed inset-0 z-50 grid place-items-center bg-[rgba(8,23,18,0.6)] p-5"
+      className="fixed inset-0 z-50 grid place-items-center bg-[var(--overlay-scrim)] p-5 backdrop-blur-xs"
       onClick={handleBackdropClick}
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="submission-view-title"
-        className="max-h-[88vh] w-full max-w-[560px] overflow-auto rounded-[24px] bg-white p-[30px] shadow-[0_20px_60px_rgba(29,65,54,0.12)]"
+        className="max-h-[88vh] w-full max-w-[560px] overflow-auto rounded-[24px] border border-[var(--dialog-border)] bg-card p-[30px] shadow-2xl"
       >
         <div className="mb-3.5 flex items-start justify-between gap-4">
           <div>
-            <p className="text-[12px] font-extrabold tracking-[0.12em] text-[#527065] uppercase">
+            <p className="text-[12px] font-extrabold tracking-[0.12em] text-brand-sage uppercase">
               {idea.topic}
             </p>
             <h2
@@ -72,7 +72,7 @@ export default function SubmissionViewDialog({
           <button
             type="button"
             onClick={onClose}
-            className="text-[22px] leading-none text-[#687773]"
+            className="text-[22px] leading-none text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
             aria-label="Close"
           >
             ×
@@ -84,39 +84,39 @@ export default function SubmissionViewDialog({
             status={idea.status}
             className="px-3 py-1.5 text-xs"
           />
-          <span className="text-xs text-[#687773]">Updated {idea.submitted}</span>
+          <span className="text-xs text-muted-foreground">Updated {idea.submitted}</span>
         </div>
 
-        <p className="rounded-[14px] bg-[#f6f8f5] p-4 text-sm leading-[1.7] text-[#333]">
+        <p className="rounded-[14px] bg-surface-subtle p-4 text-sm leading-[1.7] text-foreground">
           {idea.body}
         </p>
 
         {feedback.length > 0 ? (
-          <div className="mt-3.5 rounded-[14px] border border-[#dfe7e3] p-4">
-            <strong className="mb-1.5 block text-[12px] font-extrabold tracking-[0.08em] text-[#527065] uppercase">
+          <div className="mt-3.5 rounded-[14px] border border-border p-4">
+            <strong className="mb-1.5 block text-[12px] font-extrabold tracking-[0.08em] text-brand-sage uppercase">
               Reviewer note
             </strong>
-            <p className="m-0 text-sm leading-[1.6] text-[#333]">{feedback}</p>
+            <p className="m-0 text-sm leading-[1.6] text-foreground">{feedback}</p>
           </div>
         ) : null}
 
         {idea.status === 'Approved' ? (
-          <div className="mt-4 flex items-center justify-between rounded-[14px] bg-[#dff8eb] p-4">
-            <span className="text-[13px] font-bold text-[#16805e]">
+          <div className="mt-4 flex items-center justify-between rounded-[14px] bg-success-subtle p-4">
+            <span className="text-[13px] font-bold text-success">
               Reward credited to your wallet
             </span>
-            <strong className="font-heading text-xl text-[#16805e]">
+            <strong className="font-heading text-xl text-success">
               {idea.reward}
             </strong>
           </div>
         ) : null}
 
         {idea.status === 'Published' ? (
-          <div className="mt-4 flex items-center justify-between rounded-[14px] bg-[#dff8eb] p-4">
-            <span className="text-[13px] font-bold text-[#16805e]">
+          <div className="mt-4 flex items-center justify-between rounded-[14px] bg-success-subtle p-4">
+            <span className="text-[13px] font-bold text-success">
               Published & reward paid
             </span>
-            <strong className="font-heading text-xl text-[#16805e]">
+            <strong className="font-heading text-xl text-success">
               {idea.reward}
             </strong>
           </div>
@@ -127,7 +127,7 @@ export default function SubmissionViewDialog({
             type="button"
             variant="outline"
             onClick={onClose}
-            className="h-auto rounded-full border-[#dfe7e3] bg-white px-5 py-3 font-bold"
+            className="h-auto rounded-full border-border bg-card px-5 py-3 font-bold text-foreground hover:bg-surface-subtle"
           >
             Close
           </Button>
@@ -137,7 +137,7 @@ export default function SubmissionViewDialog({
               onClose();
               navigate(action.href);
             }}
-            className="h-auto rounded-full bg-[#12231f] px-5 py-3 font-bold text-white hover:bg-[#254b40]"
+            className="h-auto rounded-full bg-primary px-5 py-3 font-bold text-primary-foreground hover:bg-brand-forest"
           >
             {action.label}
           </Button>

@@ -8,7 +8,7 @@ interface ReportsFunnelProps {
 
 export default function ReportsFunnel({ steps, isLoading }: ReportsFunnelProps) {
   return (
-    <section className="rounded-[20px] border border-[#dfe7e3] bg-white p-[22px]">
+    <section className="rounded-[20px] border border-border bg-card p-[22px]">
       <h2 className="font-heading text-lg font-semibold text-foreground">
         Applicant → contributor funnel
       </h2>
@@ -27,12 +27,12 @@ export default function ReportsFunnel({ steps, isLoading }: ReportsFunnelProps) 
           : steps.map((step) => (
               <div key={step.id}>
                 <div className="mb-1.5 flex justify-between text-[13px]">
-                  <span className="text-[#687773]">{step.label}</span>
+                  <span className="text-muted-foreground">{step.label}</span>
                   <strong className="text-foreground">{step.count}</strong>
                 </div>
-                <div className="h-2 overflow-hidden rounded-full bg-[#eef1ef]">
+                <div className="h-2 overflow-hidden rounded-full bg-surface-muted">
                   <span
-                    className="block h-full rounded-full bg-[#173f33]"
+                    className="block h-full rounded-full bg-brand-forest"
                     style={{ width: `${step.pct}%` }}
                   />
                 </div>

@@ -108,7 +108,7 @@ export default function AdminsOverview() {
             <Button
               type="button"
               onClick={() => setIsAddOpen(true)}
-              className="h-auto rounded-full bg-[#12231f] px-5 py-3 font-bold text-white hover:bg-[#254b40]"
+              className="h-auto rounded-full bg-primary px-5 py-3 font-bold text-primary-foreground hover:bg-brand-forest"
             >
               + Add admin
             </Button>
@@ -117,19 +117,19 @@ export default function AdminsOverview() {
       />
 
       {isLoading || canManage ? null : (
-        <p className="mb-4 text-[13px] text-[#687773]">
+        <p className="mb-4 text-[13px] text-muted-foreground">
           Only the platform owner can add or remove admins.
         </p>
       )}
 
       {isLoading ? (
-        <div className="overflow-hidden rounded-[18px] border border-[#dfe7e3] bg-white p-4">
+        <div className="overflow-hidden rounded-[18px] border border-border bg-card p-4">
           {Array.from({ length: 3 }).map((_, index) => (
             <Skeleton key={index} className="mb-2 h-12 w-full" />
           ))}
         </div>
       ) : admins.length === 0 ? (
-        <div className="rounded-[22px] border border-[#dfe7e3] bg-white px-6 py-[60px] text-center text-[#687773]">
+        <div className="rounded-[22px] border border-border bg-card px-6 py-[60px] text-center text-muted-foreground">
           <span className="mb-2.5 block text-[28px]">◇</span>
           <strong className="mb-1 block text-foreground">No admins yet</strong>
           <span className="text-[13px]">
@@ -164,7 +164,7 @@ export default function AdminsOverview() {
       ) : null}
 
       {toast ? (
-        <div className="fixed bottom-[26px] left-1/2 z-[60] -translate-x-1/2 rounded-full bg-[#12231f] px-[22px] py-3.5 text-[13px] font-semibold text-white shadow-[0_12px_30px_rgba(0,0,0,0.25)]">
+        <div className="fixed bottom-[26px] left-1/2 z-[60] -translate-x-1/2 rounded-full bg-primary px-[22px] py-3.5 text-[13px] font-semibold text-primary-foreground shadow-2xl">
           {toast}
         </div>
       ) : null}

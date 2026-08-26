@@ -119,7 +119,7 @@ export default function TopicsOverview() {
           <Button
             type="button"
             onClick={() => setIsCreateOpen(true)}
-            className="h-auto rounded-full bg-[#12231f] px-5 py-3 font-bold text-white hover:bg-[#254b40]"
+            className="h-auto rounded-full bg-primary px-5 py-3 font-bold text-primary-foreground hover:bg-brand-forest"
           >
             + Create concept
           </Button>
@@ -140,7 +140,7 @@ export default function TopicsOverview() {
           ))}
         </div>
       ) : concepts.length === 0 ? (
-        <div className="rounded-[22px] border border-[#dfe7e3] bg-white px-6 py-[60px] text-center text-[#687773]">
+        <div className="rounded-[22px] border border-border bg-card px-6 py-[60px] text-center text-muted-foreground">
           <span className="mb-2.5 block text-[28px]">◇</span>
           <strong className="mb-1 block text-foreground">No concepts match</strong>
           <span className="text-[13px]">
@@ -158,7 +158,7 @@ export default function TopicsOverview() {
             <div className="mt-7 flex justify-center">
               <button
                 type="button"
-                className="rounded-full border border-[#dfe7e3] bg-white px-[26px] py-3 text-[13px] font-bold text-foreground"
+                className="rounded-full border border-border bg-card px-[26px] py-3 text-[13px] font-bold text-foreground hover:bg-surface-subtle transition-colors cursor-pointer"
                 onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
               >
                 Show more concepts · {remainingCount} remaining
@@ -179,7 +179,7 @@ export default function TopicsOverview() {
       ) : null}
 
       {toast ? (
-        <div className="fixed bottom-[26px] left-1/2 z-[60] -translate-x-1/2 rounded-full bg-[#12231f] px-[22px] py-3.5 text-[13px] font-semibold text-white shadow-[0_12px_30px_rgba(0,0,0,0.25)]">
+        <div className="fixed bottom-[26px] left-1/2 z-[60] -translate-x-1/2 rounded-full bg-primary px-[22px] py-3.5 text-[13px] font-semibold text-primary-foreground shadow-2xl">
           {toast}
         </div>
       ) : null}

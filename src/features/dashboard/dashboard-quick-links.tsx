@@ -22,7 +22,7 @@ export default function DashboardQuickLinks() {
         <Link
           key={item.href}
           to={item.href}
-          className="rounded-full border border-[#dfe7e3] bg-white px-4 py-2 text-[13px] font-bold text-foreground no-underline"
+          className="rounded-full border border-border bg-card px-4 py-2 text-[13px] font-bold text-foreground no-underline hover:bg-surface-subtle transition-colors"
         >
           {item.title === 'Applicants & users'
             ? 'Applicants & contributors'

@@ -11,7 +11,7 @@ export default function ReportsRiskSummary({
   isLoading,
 }: ReportsRiskSummaryProps) {
   return (
-    <div className="mt-[18px] flex justify-between gap-2.5 border-t border-[#eef1ef] pt-3.5 text-xs text-[#687773]">
+    <div className="mt-[18px] flex justify-between gap-2.5 border-t border-border-muted pt-3.5 text-xs text-muted-foreground">
       {isLoading ? (
         <>
           <Skeleton className="h-3.5 w-20" />
@@ -30,7 +30,7 @@ export default function ReportsRiskSummary({
           </span>
           <span>
             High risk:{' '}
-            <strong className="text-[#b3401f]">{counts.High}</strong>
+            <strong className="text-destructive">{counts.High}</strong>
           </span>
         </>
       )}

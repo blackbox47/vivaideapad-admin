@@ -59,10 +59,10 @@ export default function AuditLogFilters({
               replace
               aria-current={isActive ? 'page' : undefined}
               className={cn(
-                'inline-flex items-center gap-2 rounded-full border border-[#dfe7e3] px-4 py-2 text-[13px] font-bold no-underline transition-colors',
+                'inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-[13px] font-bold no-underline transition-colors',
                 isActive
-                  ? 'bg-[#12231f] text-white'
-                  : 'bg-white text-[#12231f] hover:bg-[#f6f8f5]',
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-card text-foreground hover:bg-surface-subtle',
               )}
             >
               {filter}
@@ -70,8 +70,8 @@ export default function AuditLogFilters({
                 className={cn(
                   'rounded-full px-2 py-0.5 text-[10px] font-bold',
                   isActive
-                    ? 'bg-white/15 text-white'
-                    : 'bg-[#f1f3f2] text-[#687773]',
+                    ? 'bg-primary-foreground/15 text-primary-foreground'
+                    : 'bg-surface-subdued text-muted-foreground',
                 )}
               >
                 {count}
@@ -82,7 +82,7 @@ export default function AuditLogFilters({
       </div>
 
       <div className="flex items-center gap-3.5">
-        <span className="whitespace-nowrap text-[13px] text-[#687773]">
+        <span className="whitespace-nowrap text-[13px] text-muted-foreground">
           {categoryCounts[category]}{' '}
           {categoryCounts[category] === 1 ? 'event' : 'events'}
         </span>
@@ -91,7 +91,7 @@ export default function AuditLogFilters({
           onChange={(event) => onSearchChange(event.target.value)}
           placeholder="Search actor, action or target"
           aria-label="Search audit events"
-          className="min-w-[260px] rounded-full border border-[#dfe7e3] bg-white px-[18px] py-2.5 text-[13px] text-foreground outline-none placeholder:text-[#9aa8a3] focus-visible:border-[#70a28d] focus-visible:shadow-[0_0_0_3px_#e2f1ea]"
+          className="min-w-[260px] rounded-full border border-border bg-card px-[18px] py-2.5 text-[13px] text-foreground outline-none placeholder:text-text-subtle focus-visible:border-brand-sage-light focus-visible:ring-2 focus-visible:ring-success-muted"
         />
       </div>
     </div>

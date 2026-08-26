@@ -32,25 +32,25 @@ export default function AdminsTable({
             <strong className="font-semibold text-foreground">
               {admin.name}
             </strong>
-            <div className="text-[11px] text-[#687773]">{admin.email}</div>
+            <div className="text-[11px] text-muted-foreground">{admin.email}</div>
           </ProjectTableCell>
           <ProjectTableCell>
             <StatusBadge status={admin.roleLabel} />
           </ProjectTableCell>
-          <ProjectTableCell className="whitespace-nowrap text-[#687773]">
+          <ProjectTableCell className="whitespace-nowrap text-muted-foreground">
             {admin.addedOn}
           </ProjectTableCell>
           <ProjectTableCell>
             {canManage && admin.access !== 'owner' ? (
               <button
                 type="button"
-                className="rounded-full border border-[#ffe6d5] bg-white px-[13px] py-[7px] text-xs font-bold text-[#b3401f]"
+                className="rounded-full border border-danger-subtle bg-card px-[13px] py-[7px] text-xs font-bold text-danger hover:bg-danger-subtle transition-colors cursor-pointer"
                 onClick={() => onRemove(admin)}
               >
                 Remove
               </button>
             ) : (
-              <span className="text-[12px] text-[#82948e]">
+              <span className="text-[12px] text-text-tertiary">
                 {admin.access === 'owner' ? 'Protected' : '—'}
               </span>
             )}

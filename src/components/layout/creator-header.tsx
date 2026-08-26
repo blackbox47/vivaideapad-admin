@@ -1,4 +1,4 @@
-import { LogOut, Menu, User } from 'lucide-react';
+import { LogOut, Menu, Moon, Sun, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 import CreatorSidebar from '@/components/layout/creator-sidebar';
@@ -24,6 +24,7 @@ import useCreatorUser from '@/hooks/auth/use-creator-user';
 import useAuth from '@/hooks/auth/use-auth';
 import useCreatorNotifications from '@/hooks/creator/use-creator-notifications';
 import useMobileNav from '@/hooks/ui/use-mobile-nav';
+import useTheme from '@/hooks/ui/use-theme';
 import { CREATOR_ROUTES } from '@/utils/constants/routes';
 
 export default function CreatorHeader() {
@@ -31,6 +32,7 @@ export default function CreatorHeader() {
   const { user } = useCreatorUser();
   const { unreadCount } = useCreatorNotifications();
   const { logout } = useAuth();
+  const { isDarkMode, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
   return (
@@ -61,7 +63,7 @@ export default function CreatorHeader() {
           </SheetContent>
         </Sheet>
 
-        <p className="min-w-0 text-xs font-extrabold tracking-[0.12em] text-[#527065] uppercase">
+        <p className="min-w-0 text-xs font-extrabold tracking-[0.12em] text-brand-sage uppercase">
           Creator workspace
         </p>
       </div>
@@ -70,8 +72,22 @@ export default function CreatorHeader() {
         <Button
           variant="outline"
           size="icon"
+          onClick={toggleTheme}
+          className="size-10 rounded-full border-border bg-card text-foreground transition-colors hover:border-foreground"
+          aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+        >
+          {isDarkMode ? (
+            <Sun className="size-4.5 text-warning" />
+          ) : (
+            <Moon className="size-4.5 text-foreground" />
+          )}
+        </Button>
+
+        <Button
+          variant="outline"
+          size="icon"
           onClick={() => navigate(CREATOR_ROUTES.notifications)}
-          className="relative size-10 rounded-full border-[#dfe7e3] bg-white text-foreground"
+          className="relative size-10 rounded-full border-border bg-card text-foreground transition-colors hover:border-foreground"
           aria-label={
             unreadCount > 0
               ? `Notifications, ${unreadCount} unread`
@@ -83,7 +99,7 @@ export default function CreatorHeader() {
             height="18"
             viewBox="0 0 24 24"
             fill="none"
-            stroke="#12231f"
+            stroke="currentColor"
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -94,7 +110,7 @@ export default function CreatorHeader() {
           </svg>
           {unreadCount > 0 ? (
             <span
-              className="absolute top-1.5 right-1.5 size-2 rounded-full bg-[#c9f36d]"
+              className="absolute top-1.5 right-1.5 size-2 rounded-full bg-brand-lime"
               aria-hidden
             />
           ) : null}
@@ -105,13 +121,13 @@ export default function CreatorHeader() {
             render={
               <Button
                 variant="outline"
-                className="h-auto rounded-full border-[#dfe7e3] bg-white py-1.5 pr-3.5 pl-1.5 text-[13px] font-bold text-foreground hover:border-[#12231f]"
+                className="h-auto rounded-full border-border bg-card py-1.5 pr-3.5 pl-1.5 text-[13px] font-bold text-foreground transition-colors hover:border-foreground"
                 aria-label="Account menu"
               />
             }
           >
             <Avatar className="size-7 after:border-transparent">
-              <AvatarFallback className="bg-[#c9f36d] text-[11px] font-bold text-[#12231f]">
+              <AvatarFallback className="bg-brand-lime text-[11px] font-bold text-brand-lime-foreground">
                 {user?.initials ?? '—'}
               </AvatarFallback>
             </Avatar>
@@ -125,12 +141,25 @@ export default function CreatorHeader() {
             <DropdownMenuItem
               onClick={() => navigate(CREATOR_ROUTES.profile)}
             >
-              <User />
+              <User className="size-4" />
               View profile
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={toggleTheme}>
+              {isDarkMode ? (
+                <>
+                  <Sun className="size-4" />
+                  Light mode
+                </>
+              ) : (
+                <>
+                  <Moon className="size-4" />
+                  Dark mode
+                </>
+              )}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem variant="destructive" onClick={logout}>
-              <LogOut />
+              <LogOut className="size-4" />
               Sign out
             </DropdownMenuItem>
           </DropdownMenuContent>

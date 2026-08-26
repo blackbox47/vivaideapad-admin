@@ -18,7 +18,7 @@ export default function CreatorLeaderboardPodium({
         {Array.from({ length: 3 }).map((_, index) => (
           <div
             key={index}
-            className="flex flex-col items-center rounded-[20px] bg-[#173f33] p-[22px] text-white"
+            className="flex flex-col items-center rounded-[20px] bg-brand-forest p-[22px] text-white"
           >
             <Skeleton className="mb-2.5 size-7 rounded-full bg-white/20" />
             <Skeleton className="size-12 rounded-full bg-white/20" />
@@ -40,14 +40,14 @@ export default function CreatorLeaderboardPodium({
       {entries.map((entry) => (
         <article
           key={entry.id}
-          className="rounded-[20px] bg-[#173f33] p-[22px] text-center text-white"
+          className="rounded-[20px] bg-brand-forest p-[22px] text-center text-white"
         >
           <span className="block text-[28px] leading-none" aria-hidden>
             {entry.medal ?? '🏅'}
           </span>
           <Avatar className="mx-auto mt-2.5 size-12 after:border-transparent">
             <AvatarFallback
-              className="text-sm font-bold text-[#12231f]"
+              className="text-sm font-bold text-foreground"
               style={{ backgroundColor: entry.avatarBg }}
             >
               {entry.initials}
@@ -56,10 +56,10 @@ export default function CreatorLeaderboardPodium({
           <strong className="mt-2 block text-[15px] font-semibold">
             {entry.name}
           </strong>
-          <span className="mt-1 block font-heading text-xl text-[#c9f36d]">
+          <span className="mt-1 block font-heading text-xl text-brand-lime">
             {formatLeaderboardPoints(entry.points)}
           </span>
-          <span className="block text-xs text-[#a9bbb4]">
+          <span className="block text-xs text-brand-sage-light">
             {entry.approved} approved · {entry.streak} streak
           </span>
         </article>

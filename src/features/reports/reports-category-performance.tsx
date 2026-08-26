@@ -11,7 +11,7 @@ export default function ReportsCategoryPerformanceTable({
   isLoading,
 }: ReportsCategoryPerformanceProps) {
   return (
-    <section className="rounded-[20px] border border-[#dfe7e3] bg-white p-[22px]">
+    <section className="rounded-[20px] border border-border bg-card p-[22px]">
       <h2 className="mb-3.5 font-heading text-lg font-semibold text-foreground">
         Performance by category
       </h2>
@@ -19,7 +19,7 @@ export default function ReportsCategoryPerformanceTable({
       <div className="overflow-x-auto">
         <table className="w-full border-collapse text-sm">
           <thead>
-            <tr className="text-left text-xs text-[#687773]">
+            <tr className="text-left text-xs text-muted-foreground">
               <th className="py-2.5">Category</th>
               <th className="py-2.5">Concepts</th>
               <th className="py-2.5">Currently active</th>
@@ -29,7 +29,7 @@ export default function ReportsCategoryPerformanceTable({
           <tbody>
             {isLoading
               ? Array.from({ length: 5 }).map((_, index) => (
-                  <tr key={index} className="border-t border-[#eef1ef]">
+                  <tr key={index} className="border-t border-border-muted">
                     <td className="py-3">
                       <Skeleton className="h-4 w-32" />
                     </td>
@@ -47,15 +47,15 @@ export default function ReportsCategoryPerformanceTable({
               : rows.map((row) => (
                   <tr
                     key={row.id}
-                    className="border-t border-[#eef1ef]"
+                    className="border-t border-border-muted"
                   >
                     <td className="py-3">
                       <strong className="text-foreground">
                         {row.category}
                       </strong>
                     </td>
-                    <td className="py-3 text-[#687773]">{row.total}</td>
-                    <td className="py-3 text-[#687773]">{row.active}</td>
+                    <td className="py-3 text-muted-foreground">{row.total}</td>
+                    <td className="py-3 text-muted-foreground">{row.active}</td>
                     <td className="py-3">
                       <strong className="text-foreground">
                         {row.rewardSum}

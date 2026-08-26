@@ -20,7 +20,7 @@ export default function ReportsTrend({
   const maxValue = Math.max(...items.map((item) => item.count), 1);
 
   return (
-    <section className="rounded-[20px] border border-[#dfe7e3] bg-white p-[22px]">
+    <section className="rounded-[20px] border border-border bg-card p-[22px]">
       <h2 className="font-heading text-lg font-semibold text-foreground">
         Submissions per week
       </h2>
@@ -28,7 +28,7 @@ export default function ReportsTrend({
       {isLoading ? (
         <Skeleton className="mt-1.5 h-4 w-48" />
       ) : (
-        <div className="mb-1.5 flex flex-wrap gap-4 text-xs text-[#687773]">
+        <div className="mb-1.5 flex flex-wrap gap-4 text-xs text-muted-foreground">
           <span>
             Total: <strong className="text-foreground">{total}</strong>
           </span>
@@ -55,19 +55,19 @@ export default function ReportsTrend({
                 key={`${item.day}-${item.count}`}
                 className="flex h-full min-w-0 flex-1 flex-col items-center justify-end"
               >
-                <small className="mb-1 text-[11px] text-[#687773]">
+                <small className="mb-1 text-[11px] text-muted-foreground">
                   {item.count}
                 </small>
                 <div
                   className={cn(
-                    'w-full rounded-t-lg rounded-b-sm bg-[#dfe8e4]',
-                    item.highlight && 'bg-[#c9f36d]',
+                    'w-full rounded-t-lg rounded-b-sm bg-border-muted',
+                    item.highlight && 'bg-brand-lime',
                   )}
                   style={{
                     height: `${Math.max((item.count / maxValue) * 90, 8)}%`,
                   }}
                 />
-                <small className="mt-1.5 block text-center text-[#687773]">
+                <small className="mt-1.5 block text-center text-muted-foreground">
                   {item.day}
                 </small>
               </div>

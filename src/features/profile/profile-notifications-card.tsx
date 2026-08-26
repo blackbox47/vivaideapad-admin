@@ -22,8 +22,8 @@ export default function ProfileNotificationsCard({
   onToggle,
 }: ProfileNotificationsCardProps) {
   return (
-    <section className="rounded-[20px] border border-[#dfe7e3] bg-white p-[22px]">
-      <h3 className="mb-4 font-heading text-base font-semibold">
+    <section className="rounded-[20px] border border-border bg-card p-[22px]">
+      <h3 className="mb-4 font-heading text-base font-semibold text-foreground">
         Notification preferences
       </h3>
       <div className="flex flex-col gap-3.5">
@@ -32,7 +32,7 @@ export default function ProfileNotificationsCard({
           return (
             <label
               key={row.id}
-              className="flex items-center justify-between text-[13px]"
+              className="flex items-center justify-between text-[13px] text-foreground"
             >
               <span>{row.label}</span>
               <input
@@ -40,7 +40,7 @@ export default function ProfileNotificationsCard({
                 checked={checked}
                 disabled={isUpdating}
                 onChange={(event) => onToggle(row.id, event.target.checked)}
-                className="size-4 cursor-pointer accent-[#12231f] disabled:opacity-60"
+                className="size-4 cursor-pointer accent-primary disabled:opacity-60"
               />
             </label>
           );

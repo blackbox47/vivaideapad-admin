@@ -61,7 +61,7 @@ export default function AdminNotificationsOverview() {
             variant="outline"
             disabled={isMarkingAll || unreadCount === 0}
             onClick={markAllRead}
-            className="h-auto rounded-full border-[#dfe7e3] bg-white px-[18px] py-[11px] font-bold hover:border-[#12231f]"
+            className="h-auto rounded-full border-border bg-card px-[18px] py-[11px] font-bold text-foreground hover:border-foreground transition-colors"
           >
             {isMarkingAll ? 'Marking…' : 'Mark all as read'}
           </Button>
@@ -71,13 +71,13 @@ export default function AdminNotificationsOverview() {
       <AdminNotificationFilters filter={filter} />
 
       {isLoading ? (
-        <div className="overflow-hidden rounded-[20px] border border-[#dfe7e3] bg-white p-4">
+        <div className="overflow-hidden rounded-[20px] border border-border bg-card p-4">
           {Array.from({ length: 5 }).map((_, index) => (
             <Skeleton key={index} className="mb-2 h-16 w-full" />
           ))}
         </div>
       ) : notifications.length === 0 ? (
-        <div className="rounded-[22px] border border-[#dfe7e3] bg-white px-6 py-[60px] text-center text-[#687773]">
+        <div className="rounded-[22px] border border-border bg-card px-6 py-[60px] text-center text-muted-foreground">
           <span className="mb-2.5 block text-[28px]" aria-hidden>
             ◇
           </span>

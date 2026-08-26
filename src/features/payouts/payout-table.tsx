@@ -34,13 +34,13 @@ export default function PayoutTable({ payouts, onProcess }: PayoutTableProps) {
             <ProjectTableCell className="font-semibold text-foreground">
               {payout.contributor}
             </ProjectTableCell>
-            <ProjectTableCell className="text-[#687773]">
+            <ProjectTableCell className="text-muted-foreground">
               {payout.methodDetail}
             </ProjectTableCell>
             <ProjectTableCell className="whitespace-nowrap font-semibold text-foreground">
               {payout.amount}
             </ProjectTableCell>
-            <ProjectTableCell className="whitespace-nowrap text-[#687773]">
+            <ProjectTableCell className="whitespace-nowrap text-muted-foreground">
               {payout.requested}
             </ProjectTableCell>
             <ProjectTableCell className="whitespace-nowrap">
@@ -50,7 +50,7 @@ export default function PayoutTable({ payouts, onProcess }: PayoutTableProps) {
               {canProcess ? (
                 <button
                   type="button"
-                  className="rounded-full bg-[#12231f] px-3.5 py-2 text-xs font-bold whitespace-nowrap text-white hover:bg-[#254b40]"
+                  className="rounded-full bg-primary px-3.5 py-2 text-xs font-bold whitespace-nowrap text-primary-foreground hover:bg-brand-forest transition-colors cursor-pointer"
                   onClick={() => onProcess(payout.id)}
                 >
                   Process

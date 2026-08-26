@@ -57,10 +57,10 @@ export default function OpportunityFilters({
               replace
               aria-current={isActive ? 'page' : undefined}
               className={cn(
-                'rounded-full border border-[#dfe7e3] px-4 py-2 text-[13px] font-bold no-underline transition-colors',
+                'rounded-full border border-border px-4 py-2 text-[13px] font-bold no-underline transition-colors',
                 isActive
-                  ? 'bg-[#12231f] text-white'
-                  : 'bg-white text-[#12231f] hover:bg-[#f6f8f5]',
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-card text-foreground hover:bg-surface-subtle',
               )}
             >
               {filter}
@@ -71,7 +71,7 @@ export default function OpportunityFilters({
 
       <label className="relative block">
         <Search
-          className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-[#9aa8a3]"
+          className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-text-subtle"
           strokeWidth={2}
           aria-hidden
         />
@@ -80,7 +80,7 @@ export default function OpportunityFilters({
           onChange={(event) => onSearchChange(event.target.value)}
           placeholder="Search briefs by title, category or keyword"
           aria-label="Search briefs"
-          className="max-w-md w-md rounded-full border border-[#dfe7e3] bg-white py-2.5 pr-4.5 pl-11 text-[13px] text-foreground outline-none placeholder:text-[#9aa8a3] focus-visible:border-[#70a28d] focus-visible:shadow-[0_0_0_3px_#e2f1ea]"
+          className="max-w-md w-md rounded-full border border-border bg-card py-2.5 pr-4.5 pl-11 text-[13px] text-foreground outline-none placeholder:text-text-subtle focus-visible:border-brand-sage-light focus-visible:ring-2 focus-visible:ring-success-muted"
         />
       </label>
     </div>

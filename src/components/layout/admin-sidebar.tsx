@@ -12,14 +12,14 @@ import { ADMIN_ROUTES } from '@/utils/constants/routes';
 function BrandMark() {
   return (
     <span
-      className="grid size-7 place-items-center bg-[#c9f36d]"
+      className="grid size-7 place-items-center bg-sidebar-primary"
       style={{
         borderRadius: '50% 50% 50% 12%',
         transform: 'rotate(-12deg)',
       }}
       aria-hidden
     >
-      <i className="block size-1.5 rounded-full bg-[#12231f]" />
+      <i className="block size-1.5 rounded-full bg-sidebar-primary-foreground" />
     </span>
   );
 }
@@ -46,7 +46,7 @@ export default function AdminSidebar({ className }: AdminSidebarProps) {
         </span>
       </div>
 
-      <p className="px-3 pt-[15px] pb-[7px] text-[10px] tracking-[0.14em] text-[#82948e] uppercase">
+      <p className="px-3 pt-[15px] pb-[7px] text-[10px] tracking-[0.14em] text-sidebar-muted uppercase">
         Platform admin
       </p>
 
@@ -62,10 +62,10 @@ export default function AdminSidebar({ className }: AdminSidebarProps) {
                 onClick={close}
                 className={({ isActive }) =>
                   cn(
-                    'my-0.5 flex items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-semibold no-underline',
+                    'my-0.5 flex items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-semibold no-underline transition-colors',
                     isActive
-                      ? 'bg-[#254b40] text-white'
-                      : 'bg-transparent text-[#c6d2ce] hover:bg-[#254b40] hover:text-white',
+                      ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                      : 'bg-transparent text-sidebar-nav-muted hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
                   )
                 }
               >
@@ -77,7 +77,7 @@ export default function AdminSidebar({ className }: AdminSidebarProps) {
         </nav>
       </ScrollArea>
 
-      <div className="mt-auto flex items-center gap-2.5 border-t border-[#2d4b43] px-2 pt-[18px]">
+      <div className="mt-auto flex items-center gap-2.5 border-t border-sidebar-border px-2 pt-[18px]">
         {isLoading || !user ? (
           <>
             <Skeleton className="size-9 rounded-full bg-sidebar-foreground/10" />
@@ -89,15 +89,15 @@ export default function AdminSidebar({ className }: AdminSidebarProps) {
         ) : (
           <>
             <Avatar className="size-9 after:border-transparent">
-              <AvatarFallback className="bg-[#c9f36d] text-xs font-bold text-[#12231f]">
+              <AvatarFallback className="bg-sidebar-primary text-xs font-bold text-sidebar-primary-foreground">
                 {user.initials}
               </AvatarFallback>
             </Avatar>
             <div className="min-w-0">
-              <p className="truncate text-[13px] font-semibold text-white">
+              <p className="truncate text-[13px] font-semibold text-sidebar-foreground">
                 {user.name}
               </p>
-              <p className="truncate text-[11px] text-[#82948e]">{user.role}</p>
+              <p className="truncate text-[11px] text-sidebar-muted">{user.role}</p>
             </div>
           </>
         )}

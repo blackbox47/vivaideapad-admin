@@ -40,7 +40,7 @@ const EMPTY: FormValues = {
 const URL_PATTERN = /^https?:\/\/\S+$/i;
 
 const fieldClassName =
-  'h-auto w-full rounded-[12px] border border-[#dfe7e3] bg-white px-[14px] py-[13px] text-sm shadow-none focus-visible:border-[#70a28d] focus-visible:ring-0 focus-visible:shadow-[0_0_0_3px_#e2f1ea]';
+  'h-auto w-full rounded-[12px] border border-border bg-card text-foreground px-[14px] py-[13px] text-sm shadow-none focus-visible:border-brand-sage-light focus-visible:ring-2 focus-visible:ring-success-muted';
 
 function validate(values: FormValues): string | null {
   if (!values.topicId) {
@@ -133,7 +133,7 @@ export default function SubmitIdeaForm({
       <div>
         <Label
           htmlFor="topic"
-          className="mb-1.5 block text-[12px] font-bold text-[#12231f]"
+          className="mb-1.5 block text-[12px] font-bold text-foreground"
         >
           Topic
         </Label>
@@ -161,7 +161,7 @@ export default function SubmitIdeaForm({
       <div>
         <Label
           htmlFor="title"
-          className="mb-1.5 block text-[12px] font-bold text-[#12231f]"
+          className="mb-1.5 block text-[12px] font-bold text-foreground"
         >
           Title
         </Label>
@@ -173,7 +173,7 @@ export default function SubmitIdeaForm({
           placeholder="Give it a working title"
           className={fieldClassName}
         />
-        <p className="mt-1 text-right text-xs text-[#9aa8a3]">
+        <p className="mt-1 text-right text-xs text-text-subtle">
           {values.title.length}/{TITLE_MAX}
         </p>
       </div>
@@ -181,7 +181,7 @@ export default function SubmitIdeaForm({
       <div>
         <Label
           htmlFor="summary"
-          className="mb-1.5 block text-[12px] font-bold text-[#12231f]"
+          className="mb-1.5 block text-[12px] font-bold text-foreground"
         >
           Summary
         </Label>
@@ -194,7 +194,7 @@ export default function SubmitIdeaForm({
           placeholder="One or two lines — what is the idea and who is it for?"
           className={fieldClassName}
         />
-        <p className="mt-1 text-right text-xs text-[#9aa8a3]">
+        <p className="mt-1 text-right text-xs text-text-subtle">
           {values.summary.length}/{SUMMARY_MAX}
         </p>
       </div>
@@ -202,7 +202,7 @@ export default function SubmitIdeaForm({
       <div>
         <Label
           htmlFor="body"
-          className="mb-1.5 block text-[12px] font-bold text-[#12231f]"
+          className="mb-1.5 block text-[12px] font-bold text-foreground"
         >
           Body
         </Label>
@@ -215,7 +215,7 @@ export default function SubmitIdeaForm({
           placeholder="Describe the idea, the steps to pilot it, and how you'd measure success."
           className={fieldClassName}
         />
-        <p className="mt-1 text-right text-xs text-[#9aa8a3]">
+        <p className="mt-1 text-right text-xs text-text-subtle">
           {values.body.length}/{BODY_MAX}
         </p>
       </div>
@@ -223,9 +223,9 @@ export default function SubmitIdeaForm({
       <div>
         <Label
           htmlFor="attachment"
-          className="mb-1.5 block text-[12px] font-bold text-[#12231f]"
+          className="mb-1.5 block text-[12px] font-bold text-foreground"
         >
-          Attachment URL <span className="font-normal text-[#9aa8a3]">(optional)</span>
+          Attachment URL <span className="font-normal text-text-subtle">(optional)</span>
         </Label>
         <Input
           id="attachment"
@@ -238,7 +238,7 @@ export default function SubmitIdeaForm({
 
       {inlineError ? (
         <p
-          className="text-[12px] font-semibold text-[#b3401f]"
+          className="text-[12px] font-semibold text-destructive"
           role="alert"
         >
           {inlineError}
@@ -248,7 +248,7 @@ export default function SubmitIdeaForm({
       <Button
         type="submit"
         disabled={isLoading || isLoadingTopics}
-        className="h-auto w-full rounded-full bg-[#12231f] px-5 py-[14px] text-sm font-bold text-white hover:bg-[#254b40] disabled:opacity-60 sm:w-auto sm:self-start"
+        className="h-auto w-full rounded-full bg-primary px-5 py-[14px] text-sm font-bold text-primary-foreground hover:bg-brand-forest disabled:opacity-60 sm:w-auto sm:self-start"
       >
         {isLoading ? 'Submitting…' : 'Submit idea'}
       </Button>

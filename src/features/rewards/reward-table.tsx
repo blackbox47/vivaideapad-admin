@@ -31,20 +31,20 @@ export default function RewardTable({ entries }: RewardTableProps) {
               <strong className="font-semibold text-foreground">
                 {entry.contributor}
               </strong>
-              <div className="text-[11px] text-[#687773]">
+              <div className="text-[11px] text-muted-foreground">
                 {entry.description}
               </div>
             </ProjectTableCell>
-            <ProjectTableCell className="whitespace-nowrap text-[#687773]">
+            <ProjectTableCell className="whitespace-nowrap text-muted-foreground">
               {entry.date}
             </ProjectTableCell>
-            <ProjectTableCell className="whitespace-nowrap text-[#687773]">
+            <ProjectTableCell className="whitespace-nowrap text-muted-foreground">
               {entry.type}
             </ProjectTableCell>
             <ProjectTableCell
               className={cn(
                 'whitespace-nowrap font-semibold',
-                isCredit ? 'text-[#16805e]' : 'text-[#b3401f]',
+                isCredit ? 'text-success' : 'text-danger',
               )}
             >
               {entry.amount}

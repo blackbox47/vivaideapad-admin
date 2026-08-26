@@ -31,7 +31,7 @@ export default function ReportsExportButton({
         type="button"
         onClick={handleClick}
         disabled={isExporting}
-        className="inline-flex items-center gap-2 rounded-full bg-[#12231f] px-[18px] py-[11px] font-bold text-white transition-colors hover:bg-[#254b40] disabled:opacity-60"
+        className="inline-flex items-center gap-2 rounded-full bg-primary px-[18px] py-[11px] font-bold text-primary-foreground transition-colors hover:bg-brand-forest disabled:opacity-60 cursor-pointer"
       >
         <Icon
           className={`size-4 ${isExporting ? 'animate-spin' : ''}`}
@@ -44,8 +44,8 @@ export default function ReportsExportButton({
         <span
           className={`text-[11px] font-semibold ${
             feedback.startsWith('Export failed')
-              ? 'text-[#b3401f]'
-              : 'text-[#16805e]'
+              ? 'text-destructive'
+              : 'text-success'
           }`}
         >
           {feedback}

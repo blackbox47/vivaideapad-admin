@@ -40,7 +40,7 @@ export default function ReportsPayoutActivity({
   ];
 
   return (
-    <section className="rounded-[20px] border border-[#dfe7e3] bg-white p-[22px]">
+    <section className="rounded-[20px] border border-border bg-card p-[22px]">
       <h2 className="mb-2 font-heading text-lg font-semibold text-foreground">
         Payout activity
       </h2>
@@ -61,7 +61,7 @@ export default function ReportsPayoutActivity({
                 key={row.id}
                 className="flex justify-between text-sm"
               >
-                <span className="text-[#687773]">{row.label}</span>
+                <span className="text-muted-foreground">{row.label}</span>
                 <strong className="text-foreground">{row.value}</strong>
               </div>
             ))}

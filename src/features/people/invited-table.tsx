@@ -15,7 +15,7 @@ export default function InvitedTable({
 }: InvitedTableProps) {
   if (users.length === 0) {
     return (
-      <div className="rounded-[22px] border border-[#dfe7e3] bg-white px-6 py-[50px] text-center text-[#687773]">
+      <div className="rounded-[22px] border border-border bg-card px-6 py-[50px] text-center text-muted-foreground">
         No one is currently waiting on their first live-task submission.
       </div>
     );
@@ -26,25 +26,25 @@ export default function InvitedTable({
       columns={['Invited applicant', 'Approved on', 'Status', 'Waiting on', '']}
     >
       {users.map((user) => (
-        <tr key={user.id} className="border-t border-[#eef1ef]">
+        <tr key={user.id} className="border-t border-border-muted">
           <td className="px-[18px] py-3.5">
             <strong className="font-semibold text-foreground">{user.name}</strong>
-            <div className="text-[11px] text-[#687773]">{user.email}</div>
+            <div className="text-[11px] text-muted-foreground">{user.email}</div>
           </td>
-          <td className="px-[18px] py-3.5 whitespace-nowrap text-[#687773]">
+          <td className="px-[18px] py-3.5 whitespace-nowrap text-muted-foreground">
             {user.joined}
           </td>
           <td className="px-[18px] py-3.5">
             <StatusBadge status={user.status} />
           </td>
-          <td className="px-[18px] py-3.5 text-[13px] text-[#687773]">
+          <td className="px-[18px] py-3.5 text-[13px] text-muted-foreground">
             First submission on a live task
           </td>
           <td className="px-[18px] py-3.5">
             <button
               type="button"
               disabled={isToggling}
-              className="rounded-full border border-[#dfe7e3] bg-white px-[13px] py-[7px] text-xs font-bold text-foreground disabled:opacity-60"
+              className="rounded-full border border-border bg-card px-[13px] py-[7px] text-xs font-bold text-foreground hover:bg-surface-subtle transition-colors disabled:opacity-60 cursor-pointer"
               onClick={() => onToggle(user)}
             >
               {user.status === 'Suspended' ? 'Reactivate' : 'Suspend'}

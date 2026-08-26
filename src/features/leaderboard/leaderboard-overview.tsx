@@ -94,7 +94,7 @@ export default function LeaderboardOverview() {
       )}
 
       {isLoading ? (
-        <div className="overflow-hidden rounded-[18px] border border-[#dfe7e3] bg-white p-4">
+        <div className="overflow-hidden rounded-[18px] border border-border bg-card p-4">
           <Skeleton className="mb-3 h-4 w-40" />
           {Array.from({ length: 6 }).map((_, index) => (
             <Skeleton key={index} className="mb-2 h-12 w-full" />
@@ -111,7 +111,7 @@ export default function LeaderboardOverview() {
           ) : null}
 
           {totalEntries === 0 ? (
-            <div className="rounded-[22px] border border-[#dfe7e3] bg-white px-6 py-[60px] text-center text-[#687773]">
+            <div className="rounded-[22px] border border-border bg-card px-6 py-[60px] text-center text-muted-foreground">
               <span className="mb-2.5 block text-[28px]">◇</span>
               <strong className="mb-1 block text-foreground">
                 No matches

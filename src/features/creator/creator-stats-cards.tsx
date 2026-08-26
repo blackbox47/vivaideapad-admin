@@ -17,7 +17,7 @@ export default function CreatorStatsCards({
         ? Array.from({ length: 4 }).map((_, index) => (
             <div
               key={index}
-              className="rounded-[20px] border border-[#e3e9e6] bg-white p-[22px]"
+              className="rounded-[20px] border border-border-subtle bg-card p-[22px]"
             >
               <Skeleton className="h-4 w-36" />
               <Skeleton className="mt-5 h-9 w-16" />
@@ -27,9 +27,9 @@ export default function CreatorStatsCards({
         : stats.map((stat) => (
             <article
               key={stat.id}
-              className="relative rounded-[20px] border border-[#e3e9e6] bg-white p-[22px] shadow-[0_1px_3px_rgba(18,35,31,0.05)] transition-[transform,box-shadow,border-color] duration-200 hover:-translate-y-1 hover:border-[#c9f36d] hover:shadow-[0_16px_32px_rgba(18,35,31,0.12)] motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+              className="relative rounded-[20px] border border-border-subtle bg-card p-[22px] shadow-xs transition-[transform,box-shadow,border-color] duration-200 hover:-translate-y-1 hover:border-brand-lime hover:shadow-lg motion-reduce:transition-none motion-reduce:hover:translate-y-0"
             >
-              <p className="text-[13px] text-[#687773]">{stat.label}</p>
+              <p className="text-[13px] text-muted-foreground">{stat.label}</p>
               <p
                 className={cn(
                   'mt-2.5 font-heading leading-none font-extrabold tracking-[-0.02em] text-foreground',
@@ -46,10 +46,10 @@ export default function CreatorStatsCards({
                 <p
                   className={cn(
                     'mt-1 text-xs',
-                    stat.tone === 'positive' && 'text-[#16805e]',
-                    stat.tone === 'danger' && 'text-[#b3401f]',
-                    stat.tone === 'muted' && 'text-[#527065]',
-                    (stat.tone === 'default' || !stat.tone) && 'text-[#687773]',
+                    stat.tone === 'positive' && 'text-success',
+                    stat.tone === 'danger' && 'text-destructive',
+                    stat.tone === 'muted' && 'text-brand-sage',
+                    (stat.tone === 'default' || !stat.tone) && 'text-muted-foreground',
                   )}
                 >
                   {stat.description}

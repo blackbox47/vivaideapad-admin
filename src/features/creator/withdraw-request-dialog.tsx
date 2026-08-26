@@ -14,7 +14,7 @@ const METHODS = [
 ] as const;
 
 const fieldClassName =
-  'h-auto w-full rounded-[12px] border border-[#dfe7e3] bg-white px-[13px] py-3 text-sm shadow-none';
+  'h-auto w-full rounded-[12px] border border-border bg-card text-foreground px-[13px] py-3 text-sm shadow-none focus-visible:border-brand-sage-light';
 
 interface WithdrawRequestDialogProps {
   available: string;
@@ -64,18 +64,18 @@ export default function WithdrawRequestDialog({
 
   return (
     <div
-      className="fixed inset-0 z-50 grid place-items-center bg-[rgba(8,23,18,0.6)] p-5"
+      className="fixed inset-0 z-50 grid place-items-center bg-[var(--overlay-scrim)] p-5 backdrop-blur-xs"
       onClick={handleBackdropClick}
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="withdraw-title"
-        className="w-full max-w-[480px] rounded-[24px] bg-white p-7 shadow-[0_20px_60px_rgba(29,65,54,0.12)]"
+        className="w-full max-w-[480px] rounded-[24px] border border-[var(--dialog-border)] bg-card p-7 shadow-2xl"
       >
         <div className="mb-4 flex items-start justify-between gap-4">
           <div>
-            <p className="text-[12px] font-extrabold tracking-[0.12em] text-[#527065] uppercase">
+            <p className="text-[12px] font-extrabold tracking-[0.12em] text-brand-sage uppercase">
               Rewards
             </p>
             <h2
@@ -88,14 +88,14 @@ export default function WithdrawRequestDialog({
           <button
             type="button"
             onClick={onClose}
-            className="text-[22px] leading-none text-[#687773]"
+            className="text-[22px] leading-none text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
             aria-label="Close"
           >
             ×
           </button>
         </div>
 
-        <p className="mb-3.5 text-[13px] text-[#687773]">
+        <p className="mb-3.5 text-[13px] text-muted-foreground">
           Available balance:{' '}
           <strong className="text-foreground">{available}</strong>. Minimum
           withdrawal threshold applies.
@@ -105,7 +105,7 @@ export default function WithdrawRequestDialog({
           <div className="mb-3">
             <Label
               htmlFor="withdraw-amount"
-              className="mb-1.5 block text-[12px] font-bold"
+              className="mb-1.5 block text-[12px] font-bold text-foreground"
             >
               Amount
             </Label>
@@ -121,7 +121,7 @@ export default function WithdrawRequestDialog({
           <div className="mb-3">
             <Label
               htmlFor="withdraw-method"
-              className="mb-1.5 block text-[12px] font-bold"
+              className="mb-1.5 block text-[12px] font-bold text-foreground"
             >
               Payout method
             </Label>
@@ -140,14 +140,14 @@ export default function WithdrawRequestDialog({
               </select>
               <ChevronDown
                 aria-hidden
-                className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-[#687773]"
+                className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-muted-foreground"
               />
             </div>
           </div>
 
           {error ? (
             <p
-              className="mb-2 text-[12px] font-semibold text-[#b3401f]"
+              className="mb-2 text-[12px] font-semibold text-destructive"
               role="alert"
             >
               {error}
@@ -159,14 +159,14 @@ export default function WithdrawRequestDialog({
               type="button"
               variant="outline"
               onClick={onClose}
-              className="h-auto rounded-full border-[#dfe7e3] bg-white px-5 py-3 font-bold"
+              className="h-auto rounded-full border-border bg-card px-5 py-3 font-bold text-foreground hover:bg-surface-subtle"
             >
               Cancel
             </Button>
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="h-auto rounded-full bg-[#12231f] px-5 py-3 font-bold text-white hover:bg-[#254b40] disabled:opacity-60"
+              className="h-auto rounded-full bg-primary px-5 py-3 font-bold text-primary-foreground hover:bg-brand-forest disabled:opacity-60"
             >
               {isSubmitting ? 'Submitting…' : 'Submit request'}
             </Button>

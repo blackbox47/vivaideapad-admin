@@ -12,24 +12,20 @@ import { cn } from '@/lib/utils';
 
 /**
  * Reusable table shell matching the project design language:
- *  - rounded-[18px] white card, hairline border (#dfe7e3)
- *  - muted (#f6f8f5) header with 11-12px uppercase-style muted label cells
- *  - hairline (#eef1ef) row dividers, 18px horizontal cell padding, 14px vertical
+ *  - rounded-[18px] card, hairline border (border-border)
+ *  - muted (bg-surface-subtle) header with 11-12px uppercase-style muted label cells
+ *  - hairline (border-border-muted) row dividers, 18px horizontal cell padding, 14px vertical
  *  - inner table has a min-width for horizontal scroll, full-width on overflow
- *
- * Use `columns` to define the header labels. Pass the row content as children
- * (one or more <ProjectTableRow> children, or any <tr> elements). For cells
- * inside rows, use <ProjectTableCell> for the default 18/14 padding.
  */
 
 const SHELL_CLASS =
-  'overflow-x-auto rounded-[18px] border border-[#dfe7e3] bg-white';
+  'overflow-x-auto rounded-[18px] border border-border bg-card';
 const INNER_CLASS = 'w-full min-w-[720px] border-collapse text-left';
 
 const HEADER_CELL_BASE =
-  'px-[18px] py-3.5 font-medium text-xs text-[#687773] bg-[#f6f8f5]';
+  'px-[18px] py-3.5 font-medium text-xs text-muted-foreground bg-surface-subtle';
 
-const ROW_BASE = 'border-t border-[#eef1ef] hover:bg-transparent';
+const ROW_BASE = 'border-t border-border-muted hover:bg-transparent';
 
 const CELL_BASE = 'px-[18px] py-3.5';
 

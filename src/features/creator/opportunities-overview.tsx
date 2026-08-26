@@ -89,7 +89,7 @@ export default function OpportunitiesOverview() {
         title="Find your next spark."
         description="Choose a brief that matches your curiosity and experience."
         action={
-          <span className="whitespace-nowrap text-[13px] text-[#687773]">
+          <span className="whitespace-nowrap text-[13px] text-muted-foreground">
             {isLoading ? '…' : countLabel}
           </span>
         }
@@ -108,7 +108,7 @@ export default function OpportunitiesOverview() {
           ))}
         </div>
       ) : topics.length === 0 ? (
-        <div className="rounded-[22px] border border-[#dfe7e3] bg-white px-6 py-[60px] text-center text-[#687773]">
+        <div className="rounded-[22px] border border-border bg-card px-6 py-[60px] text-center text-muted-foreground">
           <span className="mb-2.5 block text-[28px]">◇</span>
           <strong className="mb-1 block text-foreground">
             No briefs match your search
@@ -128,7 +128,7 @@ export default function OpportunitiesOverview() {
             <div className="mt-7 flex justify-center">
               <button
                 type="button"
-                className="rounded-full border border-[#dfe7e3] bg-white px-[26px] py-3 text-[13px] font-bold text-foreground"
+                className="rounded-full border border-border bg-card px-[26px] py-3 text-[13px] font-bold text-foreground hover:bg-surface-subtle transition-colors cursor-pointer"
                 onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
               >
                 Show more briefs · {remainingCount} remaining

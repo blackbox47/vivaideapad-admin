@@ -34,10 +34,10 @@ export default function MyIdeasTable({
           <ProjectTableCell>
             <strong className="font-semibold text-foreground">{idea.title}</strong>
           </ProjectTableCell>
-          <ProjectTableCell className="text-[#687773]">
+          <ProjectTableCell className="text-muted-foreground">
             {idea.topic}
           </ProjectTableCell>
-          <ProjectTableCell className="whitespace-nowrap text-[#687773]">
+          <ProjectTableCell className="whitespace-nowrap text-muted-foreground">
             {idea.submitted}
           </ProjectTableCell>
           <ProjectTableCell>
@@ -51,7 +51,7 @@ export default function MyIdeasTable({
               type="button"
               variant="outline"
               onClick={() => onView(idea)}
-              className="h-auto rounded-full border-[#dfe7e3] bg-white px-3.5 py-1.5 text-xs font-bold"
+              className="h-auto rounded-full border-border bg-card px-3.5 py-1.5 text-xs font-bold text-foreground hover:bg-surface-subtle"
             >
               View
             </Button>

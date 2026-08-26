@@ -56,7 +56,7 @@ export const mockAdminNotifications: AdminNotification[] = [
   {
     id: 'n1',
     icon: '✓',
-    iconBg: '#dff8eb',
+    iconBg: 'var(--success-subtle)',
     title: 'New submission ready for review',
     body: 'Nora Ahmed submitted Shared streets, softer mornings.',
     time: '2 hours ago',
@@ -67,7 +67,7 @@ export const mockAdminNotifications: AdminNotification[] = [
   {
     id: 'n2',
     icon: '⚑',
-    iconBg: '#ffe6d5',
+    iconBg: 'var(--warning-subtle)',
     title: 'High AI-risk flagged',
     body: 'Repair before replace pilot needs a closer look before approval.',
     time: 'Yesterday',
@@ -78,7 +78,7 @@ export const mockAdminNotifications: AdminNotification[] = [
   {
     id: 'n3',
     icon: '♙',
-    iconBg: '#e7e3ff',
+    iconBg: 'var(--info-alt)',
     title: 'New applicant waiting',
     body: 'Sara Idris requested contributor access.',
     time: '05-08-2026',
@@ -89,7 +89,7 @@ export const mockAdminNotifications: AdminNotification[] = [
   {
     id: 'n4',
     icon: '৳',
-    iconBg: '#f1f3f2',
+    iconBg: 'var(--surface-subtle)',
     title: 'Payout requested',
     body: 'Amina Rahman requested Tk 240 to bKash.',
     time: '20 Jul',
@@ -100,7 +100,7 @@ export const mockAdminNotifications: AdminNotification[] = [
   {
     id: 'n5',
     icon: '♔',
-    iconBg: '#f1f3f2',
+    iconBg: 'var(--surface-subtle)',
     title: 'New admin added',
     body: 'Rafi Karim can now sign in to the admin workspace.',
     time: '12-08-2026',
@@ -111,7 +111,7 @@ export const mockAdminNotifications: AdminNotification[] = [
   {
     id: 'n6',
     icon: '✦',
-    iconBg: '#ffe6d5',
+    iconBg: 'var(--warning-subtle)',
     title: 'Concept closing soon',
     body: 'A kinder commute closes for submissions in 3 days.',
     time: '23 Jul',
@@ -852,7 +852,7 @@ export const mockCreatorLeaderboard: CreatorLeaderboardOverview = {
       points: 2840,
       approved: 9,
       streak: '6 weeks',
-      avatarBg: '#dff8eb',
+      avatarBg: 'var(--success-subtle)',
       visibility: 'Public',
       medal: '🥇',
     },
@@ -865,7 +865,7 @@ export const mockCreatorLeaderboard: CreatorLeaderboardOverview = {
       points: 2620,
       approved: 7,
       streak: '4 weeks',
-      avatarBg: '#e7e3ff',
+      avatarBg: 'var(--info-alt)',
       visibility: 'Public',
       medal: '🥈',
     },
@@ -878,7 +878,7 @@ export const mockCreatorLeaderboard: CreatorLeaderboardOverview = {
       points: 2410,
       approved: 5,
       streak: '5 weeks',
-      avatarBg: '#ffe6d5',
+      avatarBg: 'var(--warning-subtle)',
       visibility: 'Public',
       medal: '🥉',
     },
@@ -893,7 +893,7 @@ export const mockCreatorLeaderboard: CreatorLeaderboardOverview = {
       points: 2180,
       approved: 4,
       streak: '2 weeks',
-      avatarBg: '#dff8eb',
+      avatarBg: 'var(--success-subtle)',
       visibility: 'Public',
     },
     {
@@ -905,7 +905,7 @@ export const mockCreatorLeaderboard: CreatorLeaderboardOverview = {
       points: 1960,
       approved: 4,
       streak: '3 weeks',
-      avatarBg: '#e7e3ff',
+      avatarBg: 'var(--info-alt)',
       visibility: 'Public',
     },
     {
@@ -917,7 +917,7 @@ export const mockCreatorLeaderboard: CreatorLeaderboardOverview = {
       points: 1720,
       approved: 3,
       streak: '1 week',
-      avatarBg: '#ffe6d5',
+      avatarBg: 'var(--warning-subtle)',
       visibility: 'Public',
     },
     {
@@ -929,7 +929,7 @@ export const mockCreatorLeaderboard: CreatorLeaderboardOverview = {
       points: 1540,
       approved: 3,
       streak: '2 weeks',
-      avatarBg: '#dff8eb',
+      avatarBg: 'var(--success-subtle)',
       visibility: 'Public',
     },
     {
@@ -941,7 +941,7 @@ export const mockCreatorLeaderboard: CreatorLeaderboardOverview = {
       points: 1290,
       approved: 2,
       streak: '—',
-      avatarBg: '#e7e3ff',
+      avatarBg: 'var(--info-alt)',
       visibility: 'Public',
     },
     {
@@ -953,7 +953,7 @@ export const mockCreatorLeaderboard: CreatorLeaderboardOverview = {
       points: 1105,
       approved: 2,
       streak: '1 week',
-      avatarBg: '#ffe6d5',
+      avatarBg: 'var(--warning-subtle)',
       visibility: 'Public',
     },
     {
@@ -965,7 +965,7 @@ export const mockCreatorLeaderboard: CreatorLeaderboardOverview = {
       points: 980,
       approved: 2,
       streak: '—',
-      avatarBg: '#dff8eb',
+      avatarBg: 'var(--success-subtle)',
       visibility: 'Public',
     },
     {
@@ -977,7 +977,7 @@ export const mockCreatorLeaderboard: CreatorLeaderboardOverview = {
       points: 840,
       approved: 2,
       streak: '1 week',
-      avatarBg: '#e8ffc0',
+      avatarBg: 'var(--brand-lime-tint)',
       visibility: 'Public',
       isYou: true,
       showGap: true,
@@ -1262,7 +1262,7 @@ export const mockCreatorInbox: CreatorNotification[] = [
   {
     id: 'n1',
     icon: '✓',
-    iconBg: '#dff8eb',
+    iconBg: 'var(--success-subtle)',
     title: 'Your submission was approved',
     body: 'Small rituals, lasting change earned a Tk 180 reward.',
     time: '2 hours ago',
@@ -1273,7 +1273,7 @@ export const mockCreatorInbox: CreatorNotification[] = [
   {
     id: 'n2',
     icon: '✎',
-    iconBg: '#f1f3f2',
+    iconBg: 'var(--surface-subtle)',
     title: 'A reviewer left feedback',
     body: 'Please clarify how the shared-seat model works during peak hours.',
     time: 'Yesterday',
@@ -1284,7 +1284,7 @@ export const mockCreatorInbox: CreatorNotification[] = [
   {
     id: 'n3',
     icon: '✦',
-    iconBg: '#f1f3f2',
+    iconBg: 'var(--surface-subtle)',
     title: 'A new concept is live',
     body: 'Learning beyond screens is now accepting submissions.',
     time: '05-08-2026',
@@ -1295,7 +1295,7 @@ export const mockCreatorInbox: CreatorNotification[] = [
   {
     id: 'n4',
     icon: '৳',
-    iconBg: '#f1f3f2',
+    iconBg: 'var(--surface-subtle)',
     title: 'Payout completed',
     body: 'Tk 240 was sent to your bKash account.',
     time: '20 Jul',
@@ -1306,7 +1306,7 @@ export const mockCreatorInbox: CreatorNotification[] = [
   {
     id: 'n5',
     icon: '↗',
-    iconBg: '#e7e3ff',
+    iconBg: 'var(--info-alt)',
     title: 'You climbed the leaderboard',
     body: 'You moved up to rank #12 after your last approval.',
     time: '22 Jul',
@@ -1317,7 +1317,7 @@ export const mockCreatorInbox: CreatorNotification[] = [
   {
     id: 'n6',
     icon: '⚑',
-    iconBg: '#ffe6d5',
+    iconBg: 'var(--warning-subtle)',
     title: 'Deadline approaching',
     body: 'A kinder commute closes for submissions in 3 days.',
     time: '23 Jul',

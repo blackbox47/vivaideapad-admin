@@ -6,7 +6,7 @@ export default function AuditLogEmptyState({
   description = 'Try a different keyword or category filter.',
 }: AuditLogEmptyStateProps) {
   return (
-    <div className="rounded-[22px] border border-[#dfe7e3] bg-white px-6 py-[60px] text-center text-[#687773]">
+    <div className="rounded-[22px] border border-border bg-card px-6 py-[60px] text-center text-muted-foreground">
       <span className="mb-2.5 block text-[28px]" aria-hidden>
         ◇
       </span>

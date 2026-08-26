@@ -12,7 +12,7 @@ export default function AuditLogLoadMore({
       <button
         type="button"
         onClick={onLoadMore}
-        className="rounded-full border border-[#dfe7e3] bg-white px-[26px] py-3 text-[13px] font-bold text-foreground transition-colors hover:bg-[#f6f8f5]"
+        className="rounded-full border border-border bg-card px-[26px] py-3 text-[13px] font-bold text-foreground transition-colors hover:bg-surface-subtle cursor-pointer"
       >
         Show more events · {remainingCount} remaining
       </button>

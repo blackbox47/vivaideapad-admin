@@ -32,7 +32,7 @@ export default function LeaderboardTable({ entries }: LeaderboardTableProps) {
               {entry.name}
             </strong>
           </ProjectTableCell>
-          <ProjectTableCell align="right" className="text-[#687773]">
+          <ProjectTableCell align="right" className="text-muted-foreground">
             {entry.approvedIdeas}
           </ProjectTableCell>
           <ProjectTableCell align="right" className="font-semibold text-foreground">

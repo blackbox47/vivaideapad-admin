@@ -14,11 +14,11 @@ export default function AuditLogTable({
 }: AuditLogTableProps) {
   if (isLoading) {
     return (
-      <section className="overflow-hidden rounded-[20px] border border-[#dfe7e3] bg-white">
+      <section className="overflow-hidden rounded-[20px] border border-border bg-card">
         {Array.from({ length: ROW_SKELETON_COUNT }).map((_, index) => (
           <div
             key={index}
-            className="grid grid-cols-[110px_34px_1fr] items-start gap-3.5 border-t border-[#eef1ef] px-[18px] py-4 first:border-t-0"
+            className="grid grid-cols-[110px_34px_1fr] items-start gap-3.5 border-t border-border-muted px-[18px] py-4 first:border-t-0"
           >
             <Skeleton className="h-3.5 w-20" />
             <Skeleton className="size-8.5 rounded-[10px]" />
@@ -33,22 +33,22 @@ export default function AuditLogTable({
   }
 
   return (
-    <section className="overflow-hidden rounded-[20px] border border-[#dfe7e3] bg-white">
+    <section className="overflow-hidden rounded-[20px] border border-border bg-card">
       {events.map((event) => (
         <div
           key={event.id}
-          className="grid grid-cols-[110px_34px_1fr] items-start gap-3.5 border-t border-[#eef1ef] px-[18px] py-4 first:border-t-0"
+          className="grid grid-cols-[110px_34px_1fr] items-start gap-3.5 border-t border-border-muted px-[18px] py-4 first:border-t-0"
         >
-          <small className="whitespace-nowrap text-[#9aa8a3]">
+          <small className="whitespace-nowrap text-text-subtle">
             {event.time}
           </small>
-          <span className="grid size-[34px] place-items-center rounded-[10px] bg-[#f1f3f2] text-sm">
+          <span className="grid size-[34px] place-items-center rounded-[10px] bg-surface-subdued text-sm text-foreground">
             {event.icon}
           </span>
           <div>
-            <strong className="text-[13px]">{event.actor}</strong>
-            <span className="text-[#687773]"> — {event.action}</span>
-            <div className="mt-0.5 text-[12px] text-[#687773]">
+            <strong className="text-[13px] text-foreground">{event.actor}</strong>
+            <span className="text-muted-foreground"> — {event.action}</span>
+            <div className="mt-0.5 text-[12px] text-muted-foreground">
               {event.target}
             </div>
           </div>

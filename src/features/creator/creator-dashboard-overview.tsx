@@ -51,7 +51,7 @@ export default function CreatorDashboardOverview() {
         action={
           <Button
             render={<Link to={CREATOR_ROUTES.opportunities} />}
-            className="h-auto rounded-full bg-[#12231f] px-5 py-3 font-bold text-white hover:bg-[#254b40]"
+            className="h-auto rounded-full bg-primary px-5 py-3 font-bold text-primary-foreground hover:bg-brand-forest"
           >
             Explore opportunities ↗
           </Button>

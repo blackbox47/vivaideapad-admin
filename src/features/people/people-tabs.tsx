@@ -31,7 +31,7 @@ export default function PeopleTabs({
 
   return (
     <div
-      className="mb-[18px] flex w-fit flex-wrap gap-2 rounded-full border border-[#dfe7e3] bg-white p-[5px]"
+      className="mb-[18px] flex w-fit flex-wrap gap-2 rounded-full border border-border bg-card p-[5px]"
       role="navigation"
       aria-label="People lists"
     >
@@ -49,8 +49,10 @@ export default function PeopleTabs({
             replace
             aria-current={isActive ? 'page' : undefined}
             className={cn(
-              'rounded-full px-[18px] py-[9px] text-[13px] font-bold no-underline',
-              isActive ? 'bg-[#12231f] text-white' : 'text-[#687773]',
+              'rounded-full px-[18px] py-[9px] text-[13px] font-bold no-underline transition-colors',
+              isActive
+                ? 'bg-primary text-primary-foreground'
+                : 'text-muted-foreground hover:text-foreground',
             )}
           >
             {item.label} · {counts[item.id]}

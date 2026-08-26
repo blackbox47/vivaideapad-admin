@@ -18,7 +18,7 @@ export default function CreatorRewardsTable({
         {Array.from({ length: 3 }).map((_, index) => (
           <div
             key={index}
-            className="h-10 animate-pulse rounded-md bg-[#f6f8f5]"
+            className="h-10 animate-pulse rounded-md bg-surface-subtle"
           />
         ))}
       </div>
@@ -27,7 +27,7 @@ export default function CreatorRewardsTable({
 
   if (entries.length === 0) {
     return (
-      <p className="py-6 text-sm text-[#687773]">No transactions yet.</p>
+      <p className="py-6 text-sm text-muted-foreground">No transactions yet.</p>
     );
   }
 
@@ -39,7 +39,7 @@ export default function CreatorRewardsTable({
             {columns.map((label) => (
               <th
                 key={label}
-                className="py-2.5 text-xs font-medium text-[#687773]"
+                className="py-2.5 text-xs font-medium text-muted-foreground"
               >
                 {label}
               </th>
@@ -48,12 +48,12 @@ export default function CreatorRewardsTable({
         </thead>
         <tbody>
           {entries.map((entry) => (
-            <tr key={entry.id} className="border-t border-[#eef1ef]">
-              <td className="py-3 text-[#687773]">{entry.date}</td>
+            <tr key={entry.id} className="border-t border-border-muted">
+              <td className="py-3 text-muted-foreground">{entry.date}</td>
               <td className="py-3 font-medium text-foreground">
                 {entry.description}
               </td>
-              <td className="py-3 text-[#687773]">{entry.type}</td>
+              <td className="py-3 text-muted-foreground">{entry.type}</td>
               <td className="py-3">
                 <StatusBadge status={entry.status} />
               </td>

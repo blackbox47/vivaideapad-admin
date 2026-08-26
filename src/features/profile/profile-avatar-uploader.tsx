@@ -39,7 +39,7 @@ export default function ProfileAvatarUploader({
     >
       <Avatar className="size-16 after:border-transparent">
         <AvatarFallback
-          className="text-[22px] font-bold text-[#12231f]"
+          className="text-[22px] font-bold text-brand-lime-foreground"
           style={
             avatarUrl
               ? {
@@ -47,7 +47,7 @@ export default function ProfileAvatarUploader({
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
                 }
-              : { backgroundColor: '#c9f36d' }
+              : { backgroundColor: 'var(--brand-lime)' }
           }
         >
           {avatarUrl ? '' : initials}
@@ -69,7 +69,7 @@ export default function ProfileAvatarUploader({
         disabled={isUploading}
         title="Upload profile photo"
         aria-label="Upload profile photo"
-        className="absolute right-[-2px] bottom-[-2px] grid size-[26px] place-items-center rounded-full border-2 border-white bg-[#12231f] p-0 text-white transition-colors hover:bg-[#0d1a16] disabled:opacity-60"
+        className="absolute right-[-2px] bottom-[-2px] grid size-[26px] place-items-center rounded-full border-2 border-card bg-primary p-0 text-primary-foreground transition-colors hover:bg-brand-forest disabled:opacity-60 cursor-pointer"
       >
         {isUploading ? (
           <Loader2 className="size-3 animate-spin" />

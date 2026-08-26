@@ -21,7 +21,7 @@ export default function LeaderboardKpiCards({
         ? Array.from({ length: 3 }).map((_, index) => (
             <div
               key={index}
-              className="rounded-[20px] border border-[#e3e9e6] bg-white p-[22px]"
+              className="rounded-[20px] border border-border-subtle bg-card p-[22px]"
             >
               <Skeleton className="h-4 w-32" />
               <Skeleton className="mt-5 h-9 w-20" />
@@ -30,9 +30,9 @@ export default function LeaderboardKpiCards({
         : items.map((item) => (
             <article
               key={item.id}
-              className="rounded-[20px] border border-[#e3e9e6] bg-white p-[22px]"
+              className="rounded-[20px] border border-border-subtle bg-card p-[22px]"
             >
-              <p className="text-[13px] text-[#687773]">{item.label}</p>
+              <p className="text-[13px] text-muted-foreground">{item.label}</p>
               <p className="mt-3 font-heading text-[32px] leading-none font-extrabold tracking-[-0.02em] text-foreground">
                 {item.value}
               </p>

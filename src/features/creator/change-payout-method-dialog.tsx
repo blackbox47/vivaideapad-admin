@@ -57,18 +57,18 @@ export default function ChangePayoutMethodDialog({
 
   return (
     <div
-      className="fixed inset-0 z-50 grid place-items-center bg-[rgba(8,23,18,0.6)] p-5"
+      className="fixed inset-0 z-50 grid place-items-center bg-[var(--overlay-scrim)] p-5 backdrop-blur-xs"
       onClick={handleBackdropClick}
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="payout-method-title"
-        className="w-full max-w-[420px] rounded-[24px] bg-white p-7 shadow-[0_20px_60px_rgba(29,65,54,0.12)]"
+        className="w-full max-w-[420px] rounded-[24px] border border-[var(--dialog-border)] bg-card p-7 shadow-2xl"
       >
         <div className="mb-4 flex items-start justify-between gap-4">
           <div>
-            <p className="text-[12px] font-extrabold tracking-[0.12em] text-[#527065] uppercase">
+            <p className="text-[12px] font-extrabold tracking-[0.12em] text-brand-sage uppercase">
               Account
             </p>
             <h2
@@ -81,7 +81,7 @@ export default function ChangePayoutMethodDialog({
           <button
             type="button"
             onClick={onClose}
-            className="text-[22px] leading-none text-[#687773]"
+            className="text-[22px] leading-none text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
             aria-label="Close"
           >
             ×
@@ -91,7 +91,7 @@ export default function ChangePayoutMethodDialog({
         <form onSubmit={handleSubmit}>
           <Label
             htmlFor="payout-method"
-            className="mb-1.5 block text-[12px] font-bold"
+            className="mb-1.5 block text-[12px] font-bold text-foreground"
           >
             Payout method
           </Label>
@@ -101,7 +101,7 @@ export default function ChangePayoutMethodDialog({
             onChange={(event) =>
               setMethod(event.target.value as PayoutMethod['method'])
             }
-            className="h-auto w-full rounded-[12px] border border-[#dfe7e3] bg-white px-[13px] py-3 text-sm"
+            className="h-auto w-full rounded-[12px] border border-border bg-card text-foreground px-[13px] py-3 text-sm focus-visible:border-brand-sage-light"
           >
             {OPTIONS.map((option) => (
               <option key={option.method} value={option.method}>
@@ -111,7 +111,7 @@ export default function ChangePayoutMethodDialog({
           </select>
 
           {error ? (
-            <p className="mt-2 text-[12px] font-semibold text-[#b3401f]" role="alert">
+            <p className="mt-2 text-[12px] font-semibold text-destructive" role="alert">
               {error}
             </p>
           ) : null}
@@ -121,14 +121,14 @@ export default function ChangePayoutMethodDialog({
               type="button"
               variant="outline"
               onClick={onClose}
-              className="h-auto rounded-full border-[#dfe7e3] bg-white px-5 py-3 font-bold"
+              className="h-auto rounded-full border-border bg-card px-5 py-3 font-bold text-foreground hover:bg-surface-subtle"
             >
               Cancel
             </Button>
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="h-auto rounded-full bg-[#12231f] px-5 py-3 font-bold text-white hover:bg-[#254b40] disabled:opacity-60"
+              className="h-auto rounded-full bg-primary px-5 py-3 font-bold text-primary-foreground hover:bg-brand-forest disabled:opacity-60"
             >
               {isSubmitting ? 'Saving…' : 'Save method'}
             </Button>

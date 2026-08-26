@@ -51,7 +51,7 @@ export default function DashboardOverview() {
         action={
           <Button
             render={<Link to={ADMIN_ROUTES.topics} />}
-            className="h-auto rounded-full bg-[#12231f] px-5 py-3 font-bold text-white hover:bg-[#254b40]"
+            className="h-auto rounded-full bg-primary px-5 py-3 font-bold text-primary-foreground hover:bg-brand-forest"
           >
             + Create concept
           </Button>
