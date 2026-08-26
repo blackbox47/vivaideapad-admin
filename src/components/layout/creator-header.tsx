@@ -1,4 +1,5 @@
 import { LogOut, Menu, User } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 import CreatorSidebar from '@/components/layout/creator-sidebar';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -21,12 +22,16 @@ import {
 } from '@/components/ui/sheet';
 import useCreatorUser from '@/hooks/auth/use-creator-user';
 import useAuth from '@/hooks/auth/use-auth';
+import useCreatorNotifications from '@/hooks/creator/use-creator-notifications';
 import useMobileNav from '@/hooks/ui/use-mobile-nav';
+import { CREATOR_ROUTES } from '@/utils/constants/routes';
 
 export default function CreatorHeader() {
   const { isOpen, setOpen } = useMobileNav();
   const { user } = useCreatorUser();
+  const { unreadCount } = useCreatorNotifications();
   const { logout } = useAuth();
+  const navigate = useNavigate();
 
   return (
     <header className="flex h-[82px] items-center justify-between gap-3">
@@ -65,8 +70,13 @@ export default function CreatorHeader() {
         <Button
           variant="outline"
           size="icon"
-          className="size-10 rounded-full border-[#dfe7e3] bg-white text-foreground"
-          aria-label="Notifications"
+          onClick={() => navigate(CREATOR_ROUTES.notifications)}
+          className="relative size-10 rounded-full border-[#dfe7e3] bg-white text-foreground"
+          aria-label={
+            unreadCount > 0
+              ? `Notifications, ${unreadCount} unread`
+              : 'Notifications'
+          }
         >
           <svg
             width="18"
@@ -82,6 +92,12 @@ export default function CreatorHeader() {
             <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
             <path d="M13.73 21a2 2 0 0 1-3.46 0" />
           </svg>
+          {unreadCount > 0 ? (
+            <span
+              className="absolute top-1.5 right-1.5 size-2 rounded-full bg-[#c9f36d]"
+              aria-hidden
+            />
+          ) : null}
         </Button>
 
         <DropdownMenu>
@@ -106,7 +122,9 @@ export default function CreatorHeader() {
               <DropdownMenuLabel>{user?.email ?? 'Signed in'}</DropdownMenuLabel>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem disabled>
+            <DropdownMenuItem
+              onClick={() => navigate(CREATOR_ROUTES.profile)}
+            >
               <User />
               View profile
             </DropdownMenuItem>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { AlertCircle } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 
@@ -12,12 +12,16 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import BalanceAdjustmentDialog from '@/features/rewards/balance-adjustment-dialog';
 import RewardFilters, {
   parseRewardType,
 } from '@/features/rewards/reward-filters';
 import RewardKpiCards from '@/features/rewards/reward-kpi-cards';
 import RewardTable from '@/features/rewards/reward-table';
+import useCreateAdjustment from '@/hooks/rewards/use-create-adjustment';
 import useRewards from '@/hooks/rewards/use-rewards';
+import type { CreateAdjustmentBody } from '@/models/rewards/rewards-model';
+import { getApiErrorMessage } from '@/utils/helpers/api-error';
 
 const PAGE_SIZE = 6;
 
@@ -38,10 +42,35 @@ export default function RewardsOverview() {
     error,
     refetch,
   } = useRewards({ type, search });
+  const [createAdjustment, createState] = useCreateAdjustment();
+  const [isAdjustOpen, setIsAdjustOpen] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+
+  const contributors = useMemo(() => {
+    return [...new Set(entries.map((entry) => entry.contributor))].sort((a, b) =>
+      a.localeCompare(b),
+    );
+  }, [entries]);
 
   useEffect(() => {
     setVisibleCount(PAGE_SIZE);
   }, [type, search]);
+
+  const closeAdjustment = () => {
+    createState.reset();
+    setIsAdjustOpen(false);
+  };
+
+  const handleCreateAdjustment = async (body: CreateAdjustmentBody) => {
+    try {
+      await createAdjustment(body).unwrap();
+      closeAdjustment();
+      setToast('Adjustment recorded');
+      window.setTimeout(() => setToast(null), 3200);
+    } catch {
+      // Error is surfaced via createState.error.
+    }
+  };
 
   const setSearch = (next: string) => {
     const nextParams = new URLSearchParams(searchParams);
@@ -82,7 +111,11 @@ export default function RewardsOverview() {
         title="Rewards ledger"
         description="Track every reward, balance adjustment and release."
         action={
-          <Button className="h-auto rounded-full bg-[#12231f] px-5 py-3 font-bold text-white hover:bg-[#254b40]">
+          <Button
+            type="button"
+            onClick={() => setIsAdjustOpen(true)}
+            className="h-auto rounded-full bg-[#12231f] px-5 py-3 font-bold text-white hover:bg-[#254b40]"
+          >
             + Add adjustment
           </Button>
         }
@@ -143,6 +176,22 @@ export default function RewardsOverview() {
           ) : null}
         </>
       )}
+
+      {isAdjustOpen ? (
+        <BalanceAdjustmentDialog
+          contributors={contributors}
+          isSubmitting={createState.isLoading}
+          error={getApiErrorMessage(createState.error)}
+          onClose={closeAdjustment}
+          onSubmit={handleCreateAdjustment}
+        />
+      ) : null}
+
+      {toast ? (
+        <div className="fixed bottom-[26px] left-1/2 z-[60] -translate-x-1/2 rounded-full bg-[#12231f] px-[22px] py-3.5 text-[13px] font-semibold text-white shadow-[0_12px_30px_rgba(0,0,0,0.25)]">
+          {toast}
+        </div>
+      ) : null}
     </div>
   );
 }

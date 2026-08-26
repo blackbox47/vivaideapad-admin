@@ -1,8 +1,10 @@
 import { useEffect, useState, type FormEvent, type MouseEvent } from 'react';
+import { ChevronDown } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { cn } from '@/lib/utils';
 
 const METHODS = [
   'bKash · 018•••42',
@@ -12,7 +14,7 @@ const METHODS = [
 ] as const;
 
 const fieldClassName =
-  'h-auto w-full rounded-[12px] border-[#dfe7e3] bg-white px-[13px] py-3 text-sm shadow-none';
+  'h-auto w-full rounded-[12px] border border-[#dfe7e3] bg-white px-[13px] py-3 text-sm shadow-none';
 
 interface WithdrawRequestDialogProps {
   available: string;
@@ -123,18 +125,24 @@ export default function WithdrawRequestDialog({
             >
               Payout method
             </Label>
-            <select
-              id="withdraw-method"
-              value={method}
-              onChange={(event) => setMethod(event.target.value)}
-              className={fieldClassName}
-            >
-              {METHODS.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
+            <div className="relative">
+              <select
+                id="withdraw-method"
+                value={method}
+                onChange={(event) => setMethod(event.target.value)}
+                className={cn(fieldClassName, 'appearance-none pr-10')}
+              >
+                {METHODS.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown
+                aria-hidden
+                className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-[#687773]"
+              />
+            </div>
           </div>
 
           {error ? (

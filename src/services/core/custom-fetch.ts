@@ -42,7 +42,8 @@ export const customFetch: BaseQueryFn<ApiRequest, unknown, ApiError> = async (
   api,
 ) => {
   if (env.useMockApi) {
-    return resolveMockRequest(request);
+    const token = (api.getState() as RootState).auth.token;
+    return resolveMockRequest(request, token);
   }
 
   const token = (api.getState() as RootState).auth.token;

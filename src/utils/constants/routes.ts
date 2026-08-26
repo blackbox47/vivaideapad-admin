@@ -12,6 +12,8 @@ export const ADMIN_ROUTES = {
   leaderboard: `${ADMIN_BASE_PATH}/leaderboard`,
   reports: `${ADMIN_BASE_PATH}/reports`,
   auditLog: `${ADMIN_BASE_PATH}/audit-log`,
+  admins: `${ADMIN_BASE_PATH}/admins`,
+  notifications: `${ADMIN_BASE_PATH}/notifications`,
   profile: `${ADMIN_BASE_PATH}/profile`,
 } as const;
 
@@ -26,5 +28,7 @@ export const CREATOR_ROUTES = {
   submissions: '/submissions',
   rewards: '/rewards',
   leaderboard: '/leaderboard',
+  notifications: '/notifications',
   submitIdea: '/ideas/new',
+  profile: '/profile',
 } as const;

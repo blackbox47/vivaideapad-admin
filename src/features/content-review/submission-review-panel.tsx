@@ -122,7 +122,7 @@ export default function SubmissionReviewPanel({
           <button
             type="button"
             disabled={isDeciding}
-            className="rounded-full border border-[#ffe6d5] bg-white px-[18px] py-3 font-bold text-[#b3401f] disabled:opacity-60"
+            className="shrink-0 whitespace-nowrap rounded-full border border-[#ffe6d5] bg-white px-4 py-3 text-[13px] font-bold text-[#b3401f] disabled:opacity-60"
             onClick={() => handleDecide('Rejected')}
           >
             Reject
@@ -130,7 +130,7 @@ export default function SubmissionReviewPanel({
           <button
             type="button"
             disabled={isDeciding}
-            className="rounded-full border border-[#dfe7e3] bg-white px-[18px] py-3 font-bold text-foreground disabled:opacity-60"
+            className="shrink-0 whitespace-nowrap rounded-full border border-[#dfe7e3] bg-white px-4 py-3 text-[13px] font-bold text-foreground disabled:opacity-60"
             onClick={() => handleDecide('Revision Requested')}
           >
             Request revision
@@ -138,7 +138,7 @@ export default function SubmissionReviewPanel({
           <button
             type="button"
             disabled={isDeciding}
-            className="rounded-full bg-[#12231f] px-[18px] py-3 font-bold text-white hover:bg-[#254b40] disabled:opacity-60"
+            className="shrink-0 whitespace-nowrap rounded-full bg-[#12231f] px-4 py-3 text-[13px] font-bold text-white hover:bg-[#254b40] disabled:opacity-60"
             onClick={() => handleDecide('Approved')}
           >
             Approve & assign reward

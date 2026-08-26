@@ -20,6 +20,8 @@ export const baseService = createApi({
     'leaderboard',
     'reports',
     'audit-log',
+    'admins',
+    'admin-notifications',
     'profile',
     'creator-dashboard',
     'my-ideas',
@@ -27,6 +29,8 @@ export const baseService = createApi({
     'creator-user',
     'creator-rewards',
     'creator-leaderboard',
+    'creator-notifications',
+    'creator-profile',
   ],
   endpoints: () => ({}),
 });

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { AlertCircle } from 'lucide-react';
 
 import PageHeader from '@/components/layout/page-header';
@@ -10,13 +11,16 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import MyIdeasTable from '@/features/creator/my-ideas-table';
+import SubmissionViewDialog from '@/features/creator/submission-view-dialog';
 import useMyIdeas from '@/hooks/creator/use-my-ideas';
+import type { MyIdea } from '@/models/creator/my-ideas-model';
 
 export default function MyIdeasOverview() {
   const { data, isLoading, isError, error, refetch } = useMyIdeas({
     status: 'all',
     search: '',
   });
+  const [viewedIdea, setViewedIdea] = useState<MyIdea | null>(null);
 
   if (isError) {
     return (
@@ -45,7 +49,18 @@ export default function MyIdeasOverview() {
         description="Track every idea from first draft to final decision."
       />
 
-      <MyIdeasTable items={data?.ideas ?? []} isLoading={isLoading} />
+      <MyIdeasTable
+        items={data?.ideas ?? []}
+        isLoading={isLoading}
+        onView={setViewedIdea}
+      />
+
+      {viewedIdea ? (
+        <SubmissionViewDialog
+          idea={viewedIdea}
+          onClose={() => setViewedIdea(null)}
+        />
+      ) : null}
     </div>
   );
 }

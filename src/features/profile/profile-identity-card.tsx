@@ -25,6 +25,7 @@ interface ProfileIdentityCardProps {
   }) => void;
   onChangePassword: (password: string) => void;
   avatar: React.ReactNode;
+  subtitle: string;
 }
 
 export default function ProfileIdentityCard({
@@ -38,6 +39,7 @@ export default function ProfileIdentityCard({
   onSaveProfile,
   onChangePassword,
   avatar,
+  subtitle,
 }: ProfileIdentityCardProps) {
   const [name, setName] = useState(profile.name);
   const [email, setEmail] = useState(profile.email);
@@ -78,7 +80,7 @@ export default function ProfileIdentityCard({
         {avatar}
         <div>
           <strong className="block text-[18px]">{profile.name}</strong>
-          <span className="text-[13px] text-[#687773]">{profile.bio}</span>
+          <span className="text-[13px] text-[#687773]">{subtitle}</span>
         </div>
       </div>
 

@@ -22,12 +22,14 @@ import {
 } from '@/components/ui/sheet';
 import useAdminUser from '@/hooks/auth/use-admin-user';
 import useAuth from '@/hooks/auth/use-auth';
+import useAdminNotifications from '@/hooks/notifications/use-admin-notifications';
 import useMobileNav from '@/hooks/ui/use-mobile-nav';
 import { ADMIN_ROUTES } from '@/utils/constants/routes';
 
 export default function AdminHeader() {
   const { isOpen, setOpen } = useMobileNav();
   const { user } = useAdminUser();
+  const { unreadCount } = useAdminNotifications();
   const { logout } = useAuth();
   const navigate = useNavigate();
 
@@ -68,8 +70,13 @@ export default function AdminHeader() {
         <Button
           variant="outline"
           size="icon"
-          className="size-10 rounded-full border-[#dfe7e3] bg-white text-foreground"
-          aria-label="Notifications"
+          onClick={() => navigate(ADMIN_ROUTES.notifications)}
+          className="relative size-10 rounded-full border-[#dfe7e3] bg-white text-foreground"
+          aria-label={
+            unreadCount > 0
+              ? `Notifications, ${unreadCount} unread`
+              : 'Notifications'
+          }
         >
           <svg
             width="18"
@@ -85,6 +92,12 @@ export default function AdminHeader() {
             <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
             <path d="M13.73 21a2 2 0 0 1-3.46 0" />
           </svg>
+          {unreadCount > 0 ? (
+            <span
+              className="absolute top-1.5 right-1.5 size-2 rounded-full bg-[#c9f36d]"
+              aria-hidden
+            />
+          ) : null}
         </Button>
 
         <DropdownMenu>

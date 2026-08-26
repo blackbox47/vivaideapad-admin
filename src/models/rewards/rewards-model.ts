@@ -35,3 +35,14 @@ export interface LedgerListParams {
   type?: LedgerTypeFilter;
   search?: string;
 }
+
+export interface CreateAdjustmentBody {
+  contributor: string;
+  amount: string;
+  reason: string;
+}
+
+export interface CreateAdjustmentResponse {
+  entry: LedgerEntry;
+  createdAt: string;
+}

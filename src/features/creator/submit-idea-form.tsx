@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { Button } from '@/components/ui/button';
@@ -17,7 +17,8 @@ import { getApiErrorMessage } from '@/utils/helpers/api-error';
 interface SubmitIdeaFormProps {
   topics: CreatorTopic[];
   isLoadingTopics: boolean;
-  initialTopicId?: string;
+  selectedTopicId?: string;
+  onTopicChange?: (topicId: string) => void;
 }
 
 interface FormValues {
@@ -39,7 +40,7 @@ const EMPTY: FormValues = {
 const URL_PATTERN = /^https?:\/\/\S+$/i;
 
 const fieldClassName =
-  'h-auto w-full rounded-[12px] border-[#dfe7e3] bg-white px-[14px] py-[13px] text-sm shadow-none focus-visible:border-[#70a28d] focus-visible:ring-0 focus-visible:shadow-[0_0_0_3px_#e2f1ea]';
+  'h-auto w-full rounded-[12px] border border-[#dfe7e3] bg-white px-[14px] py-[13px] text-sm shadow-none focus-visible:border-[#70a28d] focus-visible:ring-0 focus-visible:shadow-[0_0_0_3px_#e2f1ea]';
 
 function validate(values: FormValues): string | null {
   if (!values.topicId) {
@@ -75,15 +76,24 @@ function validate(values: FormValues): string | null {
 export default function SubmitIdeaForm({
   topics,
   isLoadingTopics,
-  initialTopicId = '',
+  selectedTopicId = '',
+  onTopicChange,
 }: SubmitIdeaFormProps) {
   const [values, setValues] = useState<FormValues>({
     ...EMPTY,
-    topicId: initialTopicId,
+    topicId: selectedTopicId,
   });
   const [validationError, setValidationError] = useState<string | null>(null);
   const [submitIdea, { isLoading }] = useSubmitIdea();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    setValues((prev) =>
+      prev.topicId === selectedTopicId
+        ? prev
+        : { ...prev, topicId: selectedTopicId },
+    );
+  }, [selectedTopicId]);
 
   const serverError = getApiErrorMessage(null);
   const inlineError = validationError ?? serverError;
@@ -130,7 +140,10 @@ export default function SubmitIdeaForm({
         <select
           id="topic"
           value={values.topicId}
-          onChange={(event) => update('topicId', event.target.value)}
+          onChange={(event) => {
+            update('topicId', event.target.value);
+            onTopicChange?.(event.target.value);
+          }}
           disabled={isLoadingTopics}
           className={fieldClassName + ' appearance-none'}
         >

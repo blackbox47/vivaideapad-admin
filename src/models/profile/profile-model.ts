@@ -29,6 +29,13 @@ export interface ProfileOverview {
   profile: ProfileDetails;
   notifications: NotificationPreferences;
   payoutMethod: PayoutMethod;
+  /** Shown under the name in the identity header, e.g. "Contributor". */
+  roleLabel: string;
+}
+
+export interface UpdatePayoutMethodBody {
+  method: PayoutMethod['method'];
+  label: string;
 }
 
 export interface UpdateProfileBody {

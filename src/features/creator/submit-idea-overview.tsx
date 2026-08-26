@@ -20,7 +20,7 @@ export default function SubmitIdeaOverview() {
   );
 
   const handleSelectTopic = (topicId: string) => {
-    setSelectedTopicId((prev) => (prev === topicId ? undefined : topicId));
+    setSelectedTopicId(topicId);
   };
 
   if (isError) {
@@ -69,7 +69,8 @@ export default function SubmitIdeaOverview() {
         <SubmitIdeaForm
           topics={topics}
           isLoadingTopics={isLoading}
-          initialTopicId={selectedTopicId ?? ''}
+          selectedTopicId={selectedTopicId ?? ''}
+          onTopicChange={setSelectedTopicId}
         />
       </section>
     </div>

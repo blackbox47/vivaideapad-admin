@@ -1,5 +1,3 @@
-import { Link } from 'react-router-dom';
-
 import StatusBadge from '@/components/shared/status-badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -8,11 +6,11 @@ import {
   ProjectTableRow,
 } from '@/components/ui/project-table';
 import type { MyIdea } from '@/models/creator/my-ideas-model';
-import { CREATOR_ROUTES } from '@/utils/constants/routes';
 
 interface MyIdeasTableProps {
   items: MyIdea[];
   isLoading: boolean;
+  onView: (idea: MyIdea) => void;
 }
 
 const columns = [
@@ -24,7 +22,11 @@ const columns = [
   { isAction: true },
 ];
 
-export default function MyIdeasTable({ items, isLoading }: MyIdeasTableProps) {
+export default function MyIdeasTable({
+  items,
+  isLoading,
+  onView,
+}: MyIdeasTableProps) {
   return (
     <ProjectTable columns={columns} isLoading={isLoading} loadingRows={4}>
       {items.map((idea) => (
@@ -46,8 +48,9 @@ export default function MyIdeasTable({ items, isLoading }: MyIdeasTableProps) {
           </ProjectTableCell>
           <ProjectTableCell>
             <Button
-              render={<Link to={CREATOR_ROUTES.submitIdea} />}
+              type="button"
               variant="outline"
+              onClick={() => onView(idea)}
               className="h-auto rounded-full border-[#dfe7e3] bg-white px-3.5 py-1.5 text-xs font-bold"
             >
               View

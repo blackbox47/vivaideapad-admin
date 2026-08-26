@@ -14,7 +14,11 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import ConceptCard from '@/features/topics/concept-card';
 import ConceptFilters from '@/features/topics/concept-filters';
+import CreateConceptDialog from '@/features/topics/create-concept-dialog';
+import useCreateConcept from '@/hooks/topics/use-create-concept';
 import useTopics from '@/hooks/topics/use-topics';
+import type { CreateConceptBody } from '@/models/topics/topics-model';
+import { getApiErrorMessage } from '@/utils/helpers/api-error';
 
 const STATUS_FILTERS = [
   'all',
@@ -42,10 +46,13 @@ export default function TopicsOverview() {
   const search = searchParams.get('q') ?? '';
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
-  const { data, isLoading, isError, error, refetch } = useTopics({
+  const { data, categories, isLoading, isError, error, refetch } = useTopics({
     status,
     search,
   });
+  const [createConcept, createState] = useCreateConcept();
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
 
   useEffect(() => {
     setTimeout(() => {
@@ -63,6 +70,22 @@ export default function TopicsOverview() {
     }
 
     setSearchParams(nextParams, { replace: true });
+  };
+
+  const closeCreate = () => {
+    createState.reset();
+    setIsCreateOpen(false);
+  };
+
+  const handleCreate = async (body: CreateConceptBody) => {
+    try {
+      await createConcept(body).unwrap();
+      closeCreate();
+      setToast('Concept saved');
+      window.setTimeout(() => setToast(null), 3200);
+    } catch {
+      // Error is surfaced via createState.error.
+    }
   };
 
   if (isError) {
@@ -93,7 +116,11 @@ export default function TopicsOverview() {
         title="Topics & concepts"
         description="Create, schedule and manage every live opportunity."
         action={
-          <Button className="h-auto rounded-full bg-[#12231f] px-5 py-3 font-bold text-white hover:bg-[#254b40]">
+          <Button
+            type="button"
+            onClick={() => setIsCreateOpen(true)}
+            className="h-auto rounded-full bg-[#12231f] px-5 py-3 font-bold text-white hover:bg-[#254b40]"
+          >
             + Create concept
           </Button>
         }
@@ -140,6 +167,22 @@ export default function TopicsOverview() {
           ) : null}
         </>
       )}
+
+      {isCreateOpen ? (
+        <CreateConceptDialog
+          categories={categories}
+          isSubmitting={createState.isLoading}
+          error={getApiErrorMessage(createState.error)}
+          onClose={closeCreate}
+          onSubmit={handleCreate}
+        />
+      ) : null}
+
+      {toast ? (
+        <div className="fixed bottom-[26px] left-1/2 z-[60] -translate-x-1/2 rounded-full bg-[#12231f] px-[22px] py-3.5 text-[13px] font-semibold text-white shadow-[0_12px_30px_rgba(0,0,0,0.25)]">
+          {toast}
+        </div>
+      ) : null}
     </div>
   );
 }

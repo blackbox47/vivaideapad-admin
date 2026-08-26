@@ -9,7 +9,7 @@ import type {
 import { logout as logoutAction, setCredentials } from '@/reducers/auth-slice';
 import { useLoginMutation } from '@/services/auth/auth-service';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { ADMIN_ROUTES } from '@/utils/constants/routes';
+import { ADMIN_ROUTES, CREATOR_ROUTES } from '@/utils/constants/routes';
 import {
   AUTH_TOKEN_STORAGE_KEY,
   CREATOR_AUTH_TOKEN_STORAGE_KEY,
@@ -45,6 +45,7 @@ export default function useAuth(): UseAuthResult {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const token = useAppSelector((state) => state.auth.token);
+  const role = useAppSelector((state) => state.auth.role);
   const [requestLogin, { isLoading, error }] = useLoginMutation();
 
   // RTK Query only exposes the latest server-reported error; keep a local
@@ -96,9 +97,11 @@ export default function useAuth(): UseAuthResult {
     localStorage.removeItem(CREATOR_AUTH_TOKEN_STORAGE_KEY);
     localStorage.setItem(SIGNED_OUT_STORAGE_KEY, 'true');
     localStorage.setItem(CREATOR_SIGNED_OUT_STORAGE_KEY, 'true');
+    const dest =
+      role === 'creator' ? CREATOR_ROUTES.login : ADMIN_ROUTES.login;
     dispatch(logoutAction());
-    navigate(ADMIN_ROUTES.login, { replace: true });
-  }, [dispatch, navigate]);
+    navigate(dest, { replace: true });
+  }, [dispatch, navigate, role]);
 
   const resetLoginError = useCallback(() => {
     setLocalError(null);

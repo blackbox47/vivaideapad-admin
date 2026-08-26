@@ -10,6 +10,10 @@ export interface MyIdea {
   status: IdeaStatus;
   reward: string;
   comments: number;
+  /** Short piece shown in the submission view modal. */
+  body: string;
+  /** Reviewer note; empty when none has been left. */
+  feedback?: string;
 }
 
 export type MyIdeasStatusFilter = 'all' | IdeaStatus;

@@ -1,7 +1,10 @@
+import type { WorkspaceAdmin } from '@/models/admins/admins-model';
 import type { AdminUser } from '@/models/auth/auth-model';
+import type { AdminNotification } from '@/models/notifications/admin-notifications-model';
 import type { ContentSubmission } from '@/models/content-review/content-review-model';
 import type { CreatorDashboardOverview } from '@/models/creator/creator-dashboard-model';
 import type { CreatorLeaderboardOverview } from '@/models/creator/creator-leaderboard-model';
+import type { CreatorNotification } from '@/models/creator/creator-notifications-model';
 import type { CreatorRewardsOverview } from '@/models/creator/creator-rewards-model';
 import type { CreatorUser } from '@/models/creator/creator-user-model';
 import type { IdeaStatus, MyIdea } from '@/models/creator/my-ideas-model';
@@ -20,6 +23,103 @@ export const mockAdminUser: AdminUser = {
   initials: 'MA',
   email: 'maya@ideapad.app',
 };
+
+export const MAYA_ADMIN_ALIASES = [
+  'maya@ideapad.app',
+  'admin@ideapad.app',
+] as const;
+
+export const mockWorkspaceAdmins: WorkspaceAdmin[] = [
+  {
+    id: 'usr_maya',
+    name: 'Maya Admin',
+    email: 'maya@ideapad.app',
+    access: 'owner',
+    roleLabel: 'Platform owner',
+    initials: 'MA',
+    addedOn: '01-01-2026',
+    addedAt: '2026-01-01T09:00:00Z',
+  },
+  {
+    id: 'usr_rafi',
+    name: 'Rafi Karim',
+    email: 'rafi@ideapad.app',
+    access: 'admin',
+    roleLabel: 'Admin',
+    initials: 'RK',
+    addedOn: '12-08-2026',
+    addedAt: '2026-08-12T11:20:00Z',
+  },
+];
+
+export const mockAdminNotifications: AdminNotification[] = [
+  {
+    id: 'n1',
+    icon: '✓',
+    iconBg: '#dff8eb',
+    title: 'New submission ready for review',
+    body: 'Nora Ahmed submitted Shared streets, softer mornings.',
+    time: '2 hours ago',
+    type: 'Review',
+    read: false,
+    occurredAt: '2026-08-26T11:10:00Z',
+  },
+  {
+    id: 'n2',
+    icon: '⚑',
+    iconBg: '#ffe6d5',
+    title: 'High AI-risk flagged',
+    body: 'Repair before replace pilot needs a closer look before approval.',
+    time: 'Yesterday',
+    type: 'Review',
+    read: false,
+    occurredAt: '2026-08-25T16:40:00Z',
+  },
+  {
+    id: 'n3',
+    icon: '♙',
+    iconBg: '#e7e3ff',
+    title: 'New applicant waiting',
+    body: 'Sara Idris requested contributor access.',
+    time: '05-08-2026',
+    type: 'Applicants',
+    read: false,
+    occurredAt: '2026-08-05T09:18:00Z',
+  },
+  {
+    id: 'n4',
+    icon: '৳',
+    iconBg: '#f1f3f2',
+    title: 'Payout requested',
+    body: 'Amina Rahman requested Tk 240 to bKash.',
+    time: '20 Jul',
+    type: 'Payouts',
+    read: true,
+    occurredAt: '2026-07-20T10:02:00Z',
+  },
+  {
+    id: 'n5',
+    icon: '♔',
+    iconBg: '#f1f3f2',
+    title: 'New admin added',
+    body: 'Rafi Karim can now sign in to the admin workspace.',
+    time: '12-08-2026',
+    type: 'System',
+    read: false,
+    occurredAt: '2026-08-12T11:20:00Z',
+  },
+  {
+    id: 'n6',
+    icon: '✦',
+    iconBg: '#ffe6d5',
+    title: 'Concept closing soon',
+    body: 'A kinder commute closes for submissions in 3 days.',
+    time: '23 Jul',
+    type: 'System',
+    read: false,
+    occurredAt: '2026-07-23T08:00:00Z',
+  },
+];
 
 export const mockDashboardOverview: DashboardOverview = {
   stats: [
@@ -1128,6 +1228,7 @@ export const mockProfileOverview: ProfileOverview = {
   profile: mockProfile,
   notifications: mockNotifications,
   payoutMethod: mockPayoutMethod,
+  roleLabel: 'Platform owner',
 };
 
 // ─── Creator workspace fixtures ────────────────────────────────────────────
@@ -1139,6 +1240,98 @@ export const mockCreatorUser: CreatorUser = {
   email: 'nora@sparkory.demo',
   bio: 'Community contributor writing about everyday sustainability.',
   joined: '12-03-2026',
+};
+
+export const mockCreatorProfile: ProfileDetails = {
+  id: 'usr_nora',
+  name: 'Nora Ahmed',
+  initials: 'NA',
+  email: 'nora@sparkory.demo',
+  phone: '+880 1XXX-XXXXXX',
+  bio: 'Community contributor writing about everyday sustainability.',
+  publicDisplay: 'Public name',
+  avatarUrl: null,
+};
+
+export const mockCreatorNotifications: NotificationPreferences = {
+  email: true,
+  inApp: true,
+};
+
+export const mockCreatorInbox: CreatorNotification[] = [
+  {
+    id: 'n1',
+    icon: '✓',
+    iconBg: '#dff8eb',
+    title: 'Your submission was approved',
+    body: 'Small rituals, lasting change earned a Tk 180 reward.',
+    time: '2 hours ago',
+    type: 'Decisions',
+    read: false,
+    occurredAt: '2026-08-26T11:20:00Z',
+  },
+  {
+    id: 'n2',
+    icon: '✎',
+    iconBg: '#f1f3f2',
+    title: 'A reviewer left feedback',
+    body: 'Please clarify how the shared-seat model works during peak hours.',
+    time: 'Yesterday',
+    type: 'Feedback',
+    read: false,
+    occurredAt: '2026-08-25T15:10:00Z',
+  },
+  {
+    id: 'n3',
+    icon: '✦',
+    iconBg: '#f1f3f2',
+    title: 'A new concept is live',
+    body: 'Learning beyond screens is now accepting submissions.',
+    time: '05-08-2026',
+    type: 'Opportunities',
+    read: false,
+    occurredAt: '2026-08-05T09:00:00Z',
+  },
+  {
+    id: 'n4',
+    icon: '৳',
+    iconBg: '#f1f3f2',
+    title: 'Payout completed',
+    body: 'Tk 240 was sent to your bKash account.',
+    time: '20 Jul',
+    type: 'Payouts',
+    read: true,
+    occurredAt: '2026-07-20T10:02:00Z',
+  },
+  {
+    id: 'n5',
+    icon: '↗',
+    iconBg: '#e7e3ff',
+    title: 'You climbed the leaderboard',
+    body: 'You moved up to rank #12 after your last approval.',
+    time: '22 Jul',
+    type: 'Decisions',
+    read: false,
+    occurredAt: '2026-07-22T14:30:00Z',
+  },
+  {
+    id: 'n6',
+    icon: '⚑',
+    iconBg: '#ffe6d5',
+    title: 'Deadline approaching',
+    body: 'A kinder commute closes for submissions in 3 days.',
+    time: '23 Jul',
+    type: 'Opportunities',
+    read: false,
+    occurredAt: '2026-07-23T08:00:00Z',
+  },
+];
+
+export const mockCreatorProfileOverview: ProfileOverview = {
+  profile: mockCreatorProfile,
+  notifications: mockCreatorNotifications,
+  payoutMethod: mockPayoutMethod,
+  roleLabel: 'Contributor',
 };
 
 export const mockCreatorDashboardOverview: CreatorDashboardOverview = {
@@ -1224,6 +1417,7 @@ export const mockMyIdeas: MyIdea[] = [
     status: 'Draft',
     reward: '—',
     comments: 0,
+    body: 'A short personal essay about a son who wrote weekly letters to his mother long after she stopped being able to read them — built as a seminar opening story.',
   },
   {
     id: 's2',
@@ -1233,6 +1427,9 @@ export const mockMyIdeas: MyIdea[] = [
     status: 'Revision Requested',
     reward: '—',
     comments: 1,
+    body: 'A tribute piece about a rickshaw-puller father teaching his daughter to ride a cycle through Dhaka traffic.',
+    feedback:
+      'Lovely angle — please add a closing line tying it back to the seminar\'s "quiet sacrifices" theme before resubmitting.',
   },
   {
     id: 's3',
@@ -1242,6 +1439,8 @@ export const mockMyIdeas: MyIdea[] = [
     status: 'Approved',
     reward: '৳9,900',
     comments: 1,
+    body: 'A oral-history piece collecting Liberation War songs from a Muktijoddha grandfather, adapted for the Victory Day seminar.',
+    feedback: 'Powerful, well-sourced and respectful — approved for reward.',
   },
   {
     id: 's4',
@@ -1251,6 +1450,8 @@ export const mockMyIdeas: MyIdea[] = [
     status: 'Published',
     reward: '৳13,200',
     comments: 1,
+    body: "A photo-essay style narrative following one neighbourhood's Mangal Shobhajatra procession from dawn preparation to the parade.",
+    feedback: 'Published on the public showcase — great work.',
   },
 ];
 

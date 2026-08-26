@@ -6,17 +6,21 @@ import CreatorLayout from '@/layouts/creator-layout';
 import AdminSignInPage from '@/pages/auth/admin-sign-in';
 import CreatorLoginPage from '@/pages/auth/creator-login';
 import LoginPage from '@/pages/auth/login';
+import AdminsPage from '@/pages/admins';
 import AuditLogPage from '@/pages/audit-log';
 import ApplicantsPage from '@/pages/applicants';
 import ContentReviewPage from '@/pages/content-review';
 import CreatorDashboardPage from '@/pages/creator/dashboard';
 import CreatorLeaderboardPage from '@/pages/creator/leaderboard';
+import CreatorNotificationsPage from '@/pages/creator/notifications';
+import CreatorProfilePage from '@/pages/creator/profile';
 import CreatorRewardsPage from '@/pages/creator/rewards';
 import MyIdeasPage from '@/pages/creator/my-ideas';
 import OpportunitiesPage from '@/pages/creator/opportunities';
 import SubmitIdeaPage from '@/pages/creator/submit-idea';
 import DashboardPage from '@/pages/dashboard';
 import LeaderboardPage from '@/pages/leaderboard';
+import NotificationsPage from '@/pages/notifications';
 import PayoutsPage from '@/pages/payouts';
 import ProfilePage from '@/pages/profile';
 import ReportsPage from '@/pages/reports';
@@ -54,6 +58,8 @@ export default function AppRoutes() {
               <Route path="leaderboard" element={<LeaderboardPage />} />
               <Route path="reports" element={<ReportsPage />} />
               <Route path="audit-log" element={<AuditLogPage />} />
+              <Route path="admins" element={<AdminsPage />} />
+              <Route path="notifications" element={<NotificationsPage />} />
               <Route path="profile" element={<ProfilePage />} />
             </Route>
           </Route>
@@ -73,6 +79,11 @@ export default function AppRoutes() {
             <Route path="submissions" element={<MyIdeasPage />} />
             <Route path="rewards" element={<CreatorRewardsPage />} />
             <Route path="leaderboard" element={<CreatorLeaderboardPage />} />
+            <Route
+              path="notifications"
+              element={<CreatorNotificationsPage />}
+            />
+            <Route path="profile" element={<CreatorProfilePage />} />
             <Route path="ideas/new" element={<SubmitIdeaPage />} />
             <Route
               path="ideas"

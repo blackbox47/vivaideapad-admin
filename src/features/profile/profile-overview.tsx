@@ -69,6 +69,7 @@ export default function ProfileOverview() {
       <div className="grid gap-[18px] lg:grid-cols-[minmax(0,1.3fr)_minmax(0,0.7fr)]">
         <ProfileIdentityCard
           profile={profile}
+          subtitle={overview.roleLabel}
           isSavingProfile={isSavingProfile || isLoading}
           profileFeedback={profileFeedback}
           profileError={profileError}

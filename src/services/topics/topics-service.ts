@@ -1,4 +1,9 @@
-import type { ConceptListParams, ConceptListResponse } from '@/models/topics/topics-model';
+import type {
+  ConceptListParams,
+  ConceptListResponse,
+  CreateConceptBody,
+  CreateConceptResponse,
+} from '@/models/topics/topics-model';
 import { baseService } from '@/services/core/base-service';
 import { CONCEPTS_URL } from '@/utils/constants/api-end-points';
 
@@ -15,7 +20,15 @@ export const topicsService = baseService.injectEndpoints({
       }),
       providesTags: ['concepts'],
     }),
+    createConcept: builder.mutation<CreateConceptResponse, CreateConceptBody>({
+      query: (body) => ({
+        url: CONCEPTS_URL,
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['concepts'],
+    }),
   }),
 });
 
-export const { useGetConceptsQuery } = topicsService;
+export const { useGetConceptsQuery, useCreateConceptMutation } = topicsService;

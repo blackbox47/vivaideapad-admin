@@ -8,6 +8,7 @@ import {
   Shield,
   SquareCheckBig,
   Trophy,
+  UserCog,
   Users,
   Wallet,
 } from 'lucide-react';
@@ -29,6 +30,7 @@ export const ADMIN_NAV_ITEMS: NavItem[] = [
   { title: 'Leaderboard', href: ADMIN_ROUTES.leaderboard, icon: Trophy },
   { title: 'Reports', href: ADMIN_ROUTES.reports, icon: BarChart3 },
   { title: 'Audit log', href: ADMIN_ROUTES.auditLog, icon: Shield },
+  { title: 'Manage admins', href: ADMIN_ROUTES.admins, icon: UserCog },
 ];
 
 export const CREATOR_NAV_ITEMS: NavItem[] = [
@@ -49,7 +51,9 @@ export const CREATOR_PAGE_TITLES: Record<string, string> = {
   [CREATOR_ROUTES.submissions]: 'My submissions',
   [CREATOR_ROUTES.rewards]: 'Rewards & payouts',
   [CREATOR_ROUTES.leaderboard]: 'Leaderboard',
+  [CREATOR_ROUTES.notifications]: 'Notifications',
   [CREATOR_ROUTES.submitIdea]: 'Submit a new idea',
+  [CREATOR_ROUTES.profile]: 'Profile',
 };
 
 export const PAGE_TITLES: Record<string, string> = {
@@ -62,5 +66,7 @@ export const PAGE_TITLES: Record<string, string> = {
   [ADMIN_ROUTES.leaderboard]: 'Leaderboard',
   [ADMIN_ROUTES.reports]: 'Reports',
   [ADMIN_ROUTES.auditLog]: 'Audit log',
+  [ADMIN_ROUTES.admins]: 'Manage admins',
+  [ADMIN_ROUTES.notifications]: 'Notifications',
   ...CREATOR_PAGE_TITLES,
 };
