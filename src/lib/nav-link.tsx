@@ -11,7 +11,12 @@
  *   receiving `{ isActive, isPending, isTransitioning }`.
  * - `end` (default `false`) restricts the active match to the exact path.
  */
-import { forwardRef, type CSSProperties, type MouseEvent, type ReactNode } from 'react';
+import {
+  type CSSProperties,
+  type MouseEvent,
+  type ReactNode,
+  type Ref,
+} from 'react';
 import { Link } from '@tanstack/react-router';
 
 export interface NavLinkRenderProps {
@@ -24,6 +29,8 @@ export type NavLinkClassName = string | ((props: NavLinkRenderProps) => string);
 export type NavLinkStyle = CSSProperties | ((props: NavLinkRenderProps) => CSSProperties);
 
 export interface NavLinkProps {
+  /** React 19: `ref` is a regular prop on function components. */
+  ref?: Ref<HTMLAnchorElement>;
   /**
    * Destination path. Mirrors react-router-dom's loose typing: any string is
    * accepted so callers can pass route constants or interpolated paths
@@ -39,10 +46,16 @@ export interface NavLinkProps {
   onClick?: (event: MouseEvent<HTMLAnchorElement>) => void;
 }
 
-export const NavLink = forwardRef<HTMLAnchorElement, NavLinkProps>(function NavLink(
-  { to, className, style, children, end, onClick, ...rest },
+export function NavLink({
   ref,
-) {
+  to,
+  className,
+  style,
+  children,
+  end,
+  onClick,
+  ...rest
+}: NavLinkProps) {
   const renderProps: NavLinkRenderProps = {
     isActive: false,
     isPending: false,
@@ -61,7 +74,6 @@ export const NavLink = forwardRef<HTMLAnchorElement, NavLinkProps>(function NavL
   // strictly a convenience wrapper for shared sidebar/nav patterns.
   return (
     <Link
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       to={to as any}
       ref={ref}
       onClick={onClick}
@@ -73,4 +85,4 @@ export const NavLink = forwardRef<HTMLAnchorElement, NavLinkProps>(function NavL
       {resolvedChildren}
     </Link>
   );
-});
+}

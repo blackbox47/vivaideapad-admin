@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type FormEvent } from 'react';
+import { useMemo, useState, type FormEvent } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 
 import { Button } from '@/components/ui/button';
@@ -100,13 +100,18 @@ export default function SubmitIdeaForm({
     [topics],
   );
 
-  useEffect(() => {
+  // Sync the form's `topicId` when the parent changes `selectedTopicId`
+  // (React's "adjust state on prop change" pattern — render-time
+  // comparison queues the setState, avoiding `set-state-in-effect`).
+  const [prevSelectedTopicId, setPrevSelectedTopicId] = useState(selectedTopicId);
+  if (selectedTopicId !== prevSelectedTopicId) {
+    setPrevSelectedTopicId(selectedTopicId);
     setValues((prev) =>
       prev.topicId === selectedTopicId
         ? prev
         : { ...prev, topicId: selectedTopicId },
     );
-  }, [selectedTopicId]);
+  }
 
   const serverError = getApiErrorMessage(null);
   const inlineError = validationError ?? serverError;

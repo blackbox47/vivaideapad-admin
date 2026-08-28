@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { AlertCircle } from 'lucide-react';
 import { useTanstackSearchParams } from '@/lib/use-tanstack-search-params';
+import useResetStateOnChange from '@/hooks/ui/use-reset-state-on-change';
 
 import PageHeader from '@/components/layout/page-header';
 import { Button } from '@/components/ui/button';
@@ -27,7 +28,10 @@ export default function ContentReviewOverview() {
   const [searchParams, setSearchParams] = useTanstackSearchParams();
   const status = parseReviewStatus(searchParams.get('status'));
   const search = searchParams.get('q') ?? '';
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [visibleCount, setVisibleCount] = useResetStateOnChange(PAGE_SIZE, [
+    status,
+    search,
+  ]);
   const [reviewId, setReviewId] = useState<string | null>(null);
 
   const {
@@ -43,10 +47,6 @@ export default function ContentReviewOverview() {
     decideSubmission,
     isDeciding,
   } = useContentReview({ status, search });
-
-  useEffect(() => {
-    setVisibleCount(PAGE_SIZE);
-  }, [status, search]);
 
   const setSearch = (next: string) => {
     const nextParams = new URLSearchParams(searchParams);

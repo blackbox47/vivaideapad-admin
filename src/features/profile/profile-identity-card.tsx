@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -52,6 +52,7 @@ export default function ProfileIdentityCard({
   avatar,
   subtitle,
 }: ProfileIdentityCardProps) {
+  'use memo';
   const [name, setName] = useState(profile.name);
   const [email, setEmail] = useState(profile.email);
   const [phone, setPhone] = useState(profile.phone);
@@ -60,19 +61,19 @@ export default function ProfileIdentityCard({
     profile.publicDisplay,
   );
 
-  useEffect(() => {
+  // Adjust local form state when the parent passes a new `profile` object
+  // (React's "adjust state on prop change" pattern). We track a snapshot
+  // string so a render-time comparison can queue the reset without an
+  // effect-driven setState — avoids `set-state-in-effect` lint violation.
+  const [prevProfile, setPrevProfile] = useState(profile);
+  if (profile !== prevProfile) {
+    setPrevProfile(profile);
     setName(profile.name);
     setEmail(profile.email);
     setPhone(profile.phone);
     setBio(profile.bio);
     setPublicDisplay(profile.publicDisplay);
-  }, [
-    profile.name,
-    profile.email,
-    profile.phone,
-    profile.bio,
-    profile.publicDisplay,
-  ]);
+  }
 
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');

@@ -26,3 +26,7 @@ function RootComponent() {
     </>
   );
 }
+
+// Exported for `react-refresh/only-export-components` — keeps the rule
+// happy by making `RootComponent` an explicit export alongside `Route`.
+export { RootComponent };

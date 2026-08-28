@@ -2,6 +2,7 @@ import js from '@eslint/js'
 import globals from 'globals'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
+import reactCompiler from 'eslint-plugin-react-compiler'
 import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
@@ -15,6 +16,9 @@ export default defineConfig([
       reactHooks.configs.flat.recommended,
       reactRefresh.configs.vite,
     ],
+    plugins: {
+      'react-compiler': reactCompiler,
+    },
     languageOptions: {
       globals: globals.browser,
     },
@@ -77,12 +81,26 @@ export default defineConfig([
 
       // ─── React hooks ──────────────────────────────────────────────────────
       'react-hooks/exhaustive-deps': 'off',
+
+      // ─── React Compiler ──────────────────────────────────────────────────
+      // Must be 'error' per the plugin docs — 'warn' silently allows
+      // compiler-incompatible code through. Options mirror the Vite Babel
+      // preset so lint and build agree.
+      'react-compiler/react-compiler': [
+        'error',
+        {
+          compilationMode: 'annotation',
+          target: '19',
+        },
+      ],
     },
   },
   // shadcn/ui components live under src/components/ui/. They follow the
   // shadcn code style (no semicolons, double quotes) and export both a
   // component and a variants helper from the same file — relax the rules
-  // that would otherwise flag them.
+  // that would otherwise flag them. Also silence React Compiler here
+  // because these wrappers use forwardRef + cloneElement patterns that
+  // are intentionally out of the compiler's reach.
   {
     files: ['src/components/ui/**/*.{ts,tsx}'],
     rules: {
@@ -91,6 +109,7 @@ export default defineConfig([
       'jsx-quotes': 'off',
       '@typescript-eslint/no-shadow': 'off',
       'react-refresh/only-export-components': 'off',
+      'react-compiler/react-compiler': 'off',
     },
   },
   // Separate config block for non-TS files (e.g. *.js, *.cjs) so react-refresh
@@ -99,6 +118,34 @@ export default defineConfig([
     files: ['**/*.{js,jsx,cjs,mjs}'],
     languageOptions: {
       globals: { ...globals.browser, ...globals.node },
+    },
+  },
+  // `react-refresh/only-export-components` complains when a file mixes
+  // component exports with helper functions. Several files co-locate a
+  // `parse*Status` helper with its filter component, and TanStack Router's
+  // generated `Route` constant lives next to its component definition in
+  // `__root.tsx`. Whitelist those specific export names so the rule
+  // focuses on accidental non-component exports.
+  {
+    files: [
+      'src/features/content-review/review-filters.tsx',
+      'src/features/payouts/payout-filters.tsx',
+      'src/features/rewards/reward-filters.tsx',
+    ],
+    rules: {
+      'react-refresh/only-export-components': [
+        'error',
+        { allowExportNames: ['parseReviewStatus', 'parsePayoutStatus', 'parseRewardType'] },
+      ],
+    },
+  },
+  {
+    files: ['src/routes/__root.tsx'],
+    rules: {
+      'react-refresh/only-export-components': [
+        'error',
+        { allowExportNames: ['Route'] },
+      ],
     },
   },
 ])
