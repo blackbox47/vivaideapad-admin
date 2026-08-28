@@ -41,3 +41,40 @@ export interface DecidePayoutBody {
   status: Extract<PayoutStatus, 'Paid' | 'Rejected'>;
   note?: string;
 }
+
+// ── Spec-aligned additions (REST spec §5.6) ──────────────────────────────
+
+export interface PayoutListParamsSpec
+  extends Omit<PayoutListParams, 'status'> {
+  status?: PayoutStatusFilter | 'all';
+  userId?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  page?: number;
+  limit?: number;
+}
+
+export interface PayoutDetail extends Payout {
+  userId: string;
+  walletBalance?: string;
+  linkedLedgerEntryId?: string;
+  processingReference?: string;
+  rejectionReason?: string;
+  decidedDate?: string;
+}
+
+export type PayoutProcessAction = 'mark_paid' | 'reject';
+
+export interface ProcessPayoutBody {
+  action: PayoutProcessAction;
+  processing_reference?: string;
+  rejection_reason?: string;
+}
+
+export interface ProcessPayoutResponse {
+  id: string;
+  status: PayoutStatus;
+  processingReference?: string;
+  rejectionReason?: string;
+  decidedAt: string;
+}

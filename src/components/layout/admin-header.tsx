@@ -1,5 +1,5 @@
 import { LogOut, Menu, Moon, Sun, User } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 
 import AdminSidebar from '@/components/layout/admin-sidebar';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -26,6 +26,7 @@ import useAdminNotifications from '@/hooks/notifications/use-admin-notifications
 import useMobileNav from '@/hooks/ui/use-mobile-nav';
 import useTheme from '@/hooks/ui/use-theme';
 import { ADMIN_ROUTES } from '@/utils/constants/routes';
+import { deriveInitials } from '@/utils/helpers/initials';
 
 export default function AdminHeader() {
   const { isOpen, setOpen } = useMobileNav();
@@ -86,7 +87,7 @@ export default function AdminHeader() {
         <Button
           variant="outline"
           size="icon"
-          onClick={() => navigate(ADMIN_ROUTES.notifications)}
+          onClick={() => navigate({ to: ADMIN_ROUTES.notifications })}
           className="relative size-10 rounded-full border-border bg-card text-foreground transition-colors hover:border-foreground"
           aria-label={
             unreadCount > 0
@@ -128,10 +129,10 @@ export default function AdminHeader() {
           >
             <Avatar className="size-7 after:border-transparent">
               <AvatarFallback className="bg-brand-lime text-[11px] font-bold text-brand-lime-foreground">
-                {user?.initials ?? '—'}
+                {user ? deriveInitials(user.display_name, user.email) : '—'}
               </AvatarFallback>
             </Avatar>
-            <span className="hidden sm:inline">{user?.name ?? 'Admin'}</span>
+            <span className="hidden sm:inline">{user?.display_name ?? 'Admin'}</span>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
             <DropdownMenuGroup>
@@ -139,7 +140,7 @@ export default function AdminHeader() {
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onClick={() => navigate(ADMIN_ROUTES.profile)}
+              onClick={() => navigate({ to: ADMIN_ROUTES.profile })}
             >
               <User className="size-4" />
               View profile

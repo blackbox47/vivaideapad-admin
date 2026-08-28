@@ -1,5 +1,5 @@
-import { useEffect, useState, type FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useMemo, useState, type FormEvent } from 'react';
+import { useNavigate } from '@tanstack/react-router';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,6 +13,7 @@ import {
 } from '@/models/creator/submit-idea-model';
 import { CREATOR_ROUTES } from '@/utils/constants/routes';
 import { getApiErrorMessage } from '@/utils/helpers/api-error';
+import type { DropdownOption } from '@/utils/types/dropdown-option';
 
 interface SubmitIdeaFormProps {
   topics: CreatorTopic[];
@@ -87,13 +88,30 @@ export default function SubmitIdeaForm({
   const [submitIdea, { isLoading }] = useSubmitIdea();
   const navigate = useNavigate();
 
-  useEffect(() => {
+  // Map CreatorTopic[] → DropdownOption[] for the `<select>`. Keeps the
+  // canonical CreatorTopic shape intact for the cards / lists that also
+  // read it; only the dropdown consumes the flattened shape.
+  const topicOptions = useMemo<DropdownOption[]>(
+    () =>
+      topics.map((topic) => ({
+        id: topic.id,
+        label: `${topic.title} · ${topic.reward}`,
+      })),
+    [topics],
+  );
+
+  // Sync the form's `topicId` when the parent changes `selectedTopicId`
+  // (React's "adjust state on prop change" pattern — render-time
+  // comparison queues the setState, avoiding `set-state-in-effect`).
+  const [prevSelectedTopicId, setPrevSelectedTopicId] = useState(selectedTopicId);
+  if (selectedTopicId !== prevSelectedTopicId) {
+    setPrevSelectedTopicId(selectedTopicId);
     setValues((prev) =>
       prev.topicId === selectedTopicId
         ? prev
         : { ...prev, topicId: selectedTopicId },
     );
-  }, [selectedTopicId]);
+  }
 
   const serverError = getApiErrorMessage(null);
   const inlineError = validationError ?? serverError;
@@ -122,7 +140,7 @@ export default function SubmitIdeaForm({
         body: values.body.trim(),
         attachmentUrl: values.attachmentUrl.trim() || undefined,
       }).unwrap();
-      navigate(CREATOR_ROUTES.submissions, { replace: true });
+      navigate({ to: CREATOR_ROUTES.submissions, replace: true });
     } catch (err) {
       setValidationError(getApiErrorMessage(err));
     }
@@ -150,9 +168,9 @@ export default function SubmitIdeaForm({
           <option value="">
             {isLoadingTopics ? 'Loading topics…' : 'Choose a topic'}
           </option>
-          {topics.map((topic) => (
+          {topicOptions.map((topic) => (
             <option key={topic.id} value={topic.id}>
-              {topic.title} · {topic.reward}
+              {topic.label}
             </option>
           ))}
         </select>

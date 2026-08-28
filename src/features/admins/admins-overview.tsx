@@ -118,7 +118,7 @@ export default function AdminsOverview() {
 
       {isLoading || canManage ? null : (
         <p className="mb-4 text-[13px] text-muted-foreground">
-          Only the platform owner can add or remove admins.
+          Only a Super Admin can add or remove admins.
         </p>
       )}
 
@@ -135,6 +135,17 @@ export default function AdminsOverview() {
           <span className="text-[13px]">
             Add an operator so they can sign in to the admin workspace.
           </span>
+          {canManage ? (
+            <div className="mt-5">
+              <Button
+                type="button"
+                onClick={() => setIsAddOpen(true)}
+                className="h-auto rounded-full bg-primary px-5 py-3 font-bold text-primary-foreground hover:bg-brand-forest"
+              >
+                + Add admin
+              </Button>
+            </div>
+          ) : null}
         </div>
       ) : (
         <AdminsTable

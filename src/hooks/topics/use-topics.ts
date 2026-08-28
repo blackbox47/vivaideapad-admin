@@ -19,9 +19,13 @@ interface UseTopicsResult {
 }
 
 function filterConcepts(
-  concepts: Concept[],
+  concepts: Concept[] | undefined,
   params: ConceptListParams,
 ): Concept[] {
+  if (!Array.isArray(concepts)) {
+    return [];
+  }
+
   const search = (params.search ?? '').trim().toLowerCase();
   const status = params.status;
 
@@ -30,8 +34,8 @@ function filterConcepts(
       !status || status === 'all' || concept.status === status;
     const matchesSearch =
       search.length === 0 ||
-      concept.title.toLowerCase().includes(search) ||
-      concept.category.toLowerCase().includes(search);
+      concept.title?.toLowerCase().includes(search) ||
+      concept.category?.toLowerCase().includes(search);
 
     return matchesStatus && matchesSearch;
   });
@@ -49,19 +53,21 @@ export default function useTopics(params: ConceptListParams): UseTopicsResult {
 
     return {
       concepts,
-      total: data.total,
+      total: data.total ?? concepts.length,
     };
   }, [data, params.search, params.status]);
 
   const categories = useMemo((): ConceptCategory[] => {
-    if (!data) {
+    if (!data || !Array.isArray(data.concepts)) {
       return [];
     }
 
     const seen = new Map<string, string>();
     for (const concept of data.concepts) {
-      if (!seen.has(concept.category)) {
-        seen.set(concept.category, concept.icon);
+      if (concept?.category) {
+        if (!seen.has(concept.category)) {
+          seen.set(concept.category, concept.icon || '✦');
+        }
       }
     }
 

@@ -10,6 +10,13 @@ import {
   USERS_URL,
 } from '@/utils/constants/api-end-points';
 
+/**
+ * Legacy service — kept for backward-compat with the live UI.
+ *
+ * The spec-aligned application/user lifecycle endpoints now live in:
+ *   - `services/applications/applications-service.ts` (decide applicant)
+ *   - `services/users/users-service.ts` (access-status, role, soft-delete, 360)
+ */
 export const peopleService = baseService.injectEndpoints({
   endpoints: (builder) => ({
     getPeople: builder.query<PeopleResponse, void>({

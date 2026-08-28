@@ -1,3 +1,4 @@
+import useAdminUser from '@/hooks/auth/use-admin-user';
 import type { WorkspaceAdmin } from '@/models/admins/admins-model';
 import {
   useCreateWorkspaceAdminMutation,
@@ -5,6 +6,7 @@ import {
   useRemoveWorkspaceAdminMutation,
 } from '@/services/admins/admins-service';
 import { getApiErrorMessage } from '@/utils/helpers/api-error';
+import { isSuperAdmin } from '@/utils/helpers/platform-role';
 
 interface UseAdminsResult {
   admins: WorkspaceAdmin[];
@@ -24,6 +26,7 @@ interface UseAdminsResult {
 }
 
 export default function useAdmins(): UseAdminsResult {
+  const { user } = useAdminUser();
   const { data, isLoading, isError, error, refetch } =
     useGetWorkspaceAdminsQuery();
   const [createAdmin, createState] = useCreateWorkspaceAdminMutation();
@@ -31,7 +34,7 @@ export default function useAdmins(): UseAdminsResult {
 
   return {
     admins: data?.admins ?? [],
-    canManage: data?.canManage ?? false,
+    canManage: isSuperAdmin(user?.role),
     isLoading,
     isError,
     error: getApiErrorMessage(error),

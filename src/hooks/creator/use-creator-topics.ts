@@ -22,9 +22,13 @@ interface UseCreatorTopicsResult {
 }
 
 function filterTopics(
-  topics: CreatorTopic[],
+  topics: CreatorTopic[] | undefined,
   params: UseCreatorTopicsParams,
 ): CreatorTopic[] {
+  if (!Array.isArray(topics)) {
+    return [];
+  }
+
   const search = (params.search ?? '').trim().toLowerCase();
   const category = params.category;
 
@@ -33,9 +37,9 @@ function filterTopics(
       !category || category === 'All' || topic.category === category;
     const matchesSearch =
       search.length === 0 ||
-      topic.title.toLowerCase().includes(search) ||
-      topic.category.toLowerCase().includes(search) ||
-      topic.description.toLowerCase().includes(search);
+      topic.title?.toLowerCase().includes(search) ||
+      topic.category?.toLowerCase().includes(search) ||
+      topic.description?.toLowerCase().includes(search);
 
     return matchesCategory && matchesSearch;
   });

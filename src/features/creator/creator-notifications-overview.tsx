@@ -1,5 +1,5 @@
 import { AlertCircle } from 'lucide-react';
-import { useSearchParams } from 'react-router-dom';
+import { useTanstackSearchParams } from '@/lib/use-tanstack-search-params';
 
 import PageHeader from '@/components/layout/page-header';
 import { Button } from '@/components/ui/button';
@@ -18,7 +18,7 @@ import useCreatorNotifications, {
 } from '@/hooks/creator/use-creator-notifications';
 
 export default function CreatorNotificationsOverview() {
-  const [searchParams] = useSearchParams();
+  const [searchParams] = useTanstackSearchParams();
   const filter = parseCreatorNotificationFilter(searchParams.get('filter'));
   const {
     notifications,

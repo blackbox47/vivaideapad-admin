@@ -29,7 +29,26 @@ export default function useReports(): UseReportsResult {
   const exportReport = useCallback(async () => {
     try {
       const result = await triggerExport().unwrap();
-      return result.filename;
+      const filename =
+        result?.filename ??
+        `ideapad-report-${new Date().toISOString().slice(0, 10)}.csv`;
+      const csvContent = result?.csv;
+
+      if (csvContent && typeof window !== 'undefined') {
+        const blob = new Blob([csvContent], {
+          type: 'text/csv;charset=utf-8;',
+        });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', filename);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }
+
+      return filename;
     } catch {
       return null;
     }

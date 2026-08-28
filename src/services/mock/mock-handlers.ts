@@ -12,6 +12,7 @@ import type {
   Applicant,
   DecideApplicantBody,
   PlatformUser,
+  PlatformUserStatus,
   ToggleUserBody,
 } from '@/models/people/people-model';
 import type {
@@ -36,7 +37,11 @@ import type {
 } from '@/models/notifications/admin-notifications-model';
 import { ADMIN_NOTIFICATION_FILTERS } from '@/models/notifications/admin-notifications-model';
 import type { AuditEvent } from '@/models/audit-log/audit-log-model';
-import type { AdminUser } from '@/models/auth/auth-model';
+import type { AuthUser } from '@/models/auth/auth-model';
+import {
+  formatPlatformRole,
+  isPlatformRole,
+} from '@/utils/helpers/platform-role';
 import type {
   CreateAdjustmentBody,
   LedgerEntry,
@@ -98,12 +103,18 @@ import {
 } from '@/services/mock/mock-data';
 import {
   ADMINS_URL,
-  ADMIN_ME_URL,
+  ADMIN_DETAIL_URL,
   ADMIN_NOTIFICATIONS_READ_ALL_URL,
   ADMIN_NOTIFICATIONS_URL,
+  APPLICATIONS_URL,
   APPLICANTS_URL,
+  AUDIT_EVENTS_URL,
   AUDIT_LOG_URL,
-  AUTH_LOGIN_URL,
+  AUTH_SIGN_IN_URL,
+  CATEGORIES_URL,
+  CATEGORY_DETAIL_URL,
+  CONCEPT_DETAIL_URL,
+  CONCEPT_STATUS_URL,
   CONCEPTS_URL,
   CREATOR_DASHBOARD_OVERVIEW_URL,
   CREATOR_IDEAS_SUBMIT_URL,
@@ -123,18 +134,35 @@ import {
   DASHBOARD_OVERVIEW_URL,
   LEADERBOARD_RECALCULATE_URL,
   LEADERBOARD_URL,
+  LEDGER_MANUAL_ADJUSTMENT_URL,
+  LEDGER_URL,
+  PAYOUT_DETAIL_URL,
+  PAYOUT_PROCESS_URL,
   PAYOUTS_URL,
   PEOPLE_URL,
   PROFILE_AVATAR_URL_URL,
+  PROFILE_DISPLAY_URL,
   PROFILE_NOTIFICATIONS_URL,
   PROFILE_OVERVIEW_URL,
   PROFILE_PASSWORD_URL,
   PROFILE_UPDATE_URL,
+  REPORTS_EXPORT_CSV_URL,
   REPORTS_EXPORT_URL,
+  REPORTS_FINANCIAL_URL,
   REPORTS_OVERVIEW_URL,
+  REPORTS_PARTICIPATION_URL,
+  REPORTS_QUALITY_URL,
   REVIEW_QUEUE_URL,
   REWARDS_LEDGER_ADJUST_URL,
   REWARDS_LEDGER_URL,
+  SUBMISSION_DECISION_URL,
+  SUBMISSION_DETAIL_URL,
+  SUBMISSION_PUBLISH_URL,
+  SUBMISSION_RISK_SCAN_URL,
+  SUBMISSIONS_URL,
+  USER_ACCESS_STATUS_URL,
+  USER_DETAIL_URL,
+  USER_ROLE_URL,
   USERS_URL,
 } from '@/utils/constants/api-end-points';
 
@@ -142,10 +170,10 @@ const MOCK_LATENCY_MS = 450;
 
 export const MOCK_SESSION_TOKEN = 'mock-admin-session-token';
 
-let applicantsState: Applicant[] = structuredClone(mockApplicants);
+const applicantsState: Applicant[] = structuredClone(mockApplicants);
 let usersState: PlatformUser[] = structuredClone(mockPeopleUsers);
-let reviewQueueState: ContentSubmission[] = structuredClone(mockReviewQueue);
-let payoutsState: Payout[] = structuredClone(mockPayouts);
+const reviewQueueState: ContentSubmission[] = structuredClone(mockReviewQueue);
+const payoutsState: Payout[] = structuredClone(mockPayouts);
 let myIdeasState: MyIdea[] = structuredClone(mockMyIdeas);
 let rewardsState: CreatorRewardsOverview = structuredClone(mockCreatorRewards);
 const leaderboardState: LeaderboardEntry[] = structuredClone(mockLeaderboard);
@@ -179,13 +207,13 @@ function peopleSnapshot() {
   };
 }
 
-function toAdminUser(admin: WorkspaceAdmin): AdminUser {
+function toAdminUser(admin: WorkspaceAdmin): AuthUser {
   return {
     id: admin.id,
-    name: admin.name,
-    role: admin.roleLabel,
-    initials: admin.initials,
+    display_name: admin.name,
+    role: admin.access === 'owner' ? 1 : 2,
     email: admin.email,
+    access_status: 'active',
   };
 }
 
@@ -306,8 +334,8 @@ function isCreateAdminBody(body: unknown): body is CreateAdminBody {
   return (
     typeof body === 'object' &&
     body !== null &&
-    typeof (body as CreateAdminBody).name === 'string' &&
-    typeof (body as CreateAdminBody).email === 'string'
+    typeof (body as CreateAdminBody).email === 'string' &&
+    typeof (body as CreateAdminBody).password === 'string'
   );
 }
 
@@ -543,10 +571,11 @@ type MockHandler = (request: ApiRequest) => unknown;
 
 const handlers: Record<string, MockHandler> = {
   [`GET ${DASHBOARD_OVERVIEW_URL}`]: () => mockDashboardOverview,
-  [`GET ${ADMIN_ME_URL}`]: () => toAdminUser(currentWorkspaceAdmin()),
-  [`POST ${AUTH_LOGIN_URL}`]: (request) => {
-    // Synthesize the role from the email domain. Real backend will return
-    // a discriminator field on the response — this is mock-only.
+  [`POST ${AUTH_SIGN_IN_URL}`]: (request) => {
+    // Synthesize the role from the email domain. Real backend returns a
+    // platform role (numeric) inside `user.role`; the workspace discriminator
+    // is a UI concern. The response shape here mirrors `LoginResponse` so the
+    // mock layer is wire-compatible with the live API.
     const body = request.body as { email?: string } | undefined;
     const email =
       typeof body?.email === 'string' ? body.email.trim().toLowerCase() : '';
@@ -554,9 +583,17 @@ const handlers: Record<string, MockHandler> = {
 
     if (isCreator) {
       return {
-        token: MOCK_SESSION_TOKEN,
-        user: mockCreatorUser,
-        role: 'creator',
+        access_token: MOCK_SESSION_TOKEN,
+        refresh_token: `mock-refresh:${MOCK_SESSION_TOKEN}`,
+        token_type: 'Bearer' as const,
+        expires_in: 900,
+        user: {
+          id: mockCreatorUser.id,
+          email: mockCreatorUser.email,
+          display_name: mockCreatorUser.name,
+          role: 3,
+          access_status: 'active',
+        },
       };
     }
 
@@ -565,45 +602,60 @@ const handlers: Record<string, MockHandler> = {
     }
 
     const admin = findAdminByEmail(email);
-    if (admin) {
-      return {
-        token: `${ADMIN_TOKEN_PREFIX}${admin.email}`,
-        user: toAdminUser(admin),
-        role: 'admin',
-      };
-    }
+    const user = admin ? toAdminUser(admin) : mockAdminUser;
+    const accessToken = admin
+      ? `${ADMIN_TOKEN_PREFIX}${admin.email}`
+      : MOCK_SESSION_TOKEN;
 
     return {
-      token: MOCK_SESSION_TOKEN,
-      user: mockAdminUser,
-      role: 'admin',
+      access_token: accessToken,
+      refresh_token: `mock-refresh:${accessToken}`,
+      token_type: 'Bearer' as const,
+      expires_in: 900,
+      user,
     };
   },
   [`GET ${ADMINS_URL}`]: () => {
-    const current = currentWorkspaceAdmin();
     const admins = [...workspaceAdminsState].sort(
       (a, b) =>
         new Date(a.addedAt).getTime() - new Date(b.addedAt).getTime(),
     );
 
     return {
-      admins,
-      canManage: current.access === 'owner',
+      data: admins.map((admin) => ({
+        id: admin.id,
+        email: admin.email,
+        display_name: admin.name,
+        role: admin.access === 'owner' ? 1 : 2,
+        access_status: 'active',
+        created_at: admin.addedAt,
+        updated_at: admin.addedAt,
+      })),
+      meta: {
+        page: 1,
+        limit: 100,
+        total: admins.length,
+        total_pages: 1,
+      },
     };
   },
   [`POST ${ADMINS_URL}`]: (request) => {
     if (currentWorkspaceAdmin().access !== 'owner') {
-      throw new Error('Only the platform owner can add admins.');
+      throw new Error('Only a Super Admin can add admins.');
     }
     if (!isCreateAdminBody(request.body)) {
       throw new Error('Invalid admin payload');
     }
 
-    const name = request.body.name.trim();
+    const name = (request.body.display_name ?? '').trim();
     const email = request.body.email.trim().toLowerCase();
+    const password = request.body.password;
 
     if (!name) {
       throw new Error('Name is required.');
+    }
+    if (password.length < 8) {
+      throw new Error('Password must be at least 8 characters.');
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       throw new Error('Enter a valid email address.');
@@ -650,13 +702,18 @@ const handlers: Record<string, MockHandler> = {
     recordAdminAudit('Added admin', `${name} · ${email}`);
 
     return {
-      admin,
-      createdAt: now.toISOString(),
+      id: admin.id,
+      email: admin.email,
+      display_name: admin.name,
+      role: 2,
+      access_status: 'active',
+      created_at: admin.addedAt,
+      updated_at: admin.addedAt,
     };
   },
-  [`DELETE ${ADMINS_URL}`]: (request) => {
+  [`DELETE ${ADMIN_DETAIL_URL(':id')}`]: (request) => {
     if (currentWorkspaceAdmin().access !== 'owner') {
-      throw new Error('Only the platform owner can remove admins.');
+      throw new Error('Only a Super Admin can remove admins.');
     }
 
     const id = String(request.params?.id ?? '').trim();
@@ -666,17 +723,14 @@ const handlers: Record<string, MockHandler> = {
       throw new Error('Admin not found.');
     }
     if (admin.access === 'owner') {
-      throw new Error('The platform owner cannot be removed.');
+      throw new Error('The Super Admin cannot be removed.');
     }
 
     workspaceAdminsState = workspaceAdminsState.filter((item) => item.id !== id);
     removedAdminEmails.add(admin.email.toLowerCase());
     recordAdminAudit('Removed admin', `${admin.name} · ${admin.email}`);
 
-    return {
-      id: admin.id,
-      removedAt: new Date().toISOString(),
-    };
+    return { deleted: true };
   },
   [`GET ${ADMIN_NOTIFICATIONS_URL}`]: (request) =>
     notificationsSnapshot(request.params?.filter),
@@ -1033,7 +1087,10 @@ const handlers: Record<string, MockHandler> = {
     };
   },
   [`GET ${PROFILE_OVERVIEW_URL}`]: () => ({
-    profile: profileState,
+    profile: {
+      ...profileState,
+      role: currentWorkspaceAdmin().access === 'owner' ? 1 : 2,
+    },
     notifications: notificationsState,
     payoutMethod: mockProfileOverview.payoutMethod,
     roleLabel: mockProfileOverview.roleLabel,
@@ -1280,7 +1337,775 @@ const handlers: Record<string, MockHandler> = {
 
     return { idea: newIdea, createdAt: today.toISOString() };
   },
+
+  // ── REST spec §5 — Categories (mock) ─────────────────────────────────
+  [`GET ${CATEGORIES_URL}`]: (request) => {
+    const search = String(request.params?.search ?? '')
+      .trim()
+      .toLowerCase();
+    const filtered = categoriesState.filter(
+      (cat) =>
+        search.length === 0 || cat.name.toLowerCase().includes(search),
+    );
+    return {
+      data: filtered,
+      meta: {
+        page: Number(request.params?.page ?? 1),
+        limit: Number(request.params?.limit ?? 50),
+        totalItems: filtered.length,
+        totalPages: 1,
+      },
+    };
+  },
+  [`POST ${CATEGORIES_URL}`]: (request) => {
+    const body = request.body as { name?: string; icon?: string } | undefined;
+    const incomingName = body?.name?.trim();
+    if (!incomingName) {
+      throw new Error('Name is required.');
+    }
+    if (
+      categoriesState.some(
+        (c) => c.name.toLowerCase() === incomingName.toLowerCase(),
+      )
+    ) {
+      throw new Error('A category with this name already exists.');
+    }
+    const cat: MockCategory = {
+      id: `cat-${Date.now()}`,
+      name: incomingName,
+      icon: body?.icon?.trim() || '✦',
+      isActive: true,
+    };
+    categoriesState = [...categoriesState, cat];
+    pushAuditEvent('Category created', cat.name, 'System');
+    pushAdminNotification({
+      icon: '✦',
+      iconBg: 'var(--surface-subtle)',
+      title: 'New category created',
+      body: `${cat.name} is now available for new concepts.`,
+      type: 'System',
+    });
+    return {
+      category: cat,
+      createdAt: new Date().toISOString(),
+    };
+  },
+  [`PATCH ${CATEGORY_DETAIL_URL(':id')}`]: (request) => {
+    const id = String(request.params?.id ?? '');
+    const cat = categoriesState.find((c) => c.id === id);
+    if (!cat) {
+      throw new Error('Category not found.');
+    }
+    const body = request.body as Partial<MockCategory> | undefined;
+    if (body?.name) cat.name = body.name.trim();
+    if (body?.icon) cat.icon = body.icon.trim();
+    if (typeof body?.isActive === 'boolean') cat.isActive = body.isActive;
+    categoriesState = categoriesState.map((c) => (c.id === id ? { ...cat } : c));
+    pushAuditEvent('Category updated', cat.name, 'System');
+    return {
+      category: { ...cat },
+      updatedAt: new Date().toISOString(),
+    };
+  },
+  [`DELETE ${CATEGORY_DETAIL_URL(':id')}`]: (request) => {
+    const id = String(request.params?.id ?? '');
+    const cat = categoriesState.find((c) => c.id === id);
+    if (!cat) {
+      throw new Error('Category not found.');
+    }
+    categoriesState = categoriesState.filter((c) => c.id !== id);
+    pushAuditEvent('Category deleted', cat.name, 'System');
+    return { id, deletedAt: new Date().toISOString() };
+  },
+
+  // ── REST spec §5.3 — Concepts (mock) ─────────────────────────────────
+  [`GET ${CONCEPT_DETAIL_URL(':id')}`]: (request) => {
+    const id = String(request.params?.id ?? '');
+    const concept = conceptsState.find((c) => c.id === id);
+    if (!concept) {
+      throw new Error('Concept not found.');
+    }
+    return {
+      concept: {
+        ...concept,
+        openDate: concept.opensOn,
+        closeDate: concept.closesOn,
+        rewardGuidance: concept.reward,
+      },
+    };
+  },
+  [`PATCH ${CONCEPT_DETAIL_URL(':id')}`]: (request) => {
+    const id = String(request.params?.id ?? '');
+    const concept = conceptsState.find((c) => c.id === id);
+    if (!concept) {
+      throw new Error('Concept not found.');
+    }
+    const body = request.body as Record<string, unknown> | undefined;
+    if (body && typeof body.title === 'string') concept.title = body.title;
+    if (body && typeof body.description === 'string') concept.description = body.description;
+    if (body && typeof body.icon === 'string') concept.icon = body.icon;
+    if (body && typeof body.reward === 'string') concept.reward = body.reward;
+    if (body && typeof body.opensOn === 'string') concept.opensOn = body.opensOn;
+    if (body && typeof body.closesOn === 'string') concept.closesOn = body.closesOn;
+    pushAuditEvent('Concept updated', concept.title, 'Content');
+    return {
+      concept: { ...concept },
+      updatedAt: new Date().toISOString(),
+    };
+  },
+  [`PATCH ${CONCEPT_STATUS_URL(':id')}`]: (request) => {
+    const id = String(request.params?.id ?? '');
+    const concept = conceptsState.find((c) => c.id === id);
+    if (!concept) {
+      throw new Error('Concept not found.');
+    }
+    const body = request.body as { status?: string } | undefined;
+    if (!body || !['draft', 'scheduled', 'active', 'archived'].includes(String(body.status))) {
+      throw new Error('Invalid status transition.');
+    }
+    const previousStatus = concept.status;
+    concept.status = body.status as ConceptStatus;
+    pushAuditEvent(
+      'Concept transitioned',
+      `${concept.title}: ${previousStatus} → ${concept.status}`,
+      'Content',
+    );
+    return {
+      id: concept.id,
+      status: concept.status,
+      transitionedAt: new Date().toISOString(),
+    };
+  },
+  [`DELETE ${CONCEPT_DETAIL_URL(':id')}`]: (request) => {
+    const id = String(request.params?.id ?? '');
+    const concept = conceptsState.find((c) => c.id === id);
+    if (!concept) {
+      throw new Error('Concept not found.');
+    }
+    conceptsState = conceptsState.filter((c) => c.id !== id);
+    pushAuditEvent('Concept deleted', concept.title, 'Content');
+    return { id, deletedAt: new Date().toISOString() };
+  },
+
+  // ── REST spec §5.4 — Applications (mock) ─────────────────────────────
+  [`GET ${APPLICATIONS_URL}`]: (request) => {
+    const status = String(request.params?.status ?? '').trim();
+    const search = String(request.params?.search ?? '')
+      .trim()
+      .toLowerCase();
+    const filtered = applicationsState.filter((app) => {
+      const matchesStatus = !status || status === 'all' || app.status === status;
+      const matchesSearch =
+        search.length === 0 ||
+        (app.applicantName ?? '').toLowerCase().includes(search) ||
+        app.ideaTitle.toLowerCase().includes(search);
+      return matchesStatus && matchesSearch;
+    });
+    return {
+      data: filtered,
+      total: filtered.length,
+    };
+  },
+  [`POST ${APPLICATIONS_URL}`]: () => {
+    // Spec defines this for completeness; mock just acknowledges.
+    return { data: [], total: 0 };
+  },
+  [`GET ${CATEGORY_DETAIL_URL(':id')}`]: (request) => {
+    const id = String(request.params?.id ?? '');
+    const cat = categoriesState.find((c) => c.id === id);
+    if (!cat) {
+      throw new Error('Category not found.');
+    }
+    return cat;
+  },
+
+  // ── REST spec §5.5 — Submissions (mock) ──────────────────────────────
+  [`GET ${SUBMISSIONS_URL}`]: (request) => {
+    const status = String(request.params?.status ?? '').trim();
+    const search = String(request.params?.search ?? '')
+      .trim()
+      .toLowerCase();
+    const filtered = reviewQueueState.filter((sub) => {
+      const matchesStatus = !status || status === 'all' || sub.status === status;
+      const matchesSearch =
+        search.length === 0 ||
+        sub.title.toLowerCase().includes(search) ||
+        sub.contributor.toLowerCase().includes(search);
+      return matchesStatus && matchesSearch;
+    });
+    return { data: filtered, total: filtered.length };
+  },
+  [`GET ${SUBMISSION_DETAIL_URL(':id')}`]: (request) => {
+    const id = String(request.params?.id ?? '');
+    const submission = reviewQueueState.find((s) => s.id === id);
+    if (!submission) {
+      throw new Error('Submission not found.');
+    }
+    return {
+      submission: {
+        ...submission,
+        version: 1,
+        risk_signal: {
+          originalityScore: 78,
+          aiLikelihoodScore: submission.risk === 'High' ? 88 : submission.risk === 'Medium' ? 45 : 12,
+          risk: submission.risk,
+          scannedAt: new Date().toISOString(),
+        },
+      },
+    };
+  },
+  [`POST ${SUBMISSION_DECISION_URL(':id')}`]: (request) => {
+    const id = String(request.params?.id ?? '');
+    const submission = reviewQueueState.find((s) => s.id === id);
+    if (!submission) {
+      throw new Error('Submission not found.');
+    }
+    const body = request.body as MockSubmissionDecision | undefined;
+    if (!body || !['approve', 'request_revision', 'reject'].includes(body.decision)) {
+      throw new Error('Invalid decision payload.');
+    }
+
+    const previousStatus = submission.status;
+    if (body.decision === 'approve') {
+      submission.status = 'Approved';
+      if (typeof body.reward_amount === 'number' && body.reward_amount > 0) {
+        pushLedgerEntry({
+          contributor: submission.contributor,
+          type: 'Reward',
+          amountValue: body.reward_amount,
+          status: 'Recorded',
+          description: `Reward for ${submission.title}`,
+        });
+      }
+      pushAdminNotification({
+        icon: '✓',
+        iconBg: 'var(--success-subtle)',
+        title: 'Submission approved',
+        body: `${submission.title} by ${submission.contributor} was approved.`,
+        type: 'Review',
+      });
+    } else if (body.decision === 'request_revision') {
+      submission.status = 'Revision Requested';
+      pushAdminNotification({
+        icon: '⚑',
+        iconBg: 'var(--warning-subtle)',
+        title: 'Revision requested',
+        body: `${submission.title} needs revisions from ${submission.contributor}.`,
+        type: 'Review',
+      });
+    } else {
+      submission.status = 'Rejected';
+      pushAdminNotification({
+        icon: '✕',
+        iconBg: 'var(--danger-subtle)',
+        title: 'Submission rejected',
+        body: `${submission.title} was rejected.`,
+        type: 'Review',
+      });
+    }
+
+    pushAuditEvent(
+      `submission.${body.decision}`,
+      `${submission.title}: ${previousStatus} → ${submission.status}`,
+      'Content',
+    );
+
+    return {
+      id: submission.id,
+      status: submission.status,
+      feedback: body.feedback,
+      reward_amount: body.reward_amount,
+      decidedAt: new Date().toISOString(),
+    };
+  },
+  [`POST ${SUBMISSION_PUBLISH_URL(':id')}`]: (request) => {
+    const id = String(request.params?.id ?? '');
+    const submission = reviewQueueState.find((s) => s.id === id);
+    if (!submission) {
+      throw new Error('Submission not found.');
+    }
+    submission.status = 'Published';
+    pushAuditEvent('submission.publish', submission.title, 'Content');
+    return {
+      id: submission.id,
+      status: submission.status,
+      publishedAt: new Date().toISOString(),
+    };
+  },
+  [`POST ${SUBMISSION_RISK_SCAN_URL(':id')}`]: (request) => {
+    const id = String(request.params?.id ?? '');
+    const submission = reviewQueueState.find((s) => s.id === id);
+    if (!submission) {
+      throw new Error('Submission not found.');
+    }
+    return {
+      id,
+      risk_signal: {
+        originalityScore: 60 + Math.floor(Math.random() * 35),
+        aiLikelihoodScore: 5 + Math.floor(Math.random() * 30),
+        risk: submission.risk,
+        notes: 'Re-scan complete.',
+        scannedAt: new Date().toISOString(),
+      },
+    };
+  },
+
+  // ── REST spec §5.6 — Payouts (mock) ──────────────────────────────────
+  [`GET ${PAYOUT_DETAIL_URL(':id')}`]: (request) => {
+    const id = String(request.params?.id ?? '');
+    const payout = payoutsState.find((p) => p.id === id);
+    if (!payout) {
+      throw new Error('Payout not found.');
+    }
+    return {
+      payout: {
+        ...payout,
+        userId: payout.contributor,
+        processingReference: '',
+      },
+    };
+  },
+  [`POST ${PAYOUT_PROCESS_URL(':id')}`]: (request) => {
+    const id = String(request.params?.id ?? '');
+    const payout = payoutsState.find((p) => p.id === id);
+    if (!payout) {
+      throw new Error('Payout not found.');
+    }
+    const body = request.body as MockProcessPayout | undefined;
+    if (!body || !['mark_paid', 'reject'].includes(body.action)) {
+      throw new Error('Invalid process action.');
+    }
+
+    const now = new Date();
+    if (body.action === 'mark_paid') {
+      payout.status = 'Paid';
+      pushLedgerEntry({
+        contributor: payout.contributor,
+        type: 'Withdrawal',
+        amountValue: -payout.amountValue,
+        status: 'Recorded',
+        description: `Payout · ${payout.methodDetail}`,
+      });
+      pushAdminNotification({
+        icon: '৳',
+        iconBg: 'var(--surface-subtle)',
+        title: 'Payout paid',
+        body: `${payout.amount} sent to ${payout.contributor} via ${payout.methodDetail}.`,
+        type: 'Payouts',
+      });
+      pushAuditEvent(
+        'payout.mark_paid',
+        `${payout.contributor} · ${payout.amount}`,
+        'Payouts',
+      );
+      return {
+        id: payout.id,
+        status: payout.status,
+        processingReference: body.processing_reference,
+        decidedAt: now.toISOString(),
+      };
+    }
+
+    payout.status = 'Rejected';
+    pushAdminNotification({
+      icon: '✕',
+      iconBg: 'var(--danger-subtle)',
+      title: 'Payout rejected',
+      body: `Withdrawal for ${payout.contributor} was rejected.`,
+      type: 'Payouts',
+    });
+    pushAuditEvent(
+      'payout.reject',
+      `${payout.contributor} · ${payout.amount}`,
+      'Payouts',
+    );
+    return {
+      id: payout.id,
+      status: payout.status,
+      rejectionReason: body.rejection_reason,
+      decidedAt: now.toISOString(),
+    };
+  },
+
+  // ── REST spec §5.6 — Ledger (mock) ───────────────────────────────────
+  [`GET ${LEDGER_URL}`]: (request) => {
+    const type = String(request.params?.type ?? '');
+    const search = String(request.params?.search ?? '')
+      .trim()
+      .toLowerCase();
+    const filtered = ledgerState
+      .filter((entry) => {
+        const matchesType =
+          !type || type === 'all' || entry.type === type;
+        const matchesSearch =
+          search.length === 0 ||
+          entry.contributor.toLowerCase().includes(search) ||
+          entry.description.toLowerCase().includes(search);
+        return matchesType && matchesSearch;
+      })
+      .sort(
+        (a, b) =>
+          new Date(b.occurredAt).getTime() -
+          new Date(a.occurredAt).getTime(),
+      );
+    return {
+      entries: filtered,
+      total: filtered.length,
+    };
+  },
+  [`POST ${LEDGER_MANUAL_ADJUSTMENT_URL}`]: (request) => {
+    const body = request.body as MockManualAdjustment | undefined;
+    if (!body) {
+      throw new Error('Invalid adjustment payload.');
+    }
+    if (!body.user_id) throw new Error('User is required.');
+    if (!Number.isFinite(body.amount) || body.amount === 0) {
+      throw new Error('Amount must be a non-zero number.');
+    }
+    if (!body.reason) throw new Error('Reason is required.');
+
+    const entry = pushLedgerEntry({
+      contributor: body.user_id,
+      type: 'Adjustment',
+      amountValue: body.amount,
+      status: 'Recorded',
+      description: body.description || `Manual adjustment · ${body.reason}`,
+    });
+    pushAuditEvent(
+      'ledger.manual_adjustment',
+      `${body.amount > 0 ? '+' : ''}Tk ${Math.abs(body.amount)} · ${body.reason}`,
+      'Payouts',
+    );
+    return {
+      entry,
+      createdAt: new Date().toISOString(),
+    };
+  },
+
+  // ── REST spec §5.7 — Users (mock) ────────────────────────────────────
+  [`GET ${USERS_URL}`]: (request) => {
+    const search = String(request.params?.search ?? '')
+      .trim()
+      .toLowerCase();
+    const filtered = usersState.filter(
+      (u) =>
+        search.length === 0 ||
+        u.name.toLowerCase().includes(search) ||
+        u.email.toLowerCase().includes(search),
+    );
+    return {
+      data: filtered,
+      total: filtered.length,
+    };
+  },
+  [`GET ${USER_DETAIL_URL(':id')}`]: (request) => {
+    const id = String(request.params?.id ?? '');
+    const user = usersState.find((u) => u.id === id);
+    if (!user) {
+      throw new Error('User not found.');
+    }
+    return {
+      user: {
+        ...user,
+        recentActivity: [
+          {
+            id: 'a-1',
+            type: 'submission',
+            description: 'Most recent submission',
+            at: new Date().toISOString(),
+          },
+        ],
+      },
+    };
+  },
+  [`PATCH ${USER_ACCESS_STATUS_URL(':id')}`]: (request) => {
+    const id = String(request.params?.id ?? '');
+    const user = usersState.find((u) => u.id === id);
+    if (!user) {
+      throw new Error('User not found.');
+    }
+    const body = request.body as { accessStatus?: string; reason?: string } | undefined;
+    if (!body || !['Active', 'Invited', 'Suspended'].includes(String(body.accessStatus))) {
+      throw new Error('Invalid access status.');
+    }
+    user.status = body.accessStatus as PlatformUserStatus;
+    pushAuditEvent(
+      'user.access_status_changed',
+      `${user.name} → ${user.status}${body.reason ? ' · ' + body.reason : ''}`,
+      'System',
+    );
+    return {
+      id: user.id,
+      status: user.status,
+      updatedAt: new Date().toISOString(),
+    };
+  },
+  [`PATCH ${USER_ROLE_URL(':id')}`]: (request) => {
+    const id = String(request.params?.id ?? '');
+    const user = usersState.find((u) => u.id === id);
+    if (!user) {
+      throw new Error('User not found.');
+    }
+    const body = request.body as { role?: unknown } | undefined;
+    const role = Number(body?.role);
+    if (!isPlatformRole(role)) {
+      throw new Error('Invalid role.');
+    }
+    pushAuditEvent(
+      'user.role_changed',
+      `${user.name} → ${formatPlatformRole(role)}`,
+      'System',
+    );
+    return {
+      id: user.id,
+      status: user.status,
+      updatedAt: new Date().toISOString(),
+    };
+  },
+  [`DELETE ${USER_DETAIL_URL(':id')}`]: (request) => {
+    const id = String(request.params?.id ?? '');
+    const user = usersState.find((u) => u.id === id);
+    if (!user) {
+      throw new Error('User not found.');
+    }
+    usersState = usersState.filter((u) => u.id !== id);
+    pushAuditEvent('user.deleted', `${user.name} · ${user.email}`, 'System');
+    return { id, deletedAt: new Date().toISOString() };
+  },
+
+  // ── REST spec §5.8 — Reports (mock) ──────────────────────────────────
+  [`GET ${REPORTS_PARTICIPATION_URL}`]: () => ({
+    applicationsSubmitted: 14,
+    applicationsApproved: 9,
+    submissionsCreated: 38,
+    submissionsApproved: 27,
+    participationRate: 0.71,
+    periodLabel: 'Last 30 days',
+  }),
+  [`GET ${REPORTS_QUALITY_URL}`]: () => ({
+    byCategory: [
+      { id: 'q1', category: 'Urban Innovation', total: 18, active: 12, rewardSum: 'Tk 36,000' },
+      { id: 'q2', category: 'Climate Action', total: 11, active: 8, rewardSum: 'Tk 22,500' },
+    ],
+    byStatus: [
+      { id: 's1', status: 'Approved', count: 27 },
+      { id: 's2', status: 'Revision Requested', count: 4 },
+      { id: 's3', status: 'Rejected', count: 7 },
+    ],
+    riskCounts: { Low: 22, Medium: 11, High: 5 },
+  }),
+  [`GET ${REPORTS_FINANCIAL_URL}`]: () => ({
+    totalRewardsIssued: 'Tk 124,800',
+    totalWithdrawalsPaid: 'Tk 86,200',
+    outstandingBalance: 'Tk 38,600',
+    pendingPayoutAmount: 'Tk 9,400',
+    reconciledAt: new Date().toISOString(),
+  }),
+  [`GET ${REPORTS_EXPORT_CSV_URL}`]: (request) => {
+    const type = String(request.params?.type ?? 'submissions');
+    const stamp = new Date().toISOString();
+    const day = stamp.slice(0, 10);
+    return {
+      exportedAt: stamp,
+      filename: `ideapad-${type}-${day}.csv`,
+      rowCount: ledgerState.length,
+    };
+  },
+
+  // ── REST spec §5.9 — Audit Events (mock) ─────────────────────────────
+  [`GET ${AUDIT_EVENTS_URL}`]: (request) => {
+    const category = String(request.params?.category ?? '');
+    const search = String(request.params?.search ?? '')
+      .trim()
+      .toLowerCase();
+    const filtered = auditLogState
+      .filter((event) => {
+        const matchesCategory =
+          !category || category === 'all' || event.category === category;
+        const matchesSearch =
+          search.length === 0 ||
+          event.actor.toLowerCase().includes(search) ||
+          event.action.toLowerCase().includes(search) ||
+          event.target.toLowerCase().includes(search);
+        return matchesCategory && matchesSearch;
+      })
+      .sort(
+        (a, b) =>
+          new Date(b.occurredAt).getTime() -
+          new Date(a.occurredAt).getTime(),
+      );
+    return { data: filtered, total: filtered.length };
+  },
+  [`GET /admin/audit-events/:id`]: (request) => {
+    const id = String(request.params?.id ?? '');
+    const event = auditLogState.find((e) => e.id === id);
+    if (!event) {
+      throw new Error('Audit event not found.');
+    }
+    return {
+      event: {
+        ...event,
+        context: {
+          reason: 'Recorded by mock handler',
+        },
+      },
+    };
+  },
+  [`GET ${PROFILE_DISPLAY_URL}`]: () => ({
+    language: 'en',
+    density: 'comfortable',
+    theme: 'system',
+  }),
 };
+
+// ── Spec-aligned mock state (REST spec §5) ──────────────────────────────
+
+interface MockCategory {
+  id: string;
+  name: string;
+  icon: string;
+  isActive: boolean;
+}
+
+let categoriesState: MockCategory[] = [
+  { id: 'cat-1', name: 'Artificial Intelligence', icon: '✦', isActive: true },
+  { id: 'cat-2', name: 'Urban Innovation', icon: '⚐', isActive: true },
+  { id: 'cat-3', name: 'Climate Action', icon: '☾', isActive: true },
+  { id: 'cat-4', name: 'Health Tech', icon: '✿', isActive: false },
+];
+
+interface MockApplication {
+  id: string;
+  applicantId: string;
+  conceptId: string;
+  ideaTitle: string;
+  ideaDescription: string;
+  status: 'Submitted' | 'Under Review' | 'Revision Requested' | 'Approved' | 'Rejected';
+  reviewerComment?: string;
+  submittedDate: string;
+  applicantName?: string;
+  applicantEmail?: string;
+}
+
+const applicationsState: MockApplication[] = applicantsState.map((a) => ({
+  id: a.id,
+  applicantId: a.id,
+  conceptId: 'concept-unknown',
+  ideaTitle: a.title,
+  ideaDescription: a.body,
+  status:
+    a.status === 'Submitted'
+      ? 'Submitted'
+      : a.status === 'Under Review'
+        ? 'Under Review'
+        : a.status === 'Revision Requested'
+          ? 'Revision Requested'
+          : a.status === 'Approved'
+            ? 'Approved'
+            : 'Rejected',
+  submittedDate: a.submitted,
+  applicantName: a.name,
+  applicantEmail: a.email,
+}));
+
+interface MockSubmissionDecision {
+  decision: 'approve' | 'request_revision' | 'reject';
+  feedback?: string;
+  reward_amount?: number;
+}
+
+interface MockProcessPayout {
+  action: 'mark_paid' | 'reject';
+  processing_reference?: string;
+  rejection_reason?: string;
+}
+
+interface MockManualAdjustment {
+  user_id: string;
+  amount: number;
+  description: string;
+  reason: string;
+}
+
+function pushAuditEvent(action: string, target: string, category: AuditEvent['category']) {
+  const actor = currentWorkspaceAdmin();
+  const now = new Date();
+  auditLogState = [
+    {
+      id: `g-${Date.now()}`,
+      time: formatLedgerDate(now),
+      occurredAt: now.toISOString(),
+      actor: actor.name,
+      action,
+      target,
+      category,
+      icon:
+        category === 'Applicants'
+          ? '♙'
+          : category === 'Content'
+            ? '✓'
+            : category === 'Payouts'
+              ? '৳'
+              : '♔',
+    },
+    ...auditLogState,
+  ];
+}
+
+function pushAdminNotification(input: {
+  icon: string;
+  iconBg: string;
+  title: string;
+  body: string;
+  type: AdminNotification['type'];
+}) {
+  const now = new Date();
+  adminNotificationsState = [
+    {
+      id: `n-${Date.now()}`,
+      icon: input.icon,
+      iconBg: input.iconBg,
+      title: input.title,
+      body: input.body,
+      time: 'Just now',
+      type: input.type,
+      read: false,
+      occurredAt: now.toISOString(),
+    },
+    ...adminNotificationsState,
+  ];
+}
+
+function pushLedgerEntry(input: {
+  contributor: string;
+  type: LedgerEntry['type'];
+  amountValue: number;
+  status: LedgerEntry['status'];
+  description: string;
+}) {
+  const now = new Date();
+  const signedLabel =
+    input.type === 'Withdrawal'
+      ? `−Tk ${input.amountValue.toLocaleString('en-US')}`
+      : input.type === 'Reward'
+        ? `+Tk ${input.amountValue.toLocaleString('en-US')}`
+        : input.amountValue < 0
+          ? `−Tk ${Math.abs(input.amountValue).toLocaleString('en-US')}`
+          : `+Tk ${input.amountValue.toLocaleString('en-US')}`;
+  const entry: LedgerEntry = {
+    id: `l-${Date.now()}`,
+    contributor: input.contributor,
+    description: input.description,
+    date: formatLedgerDate(now),
+    occurredAt: now.toISOString(),
+    type: input.type,
+    amount: signedLabel,
+    amountValue: Math.abs(input.amountValue),
+    status: input.status,
+  };
+  ledgerState = [entry, ...ledgerState];
+  return entry;
+}
 
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => {
@@ -1296,7 +2121,22 @@ export async function resolveMockRequest(
   await delay(MOCK_LATENCY_MS);
 
   const method = request.method ?? 'GET';
-  const handler = handlers[`${method} ${request.url}`];
+  const key = `${method} ${request.url}`;
+  let handler = handlers[key];
+  let resolvedRequest = request;
+
+  // Match `/resource/:id` handlers when the service substituted a real id.
+  if (!handler) {
+    const templated = `${method} ${request.url.replace(/\/[^/]+$/, '/:id')}`;
+    if (templated in handlers) {
+      handler = handlers[templated];
+      const id = request.url.split('/').pop() ?? '';
+      resolvedRequest = {
+        ...request,
+        params: { ...request.params, id },
+      };
+    }
+  }
 
   if (!handler) {
     return {
@@ -1308,7 +2148,7 @@ export async function resolveMockRequest(
   }
 
   try {
-    return { data: structuredClone(handler(request)) };
+    return { data: structuredClone(handler(resolvedRequest)) };
   } catch (error) {
     return {
       error: {

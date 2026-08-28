@@ -29,7 +29,10 @@ function formatTaka(value: number): string {
   return `Tk ${TAKA.format(Math.round(value))}`;
 }
 
-function sumAmount(entries: LedgerEntry[], predicate: (entry: LedgerEntry) => boolean): number {
+function sumAmount(entries: LedgerEntry[] | undefined, predicate: (entry: LedgerEntry) => boolean): number {
+  if (!Array.isArray(entries)) {
+    return 0;
+  }
   return entries
     .filter(predicate)
     .reduce((total, entry) => total + entry.amountValue, 0);
@@ -44,12 +47,12 @@ export default function useRewards(params: LedgerListParams): UseRewardsResult {
     }
 
     return {
-      entries: data.entries,
-      total: data.total,
+      entries: Array.isArray(data.entries) ? data.entries : [],
+      total: data.total ?? (Array.isArray(data.entries) ? data.entries.length : 0),
     };
   }, [data]);
 
-  const entries = filtered?.entries ?? [];
+  const entries = Array.isArray(filtered?.entries) ? filtered.entries : [];
   const totalCount = filtered?.total ?? 0;
 
   const totalRewarded = useMemo(

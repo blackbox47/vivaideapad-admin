@@ -20,6 +20,7 @@ export const ADMIN_NAV_ITEMS: NavItem[] = [
   { title: 'Overview', href: ADMIN_ROUTES.dashboard, icon: Home },
   { title: 'Topics & concepts', href: ADMIN_ROUTES.topics, icon: Layers },
   { title: 'Applicants & users', href: ADMIN_ROUTES.applicants, icon: Users },
+  { title: 'Categories', href: ADMIN_ROUTES.categories, icon: Layers },
   {
     title: 'Content review',
     href: ADMIN_ROUTES.contentReview,
@@ -60,6 +61,7 @@ export const PAGE_TITLES: Record<string, string> = {
   [ADMIN_ROUTES.dashboard]: 'Overview',
   [ADMIN_ROUTES.topics]: 'Topics & concepts',
   [ADMIN_ROUTES.applicants]: 'Applicants & contributors',
+  [ADMIN_ROUTES.categories]: 'Categories',
   [ADMIN_ROUTES.contentReview]: 'Content review',
   [ADMIN_ROUTES.rewards]: 'Rewards ledger',
   [ADMIN_ROUTES.payouts]: 'Payouts',

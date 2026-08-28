@@ -6,6 +6,7 @@ export const ADMIN_ROUTES = {
   signIn: `${ADMIN_BASE_PATH}/sign-in`,
   topics: `${ADMIN_BASE_PATH}/topics`,
   applicants: `${ADMIN_BASE_PATH}/applicants`,
+  categories: `${ADMIN_BASE_PATH}/categories`,
   contentReview: `${ADMIN_BASE_PATH}/content-review`,
   rewards: `${ADMIN_BASE_PATH}/rewards`,
   payouts: `${ADMIN_BASE_PATH}/payouts`,

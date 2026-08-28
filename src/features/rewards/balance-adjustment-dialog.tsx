@@ -1,10 +1,11 @@
-import { useEffect, useState, type FormEvent, type MouseEvent } from 'react';
+import { useEffect, useMemo, useState, type FormEvent, type MouseEvent } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import type { CreateAdjustmentBody } from '@/models/rewards/rewards-model';
+import type { DropdownOption } from '@/utils/types/dropdown-option';
 
 const fieldClassName =
   'h-auto w-full rounded-[12px] border border-border bg-card text-foreground px-[13px] py-3 text-sm shadow-none focus-visible:border-brand-sage-light';
@@ -50,6 +51,15 @@ export default function BalanceAdjustmentDialog({
     amount: '',
     reason: '',
   });
+
+  // Map the `contributors: string[]` prop to `{ id, label }` for the
+  // datalist. The free-text input doesn't enforce the id, but rendering
+  // the datalist through the same shape as the other dropdowns keeps
+  // the contract uniform across the SPA.
+  const contributorOptions = useMemo<DropdownOption[]>(
+    () => contributors.map((name) => ({ id: name, label: name })),
+    [contributors],
+  );
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -155,8 +165,10 @@ export default function BalanceAdjustmentDialog({
             />
             {contributors.length > 0 ? (
               <datalist id="adjustment-contributors">
-                {contributors.map((name) => (
-                  <option key={name} value={name} />
+                {contributorOptions.map((option) => (
+                  <option key={option.id} value={option.id}>
+                    {option.label}
+                  </option>
                 ))}
               </datalist>
             ) : null}

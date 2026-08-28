@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { AlertCircle } from 'lucide-react';
-import { useSearchParams } from 'react-router-dom';
+import { useTanstackSearchParams } from '@/lib/use-tanstack-search-params';
 
 import PageHeader from '@/components/layout/page-header';
 import { Button } from '@/components/ui/button';
@@ -20,7 +20,7 @@ import useAuditLog, {
 } from '@/hooks/audit-log/use-audit-log';
 
 export default function AuditLogOverview() {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useTanstackSearchParams();
   const category = parseAuditCategory(searchParams.get('category'));
   const search = searchParams.get('q') ?? '';
 

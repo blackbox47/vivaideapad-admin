@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from '@tanstack/react-router';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -46,7 +46,7 @@ export default function AdminSignInPanel() {
     try {
       await login({ email, password });
       // Always land on the admin dashboard after sign-in.
-      navigate(ADMIN_ROUTES.dashboard, { replace: true });
+      navigate({ to: ADMIN_ROUTES.dashboard, replace: true });
     } catch {
       // Failure surfaced via loginError.
     }

@@ -5,13 +5,21 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
+import type { DropdownOption } from '@/utils/types/dropdown-option';
 
-const METHODS = [
-  'bKash · 018•••42',
-  'Nagad',
-  'Rocket',
-  'Bank transfer',
-] as const;
+/**
+ * Payout methods available for withdrawal requests. Each entry is a
+ * `{ id, label }` pair — `id` is the stable identifier sent on submit,
+ * `label` is the human-readable display. For static enums the id and
+ * label are the same string; once the backend exposes real method IDs
+ * we can split them without touching the dropdown markup.
+ */
+const METHOD_OPTIONS: DropdownOption[] = [
+  { id: 'bKash · 018•••42', label: 'bKash · 018•••42' },
+  { id: 'Nagad', label: 'Nagad' },
+  { id: 'Rocket', label: 'Rocket' },
+  { id: 'Bank transfer', label: 'Bank transfer' },
+];
 
 const fieldClassName =
   'h-auto w-full rounded-[12px] border border-border bg-card text-foreground px-[13px] py-3 text-sm shadow-none focus-visible:border-brand-sage-light';
@@ -34,11 +42,10 @@ export default function WithdrawRequestDialog({
   onSubmit,
 }: WithdrawRequestDialogProps) {
   const [amount, setAmount] = useState(available);
-  const [method, setMethod] = useState(
-    METHODS.includes(defaultMethod as (typeof METHODS)[number])
-      ? defaultMethod
-      : METHODS[0],
-  );
+  const initialMethod =
+    METHOD_OPTIONS.find((option) => option.id === defaultMethod)?.id ??
+    METHOD_OPTIONS[0].id;
+  const [method, setMethod] = useState(initialMethod);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -132,9 +139,9 @@ export default function WithdrawRequestDialog({
                 onChange={(event) => setMethod(event.target.value)}
                 className={cn(fieldClassName, 'appearance-none pr-10')}
               >
-                {METHODS.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
+                {METHOD_OPTIONS.map((option) => (
+                  <option key={option.id} value={option.id}>
+                    {option.label}
                   </option>
                 ))}
               </select>

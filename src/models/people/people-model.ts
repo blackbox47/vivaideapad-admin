@@ -1,3 +1,9 @@
+import type {
+  ApplicationDecisionBody,
+  UserAccessStatusBody,
+  UserRoleBody,
+} from '@/models/users/users-model';
+
 export type ApplicantStatus =
   | 'Submitted'
   | 'Under Review'
@@ -47,3 +53,13 @@ export interface ToggleUserBody {
   id: string;
   status: PlatformUserStatus;
 }
+
+/**
+ * Re-exports from the spec-aligned `users` model so feature code can
+ * import the canonical types directly from `@/models/people/people-model`.
+ */
+export type {
+  ApplicationDecisionBody,
+  UserAccessStatusBody,
+  UserRoleBody,
+};

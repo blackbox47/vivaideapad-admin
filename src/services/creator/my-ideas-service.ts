@@ -1,4 +1,5 @@
 import type {
+  MyIdea,
   MyIdeasQueryParams,
   MyIdeasResponse,
 } from '@/models/creator/my-ideas-model';
@@ -12,10 +13,51 @@ export const myIdeasService = baseService.injectEndpoints({
         url: CREATOR_IDEAS_URL,
         method: 'GET',
         params: {
-          status: params.status,
+          status: params.status && params.status !== 'all' ? params.status.toLowerCase().replace(/\s+/g, '_') : undefined,
           search: params.search,
         },
       }),
+      transformResponse: (response: unknown): MyIdeasResponse => {
+        if (!response || typeof response !== 'object') {
+          return { ideas: [], total: 0 };
+        }
+        const res = response as Record<string, unknown>;
+        if (Array.isArray(res.ideas)) {
+          return response as MyIdeasResponse;
+        }
+        if (Array.isArray(res.data)) {
+          const mapStatus = (status: string): MyIdea['status'] => {
+            switch (status) {
+              case 'pending_review':
+                return 'Under Review';
+              case 'changes_requested':
+                return 'Revision Requested';
+              case 'approved':
+                return 'Approved';
+              case 'rejected':
+                return 'Rejected';
+              default:
+                return 'Draft';
+            }
+          };
+          const ideas = res.data.map((item: Record<string, unknown>) => ({
+            id: String(item.id ?? ''),
+            title: String(item.title ?? ''),
+            topic: String(item.concept_id ?? 'General'),
+            submitted: String(item.created_at ?? '').slice(0, 10),
+            status: mapStatus(String(item.status ?? 'draft')),
+            reward: item.reward_amount ? `$${item.reward_amount}` : '$0',
+            comments: 0,
+            body: String(item.body ?? ''),
+            feedback: (item.decision_notes as string) ?? undefined,
+          }));
+          const total = typeof (res.meta as Record<string, unknown>)?.total === 'number'
+            ? ((res.meta as Record<string, unknown>).total as number)
+            : ideas.length;
+          return { ideas, total };
+        }
+        return { ideas: [], total: 0 };
+      },
       providesTags: ['my-ideas'],
     }),
   }),

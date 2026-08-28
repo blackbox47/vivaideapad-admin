@@ -46,13 +46,15 @@ export default function ReviewTable({ submissions, onReview }: ReviewTableProps)
             <StatusBadge status={submission.status} />
           </ProjectTableCell>
           <ProjectTableCell>
-            <button
-              type="button"
-              className="rounded-full bg-primary px-3.5 py-2 text-xs font-bold whitespace-nowrap text-primary-foreground hover:bg-brand-forest transition-colors cursor-pointer"
-              onClick={() => onReview(submission.id)}
-            >
-              Review
-            </button>
+            {submission.status?.toLowerCase() !== 'approved' ? (
+              <button
+                type="button"
+                className="rounded-full bg-primary px-3.5 py-2 text-xs font-bold whitespace-nowrap text-primary-foreground hover:bg-brand-forest transition-colors cursor-pointer"
+                onClick={() => onReview(submission.id)}
+              >
+                Review
+              </button>
+            ) : null}
           </ProjectTableCell>
         </ProjectTableRow>
       ))}

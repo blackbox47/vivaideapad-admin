@@ -1,22 +1,30 @@
 import type {
-  AdminUser,
   LoginRequest,
   LoginResponse,
 } from '@/models/auth/auth-model';
+import type { ProfileOverview } from '@/models/profile/profile-model';
 import { baseService } from '@/services/core/base-service';
 import {
-  ADMIN_ME_URL,
-  AUTH_LOGIN_URL,
+  AUTH_SIGN_IN_URL,
+  PROFILE_OVERVIEW_URL,
 } from '@/utils/constants/api-end-points';
 
 export const authService = baseService.injectEndpoints({
   endpoints: (builder) => ({
-    getCurrentAdmin: builder.query<AdminUser, void>({
-      query: () => ({ url: ADMIN_ME_URL, method: 'GET' }),
+    /**
+     * The backend exposes `GET /admin/profile` as the single self-profile
+     * endpoint; the SPA has two consumers with different shapes:
+     *  - `useAdminUser` wants the slim `AuthUser` view (sidebar identity).
+     *  - `useProfileOverview` wants the full `ProfileOverview` (settings page).
+     * Both wire to the same URL but `useAdminUser` reshapes `ProfileOverview`
+     * down to `AuthUser` in `hooks/auth/use-admin-user.ts`.
+     */
+    getCurrentAdmin: builder.query<ProfileOverview, void>({
+      query: () => ({ url: PROFILE_OVERVIEW_URL, method: 'GET' }),
       providesTags: ['admin-user'],
     }),
     login: builder.mutation<LoginResponse, LoginRequest>({
-      query: (body) => ({ url: AUTH_LOGIN_URL, method: 'POST', body }),
+      query: (body) => ({ url: AUTH_SIGN_IN_URL, method: 'POST', body }),
       invalidatesTags: ['admin-user', 'dashboard'],
     }),
   }),

@@ -59,3 +59,17 @@ export interface UpdateNotificationsBody {
 export interface ProfileUpdateResponse {
   updatedAt: string;
 }
+
+// ── Spec-aligned additions (REST spec §1.5–1.7) ───────────────────────────
+
+export interface DisplayPreferences {
+  language: 'en' | 'bn';
+  density: 'comfortable' | 'compact';
+  theme: 'light' | 'dark' | 'system';
+}
+
+export interface DisplayPreferencesBody {
+  language?: DisplayPreferences['language'];
+  density?: DisplayPreferences['density'];
+  theme?: DisplayPreferences['theme'];
+}

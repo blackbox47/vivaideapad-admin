@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { AlertCircle } from 'lucide-react';
-import { useSearchParams } from 'react-router-dom';
+import { useTanstackSearchParams } from '@/lib/use-tanstack-search-params';
 
 import PageHeader from '@/components/layout/page-header';
 import { Button } from '@/components/ui/button';
@@ -41,16 +41,22 @@ function parseStatus(value: string | null): StatusFilter {
 }
 
 export default function TopicsOverview() {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useTanstackSearchParams();
   const status = parseStatus(searchParams.get('status'));
   const search = searchParams.get('q') ?? '';
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
-  const { data, categories, isLoading, isError, error, refetch } = useTopics({
+  const { data, isLoading, isError, error, refetch } = useTopics({
     status,
     search,
   });
-  const [createConcept, createState] = useCreateConcept();
+  const {
+    categories,
+    submit: submitConcept,
+    isSubmitting,
+    error: createError,
+    reset: resetCreate,
+  } = useCreateConcept();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
@@ -73,18 +79,20 @@ export default function TopicsOverview() {
   };
 
   const closeCreate = () => {
-    createState.reset();
+    resetCreate();
     setIsCreateOpen(false);
   };
 
   const handleCreate = async (body: CreateConceptBody) => {
     try {
-      await createConcept(body).unwrap();
+      await submitConcept(body);
       closeCreate();
       setToast('Concept saved');
       window.setTimeout(() => setToast(null), 3200);
     } catch {
-      // Error is surfaced via createState.error.
+      // The hook's submit() rejects with a clear message on missing-category
+      // lookup, and the mutation itself surfaces API errors via createError.
+      // The dialog renders `createError` through the inherited `error` prop.
     }
   };
 
@@ -171,8 +179,8 @@ export default function TopicsOverview() {
       {isCreateOpen ? (
         <CreateConceptDialog
           categories={categories}
-          isSubmitting={createState.isLoading}
-          error={getApiErrorMessage(createState.error)}
+          isSubmitting={isSubmitting}
+          error={getApiErrorMessage(createError)}
           onClose={closeCreate}
           onSubmit={handleCreate}
         />

@@ -1,5 +1,5 @@
 import type { WorkspaceAdmin } from '@/models/admins/admins-model';
-import type { AdminUser } from '@/models/auth/auth-model';
+import type { AuthUser } from '@/models/auth/auth-model';
 import type { AdminNotification } from '@/models/notifications/admin-notifications-model';
 import type { ContentSubmission } from '@/models/content-review/content-review-model';
 import type { CreatorDashboardOverview } from '@/models/creator/creator-dashboard-model';
@@ -16,12 +16,12 @@ import type { Concept } from '@/models/topics/topics-model';
 import type { LedgerEntry } from '@/models/rewards/rewards-model';
 import type { Payout } from '@/models/payouts/payouts-model';
 
-export const mockAdminUser: AdminUser = {
+export const mockAdminUser: AuthUser = {
   id: 'usr_maya',
-  name: 'Maya Admin',
-  role: 'Platform owner',
-  initials: 'MA',
+  display_name: 'Maya Admin',
+  role: 1,
   email: 'maya@ideapad.app',
+  access_status: 'active',
 };
 
 export const MAYA_ADMIN_ALIASES = [
@@ -35,7 +35,7 @@ export const mockWorkspaceAdmins: WorkspaceAdmin[] = [
     name: 'Maya Admin',
     email: 'maya@ideapad.app',
     access: 'owner',
-    roleLabel: 'Platform owner',
+    roleLabel: 'Super Admin',
     initials: 'MA',
     addedOn: '01-01-2026',
     addedAt: '2026-01-01T09:00:00Z',

@@ -1,5 +1,5 @@
 import { LogOut, Menu, Moon, Sun, User } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 
 import CreatorSidebar from '@/components/layout/creator-sidebar';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -86,7 +86,7 @@ export default function CreatorHeader() {
         <Button
           variant="outline"
           size="icon"
-          onClick={() => navigate(CREATOR_ROUTES.notifications)}
+          onClick={() => navigate({ to: CREATOR_ROUTES.notifications })}
           className="relative size-10 rounded-full border-border bg-card text-foreground transition-colors hover:border-foreground"
           aria-label={
             unreadCount > 0
@@ -139,7 +139,7 @@ export default function CreatorHeader() {
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onClick={() => navigate(CREATOR_ROUTES.profile)}
+              onClick={() => navigate({ to: CREATOR_ROUTES.profile })}
             >
               <User className="size-4" />
               View profile

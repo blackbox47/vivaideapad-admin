@@ -21,6 +21,7 @@ const STATUS_CLASS: Record<string, string> = {
   Paid: 'bg-success-subtle text-success',
   Owner: 'bg-success-subtle text-success',
   'Platform owner': 'bg-success-subtle text-success',
+  'Super Admin': 'bg-success-subtle text-success',
   Admin: 'bg-info-subtle text-info',
   Low: 'bg-success-subtle text-success',
   Medium: 'bg-warning-subtle text-warning',
