@@ -37,3 +37,22 @@ export interface AuditLogListParams {
   category?: AuditCategoryFilter;
   search?: string;
 }
+
+// ── Spec-aligned additions (REST spec §5.9) ───────────────────────────────
+
+export interface AuditEventDetail extends AuditEvent {
+  /** Optional structured context snapshot (state diff, reasons). */
+  context?: Record<string, unknown>;
+}
+
+export interface AuditEventsListParamsSpec {
+  actor_id?: string;
+  category?: AuditCategory;
+  target_type?: 'application' | 'submission' | 'payout_request' | 'user';
+  action?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  page?: number;
+  limit?: number;
+  search?: string;
+}

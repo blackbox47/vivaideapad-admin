@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,6 +7,17 @@ import type {
   ProfileDetails,
   PublicDisplay,
 } from '@/models/profile/profile-model';
+import type { DropdownOption } from '@/utils/types/dropdown-option';
+
+/**
+ * Public-display options for the profile identity card. `id` is the enum
+ * value stored in `ProfileDetails.publicDisplay`; `label` is what the user
+ * sees in the dropdown.
+ */
+const PUBLIC_DISPLAY_OPTIONS: DropdownOption[] = [
+  { id: 'Public name', label: 'Public name' },
+  { id: 'Pseudonymous', label: 'Pseudonymous' },
+];
 
 interface ProfileIdentityCardProps {
   profile: ProfileDetails;
@@ -48,6 +59,20 @@ export default function ProfileIdentityCard({
   const [publicDisplay, setPublicDisplay] = useState<PublicDisplay>(
     profile.publicDisplay,
   );
+
+  useEffect(() => {
+    setName(profile.name);
+    setEmail(profile.email);
+    setPhone(profile.phone);
+    setBio(profile.bio);
+    setPublicDisplay(profile.publicDisplay);
+  }, [
+    profile.name,
+    profile.email,
+    profile.phone,
+    profile.bio,
+    profile.publicDisplay,
+  ]);
 
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -131,8 +156,11 @@ export default function ProfileIdentityCard({
             }
             className="h-auto w-full rounded-[12px] border border-border bg-card text-foreground px-[13px] py-[12px] text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           >
-            <option value="Public name">Public name</option>
-            <option value="Pseudonymous">Pseudonymous</option>
+            {PUBLIC_DISPLAY_OPTIONS.map((option) => (
+              <option key={option.id} value={option.id}>
+                {option.label}
+              </option>
+            ))}
           </select>
         </div>
         <div className="sm:col-span-2">

@@ -61,8 +61,7 @@ export default function usePayouts({
 }: UsePayoutsParams): UsePayoutsResult {
   const { data, isLoading, isError, error, refetch } = useGetPayoutsQuery();
   const [decidePayout, { isLoading: isDeciding }] = useDecidePayoutMutation();
-
-  const payouts = data?.payouts ?? [];
+  const payouts = Array.isArray(data?.payouts) ? data.payouts : [];
 
   const filtered = useMemo(
     () => payouts.filter((payout) => matchesFilter(payout, status, search)),

@@ -9,6 +9,7 @@ import LoginPage from '@/pages/auth/login';
 import AdminsPage from '@/pages/admins';
 import AuditLogPage from '@/pages/audit-log';
 import ApplicantsPage from '@/pages/applicants';
+import CategoriesPage from '@/pages/categories';
 import ContentReviewPage from '@/pages/content-review';
 import CreatorDashboardPage from '@/pages/creator/dashboard';
 import CreatorLeaderboardPage from '@/pages/creator/leaderboard';
@@ -52,6 +53,7 @@ export default function AppRoutes() {
               <Route index element={<DashboardPage />} />
               <Route path="topics" element={<TopicsPage />} />
               <Route path="applicants" element={<ApplicantsPage />} />
+              <Route path="categories" element={<CategoriesPage />} />
               <Route path="content-review" element={<ContentReviewPage />} />
               <Route path="rewards" element={<RewardsPage />} />
               <Route path="payouts" element={<PayoutsPage />} />

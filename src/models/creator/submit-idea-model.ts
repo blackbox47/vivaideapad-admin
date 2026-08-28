@@ -31,8 +31,9 @@ export interface CreatorTopicsResponse {
 
 export interface SubmitIdeaBody {
   title: string;
-  topicId: string;
-  summary: string;
+  concept_id?: string;
+  topicId?: string;
+  summary?: string;
   body: string;
   attachmentUrl?: string;
 }
@@ -43,7 +44,7 @@ export interface SubmitIdeaResponse {
 }
 
 export interface ValidationIssue {
-  field: keyof SubmitIdeaBody | 'topicId';
+  field: keyof SubmitIdeaBody | 'topicId' | 'concept_id';
   message: string;
 }
 

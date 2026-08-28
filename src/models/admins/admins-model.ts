@@ -1,3 +1,5 @@
+import type { PlatformRole } from '@/utils/helpers/platform-role';
+
 export type WorkspaceAdminAccess = 'owner' | 'admin';
 
 export interface WorkspaceAdmin {
@@ -15,20 +17,21 @@ export interface WorkspaceAdmin {
 
 export interface WorkspaceAdminsResponse {
   admins: WorkspaceAdmin[];
-  canManage: boolean;
+}
+
+/** Wire payload from GET/POST `/admin/admins` (Nest `SerializedAdminAccount`). */
+export interface SerializedAdminAccount {
+  id: string;
+  email: string;
+  display_name: string | null;
+  role: PlatformRole;
+  access_status: string;
+  created_at: string;
+  updated_at?: string;
 }
 
 export interface CreateAdminBody {
-  name: string;
   email: string;
-}
-
-export interface CreateAdminResponse {
-  admin: WorkspaceAdmin;
-  createdAt: string;
-}
-
-export interface RemoveAdminResponse {
-  id: string;
-  removedAt: string;
+  password: string;
+  display_name?: string;
 }

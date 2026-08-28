@@ -8,6 +8,8 @@ import useMobileNav from '@/hooks/ui/use-mobile-nav';
 import { cn } from '@/lib/utils';
 import { ADMIN_NAV_ITEMS } from '@/utils/constants/nav-items';
 import { ADMIN_ROUTES } from '@/utils/constants/routes';
+import { deriveInitials } from '@/utils/helpers/initials';
+import { formatPlatformRole } from '@/utils/helpers/platform-role';
 
 function BrandMark() {
   return (
@@ -90,14 +92,14 @@ export default function AdminSidebar({ className }: AdminSidebarProps) {
           <>
             <Avatar className="size-9 after:border-transparent">
               <AvatarFallback className="bg-sidebar-primary text-xs font-bold text-sidebar-primary-foreground">
-                {user.initials}
+                {deriveInitials(user.display_name, user.email)}
               </AvatarFallback>
             </Avatar>
             <div className="min-w-0">
               <p className="truncate text-[13px] font-semibold text-sidebar-foreground">
-                {user.name}
+                {user.display_name ?? user.email}
               </p>
-              <p className="truncate text-[11px] text-sidebar-muted">{user.role}</p>
+              <p className="truncate text-[11px] text-sidebar-muted">{formatPlatformRole(user.role)}</p>
             </div>
           </>
         )}

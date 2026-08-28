@@ -25,6 +25,7 @@ export default function AddAdminDialog({
 }: AddAdminDialogProps) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [validationError, setValidationError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -55,6 +56,7 @@ export default function AddAdminDialog({
 
     const nextName = name.trim();
     const nextEmail = email.trim().toLowerCase();
+    const nextPassword = password.trim();
 
     if (!nextName) {
       setValidationError('Name is required.');
@@ -64,8 +66,16 @@ export default function AddAdminDialog({
       setValidationError('Enter a valid email address.');
       return;
     }
+    if (nextPassword.length < 8) {
+      setValidationError('Password must be at least 8 characters.');
+      return;
+    }
 
-    await onSubmit({ name: nextName, email: nextEmail });
+    await onSubmit({
+      display_name: nextName,
+      email: nextEmail,
+      password: nextPassword,
+    });
   };
 
   const inlineError = validationError ?? error;
@@ -104,8 +114,8 @@ export default function AddAdminDialog({
         </div>
 
         <p className="mb-4 text-[13px] text-muted-foreground">
-          They can sign in on the admin login page with this email and start
-          using the workspace immediately.
+          They can sign in on the admin login page with this email and password
+          and start using the workspace immediately.
         </p>
 
         <form onSubmit={handleSubmit} noValidate>
@@ -145,6 +155,27 @@ export default function AddAdminDialog({
               }}
               placeholder="name@ideapad.app"
               className={fieldClassName}
+            />
+          </div>
+
+          <div className="mb-3">
+            <Label
+              htmlFor="admin-password"
+              className="mb-1.5 block text-[12px] font-bold text-foreground"
+            >
+              Temporary password
+            </Label>
+            <Input
+              id="admin-password"
+              type="password"
+              value={password}
+              onChange={(event) => {
+                setPassword(event.target.value);
+                clearValidation();
+              }}
+              placeholder="At least 8 characters"
+              className={fieldClassName}
+              autoComplete="new-password"
             />
           </div>
 

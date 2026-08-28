@@ -2,8 +2,13 @@ import type { BaseQueryFn } from '@reduxjs/toolkit/query';
 
 import { env } from '@/config/env';
 import type { ApiError, ApiRequest } from '@/models/api/api-model';
+import { logout } from '@/reducers/auth-slice';
 import { resolveMockRequest } from '@/services/mock/mock-handlers';
 import type { RootState } from '@/store';
+import {
+  AUTH_TOKEN_STORAGE_KEY,
+  CREATOR_AUTH_TOKEN_STORAGE_KEY,
+} from '@/utils/constants/storage-keys';
 
 function buildQueryString(params: ApiRequest['params']): string {
   if (!params) {
@@ -22,13 +27,17 @@ function buildQueryString(params: ApiRequest['params']): string {
 }
 
 function readErrorMessage(payload: unknown, fallback: string): string {
-  if (
-    typeof payload === 'object' &&
-    payload !== null &&
-    'message' in payload &&
-    typeof (payload as { message: unknown }).message === 'string'
-  ) {
-    return (payload as { message: string }).message;
+  if (typeof payload === 'object' && payload !== null) {
+    const record = payload as {
+      message?: unknown;
+      error?: { message?: unknown };
+    };
+    if (typeof record.error?.message === 'string') {
+      return record.error.message;
+    }
+    if (typeof record.message === 'string') {
+      return record.message;
+    }
   }
   return fallback;
 }
@@ -66,10 +75,26 @@ export const customFetch: BaseQueryFn<ApiRequest, unknown, ApiError> = async (
           : JSON.stringify(request.body),
     });
 
+    const contentType = response.headers.get('content-type') ?? '';
+    const isTextOrCsv =
+      contentType.includes('text/csv') ||
+      contentType.includes('text/plain') ||
+      contentType.includes('application/csv');
+
     const payload =
-      response.status === 204 ? null : await response.json().catch(() => null);
+      response.status === 204
+        ? null
+        : isTextOrCsv
+          ? await response.text()
+          : await response.json().catch(() => response.text().catch(() => null));
 
     if (!response.ok) {
+      if (response.status === 401) {
+        localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
+        localStorage.removeItem(CREATOR_AUTH_TOKEN_STORAGE_KEY);
+        api.dispatch(logout());
+      }
+
       return {
         error: {
           status: response.status,

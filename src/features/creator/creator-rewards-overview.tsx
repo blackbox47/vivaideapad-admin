@@ -141,7 +141,7 @@ export default function CreatorRewardsOverview() {
           <Button
             type="button"
             variant="outline"
-            disabled={!data || data.entries.length === 0}
+            disabled={!data || (data.entries ?? []).length === 0}
             onClick={() => exportEntries(data?.entries ?? [])}
             className="h-auto rounded-full border-border bg-card px-3.5 py-2 text-xs font-bold text-foreground hover:bg-surface-subtle"
           >

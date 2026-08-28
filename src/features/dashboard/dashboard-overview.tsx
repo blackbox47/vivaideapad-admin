@@ -21,7 +21,7 @@ import { ADMIN_ROUTES } from '@/utils/constants/routes';
 export default function DashboardOverview() {
   const { data, isLoading, isError, error, refetch } = useDashboard();
   const { user } = useAdminUser();
-  const firstName = user?.name.split(' ')[0] ?? 'Admin';
+  const firstName = user?.display_name?.split(' ')[0] ?? 'Admin';
 
   if (isError) {
     return (

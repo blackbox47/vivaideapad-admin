@@ -4,7 +4,6 @@ import {
   useState,
   type FormEvent,
   type MouseEvent,
-  type ReactNode,
 } from 'react';
 import { format } from 'date-fns';
 import { CalendarIcon, ChevronDown } from 'lucide-react';
@@ -20,27 +19,31 @@ import {
 } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import type {
-  ConceptCategory,
   ConceptStatus,
   CreateConceptBody,
 } from '@/models/topics/topics-model';
-import {
-  CATEGORY_ICON_CHOICES,
-  CONCEPT_STATUSES,
-} from '@/models/topics/topics-model';
+import { CATEGORY_ICON_CHOICES } from '@/models/topics/topics-model';
+import type { DropdownOption } from '@/utils/types/dropdown-option';
 
 const fieldClassName =
   'h-auto w-full rounded-[12px] border border-border bg-card text-foreground px-[13px] py-3 text-sm shadow-none focus-visible:border-brand-sage-light';
 
-const STATUS_LABELS: Record<ConceptStatus, string> = {
-  draft: 'Draft',
-  scheduled: 'Scheduled',
-  active: 'Active',
-  archived: 'Archived',
-};
+const STATUS_OPTIONS: DropdownOption[] = [
+  { id: 'draft', label: 'Draft' },
+  { id: 'scheduled', label: 'Scheduled' },
+  { id: 'active', label: 'Active' },
+  { id: 'archived', label: 'Archived' },
+];
 
 interface CreateConceptDialogProps {
-  categories: ConceptCategory[];
+  /**
+   * Categories for the picker, in `{ id, label }` shape. `id` is the
+   * backend UUID (set by `useCreateConcept`'s categories query). The
+   * dialog does NOT resolve the UUID against the categories — it just
+   * emits the chosen `id` on submit and the hook layer resolves it
+   * against the wire payload.
+   */
+  categories: DropdownOption[];
   isSubmitting: boolean;
   error: string | null;
   onClose: () => void;
@@ -49,13 +52,17 @@ interface CreateConceptDialogProps {
 
 interface FormValues {
   title: string;
-  category: string;
+  /** Selected category UUID (or synthetic id for "+ New category" extras). */
+  categoryId: string;
   description: string;
   opensOn: Date | undefined;
   closesOn: Date | undefined;
   reward: string;
   status: ConceptStatus;
 }
+
+/** Synthetic id prefix for `+ New category` additions — not a real UUID. */
+const LOCAL_CATEGORY_PREFIX = 'local:';
 
 function formatConceptDate(date: Date): string {
   return format(date, 'd MMM');
@@ -116,12 +123,16 @@ function FieldSelect({
   id,
   value,
   onChange,
-  children,
+  options,
+  placeholder,
+  ariaLabel,
 }: {
   id: string;
   value: string;
   onChange: (value: string) => void;
-  children: ReactNode;
+  options: DropdownOption[];
+  placeholder?: string;
+  ariaLabel?: string;
 }) {
   return (
     <div className="relative">
@@ -129,9 +140,21 @@ function FieldSelect({
         id={id}
         value={value}
         onChange={(event) => onChange(event.target.value)}
+        aria-label={ariaLabel}
         className={cn(fieldClassName, 'appearance-none pr-10')}
       >
-        {children}
+        {options.length === 0 && placeholder ? (
+          <option value="">{placeholder}</option>
+        ) : null}
+        {options.map((option) => (
+          <option
+            key={option.id}
+            value={option.id}
+            disabled={option.disabled}
+          >
+            {option.label}
+          </option>
+        ))}
       </select>
       <ChevronDown
         aria-hidden
@@ -148,7 +171,7 @@ export default function CreateConceptDialog({
   onClose,
   onSubmit,
 }: CreateConceptDialogProps) {
-  const [extraCategories, setExtraCategories] = useState<ConceptCategory[]>([]);
+  const [extraCategories, setExtraCategories] = useState<DropdownOption[]>([]);
   const [isNewCategoryOpen, setIsNewCategoryOpen] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
   const [newCategoryIcon, setNewCategoryIcon] = useState<string>(
@@ -157,7 +180,7 @@ export default function CreateConceptDialog({
   const [validationError, setValidationError] = useState<string | null>(null);
   const [values, setValues] = useState<FormValues>({
     title: '',
-    category: categories[0]?.name ?? '',
+    categoryId: categories[0]?.id ?? '',
     description: '',
     opensOn: undefined,
     closesOn: undefined,
@@ -165,14 +188,17 @@ export default function CreateConceptDialog({
     status: 'draft',
   });
 
-  const categoryOptions = useMemo(() => {
-    const seen = new Map<string, string>();
-    for (const category of [...categories, ...extraCategories]) {
-      if (!seen.has(category.name)) {
-        seen.set(category.name, category.icon);
+  // Merge real categories with local-only extras, deduping by id.
+  const categoryOptions = useMemo<DropdownOption[]>(() => {
+    const seen = new Set<string>();
+    const out: DropdownOption[] = [];
+    for (const c of [...categories, ...extraCategories]) {
+      if (!seen.has(c.id)) {
+        seen.add(c.id);
+        out.push(c);
       }
     }
-    return [...seen.entries()].map(([name, icon]) => ({ name, icon }));
+    return out;
   }, [categories, extraCategories]);
 
   useEffect(() => {
@@ -214,17 +240,22 @@ export default function CreateConceptDialog({
     }
 
     const alreadyExists = categoryOptions.some(
-      (option) => option.name.toLowerCase() === name.toLowerCase(),
+      (option) => option.label.trim() === name,
     );
     if (alreadyExists) {
-      update('category', name);
+      const match = categoryOptions.find((option) => option.label.trim() === name);
+      if (match) update('categoryId', match.id);
       setIsNewCategoryOpen(false);
       setNewCategoryName('');
       return;
     }
 
-    setExtraCategories((prev) => [...prev, { name, icon: newCategoryIcon }]);
-    update('category', name);
+    const newId = `${LOCAL_CATEGORY_PREFIX}${name}`;
+    setExtraCategories((prev) => [
+      ...prev,
+      { id: newId, label: `${newCategoryIcon} ${name}` },
+    ]);
+    update('categoryId', newId);
     setIsNewCategoryOpen(false);
     setNewCategoryName('');
     setNewCategoryIcon(CATEGORY_ICON_CHOICES[0]);
@@ -234,14 +265,14 @@ export default function CreateConceptDialog({
     event.preventDefault();
 
     const title = values.title.trim();
-    const category = values.category.trim();
+    const categoryId = values.categoryId;
     const description = values.description.trim();
 
     if (!title) {
       setValidationError('Title is required.');
       return;
     }
-    if (!category) {
+    if (!categoryId) {
       setValidationError('Pick a category before saving.');
       return;
     }
@@ -250,14 +281,26 @@ export default function CreateConceptDialog({
       return;
     }
 
-    const selected =
-      categoryOptions.find((option) => option.name === category) ??
-      categoryOptions[0];
+    // Local-only category picks can't be submitted — the backend rejects
+    // non-UUID category_ids. Surface a clear error before the request.
+    if (categoryId.startsWith(LOCAL_CATEGORY_PREFIX)) {
+      setValidationError(
+        `"${categoryId.slice(LOCAL_CATEGORY_PREFIX.length)}" is a draft category — save it from the Categories page first.`,
+      );
+      return;
+    }
 
+    // The dropdown's label is the human-readable display string
+    // (`"✦ General"`). We pass it through as `body.category` for any
+    // downstream consumers that want to read the display name without
+    // resolving the UUID. The hook layer will overwrite `icon` with the
+    // authoritative value from the cached categories response.
+    const selected = categoryOptions.find((c) => c.id === categoryId);
     await onSubmit({
       title,
-      category,
-      icon: selected?.icon ?? '✦',
+      category: selected?.label ?? '',
+      categoryId,
+      icon: '✦',
       description,
       opensOn: values.opensOn ? formatConceptDate(values.opensOn) : '',
       closesOn: values.closesOn ? formatConceptDate(values.closesOn) : '',
@@ -340,18 +383,12 @@ export default function CreateConceptDialog({
               </div>
               <FieldSelect
                 id="concept-category"
-                value={values.category}
-                onChange={(value) => update('category', value)}
-              >
-                {categoryOptions.length === 0 ? (
-                  <option value="">Choose a category</option>
-                ) : null}
-                {categoryOptions.map((option) => (
-                  <option key={option.name} value={option.name}>
-                    {option.icon} {option.name}
-                  </option>
-                ))}
-              </FieldSelect>
+                value={values.categoryId}
+                onChange={(value) => update('categoryId', value)}
+                options={categoryOptions}
+                placeholder="Choose a category"
+                ariaLabel="Concept category"
+              />
               {isNewCategoryOpen ? (
                 <div className="mt-2.5 flex flex-col gap-2 rounded-[12px] bg-surface-subtle p-3">
                   <div className="flex flex-wrap gap-1.5">
@@ -473,13 +510,9 @@ export default function CreateConceptDialog({
                 id="concept-status"
                 value={values.status}
                 onChange={(value) => update('status', value as ConceptStatus)}
-              >
-                {CONCEPT_STATUSES.map((status) => (
-                  <option key={status} value={status}>
-                    {STATUS_LABELS[status]}
-                  </option>
-                ))}
-              </FieldSelect>
+                options={STATUS_OPTIONS}
+                ariaLabel="Concept status"
+              />
             </div>
           </div>
 

@@ -60,23 +60,26 @@ export default function useAuth(): UseAuthResult {
 
       try {
         const session = await requestLogin(credentials).unwrap();
-        const intendedRole: UserRole = options?.asRole ?? session.role;
+        // The workspace discriminator ('admin' | 'creator') is a UI concern
+        // derived from which panel mounted — never trust the server response
+        // for it. `session.user.role` is the platform role (numeric enum).
+        const intendedRole: UserRole = options?.asRole ?? 'admin';
 
         // Persist to the role-appropriate storage key so admin + creator
         // sessions can coexist in different tabs without colliding.
         if (intendedRole === 'creator') {
           localStorage.setItem(
             CREATOR_AUTH_TOKEN_STORAGE_KEY,
-            session.token,
+            session.access_token,
           );
           localStorage.removeItem(CREATOR_SIGNED_OUT_STORAGE_KEY);
         } else {
-          localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, session.token);
+          localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, session.access_token);
           localStorage.removeItem(SIGNED_OUT_STORAGE_KEY);
         }
 
         dispatch(
-          setCredentials({ token: session.token, role: intendedRole }),
+          setCredentials({ token: session.access_token, role: intendedRole }),
         );
 
         return session;

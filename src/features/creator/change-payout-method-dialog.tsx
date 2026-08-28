@@ -6,12 +6,18 @@ import type {
   PayoutMethod,
   UpdatePayoutMethodBody,
 } from '@/models/profile/profile-model';
+import type { DropdownOption } from '@/utils/types/dropdown-option';
 
-const OPTIONS: UpdatePayoutMethodBody[] = [
-  { method: 'bKash', label: 'bKash · 018•••42' },
-  { method: 'Nagad', label: 'Nagad' },
-  { method: 'Rocket', label: 'Rocket' },
-  { method: 'Bank', label: 'Bank transfer' },
+/**
+ * Payout-method options. `id` matches the `method` enum stored on
+ * `UpdatePayoutMethodBody` (sent to the wire as `method`); `label` is the
+ * human-readable display string in the dropdown.
+ */
+const METHOD_OPTIONS: DropdownOption[] = [
+  { id: 'bKash', label: 'bKash · 018•••42' },
+  { id: 'Nagad', label: 'Nagad' },
+  { id: 'Rocket', label: 'Rocket' },
+  { id: 'Bank', label: 'Bank transfer' },
 ];
 
 interface ChangePayoutMethodDialogProps {
@@ -50,8 +56,12 @@ export default function ChangePayoutMethodDialog({
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const selected =
-      OPTIONS.find((option) => option.method === method) ?? OPTIONS[0];
+    const selected: UpdatePayoutMethodBody = {
+      method: method as PayoutMethod['method'],
+      label:
+        METHOD_OPTIONS.find((option) => option.id === method)?.label ??
+        METHOD_OPTIONS[0].label,
+    };
     await onSubmit(selected);
   };
 
@@ -103,8 +113,8 @@ export default function ChangePayoutMethodDialog({
             }
             className="h-auto w-full rounded-[12px] border border-border bg-card text-foreground px-[13px] py-3 text-sm focus-visible:border-brand-sage-light"
           >
-            {OPTIONS.map((option) => (
-              <option key={option.method} value={option.method}>
+            {METHOD_OPTIONS.map((option) => (
+              <option key={option.id} value={option.id}>
                 {option.label}
               </option>
             ))}

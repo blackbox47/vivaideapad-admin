@@ -64,4 +64,50 @@ export interface ReportsOverview {
 export interface ReportsExportResponse {
   exportedAt: string;
   filename: string;
+  csv?: string;
+}
+
+// ── Spec-aligned additions (REST spec §5.8) ───────────────────────────────
+
+export interface ParticipationReport {
+  applicationsSubmitted: number;
+  applicationsApproved: number;
+  submissionsCreated: number;
+  submissionsApproved: number;
+  participationRate: number;
+  periodLabel: string;
+}
+
+export interface QualityAndCategoriesReport {
+  byCategory: ReportsCategoryPerformance[];
+  byStatus: ReportsQualityRow[];
+  riskCounts: ReportsRiskCounts;
+}
+
+export interface FinancialReconciliationReport {
+  totalRewardsIssued: string;
+  totalWithdrawalsPaid: string;
+  outstandingBalance: string;
+  pendingPayoutAmount: string;
+  /** Reconciliation timestamp. */
+  reconciledAt: string;
+}
+
+export interface CsvExportResponse {
+  exportedAt: string;
+  filename: string;
+  rowCount: number;
+}
+
+export type CsvExportType =
+  | 'applications'
+  | 'submissions'
+  | 'ledger'
+  | 'payouts';
+
+export interface CsvExportParams {
+  type: CsvExportType;
+  dateFrom?: string;
+  dateTo?: string;
+  [key: string]: string | number | boolean | undefined;
 }

@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,7 @@ import {
 } from '@/models/creator/submit-idea-model';
 import { CREATOR_ROUTES } from '@/utils/constants/routes';
 import { getApiErrorMessage } from '@/utils/helpers/api-error';
+import type { DropdownOption } from '@/utils/types/dropdown-option';
 
 interface SubmitIdeaFormProps {
   topics: CreatorTopic[];
@@ -87,6 +88,18 @@ export default function SubmitIdeaForm({
   const [submitIdea, { isLoading }] = useSubmitIdea();
   const navigate = useNavigate();
 
+  // Map CreatorTopic[] → DropdownOption[] for the `<select>`. Keeps the
+  // canonical CreatorTopic shape intact for the cards / lists that also
+  // read it; only the dropdown consumes the flattened shape.
+  const topicOptions = useMemo<DropdownOption[]>(
+    () =>
+      topics.map((topic) => ({
+        id: topic.id,
+        label: `${topic.title} · ${topic.reward}`,
+      })),
+    [topics],
+  );
+
   useEffect(() => {
     setValues((prev) =>
       prev.topicId === selectedTopicId
@@ -150,9 +163,9 @@ export default function SubmitIdeaForm({
           <option value="">
             {isLoadingTopics ? 'Loading topics…' : 'Choose a topic'}
           </option>
-          {topics.map((topic) => (
+          {topicOptions.map((topic) => (
             <option key={topic.id} value={topic.id}>
-              {topic.title} · {topic.reward}
+              {topic.label}
             </option>
           ))}
         </select>

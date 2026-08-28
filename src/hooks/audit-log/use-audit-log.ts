@@ -51,7 +51,7 @@ export default function useAuditLog({
   pageSize = DEFAULT_PAGE_SIZE,
 }: UseAuditLogParams): UseAuditLogResult {
   const { data, isLoading, isError, error, refetch } = useGetAuditLogQuery({
-    search,
+    search: search.trim() || undefined,
   });
 
   const allEvents = data?.events ?? [];
