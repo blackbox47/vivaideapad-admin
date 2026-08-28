@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { AlertCircle } from 'lucide-react';
-import { useSearchParams } from 'react-router-dom';
+import { useTanstackSearchParams } from '@/lib/use-tanstack-search-params';
 
 import PageHeader from '@/components/layout/page-header';
 import { Button } from '@/components/ui/button';
@@ -34,7 +34,7 @@ function parseCategory(value: string | null): OpportunityCategoryFilter {
 }
 
 export default function OpportunitiesOverview() {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useTanstackSearchParams();
   const category = parseCategory(searchParams.get('category'));
   const search = searchParams.get('q') ?? '';
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);

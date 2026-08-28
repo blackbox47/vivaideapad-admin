@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { AlertCircle } from 'lucide-react';
-import { useSearchParams } from 'react-router-dom';
+import { useTanstackSearchParams } from '@/lib/use-tanstack-search-params';
 
 import PageHeader from '@/components/layout/page-header';
 import { Button } from '@/components/ui/button';
@@ -26,7 +26,7 @@ import { getApiErrorMessage } from '@/utils/helpers/api-error';
 const PAGE_SIZE = 6;
 
 export default function RewardsOverview() {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useTanstackSearchParams();
   const type = parseRewardType(searchParams.get('type'));
   const search = searchParams.get('q') ?? '';
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);

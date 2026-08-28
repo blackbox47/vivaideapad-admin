@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from '@tanstack/react-router';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -73,7 +73,7 @@ export default function LoginPanel({ role }: LoginPanelProps) {
 
     try {
       await login({ email, password }, { asRole: role });
-      navigate(homeForRole(role), { replace: true });
+      navigate({ to: homeForRole(role), replace: true });
     } catch {
       // Failure surfaced via loginError.
     }

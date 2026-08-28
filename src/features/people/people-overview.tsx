@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { AlertCircle } from 'lucide-react';
-import { useSearchParams } from 'react-router-dom';
+import { useTanstackSearchParams } from '@/lib/use-tanstack-search-params';
 
 import PageHeader from '@/components/layout/page-header';
 import { Button } from '@/components/ui/button';
@@ -35,7 +35,7 @@ function parseTab(value: string | null): PeopleTab {
 }
 
 export default function PeopleOverview() {
-  const [searchParams] = useSearchParams();
+  const [searchParams] = useTanstackSearchParams();
   const tab = parseTab(searchParams.get('tab'));
   const [reviewId, setReviewId] = useState<string | null>(null);
   const {

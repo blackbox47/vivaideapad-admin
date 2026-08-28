@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -135,7 +135,7 @@ export default function SubmitIdeaForm({
         body: values.body.trim(),
         attachmentUrl: values.attachmentUrl.trim() || undefined,
       }).unwrap();
-      navigate(CREATOR_ROUTES.submissions, { replace: true });
+      navigate({ to: CREATOR_ROUTES.submissions, replace: true });
     } catch (err) {
       setValidationError(getApiErrorMessage(err));
     }

@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 
 import type {
   LoginRequest,
@@ -103,7 +103,7 @@ export default function useAuth(): UseAuthResult {
     const dest =
       role === 'creator' ? CREATOR_ROUTES.login : ADMIN_ROUTES.login;
     dispatch(logoutAction());
-    navigate(dest, { replace: true });
+    navigate({ to: dest, replace: true });
   }, [dispatch, navigate, role]);
 
   const resetLoginError = useCallback(() => {

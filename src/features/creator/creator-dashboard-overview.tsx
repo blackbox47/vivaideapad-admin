@@ -1,5 +1,5 @@
 import { AlertCircle } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link } from '@tanstack/react-router';
 
 import PageHeader from '@/components/layout/page-header';
 import { Button } from '@/components/ui/button';

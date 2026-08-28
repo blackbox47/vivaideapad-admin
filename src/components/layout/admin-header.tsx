@@ -1,5 +1,5 @@
 import { LogOut, Menu, Moon, Sun, User } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@tanstack/react-router';
 
 import AdminSidebar from '@/components/layout/admin-sidebar';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -87,7 +87,7 @@ export default function AdminHeader() {
         <Button
           variant="outline"
           size="icon"
-          onClick={() => navigate(ADMIN_ROUTES.notifications)}
+          onClick={() => navigate({ to: ADMIN_ROUTES.notifications })}
           className="relative size-10 rounded-full border-border bg-card text-foreground transition-colors hover:border-foreground"
           aria-label={
             unreadCount > 0
@@ -140,7 +140,7 @@ export default function AdminHeader() {
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onClick={() => navigate(ADMIN_ROUTES.profile)}
+              onClick={() => navigate({ to: ADMIN_ROUTES.profile })}
             >
               <User className="size-4" />
               View profile

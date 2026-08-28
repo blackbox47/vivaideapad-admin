@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link } from '@tanstack/react-router';
 
 import { ADMIN_NAV_ITEMS } from '@/utils/constants/nav-items';
 import { ADMIN_ROUTES } from '@/utils/constants/routes';

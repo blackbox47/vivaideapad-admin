@@ -97,7 +97,7 @@ export function toProfileOverview(
   }
 
   if (isRecord(response.profile) && typeof response.profile.name === 'string') {
-    return response as ProfileOverview;
+    return response as unknown as ProfileOverview;
   }
 
   const prefs = isRecord(response.display_prefs) ? response.display_prefs : {};

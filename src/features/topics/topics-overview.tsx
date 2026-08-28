@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { AlertCircle } from 'lucide-react';
-import { useSearchParams } from 'react-router-dom';
+import { useTanstackSearchParams } from '@/lib/use-tanstack-search-params';
 
 import PageHeader from '@/components/layout/page-header';
 import { Button } from '@/components/ui/button';
@@ -41,7 +41,7 @@ function parseStatus(value: string | null): StatusFilter {
 }
 
 export default function TopicsOverview() {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useTanstackSearchParams();
   const status = parseStatus(searchParams.get('status'));
   const search = searchParams.get('q') ?? '';
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);

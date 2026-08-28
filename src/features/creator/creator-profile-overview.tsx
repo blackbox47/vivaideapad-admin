@@ -79,7 +79,7 @@ export default function CreatorProfileOverview() {
       />
 
       {overview ? (
-        <div className="grid gap-[18px] lg:grid-cols-[minmax(0,1.3fr)_minmax(0,0.7fr)]">
+        <div className="grid gap-4.5 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,0.7fr)]">
           <ProfileIdentityCard
             profile={overview.profile}
             subtitle={overview.roleLabel}
@@ -106,7 +106,7 @@ export default function CreatorProfileOverview() {
             }
           />
 
-          <div className="flex flex-col gap-[18px]">
+          <div className="flex flex-col gap-4.5">
             <ProfileNotificationsCard
               preferences={overview.notifications}
               isUpdating={isUpdatingNotifications || isLoading}

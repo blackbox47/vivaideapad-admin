@@ -1,4 +1,4 @@
-import { Outlet } from 'react-router-dom';
+import { Outlet } from '@tanstack/react-router';
 
 import AdminHeader from '@/components/layout/admin-header';
 import AdminSidebar from '@/components/layout/admin-sidebar';
