@@ -17,12 +17,12 @@ export default function ConceptCard({ concept }: ConceptCardProps) {
   return (
     <article className="rounded-[20px] border border-border bg-card p-5 transition-[transform,box-shadow] duration-200 hover:-translate-y-1 hover:shadow-lg motion-reduce:transition-none motion-reduce:hover:translate-y-0">
       <div className="flex items-start justify-between">
-        <span className="grid size-[42px] place-items-center rounded-xl bg-surface-subtle text-lg leading-none">
+        <span className="grid size-10.5 place-items-center rounded-xl bg-surface-subtle text-lg leading-none">
           {concept.icon}
         </span>
         <span
           className={cn(
-            'rounded-full px-[11px] py-[5px] text-[11px] font-bold',
+            'rounded-full px-2.75 py-1.25 text-[11px] font-bold',
             STATUS_STYLES[concept.status],
           )}
         >
@@ -30,13 +30,13 @@ export default function ConceptCard({ concept }: ConceptCardProps) {
         </span>
       </div>
 
-      <p className="mt-3.5 text-[11px] font-extrabold tracking-[0.1em] text-brand-sage uppercase">
+      <p className="mt-3.5 text-[11px] font-extrabold tracking-widest text-brand-sage uppercase">
         {concept.category}
       </p>
       <h2 className="mt-2 font-heading text-lg font-semibold text-foreground">
         {concept.title}
       </h2>
-      <p className="mt-0 mb-3 text-[13px] leading-[1.5] text-muted-foreground">
+      <p className="mt-0 mb-3 text-[13px] leading-normal text-muted-foreground">
         {concept.description}
       </p>
       <p className="mb-3.5 text-xs text-muted-foreground">

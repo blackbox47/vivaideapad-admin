@@ -142,13 +142,13 @@ export default function TopicsOverview() {
       />
 
       {isLoading ? (
-        <div className="grid gap-[18px] sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4.5 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, index) => (
-            <Skeleton key={index} className="h-[280px] rounded-[20px]" />
+            <Skeleton key={index} className="h-70 rounded-[20px]" />
           ))}
         </div>
       ) : concepts.length === 0 ? (
-        <div className="rounded-[22px] border border-border bg-card px-6 py-[60px] text-center text-muted-foreground">
+        <div className="rounded-[22px] border border-border bg-card px-6 py-15 text-center text-muted-foreground">
           <span className="mb-2.5 block text-[28px]">◇</span>
           <strong className="mb-1 block text-foreground">No concepts match</strong>
           <span className="text-[13px]">
@@ -157,7 +157,7 @@ export default function TopicsOverview() {
         </div>
       ) : (
         <>
-          <div className="grid gap-[18px] sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4.5 sm:grid-cols-2 lg:grid-cols-3">
             {visibleConcepts.map((concept) => (
               <ConceptCard key={concept.id} concept={concept} />
             ))}
@@ -166,7 +166,7 @@ export default function TopicsOverview() {
             <div className="mt-7 flex justify-center">
               <button
                 type="button"
-                className="rounded-full border border-border bg-card px-[26px] py-3 text-[13px] font-bold text-foreground hover:bg-surface-subtle transition-colors cursor-pointer"
+                className="rounded-full border border-border bg-card px-6.5 py-3 text-[13px] font-bold text-foreground hover:bg-surface-subtle transition-colors cursor-pointer"
                 onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
               >
                 Show more concepts · {remainingCount} remaining
@@ -187,7 +187,7 @@ export default function TopicsOverview() {
       ) : null}
 
       {toast ? (
-        <div className="fixed bottom-[26px] left-1/2 z-[60] -translate-x-1/2 rounded-full bg-primary px-[22px] py-3.5 text-[13px] font-semibold text-primary-foreground shadow-2xl">
+        <div className="fixed bottom-6.5 left-1/2 z-60 -translate-x-1/2 rounded-full bg-primary px-5.5 py-3.5 text-[13px] font-semibold text-primary-foreground shadow-2xl">
           {toast}
         </div>
       ) : null}
