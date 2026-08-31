@@ -2,13 +2,9 @@ import type { BaseQueryFn } from '@reduxjs/toolkit/query';
 
 import { env } from '@/config/env';
 import type { ApiError, ApiRequest } from '@/models/api/api-model';
-import { logout } from '@/reducers/auth-slice';
+import { sessionExpired } from '@/reducers/auth-slice';
 import { resolveMockRequest } from '@/services/mock/mock-handlers';
-import type { RootState } from '@/store';
-import {
-  AUTH_TOKEN_STORAGE_KEY,
-  CREATOR_AUTH_TOKEN_STORAGE_KEY,
-} from '@/utils/constants/storage-keys';
+import { AUTH_REFRESH_URL } from '@/utils/constants/api-end-points';
 
 function buildQueryString(params: ApiRequest['params']): string {
   if (!params) {
@@ -42,74 +38,132 @@ function readErrorMessage(payload: unknown, fallback: string): string {
   return fallback;
 }
 
+async function parseBody(response: Response): Promise<unknown> {
+  if (response.status === 204) return null;
+  const contentType = response.headers.get('content-type') ?? '';
+  if (
+    contentType.includes('text/csv') ||
+    contentType.includes('text/plain')
+  ) {
+    return response.text();
+  }
+  return response.json().catch(() => response.text().catch(() => null));
+}
+
+/**
+ * Single in-flight refresh promise. Cleared on settle so the next 401 starts
+ * a fresh refresh. Concurrent 401s share the same promise.
+ */
+let refreshInFlight: Promise<boolean> | null = null;
+
+async function performRefresh(signal: AbortSignal | undefined): Promise<boolean> {
+  const url = `${env.apiBaseUrl.replace(/\/+$/, '')}${AUTH_REFRESH_URL}`;
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      credentials: 'include',
+      signal,
+    });
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
+
+async function refreshAccessToken(
+  signal: AbortSignal | undefined,
+): Promise<boolean> {
+  if (!refreshInFlight) {
+    refreshInFlight = performRefresh(signal).finally(() => {
+      refreshInFlight = null;
+    });
+  }
+  return refreshInFlight;
+}
+
+async function issueRequest(
+  request: ApiRequest,
+  signal: AbortSignal | undefined,
+): Promise<Response> {
+  const isFormData = request.body instanceof FormData;
+  const url = `${env.apiBaseUrl.replace(/\/+$/, '')}${request.url}${buildQueryString(request.params)}`;
+  return fetch(url, {
+    method: request.method ?? 'GET',
+    credentials: 'include',
+    signal,
+    headers: {
+      // FormData uploads must keep the browser-generated boundary header.
+      ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
+    },
+    body: isFormData
+      ? (request.body as FormData)
+      : request.body === undefined
+        ? undefined
+        : JSON.stringify(request.body),
+  });
+}
+
 /**
  * Single HTTP seam for the app. Components never call `fetch` directly — they
  * consume the typed hooks generated from `baseService.injectEndpoints`.
+ *
+ * Tokens travel in HttpOnly cookies set by the backend; the SPA never sends
+ * an `Authorization` header. On a 401 we fire a single-flight `/auth/refresh`
+ * and retry the original request once. If the refresh also fails (or the
+ * backend has revoked the session family), we dispatch `sessionExpired` so
+ * the store resets and the SPA can redirect to login.
  */
 export const customFetch: BaseQueryFn<ApiRequest, unknown, ApiError> = async (
   request,
-  api,
+  apiArg,
 ) => {
   if (env.useMockApi) {
-    const token = (api.getState() as RootState).auth.token;
-    return resolveMockRequest(request, token);
+    // Mock mode never hits the network; cookies are not relevant.
+    return resolveMockRequest(request, /* token */ undefined);
   }
 
-  const token = (api.getState() as RootState).auth.token;
-  const isFormData = request.body instanceof FormData;
-  const url = `${env.apiBaseUrl.replace(/\/+$/, '')}${request.url}${buildQueryString(request.params)}`;
+  const isRefreshRoute = request.url === AUTH_REFRESH_URL;
 
   try {
-    const response = await fetch(url, {
-      method: request.method ?? 'GET',
-      signal: api.signal,
-      headers: {
-        // FormData uploads must keep the browser-generated boundary header.
-        ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
-      body: isFormData
-        ? (request.body as FormData)
-        : request.body === undefined
-          ? undefined
-          : JSON.stringify(request.body),
-    });
+    const first = await issueRequest(request, apiArg.signal);
+    if (first.ok) {
+      return { data: await parseBody(first) };
+    }
 
-    const contentType = response.headers.get('content-type') ?? '';
-    const isTextOrCsv =
-      contentType.includes('text/csv') ||
-      contentType.includes('text/plain') ||
-      contentType.includes('application/csv');
-
-    const payload =
-      response.status === 204
-        ? null
-        : isTextOrCsv
-          ? await response.text()
-          : await response.json().catch(() => response.text().catch(() => null));
-
-    if (!response.ok) {
-      if (response.status === 401) {
-        localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
-        localStorage.removeItem(CREATOR_AUTH_TOKEN_STORAGE_KEY);
-        api.dispatch(logout());
-      }
-
+    if (first.status !== 401 || isRefreshRoute) {
+      const payload = await parseBody(first);
       return {
         error: {
-          status: response.status,
-          message: readErrorMessage(payload, response.statusText),
+          status: first.status,
+          message: readErrorMessage(payload, first.statusText),
         },
       };
     }
 
-    return { data: payload };
+    const refreshed = await refreshAccessToken(apiArg.signal);
+    if (!refreshed) {
+      apiArg.dispatch(sessionExpired());
+      return {
+        error: { status: 401, message: 'Session expired. Please sign in again.' },
+      };
+    }
+
+    const retry = await issueRequest(request, apiArg.signal);
+    const payload = await parseBody(retry);
+    if (retry.ok) {
+      return { data: payload };
+    }
+    return {
+      error: {
+        status: retry.status,
+        message: readErrorMessage(payload, retry.statusText),
+      },
+    };
   } catch (error) {
     return {
       error: {
         status: 0,
-        message:
-          error instanceof Error ? error.message : 'Network request failed',
+        message: error instanceof Error ? error.message : 'Network request failed',
       },
     };
   }

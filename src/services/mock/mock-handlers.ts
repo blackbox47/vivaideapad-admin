@@ -572,10 +572,9 @@ type MockHandler = (request: ApiRequest) => unknown;
 const handlers: Record<string, MockHandler> = {
   [`GET ${DASHBOARD_OVERVIEW_URL}`]: () => mockDashboardOverview,
   [`POST ${AUTH_SIGN_IN_URL}`]: (request) => {
-    // Synthesize the role from the email domain. Real backend returns a
-    // platform role (numeric) inside `user.role`; the workspace discriminator
-    // is a UI concern. The response shape here mirrors `LoginResponse` so the
-    // mock layer is wire-compatible with the live API.
+    // Mock mode mirrors the live wire format: only `user` in the body.
+    // Tokens are HttpOnly cookies that the real backend sets — the mock
+    // short-circuits before `fetch`, so cookies are never set here.
     const body = request.body as { email?: string } | undefined;
     const email =
       typeof body?.email === 'string' ? body.email.trim().toLowerCase() : '';
@@ -583,10 +582,6 @@ const handlers: Record<string, MockHandler> = {
 
     if (isCreator) {
       return {
-        access_token: MOCK_SESSION_TOKEN,
-        refresh_token: `mock-refresh:${MOCK_SESSION_TOKEN}`,
-        token_type: 'Bearer' as const,
-        expires_in: 900,
         user: {
           id: mockCreatorUser.id,
           email: mockCreatorUser.email,
@@ -603,17 +598,8 @@ const handlers: Record<string, MockHandler> = {
 
     const admin = findAdminByEmail(email);
     const user = admin ? toAdminUser(admin) : mockAdminUser;
-    const accessToken = admin
-      ? `${ADMIN_TOKEN_PREFIX}${admin.email}`
-      : MOCK_SESSION_TOKEN;
-
-    return {
-      access_token: accessToken,
-      refresh_token: `mock-refresh:${accessToken}`,
-      token_type: 'Bearer' as const,
-      expires_in: 900,
-      user,
-    };
+    void MOCK_SESSION_TOKEN;
+    return { user };
   },
   [`GET ${ADMINS_URL}`]: () => {
     const admins = [...workspaceAdminsState].sort(

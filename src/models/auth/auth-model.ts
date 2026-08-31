@@ -37,13 +37,10 @@ export interface LoginRequest {
 }
 
 /**
- * Backend `TokensSchema` — `access_token` is the only token the SPA stores
- * for now (refresh-token rotation is out of scope; see plan §10).
+ * Backend response from `POST /auth/sign-in` and `POST /auth/refresh`. Tokens
+ * are no longer in the body — they are set as HttpOnly cookies by the
+ * backend. The SPA only reads the `user` shape from this response.
  */
 export interface LoginResponse {
-  access_token: string;
-  refresh_token: string;
-  token_type: 'Bearer';
-  expires_in: number;
   user: AuthUser;
 }
