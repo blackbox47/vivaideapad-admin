@@ -2,11 +2,13 @@ import { Outlet } from '@tanstack/react-router';
 
 import AdminHeader from '@/components/layout/admin-header';
 import AdminSidebar from '@/components/layout/admin-sidebar';
+import { NotificationsStreamBootstrap } from '@/components/notifications/notifications-stream-bootstrap';
 import { TooltipProvider } from '@/components/ui/tooltip';
 
 export default function AdminLayout() {
   return (
     <TooltipProvider>
+      <NotificationsStreamBootstrap role="admin" />
       <div className="flex min-h-svh bg-background text-foreground">
         <div className="sticky top-0 hidden h-svh md:block">
           <AdminSidebar />

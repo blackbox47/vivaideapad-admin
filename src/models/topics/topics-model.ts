@@ -86,8 +86,9 @@ export interface ApiCreateConceptBody {
 /** Mirror of `CONCEPT_STATUSES` on the backend (`concept.entity.ts:11`). */
 export const BACKEND_CONCEPT_STATUSES = [
   'draft',
-  'published',
-  'closed',
+  'scheduled',
+  'active',
+  'archived',
 ] as const;
 export type BackendConceptStatus =
   (typeof BACKEND_CONCEPT_STATUSES)[number];

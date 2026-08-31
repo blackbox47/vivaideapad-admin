@@ -60,7 +60,7 @@ export const topicsService = baseService.injectEndpoints({
               title: String(item.title ?? ''),
               category: String(metadata.category_name ?? item.category_name ?? item.category ?? 'General'),
               description: String(item.brief ?? item.description ?? ''),
-              status: (item.status ?? 'active') as ConceptStatus,
+              status: normalizeConceptStatus(item.status),
               icon: String(metadata.icon ?? item.icon ?? '✦'),
               opensOn: item.open_date ? String(item.open_date).slice(0, 10) : String(item.opensOn ?? ''),
               closesOn: item.close_date ? String(item.close_date).slice(0, 10) : String(item.closesOn ?? ''),
@@ -99,7 +99,7 @@ export const topicsService = baseService.injectEndpoints({
           title: String(res.title ?? ''),
           category: String(metadata.category_name ?? res.category_name ?? res.category ?? 'General'),
           description: String(res.brief ?? res.description ?? ''),
-          status: (res.status ?? 'active') as ConceptStatus,
+          status: normalizeConceptStatus(res.status),
           icon: String(metadata.icon ?? res.icon ?? '✦'),
           opensOn: res.open_date ? String(res.open_date).slice(0, 10) : String(res.opensOn ?? ''),
           closesOn: res.close_date ? String(res.close_date).slice(0, 10) : String(res.closesOn ?? ''),
@@ -222,31 +222,35 @@ export function parseReward(input: string | undefined): number {
 }
 
 /**
+ * Safely parse incoming backend status to the frontend ConceptStatus enum.
+ * Maps legacy 'published' -> 'active' and 'closed' -> 'archived'.
+ */
+export function normalizeConceptStatus(raw: unknown): ConceptStatus {
+  if (raw === 'published') return 'active';
+  if (raw === 'closed') return 'archived';
+  if (
+    raw === 'draft' ||
+    raw === 'scheduled' ||
+    raw === 'active' ||
+    raw === 'archived'
+  ) {
+    return raw;
+  }
+  return 'active';
+}
+
+/**
  * Map the FE `ConceptStatus` enum to the BE `BackendConceptStatus` enum.
- * Locked by the user as:
+ * Frontend and backend statuses are now fully aligned:
  *   draft     → draft
- *   scheduled → draft
- *   active    → published
- *   archived  → closed
+ *   scheduled → scheduled
+ *   active    → active
+ *   archived  → archived
  */
 export function mapStatusForBackend(
   status: ConceptStatus,
 ): BackendConceptStatus {
-  switch (status) {
-    case 'draft':
-    case 'scheduled':
-      return 'draft';
-    case 'active':
-      return 'published';
-    case 'archived':
-      return 'closed';
-    default: {
-      // Exhaustiveness check — TypeScript will flag a missing case here
-      // if a new ConceptStatus is ever added.
-      const _exhaustive: never = status;
-      return _exhaustive;
-    }
-  }
+  return status;
 }
 
 /**
@@ -310,6 +314,7 @@ export const __testing = {
   parseConceptDate,
   parseReward,
   mapStatusForBackend,
+  normalizeConceptStatus,
   toApiCreateBody,
   toApiUpdateBody,
 };

@@ -4,8 +4,8 @@ import { cn } from '@/lib/utils';
 
 const STATUS_STYLES: Record<Concept['status'], string> = {
   active: 'bg-success-subtle text-success',
-  draft: 'bg-info-alt text-info',
-  scheduled: 'bg-info-alt text-info',
+  draft: 'bg-info-subtle text-info',
+  scheduled: 'bg-info-subtle text-info',
   archived: 'bg-surface-muted text-muted-foreground',
 };
 

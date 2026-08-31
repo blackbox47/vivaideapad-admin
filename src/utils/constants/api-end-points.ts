@@ -19,6 +19,7 @@ export const ADMINS_URL = '/admin/admins';
 export const ADMIN_DETAIL_URL = (id: string) => `/admin/admins/${id}`;
 export const ADMIN_NOTIFICATIONS_URL = '/admin/notifications';
 export const ADMIN_NOTIFICATIONS_READ_ALL_URL = '/admin/notifications/read-all';
+export const ADMIN_NOTIFICATIONS_STREAM_URL = '/admin/notifications/stream';
 export const PROFILE_OVERVIEW_URL = '/admin/profile';
 export const PROFILE_UPDATE_URL = '/admin/profile';
 export const PROFILE_PASSWORD_URL = '/admin/profile/password';
@@ -94,6 +95,8 @@ export const CREATOR_LEADERBOARD_URL = '/contributor/leaderboard';
 export const CREATOR_NOTIFICATIONS_URL = '/contributor/notifications';
 export const CREATOR_NOTIFICATIONS_READ_ALL_URL =
   '/contributor/notifications/read-all';
+export const CREATOR_NOTIFICATIONS_STREAM_URL =
+  '/contributor/notifications/stream';
 export const CREATOR_PROFILE_URL = '/contributor/profile';
 export const CREATOR_PROFILE_PASSWORD_URL = '/contributor/profile/password';
 export const CREATOR_PROFILE_NOTIFICATIONS_URL =
