@@ -36,22 +36,23 @@ const HOME_FOR_ROLE: Record<GuardRole, string> = {
 type StoreLike = { getState: () => RootState };
 
 function readAuth(store: StoreLike) {
-  const { token, role } = store.getState().auth;
-  return { token, role: role as GuardRole | null };
+  const { isAuthenticated, role } = store.getState().auth;
+  return { isAuthenticated, role: role as GuardRole | null };
 }
 
 export const authGuard = {
   /**
    * Use for routes that require an authenticated user matching `role`.
-   * - No token → bounce to the role's login (carries `from` for post-login
-   *   redirect, replacing the old `state={{ from: location }}` pattern).
+   * - Not signed in → bounce to the role's login (carries `from` for
+   *   post-login redirect, replacing the old `state={{ from: location }}`
+   *   pattern).
    * - Signed in as the wrong role → bounce to that role's home so the user
    *   isn't trapped in a workspace they don't own.
    */
   private(store: StoreLike, role: GuardRole, from?: string) {
-    const { token, role: actualRole } = readAuth(store);
+    const { isAuthenticated, role: actualRole } = readAuth(store);
 
-    if (!token) {
+    if (!isAuthenticated) {
       throw redirect({
         to: LOGIN_FOR_ROLE[role],
         search: { from },
@@ -71,13 +72,13 @@ export const authGuard = {
    * - Signed in as this role → send them to this role's home (already done).
    */
   public(store: StoreLike, role: GuardRole) {
-    const { token, role: actualRole } = readAuth(store);
+    const { isAuthenticated, role: actualRole } = readAuth(store);
 
-    if (token && actualRole && actualRole !== role) {
+    if (isAuthenticated && actualRole && actualRole !== role) {
       throw redirect({ to: HOME_FOR_ROLE[actualRole] });
     }
 
-    if (token && actualRole === role) {
+    if (isAuthenticated && actualRole === role) {
       throw redirect({ to: HOME_FOR_ROLE[role] });
     }
   },

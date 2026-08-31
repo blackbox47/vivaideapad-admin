@@ -5,7 +5,7 @@ import {
 } from '@reduxjs/toolkit';
 import { setupListeners } from '@reduxjs/toolkit/query';
 
-import authReducer, { logout } from '@/reducers/auth-slice';
+import authReducer, { sessionExpired } from '@/reducers/auth-slice';
 import uiReducer from '@/reducers/ui-slice';
 import { baseService } from '@/services/core/base-service';
 
@@ -18,11 +18,11 @@ const appReducer = combineReducers({
 export type RootState = ReturnType<typeof appReducer>;
 
 /**
- * Logging out discards the whole store, including every RTK Query cache, so no
- * previous admin's data can leak into the next session.
+ * Session expiry discards the whole store, including every RTK Query cache,
+ * so no previous user's data can leak into the next session.
  */
 function rootReducer(state: RootState | undefined, action: Action): RootState {
-  if (action.type === logout.type) {
+  if (action.type === sessionExpired.type) {
     return appReducer(undefined, action);
   }
   return appReducer(state, action);

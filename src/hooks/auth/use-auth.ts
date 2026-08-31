@@ -6,16 +6,16 @@ import type {
   LoginResponse,
   UserRole,
 } from '@/models/auth/auth-model';
-import { logout as logoutAction, setCredentials } from '@/reducers/auth-slice';
-import { useLoginMutation } from '@/services/auth/auth-service';
+import {
+  sessionCleared,
+  sessionEstablished,
+} from '@/reducers/auth-slice';
+import {
+  useLoginMutation,
+  useSignOutMutation,
+} from '@/services/auth/auth-service';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { ADMIN_ROUTES, CREATOR_ROUTES } from '@/utils/constants/routes';
-import {
-  AUTH_TOKEN_STORAGE_KEY,
-  CREATOR_AUTH_TOKEN_STORAGE_KEY,
-  CREATOR_SIGNED_OUT_STORAGE_KEY,
-  SIGNED_OUT_STORAGE_KEY,
-} from '@/utils/constants/storage-keys';
 import { getApiErrorMessage } from '@/utils/helpers/api-error';
 
 interface LoginOptions {
@@ -23,8 +23,6 @@ interface LoginOptions {
    * Hint for which role this login panel is for. The panel knows it was
    * mounted on `/login` (creator) or `/admin/login` (admin), so we trust the
    * caller over the server response when assigning the role claim.
-   *
-   * When the real backend returns a role claim, this can be dropped.
    */
   asRole?: UserRole;
 }
@@ -37,16 +35,17 @@ interface UseAuthResult {
     credentials: LoginRequest,
     options?: LoginOptions,
   ) => Promise<LoginResponse>;
-  logout: () => void;
+  logout: () => Promise<void>;
   resetLoginError: () => void;
 }
 
 export default function useAuth(): UseAuthResult {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const token = useAppSelector((state) => state.auth.token);
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
   const role = useAppSelector((state) => state.auth.role);
   const [requestLogin, { isLoading, error }] = useLoginMutation();
+  const [requestSignOut] = useSignOutMutation();
 
   // RTK Query only exposes the latest server-reported error; keep a local
   // copy so the form can clear it as soon as the user edits an input.
@@ -60,26 +59,13 @@ export default function useAuth(): UseAuthResult {
 
       try {
         const session = await requestLogin(credentials).unwrap();
-        // The workspace discriminator ('admin' | 'creator') is a UI concern
-        // derived from which panel mounted — never trust the server response
-        // for it. `session.user.role` is the platform role (numeric enum).
         const intendedRole: UserRole = options?.asRole ?? 'admin';
 
-        // Persist to the role-appropriate storage key so admin + creator
-        // sessions can coexist in different tabs without colliding.
-        if (intendedRole === 'creator') {
-          localStorage.setItem(
-            CREATOR_AUTH_TOKEN_STORAGE_KEY,
-            session.access_token,
-          );
-          localStorage.removeItem(CREATOR_SIGNED_OUT_STORAGE_KEY);
-        } else {
-          localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, session.access_token);
-          localStorage.removeItem(SIGNED_OUT_STORAGE_KEY);
-        }
-
         dispatch(
-          setCredentials({ token: session.access_token, role: intendedRole }),
+          sessionEstablished({
+            role: intendedRole,
+            userId: session.user.id,
+          }),
         );
 
         return session;
@@ -92,26 +78,25 @@ export default function useAuth(): UseAuthResult {
     [dispatch, requestLogin],
   );
 
-  const logout = useCallback(() => {
-    // Clear BOTH storage keys so a future re-login as the other role cannot
-    // accidentally pick up a stale token. The full store reset (below) also
-    // flushes every RTK Query cache.
-    localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
-    localStorage.removeItem(CREATOR_AUTH_TOKEN_STORAGE_KEY);
-    localStorage.setItem(SIGNED_OUT_STORAGE_KEY, 'true');
-    localStorage.setItem(CREATOR_SIGNED_OUT_STORAGE_KEY, 'true');
-    const dest =
-      role === 'creator' ? CREATOR_ROUTES.login : ADMIN_ROUTES.login;
-    dispatch(logoutAction());
+  const logout = useCallback(async () => {
+    try {
+      await requestSignOut().unwrap();
+    } catch {
+      // Network or 4xx — we still clear local state and route to login; the
+      // server's HttpOnly cookies either expired or never existed, and the
+      // SPA cannot read them to clear them itself.
+    }
+    dispatch(sessionCleared());
+    const dest = role === 'creator' ? CREATOR_ROUTES.login : ADMIN_ROUTES.login;
     navigate({ to: dest, replace: true });
-  }, [dispatch, navigate, role]);
+  }, [dispatch, navigate, requestSignOut, role]);
 
   const resetLoginError = useCallback(() => {
     setLocalError(null);
   }, []);
 
   return {
-    isAuthenticated: Boolean(token),
+    isAuthenticated,
     isLoggingIn: isLoading,
     loginError,
     login,

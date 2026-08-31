@@ -6,6 +6,7 @@ import type { ProfileOverview } from '@/models/profile/profile-model';
 import { baseService } from '@/services/core/base-service';
 import {
   AUTH_SIGN_IN_URL,
+  AUTH_SIGN_OUT_URL,
   PROFILE_OVERVIEW_URL,
 } from '@/utils/constants/api-end-points';
 
@@ -27,7 +28,19 @@ export const authService = baseService.injectEndpoints({
       query: (body) => ({ url: AUTH_SIGN_IN_URL, method: 'POST', body }),
       invalidatesTags: ['admin-user', 'dashboard'],
     }),
+    /**
+     * Server-side sign-out. The backend clears the auth cookies via
+     * `Set-Cookie` with `Max-Age=0`; the SPA then dispatches
+     * `sessionCleared` to reset Redux.
+     */
+    signOut: builder.mutation<void, void>({
+      query: () => ({ url: AUTH_SIGN_OUT_URL, method: 'POST' }),
+    }),
   }),
 });
 
-export const { useGetCurrentAdminQuery, useLoginMutation } = authService;
+export const {
+  useGetCurrentAdminQuery,
+  useLoginMutation,
+  useSignOutMutation,
+} = authService;
