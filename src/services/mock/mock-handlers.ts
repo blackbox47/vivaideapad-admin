@@ -6,6 +6,7 @@
  * is the only change needed once the API exists.
  */
 
+import { format } from 'date-fns';
 import type { ApiRequest, ApiResult } from '@/models/api/api-model';
 import type { LeaderboardEntry } from '@/models/leaderboard/leaderboard-model';
 import type {
@@ -1427,12 +1428,50 @@ const handlers: Record<string, MockHandler> = {
       throw new Error('Concept not found.');
     }
     const body = request.body as Record<string, unknown> | undefined;
-    if (body && typeof body.title === 'string') concept.title = body.title;
-    if (body && typeof body.description === 'string') concept.description = body.description;
-    if (body && typeof body.icon === 'string') concept.icon = body.icon;
-    if (body && typeof body.reward === 'string') concept.reward = body.reward;
-    if (body && typeof body.opensOn === 'string') concept.opensOn = body.opensOn;
-    if (body && typeof body.closesOn === 'string') concept.closesOn = body.closesOn;
+    if (body) {
+      if (typeof body.title === 'string') concept.title = body.title;
+      if (typeof body.brief === 'string') concept.description = body.brief;
+      else if (typeof body.description === 'string') concept.description = body.description;
+
+      const meta = body.metadata as Record<string, unknown> | undefined;
+      if (meta && typeof meta.icon === 'string') concept.icon = meta.icon;
+      else if (typeof body.icon === 'string') concept.icon = body.icon;
+
+      if (typeof body.category_id === 'string') {
+        concept.categoryId = body.category_id;
+        const matchedCat = categoriesState.find((c) => c.id === body.category_id);
+        if (matchedCat) {
+          concept.category = matchedCat.name;
+          concept.icon = matchedCat.icon || concept.icon;
+        }
+      } else if (typeof body.category === 'string') {
+        concept.category = body.category;
+      }
+
+      if (typeof body.reward_budget === 'number') {
+        concept.reward = `৳${body.reward_budget.toLocaleString('en-US')}`;
+      } else if (typeof body.reward === 'string') {
+        concept.reward = body.reward;
+      }
+
+      if (typeof body.status === 'string' && CONCEPT_STATUSES.includes(body.status as ConceptStatus)) {
+        concept.status = body.status as ConceptStatus;
+      }
+
+      if (typeof body.open_date === 'string') {
+        const d = new Date(body.open_date);
+        concept.opensOn = !Number.isNaN(d.getTime()) ? format(d, 'd MMM') : body.open_date;
+      } else if (typeof body.opensOn === 'string') {
+        concept.opensOn = body.opensOn;
+      }
+
+      if (typeof body.close_date === 'string') {
+        const d = new Date(body.close_date);
+        concept.closesOn = !Number.isNaN(d.getTime()) ? format(d, 'd MMM') : body.close_date;
+      } else if (typeof body.closesOn === 'string') {
+        concept.closesOn = body.closesOn;
+      }
+    }
     pushAuditEvent('Concept updated', concept.title, 'Content');
     return {
       concept: { ...concept },

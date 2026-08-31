@@ -11,9 +11,10 @@ const STATUS_STYLES: Record<Concept['status'], string> = {
 
 interface ConceptCardProps {
   concept: Concept;
+  onEdit?: (concept: Concept) => void;
 }
 
-export default function ConceptCard({ concept }: ConceptCardProps) {
+export default function ConceptCard({ concept, onEdit }: ConceptCardProps) {
   return (
     <article className="rounded-[20px] border border-border bg-card p-5 transition-[transform,box-shadow] duration-200 hover:-translate-y-1 hover:shadow-lg motion-reduce:transition-none motion-reduce:hover:translate-y-0">
       <div className="flex items-start justify-between">
@@ -45,8 +46,10 @@ export default function ConceptCard({ concept }: ConceptCardProps) {
       </p>
 
       <Button
+        type="button"
         variant="outline"
-        className="h-auto w-full rounded-full border-border bg-card py-2.5 text-[13px] font-bold text-foreground hover:bg-surface-subtle"
+        onClick={() => onEdit?.(concept)}
+        className="h-auto w-full rounded-full border-border bg-card py-2.5 text-[13px] font-bold text-foreground hover:bg-surface-subtle cursor-pointer"
       >
         Edit concept
       </Button>

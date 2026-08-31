@@ -15,9 +15,15 @@ import { Skeleton } from '@/components/ui/skeleton';
 import ConceptCard from '@/features/topics/concept-card';
 import ConceptFilters from '@/features/topics/concept-filters';
 import CreateConceptDialog from '@/features/topics/create-concept-dialog';
+import EditConceptDialog from '@/features/topics/edit-concept-dialog';
 import useCreateConcept from '@/hooks/topics/use-create-concept';
+import useEditConcept from '@/hooks/topics/use-edit-concept';
 import useTopics from '@/hooks/topics/use-topics';
-import type { CreateConceptBody } from '@/models/topics/topics-model';
+import type {
+  Concept,
+  CreateConceptBody,
+  UpdateConceptBody,
+} from '@/models/topics/topics-model';
 import { getApiErrorMessage } from '@/utils/helpers/api-error';
 
 const STATUS_FILTERS = [
@@ -57,7 +63,15 @@ export default function TopicsOverview() {
     error: createError,
     reset: resetCreate,
   } = useCreateConcept();
+  const {
+    categories: editCategories,
+    submit: submitEditConcept,
+    isSubmitting: isEditSubmitting,
+    error: editError,
+    reset: resetEdit,
+  } = useEditConcept();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [editingConcept, setEditingConcept] = useState<Concept | null>(null);
   const [toast, setToast] = useState<string | null>(null);
 
   useEffect(() => {
@@ -83,6 +97,11 @@ export default function TopicsOverview() {
     setIsCreateOpen(false);
   };
 
+  const closeEdit = () => {
+    resetEdit();
+    setEditingConcept(null);
+  };
+
   const handleCreate = async (body: CreateConceptBody) => {
     try {
       await submitConcept(body);
@@ -93,6 +112,17 @@ export default function TopicsOverview() {
       // The hook's submit() rejects with a clear message on missing-category
       // lookup, and the mutation itself surfaces API errors via createError.
       // The dialog renders `createError` through the inherited `error` prop.
+    }
+  };
+
+  const handleEdit = async (id: string, body: UpdateConceptBody) => {
+    try {
+      await submitEditConcept(id, body);
+      closeEdit();
+      setToast('Concept updated');
+      window.setTimeout(() => setToast(null), 3200);
+    } catch {
+      // API errors surfaced via editError
     }
   };
 
@@ -159,7 +189,11 @@ export default function TopicsOverview() {
         <>
           <div className="grid gap-4.5 sm:grid-cols-2 lg:grid-cols-3">
             {visibleConcepts.map((concept) => (
-              <ConceptCard key={concept.id} concept={concept} />
+              <ConceptCard
+                key={concept.id}
+                concept={concept}
+                onEdit={(c) => setEditingConcept(c)}
+              />
             ))}
           </div>
           {remainingCount > 0 ? (
@@ -183,6 +217,17 @@ export default function TopicsOverview() {
           error={getApiErrorMessage(createError)}
           onClose={closeCreate}
           onSubmit={handleCreate}
+        />
+      ) : null}
+
+      {editingConcept ? (
+        <EditConceptDialog
+          concept={editingConcept}
+          categories={editCategories.length > 0 ? editCategories : categories}
+          isSubmitting={isEditSubmitting}
+          error={getApiErrorMessage(editError)}
+          onClose={closeEdit}
+          onSubmit={handleEdit}
         />
       ) : null}
 
