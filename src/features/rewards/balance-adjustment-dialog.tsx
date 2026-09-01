@@ -1,42 +1,15 @@
 import { useEffect, useMemo, type MouseEvent } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import type { CreateAdjustmentBody } from '@/models/rewards/rewards-model';
+import {
+  balanceAdjustmentSchema,
+  type BalanceAdjustmentFormValues,
+} from '@/models/rewards/rewards-schema';
 import type { DropdownOption } from '@/utils/types/dropdown-option';
-
-function parseAdjustmentAmount(raw: string): number | null {
-  const match = raw.trim().replace(/,/g, '').match(/^([+-])?\s*(\d+)$/);
-  if (!match) {
-    return null;
-  }
-
-  const value = Number(match[2]);
-  if (!Number.isFinite(value) || value === 0) {
-    return null;
-  }
-
-  return match[1] === '-' ? -value : value;
-}
-
-const balanceAdjustmentSchema = z.object({
-  contributor: z.string().trim().min(1, 'Contributor is required.'),
-  amount: z
-    .string()
-    .trim()
-    .min(1, 'Amount is required.')
-    .refine(
-      (raw) => parseAdjustmentAmount(raw) !== null,
-      'Enter a non-zero amount such as -20 or +50.',
-    ),
-  reason: z.string().trim().min(1, 'Reason is required.'),
-});
-
-type BalanceAdjustmentFormValues = z.infer<typeof balanceAdjustmentSchema>;
 
 interface BalanceAdjustmentDialogProps {
   contributors: string[];

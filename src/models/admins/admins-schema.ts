@@ -1,0 +1,13 @@
+import { z } from 'zod';
+
+export const addAdminSchema = z.object({
+  name: z.string().trim().min(1, 'Name is required.'),
+  email: z
+    .string()
+    .trim()
+    .min(1, 'Email is required.')
+    .email('Enter a valid email address.'),
+  password: z.string().min(8, 'Password must be at least 8 characters.'),
+});
+
+export type AddAdminFormValues = z.infer<typeof addAdminSchema>;

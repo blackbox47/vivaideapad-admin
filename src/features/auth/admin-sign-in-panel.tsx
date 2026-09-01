@@ -1,23 +1,15 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useNavigate } from '@tanstack/react-router';
-import { z } from 'zod';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import useAuth from '@/hooks/auth/use-auth';
+import {
+  adminSignInSchema,
+  type AdminSignInFormValues,
+} from '@/models/auth/auth-schema';
 import { ADMIN_ROUTES } from '@/utils/constants/routes';
-
-const adminSignInSchema = z.object({
-  email: z
-    .string()
-    .trim()
-    .min(1, 'Admin email is required')
-    .email('Please enter a valid email address'),
-  password: z.string().min(1, 'Password is required'),
-});
-
-type AdminSignInFormValues = z.infer<typeof adminSignInSchema>;
 
 export default function AdminSignInPanel() {
   const {

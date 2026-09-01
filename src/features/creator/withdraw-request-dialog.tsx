@@ -2,12 +2,14 @@ import { useEffect, type MouseEvent } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ChevronDown } from 'lucide-react';
-import { z } from 'zod';
-
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
+import {
+  withdrawRequestSchema,
+  type WithdrawRequestFormValues,
+} from '@/models/creator/creator-payout-schema';
 import type { DropdownOption } from '@/utils/types/dropdown-option';
 
 const METHOD_OPTIONS: DropdownOption[] = [
@@ -16,13 +18,6 @@ const METHOD_OPTIONS: DropdownOption[] = [
   { id: 'Rocket', label: 'Rocket' },
   { id: 'Bank transfer', label: 'Bank transfer' },
 ];
-
-const withdrawRequestSchema = z.object({
-  amount: z.string().trim().min(1, 'Amount is required.'),
-  method: z.string().min(1, 'Payout method is required.'),
-});
-
-type WithdrawRequestFormValues = z.infer<typeof withdrawRequestSchema>;
 
 const fieldClassName =
   'h-auto w-full rounded-[12px] border border-border bg-card text-foreground px-[13px] py-3 text-sm shadow-none focus-visible:border-brand-sage-light';

@@ -1,21 +1,15 @@
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
   CATEGORY_ICON_CHOICES,
   type Category,
 } from '@/models/categories/categories-model';
-
-const categoryFormSchema = z.object({
-  name: z.string().trim().min(1, 'Name is required.'),
-  icon: z.string().min(1, 'Icon is required.'),
-  isActive: z.boolean(),
-});
-
-type CategoryFormValues = z.infer<typeof categoryFormSchema>;
+import {
+  categoryFormSchema,
+  type CategoryFormValues,
+} from '@/models/categories/categories-schema';
 
 interface CategoryFormDialogProps {
   mode: 'create' | 'edit';

@@ -8,8 +8,6 @@ import { Controller, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { format, parse } from 'date-fns';
 import { CalendarIcon, ChevronDown } from 'lucide-react';
-import { z } from 'zod';
-
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Input } from '@/components/ui/input';
@@ -27,6 +25,11 @@ import type {
   UpdateConceptBody,
 } from '@/models/topics/topics-model';
 import { CATEGORY_ICON_CHOICES } from '@/models/topics/topics-model';
+import {
+  editConceptSchema,
+  LOCAL_CATEGORY_PREFIX,
+  type EditConceptFormValues,
+} from '@/models/topics/topics-schema';
 import type { DropdownOption } from '@/utils/types/dropdown-option';
 
 const fieldClassName =
@@ -38,27 +41,6 @@ const STATUS_OPTIONS: DropdownOption[] = [
   { id: 'active', label: 'Active' },
   { id: 'archived', label: 'Archived' },
 ];
-
-/** Synthetic id prefix for `+ New category` additions — not a real UUID. */
-const LOCAL_CATEGORY_PREFIX = 'local:';
-
-const editConceptSchema = z.object({
-  title: z.string().trim().min(1, 'Title is required.'),
-  categoryId: z
-    .string()
-    .min(1, 'Pick a category before saving.')
-    .refine(
-      (id) => !id.startsWith(LOCAL_CATEGORY_PREFIX),
-      'Draft category must be saved from the Categories page first.',
-    ),
-  description: z.string().trim().min(1, 'Description is required.'),
-  opensOn: z.date().optional(),
-  closesOn: z.date().optional(),
-  reward: z.string(),
-  status: z.enum(['draft', 'scheduled', 'active', 'archived']),
-});
-
-type EditConceptFormValues = z.infer<typeof editConceptSchema>;
 
 interface EditConceptDialogProps {
   concept: Concept;

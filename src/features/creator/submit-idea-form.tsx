@@ -2,8 +2,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate } from '@tanstack/react-router';
-import { z } from 'zod';
-
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -15,40 +13,13 @@ import {
   SUMMARY_MAX,
   TITLE_MAX,
 } from '@/models/creator/submit-idea-model';
+import {
+  submitIdeaSchema,
+  type SubmitIdeaFormValues,
+} from '@/models/creator/submit-idea-schema';
 import { CREATOR_ROUTES } from '@/utils/constants/routes';
 import { getApiErrorMessage } from '@/utils/helpers/api-error';
 import type { DropdownOption } from '@/utils/types/dropdown-option';
-
-const URL_PATTERN = /^https?:\/\/\S+$/i;
-
-const submitIdeaSchema = z.object({
-  topicId: z.string().min(1, 'Pick a topic before submitting.'),
-  title: z
-    .string()
-    .trim()
-    .min(1, 'Title is required.')
-    .max(TITLE_MAX, `Title must be at most ${TITLE_MAX} characters.`),
-  summary: z
-    .string()
-    .trim()
-    .min(1, 'Summary is required.')
-    .max(SUMMARY_MAX, `Summary must be at most ${SUMMARY_MAX} characters.`),
-  body: z
-    .string()
-    .trim()
-    .min(1, 'Body is required.')
-    .max(BODY_MAX, `Body must be at most ${BODY_MAX} characters.`),
-  attachmentUrl: z
-    .string()
-    .trim()
-    .refine(
-      (val) => !val || URL_PATTERN.test(val),
-      'Attachment URL must start with http:// or https://',
-    )
-    .optional(),
-});
-
-type SubmitIdeaFormValues = z.infer<typeof submitIdeaSchema>;
 
 interface SubmitIdeaFormProps {
   topics: CreatorTopic[];

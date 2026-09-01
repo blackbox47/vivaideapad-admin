@@ -1,10 +1,12 @@
 import { useEffect, type MouseEvent } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import {
+  changePayoutMethodSchema,
+  type ChangePayoutMethodFormValues,
+} from '@/models/creator/creator-payout-schema';
 import type {
   PayoutMethod,
   UpdatePayoutMethodBody,
@@ -17,12 +19,6 @@ const METHOD_OPTIONS: DropdownOption[] = [
   { id: 'Rocket', label: 'Rocket' },
   { id: 'Bank', label: 'Bank transfer' },
 ];
-
-const changePayoutMethodSchema = z.object({
-  method: z.enum(['bKash', 'Nagad', 'Rocket', 'Bank']),
-});
-
-type ChangePayoutMethodFormValues = z.infer<typeof changePayoutMethodSchema>;
 
 interface ChangePayoutMethodDialogProps {
   current: PayoutMethod;

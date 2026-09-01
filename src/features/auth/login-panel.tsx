@@ -1,24 +1,16 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useNavigate } from '@tanstack/react-router';
-import { z } from 'zod';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import useAuth from '@/hooks/auth/use-auth';
 import type { UserRole } from '@/models/auth/auth-model';
+import {
+  loginSchema,
+  type LoginFormValues,
+} from '@/models/auth/auth-schema';
 import { ADMIN_ROUTES, CREATOR_ROUTES } from '@/utils/constants/routes';
-
-const loginSchema = z.object({
-  email: z
-    .string()
-    .trim()
-    .min(1, 'Email is required')
-    .email('Please enter a valid email address'),
-  password: z.string().min(1, 'Password is required'),
-});
-
-type LoginFormValues = z.infer<typeof loginSchema>;
 
 interface LoginPanelProps {
   role: UserRole;

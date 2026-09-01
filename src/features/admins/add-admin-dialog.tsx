@@ -1,23 +1,13 @@
 import { useEffect, type MouseEvent } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import type { CreateAdminBody } from '@/models/admins/admins-model';
-
-const addAdminSchema = z.object({
-  name: z.string().trim().min(1, 'Name is required.'),
-  email: z
-    .string()
-    .trim()
-    .min(1, 'Email is required.')
-    .email('Enter a valid email address.'),
-  password: z.string().min(8, 'Password must be at least 8 characters.'),
-});
-
-type AddAdminFormValues = z.infer<typeof addAdminSchema>;
+import {
+  addAdminSchema,
+  type AddAdminFormValues,
+} from '@/models/admins/admins-schema';
 
 interface AddAdminDialogProps {
   isSubmitting: boolean;

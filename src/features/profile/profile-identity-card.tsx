@@ -1,8 +1,6 @@
 import { useEffect } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,38 +9,18 @@ import type {
   ProfileDetails,
   PublicDisplay,
 } from '@/models/profile/profile-model';
+import {
+  passwordChangeSchema,
+  profileDetailsSchema,
+  type PasswordChangeFormValues,
+  type ProfileDetailsFormValues,
+} from '@/models/profile/profile-schema';
 import type { DropdownOption } from '@/utils/types/dropdown-option';
 
 const PUBLIC_DISPLAY_OPTIONS: DropdownOption[] = [
   { id: 'Public name', label: 'Public name' },
   { id: 'Pseudonymous', label: 'Pseudonymous' },
 ];
-
-const profileDetailsSchema = z.object({
-  name: z.string().trim().min(1, 'Display name is required.'),
-  email: z
-    .string()
-    .trim()
-    .min(1, 'Email address is required.')
-    .email('Enter a valid email address.'),
-  phone: z.string(),
-  bio: z.string(),
-  publicDisplay: z.enum(['Public name', 'Pseudonymous']),
-});
-
-type ProfileDetailsFormValues = z.infer<typeof profileDetailsSchema>;
-
-const passwordChangeSchema = z
-  .object({
-    newPassword: z.string().min(8, 'Password must be at least 8 characters.'),
-    confirmPassword: z.string().min(1, 'Please confirm your password.'),
-  })
-  .refine((data) => data.newPassword === data.confirmPassword, {
-    message: 'Passwords do not match.',
-    path: ['confirmPassword'],
-  });
-
-type PasswordChangeFormValues = z.infer<typeof passwordChangeSchema>;
 
 interface ProfileIdentityCardProps {
   profile: ProfileDetails;

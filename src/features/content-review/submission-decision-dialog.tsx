@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -10,48 +8,11 @@ import type {
   SubmissionDecisionAction,
   SubmissionDecisionBody,
 } from '@/models/content-review/content-review-model';
+import {
+  submissionDecisionSchema,
+  type SubmissionDecisionFormValues,
+} from '@/models/content-review/content-review-schema';
 import { getApiErrorMessage } from '@/utils/helpers/api-error';
-
-const submissionDecisionSchema = z
-  .object({
-    decision: z.enum(['approve', 'request_revision', 'reject']),
-    rewardAmount: z.string().optional(),
-    feedback: z.string().optional(),
-  })
-  .superRefine((data, ctx) => {
-    if (
-      data.decision === 'request_revision' &&
-      (!data.feedback || data.feedback.trim().length === 0)
-    ) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'Please leave feedback before requesting a revision.',
-        path: ['feedback'],
-      });
-    }
-    if (
-      data.decision === 'reject' &&
-      (!data.feedback || data.feedback.trim().length === 0)
-    ) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'Please leave feedback before rejecting.',
-        path: ['feedback'],
-      });
-    }
-    if (data.decision === 'approve') {
-      const reward = Number(data.rewardAmount?.trim());
-      if (!Number.isFinite(reward) || reward <= 0) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: 'Reward amount must be a positive number.',
-          path: ['rewardAmount'],
-        });
-      }
-    }
-  });
-
-type SubmissionDecisionFormValues = z.infer<typeof submissionDecisionSchema>;
 
 interface SubmissionDecisionDialogProps {
   submissionId: string;
