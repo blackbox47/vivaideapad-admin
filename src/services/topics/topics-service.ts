@@ -28,13 +28,15 @@ export const topicsService = baseService.injectEndpoints({
       query: (params) => ({
         url: CONCEPTS_URL,
         method: 'GET',
-        params: {
-          status: params?.status,
-          search: params?.search,
-          category_id: params?.category_id,
-          page: params?.page,
-          limit: params?.limit,
-        },
+        params: params
+          ? {
+              status: params.status,
+              search: params.search,
+              category_id: params.category_id,
+              page: params.page,
+              limit: params.limit,
+            }
+          : undefined,
       }),
       transformResponse: (response: unknown): ConceptListResponse => {
         if (!response || typeof response !== 'object') {
