@@ -32,12 +32,12 @@ export default function PayoutProcessPanel({
   };
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-[var(--overlay-scrim)] p-5 backdrop-blur-xs">
+    <div className="fixed inset-0 z-50 grid place-items-center bg-(--overlay-scrim) p-5 backdrop-blur-xs">
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="payout-process-title"
-        className="max-h-[90vh] w-full max-w-[560px] overflow-auto rounded-[24px] border border-[var(--dialog-border)] bg-card p-7 shadow-2xl"
+        className="max-h-[90vh] w-full max-w-140 overflow-auto rounded-[24px] border border-(--dialog-border) bg-card p-7 shadow-2xl"
       >
         <div className="mb-3.5 flex items-start justify-between gap-4">
           <div>
@@ -46,7 +46,7 @@ export default function PayoutProcessPanel({
             </p>
             <h2
               id="payout-process-title"
-              className="mt-1.5 font-heading text-[22px] tracking-[-0.04em] text-foreground"
+              className="mt-1.5 font-heading text-[22px] tracking-display text-foreground"
             >
               {payout.contributor}
             </h2>
@@ -90,15 +90,15 @@ export default function PayoutProcessPanel({
             setNoteError(null);
           }}
           placeholder="Add a note (required when rejecting, optional when paying)"
-          className="min-h-[70px]"
+          className="min-h-17.5"
           errorMessage={noteError}
         />
 
-        <div className="mt-[18px] flex flex-wrap justify-end gap-2.5">
+        <div className="mt-4.5 flex flex-wrap justify-end gap-2.5">
           <button
             type="button"
             disabled={isDeciding}
-            className="rounded-full border border-danger-subtle bg-card px-[18px] py-3 font-bold text-danger hover:bg-danger-subtle transition-colors disabled:opacity-60 cursor-pointer"
+            className="rounded-full border border-danger-subtle bg-card px-4.5 py-3 font-bold text-danger hover:bg-danger-subtle transition-colors disabled:opacity-60 cursor-pointer"
             onClick={() => handleDecide('Rejected')}
           >
             Reject
@@ -106,7 +106,7 @@ export default function PayoutProcessPanel({
           <button
             type="button"
             disabled={isDeciding}
-            className="rounded-full bg-primary px-[18px] py-3 font-bold text-primary-foreground hover:bg-brand-forest transition-colors disabled:opacity-60 cursor-pointer"
+            className="rounded-full bg-primary px-4.5 py-3 font-bold text-primary-foreground hover:bg-brand-forest transition-colors disabled:opacity-60 cursor-pointer"
             onClick={() => handleDecide('Paid')}
           >
             Mark as paid

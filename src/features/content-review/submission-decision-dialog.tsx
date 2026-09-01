@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 
@@ -95,7 +95,7 @@ export default function SubmissionDecisionDialog({
   const {
     register,
     handleSubmit,
-    watch,
+    control,
     setValue,
     formState: { errors },
   } = useForm<SubmissionDecisionFormValues>({
@@ -107,7 +107,7 @@ export default function SubmissionDecisionDialog({
     },
   });
 
-  const decision = watch('decision');
+  const decision = useWatch({ control, name: 'decision' });
 
   const onFormSubmit = async (values: SubmissionDecisionFormValues) => {
     setSubmitError(null);
@@ -154,7 +154,7 @@ export default function SubmissionDecisionDialog({
       <div
         role="dialog"
         aria-modal="true"
-        className="max-h-[90vh] w-full max-w-[560px] overflow-auto rounded-2xl border bg-card p-7 shadow-2xl"
+        className="max-h-[90vh] w-full max-w-140 overflow-auto rounded-2xl border bg-card p-7 shadow-2xl"
       >
         <div className="mb-3">
           <p className="text-xs font-semibold tracking-wider text-emerald-700 uppercase">

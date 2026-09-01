@@ -33,7 +33,7 @@ const HOME_FOR_ROLE: Record<GuardRole, string> = {
   creator: CREATOR_ROUTES.dashboard,
 };
 
-type StoreLike = { getState: () => RootState };
+interface StoreLike { getState: () => RootState }
 
 function readAuth(store: StoreLike) {
   const { isAuthenticated, role } = store.getState().auth;

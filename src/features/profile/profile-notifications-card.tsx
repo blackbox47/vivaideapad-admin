@@ -23,7 +23,7 @@ export default function ProfileNotificationsCard({
   onToggle,
 }: ProfileNotificationsCardProps) {
   return (
-    <section className="rounded-[20px] border border-border bg-card p-[22px]">
+    <section className="rounded-[20px] border border-border bg-card p-5.5">
       <h3 className="mb-4 font-heading text-base font-semibold text-foreground">
         Notification preferences
       </h3>

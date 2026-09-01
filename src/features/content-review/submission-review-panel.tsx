@@ -39,12 +39,12 @@ export default function SubmissionReviewPanel({
   };
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-[var(--overlay-scrim)] p-5 backdrop-blur-xs">
+    <div className="fixed inset-0 z-50 grid place-items-center bg-(--overlay-scrim) p-5 backdrop-blur-xs">
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="content-review-title"
-        className="max-h-[90vh] w-full max-w-[560px] overflow-auto rounded-[24px] border border-[var(--dialog-border)] bg-card p-7 shadow-2xl"
+        className="max-h-[90vh] w-full max-w-140 overflow-auto rounded-[24px] border border-(--dialog-border) bg-card p-7 shadow-2xl"
       >
         <div className="mb-3.5 flex items-start justify-between gap-4">
           <div>
@@ -53,7 +53,7 @@ export default function SubmissionReviewPanel({
             </p>
             <h2
               id="content-review-title"
-              className="mt-1.5 font-heading text-[22px] tracking-[-0.04em] text-foreground"
+              className="mt-1.5 font-heading text-[22px] tracking-display text-foreground"
             >
               {submission.title}
             </h2>
@@ -108,11 +108,11 @@ export default function SubmissionReviewPanel({
             setFeedbackError(null);
           }}
           placeholder="Add reviewer notes (optional for approval, required for revision or rejection)"
-          className="min-h-[70px]"
+          className="min-h-17.5"
           errorMessage={feedbackError}
         />
 
-        <div className="mt-[18px] flex flex-wrap justify-end gap-2.5">
+        <div className="mt-4.5 flex flex-wrap justify-end gap-2.5">
           <button
             type="button"
             disabled={isDeciding}

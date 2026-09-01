@@ -47,7 +47,7 @@ export default function AdminSignInPanel() {
 
   return (
     <section className="flex min-h-svh items-center justify-center bg-surface-subtle p-11 lg:min-h-0">
-      <div className="w-full max-w-[380px]">
+      <div className="w-full max-w-95">
         <Link
           to={ADMIN_ROUTES.login}
           className="inline-flex items-center rounded-full border border-border bg-card px-3.5 py-2 text-[13px] font-bold text-foreground no-underline transition-colors hover:bg-surface-subtle"
@@ -79,7 +79,7 @@ export default function AdminSignInPanel() {
             />
           </div>
 
-          <div className="mb-[18px]">
+          <div className="mb-4.5">
             <Input
               id="admin-password"
               label="Password"
@@ -103,13 +103,13 @@ export default function AdminSignInPanel() {
           <Button
             type="submit"
             disabled={isLoggingIn}
-            className="h-auto w-full rounded-full bg-primary px-5 py-[14px] font-bold text-primary-foreground hover:bg-brand-forest disabled:opacity-60"
+            className="h-auto w-full rounded-full bg-primary px-5 py-3.5nt-bold text-primary-foreground hover:bg-brand-forest disabled:opacity-60"
           >
             {isLoggingIn ? 'Signing in…' : 'Sign in to console'}
           </Button>
         </form>
 
-        <p className="mt-[22px] text-center text-[12px] text-muted-foreground">
+        <p className="mt-5.5 text-center text-[12px] text-muted-foreground">
           Need contributor access?{' '}
           <Link
             to={ADMIN_ROUTES.login}

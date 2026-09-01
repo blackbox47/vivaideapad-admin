@@ -5,9 +5,9 @@ import { startAdminNotificationsStream } from '@/services/notifications/admin-no
 import { startCreatorNotificationsStream } from '@/services/creator/creator-notifications-stream';
 import { store } from '@/store';
 
-type Props = {
+interface Props {
   role: 'admin' | 'creator';
-};
+}
 
 /**
  * Mounts the notification SSE stream for the lifetime of a protected layout.

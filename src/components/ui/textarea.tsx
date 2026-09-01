@@ -56,7 +56,7 @@ function Textarea({
         aria-invalid={isInvalid ? "true" : undefined}
         aria-describedby={ariaDescribedBy}
         className={cn(
-          "flex min-h-[80px] w-full rounded-[12px] border border-border bg-card px-3.5 py-3 text-sm text-foreground shadow-none outline-none transition-colors",
+          "flex min-h-20 w-full rounded-[12px] border border-border bg-card px-3.5 py-3 text-sm text-foreground shadow-none outline-none transition-colors",
           "placeholder:text-muted-foreground",
           "focus-visible:border-brand-sage-light focus-visible:ring-2 focus-visible:ring-success-muted",
           "disabled:cursor-not-allowed disabled:pointer-events-none disabled:bg-input/50 disabled:opacity-50",

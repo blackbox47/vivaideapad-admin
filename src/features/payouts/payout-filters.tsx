@@ -113,7 +113,7 @@ export default function PayoutFilters({
           onChange={(event) => onSearchChange(event.target.value)}
           placeholder="Search by contributor or method"
           aria-label="Search payouts"
-          className="min-w-[260px] rounded-full px-[18px] py-2.5 text-[13px] placeholder:text-text-subtle"
+          className="min-w-65 rounded-full px-4.5 py-2.5 text-[13px] placeholder:text-text-subtle"
         />
       </div>
     </div>

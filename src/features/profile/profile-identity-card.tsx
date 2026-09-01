@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 
@@ -97,7 +97,7 @@ export default function ProfileIdentityCard({
     register: registerPassword,
     handleSubmit: handlePasswordSubmit,
     reset: resetPassword,
-    watch: watchPassword,
+    control: passwordControl,
     formState: { errors: passwordErrors },
   } = useForm<PasswordChangeFormValues>({
     resolver: zodResolver(passwordChangeSchema),
@@ -132,10 +132,13 @@ export default function ProfileIdentityCard({
     resetPassword();
   };
 
-  const newPasswordValue = watchPassword('newPassword');
+  const newPasswordValue = useWatch({
+    control: passwordControl,
+    name: 'newPassword',
+  });
 
   return (
-    <section className="rounded-[20px] border border-border bg-card p-[26px]">
+    <section className="rounded-[20px] border border-border bg-card p-6.5">
       <div className="mb-6 flex items-center gap-4">
         {avatar}
         <div>
@@ -180,7 +183,7 @@ export default function ProfileIdentityCard({
             <select
               id="profile-display"
               {...registerProfile('publicDisplay')}
-              className="h-auto w-full rounded-[12px] border border-border bg-card text-foreground px-[13px] py-[12px] text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+              className="h-auto w-full rounded-[12px] border border-border bg-card text-foreground px-3.25 py-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
             >
               {PUBLIC_DISPLAY_OPTIONS.map((option) => (
                 <option key={option.id} value={option.id}>
@@ -200,7 +203,7 @@ export default function ProfileIdentityCard({
           </div>
         </div>
 
-        <div className="mt-[18px] flex items-center gap-3">
+        <div className="mt-4.5 flex items-center gap-3">
           <Button
             type="submit"
             disabled={isSavingProfile}
@@ -221,7 +224,7 @@ export default function ProfileIdentityCard({
         </div>
       </form>
 
-      <div className="mt-[26px] border-t border-border-muted pt-[22px]">
+      <div className="mt-6.5 border-t border-border-muted pt-5.5">
         <h3 className="mb-3.5 font-heading text-base font-semibold text-foreground">Security</h3>
         <form onSubmit={handlePasswordSubmit(onUpdatePassword)} noValidate>
           <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
@@ -254,7 +257,7 @@ export default function ProfileIdentityCard({
               type="submit"
               variant="outline"
               disabled={isChangingPassword || !newPasswordValue}
-              className="h-auto rounded-full border-border bg-card px-[18px] py-[11px] text-[13px] font-bold text-foreground hover:bg-surface-subtle disabled:opacity-60"
+              className="h-auto rounded-full border-border bg-card px-4.5 py-2.75 text-[13px] font-bold text-foreground hover:bg-surface-subtle disabled:opacity-60"
             >
               {isChangingPassword ? 'Updating…' : 'Update password'}
             </Button>

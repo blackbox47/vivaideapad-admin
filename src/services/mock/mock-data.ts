@@ -215,10 +215,10 @@ export const mockDashboardOverview: DashboardOverview = {
 export const mockConcepts: Concept[] = [
   {
     id: 't1',
-    title: "মা দিবসের গল্প — Mother's Day Stories",
+    title: 'মা দিবসের গল্প — Mother\'s Day Stories',
     category: 'Family occasions',
     description:
-      "Share a heartfelt story or campaign idea celebrating mothers for the client's Mother's Day seminar content.",
+      'Share a heartfelt story or campaign idea celebrating mothers for the client\'s Mother\'s Day seminar content.',
     status: 'active',
     icon: '❀',
     opensOn: '20 Jul',
@@ -227,10 +227,10 @@ export const mockConcepts: Concept[] = [
   },
   {
     id: 't2',
-    title: "বাবা দিবসের অনুপ্রেরণা — Father's Day Inspiration",
+    title: 'বাবা দিবসের অনুপ্রেরণা — Father\'s Day Inspiration',
     category: 'Family occasions',
     description:
-      "Contribute a real-life inspired story or seminar talking point honouring fathers for Father's Day content.",
+      'Contribute a real-life inspired story or seminar talking point honouring fathers for Father\'s Day content.',
     status: 'active',
     icon: '⛰',
     opensOn: '15 Jul',
@@ -242,7 +242,7 @@ export const mockConcepts: Concept[] = [
     title: 'মহান বিজয় দিবস — Victory Day (16 Dec)',
     category: 'National days',
     description:
-      "Craft content ideas honouring Bijoy Dibosh for the company's national-day seminar and CSR campaign.",
+      'Craft content ideas honouring Bijoy Dibosh for the company\'s national-day seminar and CSR campaign.',
     status: 'active',
     icon: '★',
     opensOn: '10 Nov',
@@ -263,7 +263,7 @@ export const mockConcepts: Concept[] = [
   },
   {
     id: 't5',
-    title: "একুশে ফেব্রুয়ারি — Language Martyrs' Day",
+    title: 'একুশে ফেব্রুয়ারি — Language Martyrs\' Day',
     category: 'National days',
     description:
       'Draft concept honouring the Language Movement for a company remembrance seminar.',
@@ -290,7 +290,7 @@ export const mockConcepts: Concept[] = [
     title: 'ঈদ উৎসব প্যাকেজিং — Eid Festival Packaging',
     category: 'Cultural festivals',
     description:
-      "Fresh packaging and gifting concepts for the brand's Eid seasonal line.",
+      'Fresh packaging and gifting concepts for the brand\'s Eid seasonal line.',
     status: 'active',
     icon: '☾',
     opensOn: '1 Jul',
@@ -480,13 +480,13 @@ export const mockReviewQueue: ContentSubmission[] = [
     submitted: '16-07-2026',
     risk: 'Low',
     status: 'Published',
-    body: "A photo-essay style narrative following one neighbourhood's Mangal Shobhajatra procession from dawn to parade.",
+    body: 'A photo-essay style narrative following one neighbourhood\'s Mangal Shobhajatra procession from dawn to parade.',
     approvedCount: 7,
     approvalRate: '78%',
   },
   {
     id: 'r6',
-    title: "Songs My Grandfather Sang in '71",
+    title: 'Songs My Grandfather Sang in \'71',
     contributor: 'Nora Ahmed',
     topic: 'মহান বিজয় দিবস — Victory Day (16 Dec)',
     submitted: '28-07-2026',
@@ -1412,7 +1412,7 @@ export const mockMyIdeas: MyIdea[] = [
   {
     id: 's1',
     title: 'A Letter Amma Never Got',
-    topic: "মা দিবসের গল্প — Mother's Day Stories",
+    topic: 'মা দিবসের গল্প — Mother\'s Day Stories',
     submitted: '06-08-2026',
     status: 'Draft',
     reward: '—',
@@ -1422,7 +1422,7 @@ export const mockMyIdeas: MyIdea[] = [
   {
     id: 's2',
     title: 'The Man Who Taught Me to Ride',
-    topic: "বাবা দিবসের অনুপ্রেরণা — Father's Day Inspiration",
+    topic: 'বাবা দিবসের অনুপ্রেরণা — Father\'s Day Inspiration',
     submitted: '03-08-2026',
     status: 'Revision Requested',
     reward: '—',
@@ -1433,7 +1433,7 @@ export const mockMyIdeas: MyIdea[] = [
   },
   {
     id: 's3',
-    title: "Songs My Grandfather Sang in '71",
+    title: 'Songs My Grandfather Sang in \'71',
     topic: 'মহান বিজয় দিবস — Victory Day (16 Dec)',
     submitted: '28-07-2026',
     status: 'Approved',
@@ -1450,7 +1450,7 @@ export const mockMyIdeas: MyIdea[] = [
     status: 'Published',
     reward: '৳13,200',
     comments: 1,
-    body: "A photo-essay style narrative following one neighbourhood's Mangal Shobhajatra procession from dawn preparation to the parade.",
+    body: 'A photo-essay style narrative following one neighbourhood\'s Mangal Shobhajatra procession from dawn preparation to the parade.',
     feedback: 'Published on the public showcase — great work.',
   },
 ];
@@ -1491,9 +1491,9 @@ export const mockCreatorRewards: CreatorRewardsOverview = {
 export const mockCreatorTopics: CreatorTopic[] = [
   {
     id: 't1',
-    title: "মা দিবসের গল্প — Mother's Day Stories",
+    title: 'মা দিবসের গল্প — Mother\'s Day Stories',
     description:
-      "Share a heartfelt story or campaign idea celebrating mothers for the client's Mother's Day seminar content.",
+      'Share a heartfelt story or campaign idea celebrating mothers for the client\'s Mother\'s Day seminar content.',
     reward: '৳3,000',
     closesOn: '11 May',
     category: 'Family occasions',
@@ -1502,9 +1502,9 @@ export const mockCreatorTopics: CreatorTopic[] = [
   },
   {
     id: 't2',
-    title: "বাবা দিবসের অনুপ্রেরণা — Father's Day Inspiration",
+    title: 'বাবা দিবসের অনুপ্রেরণা — Father\'s Day Inspiration',
     description:
-      "Contribute a real-life inspired story or seminar talking point honouring fathers for Father's Day content.",
+      'Contribute a real-life inspired story or seminar talking point honouring fathers for Father\'s Day content.',
     reward: '৳3,000',
     closesOn: '21 Jun',
     category: 'Family occasions',
@@ -1515,7 +1515,7 @@ export const mockCreatorTopics: CreatorTopic[] = [
     id: 't3',
     title: 'মহান বিজয় দিবস — Victory Day (16 Dec)',
     description:
-      "Craft content ideas honouring Bijoy Dibosh for the company's national-day seminar and CSR campaign.",
+      'Craft content ideas honouring Bijoy Dibosh for the company\'s national-day seminar and CSR campaign.',
     reward: '৳5,000',
     closesOn: '16 Dec',
     category: 'National days',
@@ -1537,7 +1537,7 @@ export const mockCreatorTopics: CreatorTopic[] = [
     id: 't7',
     title: 'ঈদ উৎসব প্যাকেজিং — Eid Festival Packaging',
     description:
-      "Fresh packaging and gifting concepts for the brand's Eid seasonal line.",
+      'Fresh packaging and gifting concepts for the brand\'s Eid seasonal line.',
     reward: '৳3,800',
     closesOn: '20 Jul',
     category: 'Cultural festivals',

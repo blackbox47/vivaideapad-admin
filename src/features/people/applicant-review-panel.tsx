@@ -21,12 +21,12 @@ export default function ApplicantReviewPanel({
   const [comment, setComment] = useState('');
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-[var(--overlay-scrim)] p-5 backdrop-blur-xs">
+    <div className="fixed inset-0 z-50 grid place-items-center bg-(--overlay-scrim) p-5 backdrop-blur-xs">
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="applicant-review-title"
-        className="max-h-[90vh] w-full max-w-[560px] overflow-auto rounded-[24px] border border-[var(--dialog-border)] bg-card p-7 shadow-2xl"
+        className="max-h-[90vh] w-full max-w-140 overflow-auto rounded-[24px] border border-(--dialog-border) bg-card p-7 shadow-2xl"
       >
         <div className="mb-3.5 flex items-start justify-between gap-4">
           <div>
@@ -35,7 +35,7 @@ export default function ApplicantReviewPanel({
             </p>
             <h2
               id="applicant-review-title"
-              className="mt-1.5 font-heading text-[22px] tracking-[-0.04em] text-foreground"
+              className="mt-1.5 font-heading text-[22px] tracking-display text-foreground"
             >
               {applicant.title}
             </h2>
@@ -99,18 +99,18 @@ export default function ApplicantReviewPanel({
           value={comment}
           onChange={(event) => setComment(event.target.value)}
           placeholder="Required if requesting revision or rejecting"
-          className="min-h-[60px]"
+          className="min-h-15"
         />
         <p className="mt-2.5 text-xs text-muted-foreground">
           Approving grants this applicant contributor portal access. They will
           appear under Invited until they sign in and submit against a live task.
         </p>
 
-        <div className="mt-[18px] flex flex-wrap justify-end gap-2.5">
+        <div className="mt-4.5 flex flex-wrap justify-end gap-2.5">
           <button
             type="button"
             disabled={isDeciding}
-            className="rounded-full border border-danger-subtle bg-card px-[18px] py-3 font-bold text-danger hover:bg-danger-subtle transition-colors disabled:opacity-60 cursor-pointer"
+            className="rounded-full border border-danger-subtle bg-card px-4.5 py-3 font-bold text-danger hover:bg-danger-subtle transition-colors disabled:opacity-60 cursor-pointer"
             onClick={() => onDecide('Rejected', comment)}
           >
             Reject
@@ -118,7 +118,7 @@ export default function ApplicantReviewPanel({
           <button
             type="button"
             disabled={isDeciding}
-            className="rounded-full border border-border bg-card px-[18px] py-3 font-bold text-foreground hover:bg-surface-subtle transition-colors disabled:opacity-60 cursor-pointer"
+            className="rounded-full border border-border bg-card px-4.5 py-3 font-bold text-foreground hover:bg-surface-subtle transition-colors disabled:opacity-60 cursor-pointer"
             onClick={() => onDecide('Revision Requested', comment)}
           >
             Request revision
@@ -126,7 +126,7 @@ export default function ApplicantReviewPanel({
           <button
             type="button"
             disabled={isDeciding}
-            className="rounded-full bg-primary px-[18px] py-3 font-bold text-primary-foreground hover:bg-brand-forest transition-colors disabled:opacity-60 cursor-pointer"
+            className="rounded-full bg-primary px-4.5 py-3 font-bold text-primary-foreground hover:bg-brand-forest transition-colors disabled:opacity-60 cursor-pointer"
             onClick={() => onDecide('Approved', comment)}
           >
             Approve applicant

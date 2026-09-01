@@ -86,14 +86,14 @@ export default function WithdrawRequestDialog({
 
   return (
     <div
-      className="fixed inset-0 z-50 grid place-items-center bg-[var(--overlay-scrim)] p-5 backdrop-blur-xs"
+      className="fixed inset-0 z-50 grid place-items-center bg-(--overlay-scrim) p-5 backdrop-blur-xs"
       onClick={handleBackdropClick}
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="withdraw-title"
-        className="w-full max-w-[480px] rounded-[24px] border border-[var(--dialog-border)] bg-card p-7 shadow-2xl"
+        className="w-full max-w-120 rounded-[24px] border border-(--dialog-border) bg-card p-7 shadow-2xl"
       >
         <div className="mb-4 flex items-start justify-between gap-4">
           <div>

@@ -43,7 +43,7 @@ export default function ConceptFilters({
   onSearchChange,
 }: ConceptFiltersProps) {
   return (
-    <div className="mb-[22px] flex flex-wrap items-center justify-between gap-4">
+    <div className="mb-5.5 flex flex-wrap items-center justify-between gap-4">
       <div
         className="flex flex-wrap gap-2"
         role="navigation"
@@ -81,7 +81,7 @@ export default function ConceptFilters({
           onChange={(event) => onSearchChange(event.target.value)}
           placeholder="Search by title or category"
           aria-label="Search concepts"
-          className="min-w-[240px] rounded-full px-[18px] py-2.5 text-[13px] placeholder:text-text-subtle"
+          className="min-w-60 rounded-full px-4.5 py-2.5 text-[13px] placeholder:text-text-subtle"
         />
       </div>
     </div>

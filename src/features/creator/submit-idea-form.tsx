@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate } from '@tanstack/react-router';
 import { z } from 'zod';
@@ -73,7 +73,7 @@ export default function SubmitIdeaForm({
   const {
     register,
     handleSubmit,
-    watch,
+    control,
     setValue,
     formState: { errors },
   } = useForm<SubmitIdeaFormValues>({
@@ -87,9 +87,9 @@ export default function SubmitIdeaForm({
     },
   });
 
-  const titleValue = watch('title') ?? '';
-  const summaryValue = watch('summary') ?? '';
-  const bodyValue = watch('body') ?? '';
+  const titleValue = useWatch({ control, name: 'title' }) ?? '';
+  const summaryValue = useWatch({ control, name: 'summary' }) ?? '';
+  const bodyValue = useWatch({ control, name: 'body' }) ?? '';
 
   const topicOptions = useMemo<DropdownOption[]>(
     () =>
@@ -235,7 +235,7 @@ export default function SubmitIdeaForm({
       <Button
         type="submit"
         disabled={isLoading || isLoadingTopics}
-        className="h-auto w-full rounded-full bg-primary px-5 py-[14px] text-sm font-bold text-primary-foreground hover:bg-brand-forest disabled:opacity-60 sm:w-auto sm:self-start"
+        className="h-auto w-full rounded-full bg-primary px-5 py-3.5 text-sm font-bold text-primary-foreground hover:bg-brand-forest disabled:opacity-60 sm:w-auto sm:self-start"
       >
         {isLoading ? 'Submitting…' : 'Submit idea'}
       </Button>

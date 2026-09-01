@@ -92,7 +92,7 @@ export default function AuditLogFilters({
           onChange={(event) => onSearchChange(event.target.value)}
           placeholder="Search actor, action or target"
           aria-label="Search audit events"
-          className="min-w-[260px] rounded-full px-[18px] py-2.5 text-[13px] placeholder:text-text-subtle"
+          className="min-w-65 rounded-full px-4.5 py-2.5 text-[13px] placeholder:text-text-subtle"
         />
       </div>
     </div>

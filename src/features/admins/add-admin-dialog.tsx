@@ -72,14 +72,14 @@ export default function AddAdminDialog({
 
   return (
     <div
-      className="fixed inset-0 z-50 grid place-items-center bg-[var(--overlay-scrim)] p-5 backdrop-blur-xs"
+      className="fixed inset-0 z-50 grid place-items-center bg-(--overlay-scrim) p-5 backdrop-blur-xs"
       onClick={handleBackdropClick}
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="add-admin-title"
-        className="max-h-[88vh] w-full max-w-[560px] overflow-auto rounded-[24px] border border-[var(--dialog-border)] bg-card p-[30px] shadow-2xl"
+        className="max-h-[88vh] w-full max-w-140 overflow-auto rounded-[24px] border border-(--dialog-border) bg-card p-7.5 shadow-2xl"
       >
         <div className="mb-4 flex items-start justify-between gap-4">
           <div>
