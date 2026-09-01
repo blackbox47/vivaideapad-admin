@@ -1,4 +1,4 @@
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 
@@ -38,7 +38,7 @@ export default function CategoryFormDialog({
   const {
     register,
     handleSubmit,
-    watch,
+    control,
     setValue,
     formState: { errors },
   } = useForm<CategoryFormValues>({
@@ -50,7 +50,7 @@ export default function CategoryFormDialog({
     },
   });
 
-  const selectedIcon = watch('icon');
+  const selectedIcon = useWatch({ control, name: 'icon' });
 
   const onFormSubmit = (values: CategoryFormValues) => {
     onSubmit(

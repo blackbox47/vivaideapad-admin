@@ -4,7 +4,7 @@ import {
   useState,
   type MouseEvent,
 } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { format, parse } from 'date-fns';
 import { CalendarIcon, ChevronDown } from 'lucide-react';
@@ -234,7 +234,6 @@ export default function EditConceptDialog({
     control,
     setValue,
     reset,
-    watch,
     formState: { errors },
   } = useForm<EditConceptFormValues>({
     resolver: zodResolver(editConceptSchema),
@@ -261,8 +260,8 @@ export default function EditConceptDialog({
     });
   }, [concept, resolveCategoryId, reset]);
 
-  const opensOn = watch('opensOn');
-  const closesOn = watch('closesOn');
+  const opensOn = useWatch({ control, name: 'opensOn' });
+  const closesOn = useWatch({ control, name: 'closesOn' });
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -333,14 +332,14 @@ export default function EditConceptDialog({
 
   return (
     <div
-      className="fixed inset-0 z-50 grid place-items-center bg-[var(--overlay-scrim)] p-5 backdrop-blur-xs"
+      className="fixed inset-0 z-50 grid place-items-center bg-(--overlay-scrim) p-5 backdrop-blur-xs"
       onClick={handleBackdropClick}
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="edit-concept-title"
-        className="max-h-[88vh] w-full max-w-[560px] overflow-auto rounded-[24px] border border-[var(--dialog-border)] bg-card p-[30px] shadow-2xl"
+        className="max-h-[88vh] w-full max-w-140 overflow-auto rounded-[24px] border border-(--dialog-border) bg-card p-7.5 shadow-2xl"
       >
         <div className="mb-4 flex items-start justify-between gap-4">
           <div>
@@ -449,12 +448,12 @@ export default function EditConceptDialog({
                         setCategoryDraftError(null);
                       }}
                       placeholder="New category name"
-                      className="h-auto flex-1 rounded-[10px] border border-border bg-card px-3 py-[9px] text-[13px] text-foreground shadow-none"
+                      className="h-auto flex-1 rounded-[10px] border border-border bg-card px-3 py-2.25text-[13px] text-foreground shadow-none"
                     />
                     <Button
                       type="button"
                       onClick={handleAddCategory}
-                      className="h-auto rounded-[10px] bg-primary px-4 py-[9px] text-[13px] font-bold text-primary-foreground hover:bg-brand-forest cursor-pointer"
+                      className="h-auto rounded-[10px] bg-primary px-4 py-2.25 text-[13px] font-bold text-primary-foreground hover:bg-brand-forest cursor-pointer"
                     >
                       Add
                     </Button>
@@ -471,7 +470,7 @@ export default function EditConceptDialog({
                 id="edit-concept-description"
                 label="Description"
                 required
-                className="min-h-[70px]"
+                className="min-h-17.5"
                 errorMessage={errors.description?.message}
                 {...register('description')}
               />
