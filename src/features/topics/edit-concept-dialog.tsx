@@ -2,11 +2,13 @@ import {
   useEffect,
   useMemo,
   useState,
-  type FormEvent,
   type MouseEvent,
 } from 'react';
-import { format } from 'date-fns';
+import { Controller, useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { format, parse } from 'date-fns';
 import { CalendarIcon, ChevronDown } from 'lucide-react';
+import { z } from 'zod';
 
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -17,6 +19,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import type {
   Concept,
@@ -36,34 +39,26 @@ const STATUS_OPTIONS: DropdownOption[] = [
   { id: 'archived', label: 'Archived' },
 ];
 
-const MONTH_INDEX: Record<string, number> = {
-  jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5,
-  jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11,
-};
+/** Synthetic id prefix for `+ New category` additions — not a real UUID. */
+const LOCAL_CATEGORY_PREFIX = 'local:';
 
-function parseInitialDate(input: string | undefined): Date | undefined {
-  if (!input) return undefined;
-  const trimmed = input.trim();
-  if (!trimmed || trimmed === '—') return undefined;
+const editConceptSchema = z.object({
+  title: z.string().trim().min(1, 'Title is required.'),
+  categoryId: z
+    .string()
+    .min(1, 'Pick a category before saving.')
+    .refine(
+      (id) => !id.startsWith(LOCAL_CATEGORY_PREFIX),
+      'Draft category must be saved from the Categories page first.',
+    ),
+  description: z.string().trim().min(1, 'Description is required.'),
+  opensOn: z.date().optional(),
+  closesOn: z.date().optional(),
+  reward: z.string(),
+  status: z.enum(['draft', 'scheduled', 'active', 'archived']),
+});
 
-  // 1. "20 Jul" / "20 Jul 2026"
-  const named = /^(\d{1,2})\s+([A-Za-z]{3,9})(?:\s+(\d{4}))?$/.exec(trimmed);
-  if (named) {
-    const day = Number(named[1]);
-    const monthKey = named[2].slice(0, 3).toLowerCase();
-    const month = MONTH_INDEX[monthKey];
-    if (month !== undefined && day >= 1 && day <= 31) {
-      const year = named[3] ? Number(named[3]) : new Date().getFullYear();
-      const d = new Date(year, month, day);
-      if (!Number.isNaN(d.getTime())) return d;
-    }
-  }
-
-  // 2. ISO "YYYY-MM-DD" or standard date string
-  const d = new Date(trimmed);
-  if (!Number.isNaN(d.getTime())) return d;
-  return undefined;
-}
+type EditConceptFormValues = z.infer<typeof editConceptSchema>;
 
 interface EditConceptDialogProps {
   concept: Concept;
@@ -74,20 +69,19 @@ interface EditConceptDialogProps {
   onSubmit: (id: string, body: UpdateConceptBody) => Promise<void>;
 }
 
-interface FormValues {
-  title: string;
-  categoryId: string;
-  description: string;
-  opensOn: Date | undefined;
-  closesOn: Date | undefined;
-  reward: string;
-  status: ConceptStatus;
-}
-
-const LOCAL_CATEGORY_PREFIX = 'local:';
-
 function formatConceptDate(date: Date): string {
   return format(date, 'd MMM');
+}
+
+function parseInitialDate(raw?: string): Date | undefined {
+  if (!raw) return undefined;
+  const direct = new Date(raw);
+  if (!isNaN(direct.getTime())) {
+    return direct;
+  }
+  const currentYear = new Date().getFullYear();
+  const parsed = parse(`${raw} ${currentYear}`, 'd MMM yyyy', new Date());
+  return isNaN(parsed.getTime()) ? undefined : parsed;
 }
 
 function DateField({
@@ -115,7 +109,7 @@ function DateField({
             id={id}
             className={cn(
               fieldClassName,
-              'justify-between font-normal hover:bg-card',
+              'justify-between font-normal hover:bg-card cursor-pointer',
               !value && 'text-text-subtle',
             )}
           />
@@ -200,9 +194,8 @@ export default function EditConceptDialog({
   const [newCategoryIcon, setNewCategoryIcon] = useState<string>(
     CATEGORY_ICON_CHOICES[0],
   );
-  const [validationError, setValidationError] = useState<string | null>(null);
+  const [categoryDraftError, setCategoryDraftError] = useState<string | null>(null);
 
-  // Merge real categories with local-only extras, deduping by id.
   const categoryOptions = useMemo<DropdownOption[]>(() => {
     const seen = new Set<string>();
     const out: DropdownOption[] = [];
@@ -235,18 +228,29 @@ export default function EditConceptDialog({
     return categoryOptions[0]?.id ?? '';
   }, [concept, categoryOptions]);
 
-  const [values, setValues] = useState<FormValues>({
-    title: concept.title,
-    categoryId: resolveCategoryId,
-    description: concept.description,
-    opensOn: parseInitialDate(concept.openDate || concept.opensOn),
-    closesOn: parseInitialDate(concept.closeDate || concept.closesOn),
-    reward: concept.reward,
-    status: concept.status,
+  const {
+    register,
+    handleSubmit,
+    control,
+    setValue,
+    reset,
+    watch,
+    formState: { errors },
+  } = useForm<EditConceptFormValues>({
+    resolver: zodResolver(editConceptSchema),
+    defaultValues: {
+      title: concept.title,
+      categoryId: resolveCategoryId,
+      description: concept.description,
+      opensOn: parseInitialDate(concept.openDate || concept.opensOn),
+      closesOn: parseInitialDate(concept.closeDate || concept.closesOn),
+      reward: concept.reward,
+      status: concept.status,
+    },
   });
 
   useEffect(() => {
-    setValues({
+    reset({
       title: concept.title,
       categoryId: resolveCategoryId,
       description: concept.description,
@@ -255,7 +259,10 @@ export default function EditConceptDialog({
       reward: concept.reward,
       status: concept.status,
     });
-  }, [concept, resolveCategoryId]);
+  }, [concept, resolveCategoryId, reset]);
+
+  const opensOn = watch('opensOn');
+  const closesOn = watch('closesOn');
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -278,20 +285,10 @@ export default function EditConceptDialog({
     }
   };
 
-  const update = <Key extends keyof FormValues>(
-    key: Key,
-    value: FormValues[Key],
-  ) => {
-    setValues((prev) => ({ ...prev, [key]: value }));
-    if (validationError) {
-      setValidationError(null);
-    }
-  };
-
   const handleAddCategory = () => {
     const name = newCategoryName.trim();
     if (!name) {
-      setValidationError('Enter a category name.');
+      setCategoryDraftError('Enter a category name.');
       return;
     }
 
@@ -300,9 +297,10 @@ export default function EditConceptDialog({
     );
     if (alreadyExists) {
       const match = categoryOptions.find((option) => option.label.trim() === name);
-      if (match) update('categoryId', match.id);
+      if (match) setValue('categoryId', match.id);
       setIsNewCategoryOpen(false);
       setNewCategoryName('');
+      setCategoryDraftError(null);
       return;
     }
 
@@ -311,54 +309,27 @@ export default function EditConceptDialog({
       ...prev,
       { id: newId, label: `${newCategoryIcon} ${name}` },
     ]);
-    update('categoryId', newId);
+    setValue('categoryId', newId);
     setIsNewCategoryOpen(false);
     setNewCategoryName('');
     setNewCategoryIcon(CATEGORY_ICON_CHOICES[0]);
+    setCategoryDraftError(null);
   };
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    const title = values.title.trim();
-    const categoryId = values.categoryId;
-    const description = values.description.trim();
-
-    if (!title) {
-      setValidationError('Title is required.');
-      return;
-    }
-    if (!categoryId) {
-      setValidationError('Pick a category before saving.');
-      return;
-    }
-    if (!description) {
-      setValidationError('Description is required.');
-      return;
-    }
-
-    if (categoryId.startsWith(LOCAL_CATEGORY_PREFIX)) {
-      setValidationError(
-        `"${categoryId.slice(LOCAL_CATEGORY_PREFIX.length)}" is a draft category — save it from the Categories page first.`,
-      );
-      return;
-    }
-
-    const selected = categoryOptions.find((c) => c.id === categoryId);
+  const onFormSubmit = async (values: EditConceptFormValues) => {
+    const selected = categoryOptions.find((c) => c.id === values.categoryId);
     await onSubmit(concept.id, {
-      title,
+      title: values.title.trim(),
       category: selected?.label ?? '',
-      categoryId,
+      categoryId: values.categoryId,
       icon: concept.icon || '✦',
-      description,
+      description: values.description.trim(),
       opensOn: values.opensOn ? formatConceptDate(values.opensOn) : '',
       closesOn: values.closesOn ? formatConceptDate(values.closesOn) : '',
       reward: values.reward.trim(),
       status: values.status,
     });
   };
-
-  const inlineError = validationError ?? error;
 
   return (
     <div
@@ -393,20 +364,14 @@ export default function EditConceptDialog({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} noValidate>
+        <form onSubmit={handleSubmit(onFormSubmit)} noValidate>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
-              <Label
-                htmlFor="edit-concept-title-input"
-                className="mb-1.5 block text-[12px] font-bold text-foreground"
-              >
-                Title
-              </Label>
               <Input
                 id="edit-concept-title-input"
-                value={values.title}
-                onChange={(event) => update('title', event.target.value)}
-                className={fieldClassName}
+                label="Title"
+                errorMessage={errors.title?.message}
+                {...register('title')}
               />
             </div>
 
@@ -423,6 +388,7 @@ export default function EditConceptDialog({
                   onClick={() => {
                     setIsNewCategoryOpen((open) => !open);
                     setNewCategoryName('');
+                    setCategoryDraftError(null);
                     setNewCategoryIcon(CATEGORY_ICON_CHOICES[0]);
                   }}
                   className="text-[12px] font-bold text-brand-sage hover:underline cursor-pointer"
@@ -430,14 +396,25 @@ export default function EditConceptDialog({
                   + New category
                 </button>
               </div>
-              <FieldSelect
-                id="edit-concept-category"
-                value={values.categoryId}
-                onChange={(value) => update('categoryId', value)}
-                options={categoryOptions}
-                placeholder="Choose a category"
-                ariaLabel="Concept category"
+              <Controller
+                control={control}
+                name="categoryId"
+                render={({ field }) => (
+                  <FieldSelect
+                    id="edit-concept-category"
+                    value={field.value}
+                    onChange={field.onChange}
+                    options={categoryOptions}
+                    placeholder="Choose a category"
+                    ariaLabel="Concept category"
+                  />
+                )}
               />
+              {errors.categoryId?.message ? (
+                <p className="mt-1.5 text-xs font-semibold text-destructive" role="alert">
+                  {errors.categoryId.message}
+                </p>
+              ) : null}
               {isNewCategoryOpen ? (
                 <div className="mt-2.5 flex flex-col gap-2 rounded-[12px] bg-surface-subtle p-3">
                   <div className="flex flex-wrap gap-1.5">
@@ -463,9 +440,10 @@ export default function EditConceptDialog({
                   <div className="flex gap-2">
                     <Input
                       value={newCategoryName}
-                      onChange={(event) =>
-                        setNewCategoryName(event.target.value)
-                      }
+                      onChange={(event) => {
+                        setNewCategoryName(event.target.value);
+                        setCategoryDraftError(null);
+                      }}
                       placeholder="New category name"
                       className="h-auto flex-1 rounded-[10px] border border-border bg-card px-3 py-[9px] text-[13px] text-foreground shadow-none"
                     />
@@ -477,6 +455,9 @@ export default function EditConceptDialog({
                       Add
                     </Button>
                   </div>
+                  {categoryDraftError ? (
+                    <p className="text-xs text-destructive">{categoryDraftError}</p>
+                  ) : null}
                 </div>
               ) : null}
             </div>
@@ -488,11 +469,11 @@ export default function EditConceptDialog({
               >
                 Description
               </Label>
-              <textarea
+              <Textarea
                 id="edit-concept-description"
-                value={values.description}
-                onChange={(event) => update('description', event.target.value)}
-                className={cn(fieldClassName, 'min-h-[70px]')}
+                className="min-h-[70px]"
+                errorMessage={errors.description?.message}
+                {...register('description')}
               />
             </div>
 
@@ -503,16 +484,22 @@ export default function EditConceptDialog({
               >
                 Opening date
               </Label>
-              <DateField
-                id="edit-concept-opens"
-                value={values.opensOn}
-                onChange={(date) => {
-                  update('opensOn', date);
-                  if (date && values.closesOn && values.closesOn < date) {
-                    update('closesOn', undefined);
-                  }
-                }}
-                placeholder="20 Jul"
+              <Controller
+                control={control}
+                name="opensOn"
+                render={({ field }) => (
+                  <DateField
+                    id="edit-concept-opens"
+                    value={field.value}
+                    onChange={(date) => {
+                      field.onChange(date);
+                      if (date && closesOn && closesOn < date) {
+                        setValue('closesOn', undefined);
+                      }
+                    }}
+                    placeholder="20 Jul"
+                  />
+                )}
               />
             </div>
 
@@ -523,28 +510,28 @@ export default function EditConceptDialog({
               >
                 Closing date
               </Label>
-              <DateField
-                id="edit-concept-closes"
-                value={values.closesOn}
-                onChange={(date) => update('closesOn', date)}
-                placeholder="11 May"
-                disabledBefore={values.opensOn}
+              <Controller
+                control={control}
+                name="closesOn"
+                render={({ field }) => (
+                  <DateField
+                    id="edit-concept-closes"
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder="11 May"
+                    disabledBefore={opensOn}
+                  />
+                )}
               />
             </div>
 
             <div>
-              <Label
-                htmlFor="edit-concept-reward"
-                className="mb-1.5 block text-[12px] font-bold text-foreground"
-              >
-                Reward guidance
-              </Label>
               <Input
                 id="edit-concept-reward"
-                value={values.reward}
-                onChange={(event) => update('reward', event.target.value)}
+                label="Reward guidance"
                 placeholder="৳3,000"
-                className={fieldClassName}
+                errorMessage={errors.reward?.message}
+                {...register('reward')}
               />
             </div>
 
@@ -555,22 +542,28 @@ export default function EditConceptDialog({
               >
                 Status
               </Label>
-              <FieldSelect
-                id="edit-concept-status"
-                value={values.status}
-                onChange={(value) => update('status', value as ConceptStatus)}
-                options={STATUS_OPTIONS}
-                ariaLabel="Concept status"
+              <Controller
+                control={control}
+                name="status"
+                render={({ field }) => (
+                  <FieldSelect
+                    id="edit-concept-status"
+                    value={field.value}
+                    onChange={(value) => field.onChange(value as ConceptStatus)}
+                    options={STATUS_OPTIONS}
+                    ariaLabel="Concept status"
+                  />
+                )}
               />
             </div>
           </div>
 
-          {inlineError ? (
+          {error ? (
             <p
               className="mt-3 text-[12px] font-semibold text-destructive"
               role="alert"
             >
-              {inlineError}
+              {error}
             </p>
           ) : null}
 

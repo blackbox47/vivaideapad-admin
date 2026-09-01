@@ -1,3 +1,4 @@
+import { Input } from '@/components/ui/input';
 import type { NotificationPreferences } from '@/models/profile/profile-model';
 
 interface ProfileNotificationsCardProps {
@@ -35,7 +36,7 @@ export default function ProfileNotificationsCard({
               className="flex items-center justify-between text-[13px] text-foreground"
             >
               <span>{row.label}</span>
-              <input
+              <Input
                 type="checkbox"
                 checked={checked}
                 disabled={isUpdating}

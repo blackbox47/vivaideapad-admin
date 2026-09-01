@@ -1,5 +1,6 @@
 import { Link } from '@tanstack/react-router';
 
+import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import type {
   LedgerTypeFilter,
@@ -102,12 +103,12 @@ export default function RewardFilters({
         <span className="whitespace-nowrap text-[13px] text-muted-foreground">
           {visibleCount} {visibleCount === 1 ? 'entry' : 'entries'}
         </span>
-        <input
+        <Input
           value={search}
           onChange={(event) => onSearchChange(event.target.value)}
           placeholder="Search by contributor or description"
           aria-label="Search ledger entries"
-          className="min-w-[260px] rounded-full border border-border bg-card px-[18px] py-2.5 text-[13px] text-foreground outline-none placeholder:text-text-subtle focus-visible:border-brand-sage-light focus-visible:ring-2 focus-visible:ring-success-muted"
+          className="min-w-[260px] rounded-full px-[18px] py-2.5 text-[13px] placeholder:text-text-subtle"
         />
       </div>
     </div>

@@ -1,4 +1,7 @@
-import { useEffect, useState, type FormEvent, type MouseEvent } from 'react';
+import { useEffect, type MouseEvent } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -8,17 +11,18 @@ import type {
 } from '@/models/profile/profile-model';
 import type { DropdownOption } from '@/utils/types/dropdown-option';
 
-/**
- * Payout-method options. `id` matches the `method` enum stored on
- * `UpdatePayoutMethodBody` (sent to the wire as `method`); `label` is the
- * human-readable display string in the dropdown.
- */
 const METHOD_OPTIONS: DropdownOption[] = [
   { id: 'bKash', label: 'bKash · 018•••42' },
   { id: 'Nagad', label: 'Nagad' },
   { id: 'Rocket', label: 'Rocket' },
   { id: 'Bank', label: 'Bank transfer' },
 ];
+
+const changePayoutMethodSchema = z.object({
+  method: z.enum(['bKash', 'Nagad', 'Rocket', 'Bank']),
+});
+
+type ChangePayoutMethodFormValues = z.infer<typeof changePayoutMethodSchema>;
 
 interface ChangePayoutMethodDialogProps {
   current: PayoutMethod;
@@ -35,7 +39,16 @@ export default function ChangePayoutMethodDialog({
   onClose,
   onSubmit,
 }: ChangePayoutMethodDialogProps) {
-  const [method, setMethod] = useState<PayoutMethod['method']>(current.method);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<ChangePayoutMethodFormValues>({
+    resolver: zodResolver(changePayoutMethodSchema),
+    defaultValues: {
+      method: current.method,
+    },
+  });
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -54,12 +67,11 @@ export default function ChangePayoutMethodDialog({
     }
   };
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const onFormSubmit = async (values: ChangePayoutMethodFormValues) => {
     const selected: UpdatePayoutMethodBody = {
-      method: method as PayoutMethod['method'],
+      method: values.method,
       label:
-        METHOD_OPTIONS.find((option) => option.id === method)?.label ??
+        METHOD_OPTIONS.find((option) => option.id === values.method)?.label ??
         METHOD_OPTIONS[0].label,
     };
     await onSubmit(selected);
@@ -98,7 +110,7 @@ export default function ChangePayoutMethodDialog({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit(onFormSubmit)} noValidate>
           <Label
             htmlFor="payout-method"
             className="mb-1.5 block text-[12px] font-bold text-foreground"
@@ -107,10 +119,7 @@ export default function ChangePayoutMethodDialog({
           </Label>
           <select
             id="payout-method"
-            value={method}
-            onChange={(event) =>
-              setMethod(event.target.value as PayoutMethod['method'])
-            }
+            {...register('method')}
             className="h-auto w-full rounded-[12px] border border-border bg-card text-foreground px-[13px] py-3 text-sm focus-visible:border-brand-sage-light"
           >
             {METHOD_OPTIONS.map((option) => (
@@ -119,6 +128,11 @@ export default function ChangePayoutMethodDialog({
               </option>
             ))}
           </select>
+          {errors.method?.message ? (
+            <p className="mt-1.5 text-xs font-semibold text-destructive" role="alert">
+              {errors.method.message}
+            </p>
+          ) : null}
 
           {error ? (
             <p className="mt-2 text-[12px] font-semibold text-destructive" role="alert">

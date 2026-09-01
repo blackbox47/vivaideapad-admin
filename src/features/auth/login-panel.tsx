@@ -1,15 +1,24 @@
-import { useState, type FormEvent } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useNavigate } from '@tanstack/react-router';
+import { z } from 'zod';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import useAuth from '@/hooks/auth/use-auth';
 import type { UserRole } from '@/models/auth/auth-model';
 import { ADMIN_ROUTES, CREATOR_ROUTES } from '@/utils/constants/routes';
 
-const fieldClassName =
-  'h-auto w-full rounded-[12px] border-border bg-card px-[14px] py-[13px] text-sm text-foreground shadow-none focus-visible:border-brand-sage-light focus-visible:ring-2 focus-visible:ring-success-muted';
+const loginSchema = z.object({
+  email: z
+    .string()
+    .trim()
+    .min(1, 'Email is required')
+    .email('Please enter a valid email address'),
+  password: z.string().min(1, 'Password is required'),
+});
+
+type LoginFormValues = z.infer<typeof loginSchema>;
 
 interface LoginPanelProps {
   role: UserRole;
@@ -34,52 +43,31 @@ function descriptionForRole(role: UserRole): string {
 }
 
 export default function LoginPanel({ role }: LoginPanelProps) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [validationError, setValidationError] = useState<string | null>(null);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+  });
   const { login, isLoggingIn, loginError, resetLoginError } = useAuth();
   const navigate = useNavigate();
 
   const loginPath = loginForRole(role);
 
-  const handleEmailChange = (value: string) => {
-    setEmail(value);
-    if (loginError || validationError) {
-      resetLoginError();
-      setValidationError(null);
-    }
-  };
-
-  const handlePasswordChange = (value: string) => {
-    setPassword(value);
-    if (loginError || validationError) {
-      resetLoginError();
-      setValidationError(null);
-    }
-  };
-
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setValidationError(null);
-
-    if (!email.trim()) {
-      setValidationError('Email is required');
-      return;
-    }
-    if (!password.trim()) {
-      setValidationError('Password is required');
-      return;
-    }
-
+  const onSubmit = async (values: LoginFormValues) => {
+    resetLoginError();
     try {
-      await login({ email, password }, { asRole: role });
+      await login(values, { asRole: role });
       navigate({ to: homeForRole(role), replace: true });
     } catch {
       // Failure surfaced via loginError.
     }
   };
-
-  const inlineError = validationError ?? loginError;
 
   return (
     <section className="flex min-h-svh items-center justify-center bg-surface-subtle p-11 lg:min-h-0">
@@ -99,49 +87,35 @@ export default function LoginPanel({ role }: LoginPanelProps) {
         </h2>
         <p className="text-muted-foreground">{descriptionForRole(role)}</p>
 
-        <form className="mt-7" onSubmit={handleSubmit} noValidate>
+        <form className="mt-7" onSubmit={handleSubmit(onSubmit)} noValidate>
           <div className="mb-3.5">
-            <Label
-              htmlFor="email"
-              className="mb-1.5 block text-[12px] font-bold text-foreground"
-            >
-              Email address
-            </Label>
             <Input
               id="email"
+              label="Email address"
               type="email"
-              value={email}
-              onChange={(event) => handleEmailChange(event.target.value)}
               autoComplete="username"
-              aria-invalid={Boolean(inlineError)}
-              className={fieldClassName}
+              errorMessage={errors.email?.message}
+              {...register('email')}
             />
           </div>
 
           <div className="mb-[18px]">
-            <Label
-              htmlFor="password"
-              className="mb-1.5 block text-[12px] font-bold text-foreground"
-            >
-              Password
-            </Label>
             <Input
               id="password"
+              label="Password"
               type="password"
-              value={password}
-              onChange={(event) => handlePasswordChange(event.target.value)}
               autoComplete="current-password"
-              aria-invalid={Boolean(inlineError)}
-              className={fieldClassName}
+              errorMessage={errors.password?.message}
+              {...register('password')}
             />
           </div>
 
-          {inlineError ? (
+          {loginError ? (
             <p
               className="mb-3 text-[12px] font-semibold text-destructive"
               role="alert"
             >
-              {inlineError}
+              {loginError}
             </p>
           ) : null}
 

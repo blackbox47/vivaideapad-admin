@@ -1,6 +1,8 @@
 import { useState } from 'react';
 
 import StatusBadge from '@/components/shared/status-badge';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import type { Applicant, ApplicantStatus } from '@/models/people/people-model';
 
 interface ApplicantReviewPanelProps {
@@ -87,19 +89,19 @@ export default function ApplicantReviewPanel({
         </p>
 
         <label className="my-3.5 flex items-start gap-2 text-xs text-muted-foreground">
-          <input type="checkbox" defaultChecked disabled className="accent-primary" />
+          <Input type="checkbox" defaultChecked disabled className="accent-primary" />
           Applicant confirmed originality and accepted content guidelines.
         </label>
 
         <label className="mb-1.5 block text-xs font-bold text-foreground" htmlFor="reviewer-comment">
           Reviewer comment
         </label>
-        <textarea
+        <Textarea
           id="reviewer-comment"
           value={comment}
           onChange={(event) => setComment(event.target.value)}
           placeholder="Required if requesting revision or rejecting"
-          className="min-h-[60px] w-full rounded-xl border border-border bg-card text-foreground px-[13px] py-3 text-sm outline-none focus-visible:border-brand-sage-light"
+          className="min-h-[60px]"
         />
         <p className="mt-2.5 text-xs text-muted-foreground">
           Approving grants this applicant contributor portal access. They will

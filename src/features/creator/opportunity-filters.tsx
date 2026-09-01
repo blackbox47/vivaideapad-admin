@@ -1,6 +1,7 @@
 import { Search } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
 
+import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import {
   OPPORTUNITY_CATEGORIES,
@@ -75,12 +76,12 @@ export default function OpportunityFilters({
           strokeWidth={2}
           aria-hidden
         />
-        <input
+        <Input
           value={search}
           onChange={(event) => onSearchChange(event.target.value)}
           placeholder="Search briefs by title, category or keyword"
           aria-label="Search briefs"
-          className="max-w-md w-md rounded-full border border-border bg-card py-2.5 pr-4.5 pl-11 text-[13px] text-foreground outline-none placeholder:text-text-subtle focus-visible:border-brand-sage-light focus-visible:ring-2 focus-visible:ring-success-muted"
+          className="max-w-md w-md rounded-full py-2.5 pr-4.5 pl-11 text-[13px] placeholder:text-text-subtle"
         />
       </label>
     </div>

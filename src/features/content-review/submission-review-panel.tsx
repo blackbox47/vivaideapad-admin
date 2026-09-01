@@ -1,5 +1,6 @@
 import { useState } from 'react';
 
+import { Textarea } from '@/components/ui/textarea';
 import type {
   ContentSubmission,
   SubmissionStatus,
@@ -104,7 +105,7 @@ export default function SubmissionReviewPanel({
         >
           Feedback to contributor
         </label>
-        <textarea
+        <Textarea
           id="content-reviewer-comment"
           value={comment}
           onChange={(event) => {
@@ -112,11 +113,9 @@ export default function SubmissionReviewPanel({
             setFeedbackError(null);
           }}
           placeholder="Add reviewer notes (optional for approval, required for revision or rejection)"
-          className="min-h-[70px] w-full rounded-xl border border-border bg-card text-foreground px-[13px] py-3 text-sm outline-none focus-visible:border-brand-sage-light"
+          className="min-h-[70px]"
+          errorMessage={feedbackError}
         />
-        {feedbackError ? (
-          <p className="mt-2 text-xs text-destructive">{feedbackError}</p>
-        ) : null}
 
         <div className="mt-[18px] flex flex-wrap justify-end gap-2.5">
           <button

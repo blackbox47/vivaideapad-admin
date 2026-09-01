@@ -2,6 +2,7 @@ import { Camera, Loader2 } from 'lucide-react';
 import { useRef } from 'react';
 
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Input } from '@/components/ui/input';
 
 interface ProfileAvatarUploaderProps {
   name: string;
@@ -54,7 +55,7 @@ export default function ProfileAvatarUploader({
         </AvatarFallback>
       </Avatar>
 
-      <input
+      <Input
         ref={inputRef}
         type="file"
         accept="image/*"

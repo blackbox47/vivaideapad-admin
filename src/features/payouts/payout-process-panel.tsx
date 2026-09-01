@@ -1,5 +1,6 @@
 import { useState } from 'react';
 
+import { Textarea } from '@/components/ui/textarea';
 import type { Payout } from '@/models/payouts/payouts-model';
 
 interface PayoutProcessPanelProps {
@@ -86,7 +87,7 @@ export default function PayoutProcessPanel({
         >
           Admin note
         </label>
-        <textarea
+        <Textarea
           id="payout-process-note"
           value={note}
           onChange={(event) => {
@@ -94,11 +95,9 @@ export default function PayoutProcessPanel({
             setNoteError(null);
           }}
           placeholder="Add a note (required when rejecting, optional when paying)"
-          className="min-h-[70px] w-full rounded-xl border border-border bg-card text-foreground px-[13px] py-3 text-sm outline-none focus-visible:border-brand-sage-light"
+          className="min-h-[70px]"
+          errorMessage={noteError}
         />
-        {noteError ? (
-          <p className="mt-2 text-xs text-destructive">{noteError}</p>
-        ) : null}
 
         <div className="mt-[18px] flex flex-wrap justify-end gap-2.5">
           <button

@@ -1,5 +1,8 @@
-import { useEffect, useState, type FormEvent, type MouseEvent } from 'react';
+import { useEffect, type MouseEvent } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { ChevronDown } from 'lucide-react';
+import { z } from 'zod';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,19 +10,19 @@ import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import type { DropdownOption } from '@/utils/types/dropdown-option';
 
-/**
- * Payout methods available for withdrawal requests. Each entry is a
- * `{ id, label }` pair — `id` is the stable identifier sent on submit,
- * `label` is the human-readable display. For static enums the id and
- * label are the same string; once the backend exposes real method IDs
- * we can split them without touching the dropdown markup.
- */
 const METHOD_OPTIONS: DropdownOption[] = [
   { id: 'bKash · 018•••42', label: 'bKash · 018•••42' },
   { id: 'Nagad', label: 'Nagad' },
   { id: 'Rocket', label: 'Rocket' },
   { id: 'Bank transfer', label: 'Bank transfer' },
 ];
+
+const withdrawRequestSchema = z.object({
+  amount: z.string().trim().min(1, 'Amount is required.'),
+  method: z.string().min(1, 'Payout method is required.'),
+});
+
+type WithdrawRequestFormValues = z.infer<typeof withdrawRequestSchema>;
 
 const fieldClassName =
   'h-auto w-full rounded-[12px] border border-border bg-card text-foreground px-[13px] py-3 text-sm shadow-none focus-visible:border-brand-sage-light';
@@ -41,11 +44,21 @@ export default function WithdrawRequestDialog({
   onClose,
   onSubmit,
 }: WithdrawRequestDialogProps) {
-  const [amount, setAmount] = useState(available);
   const initialMethod =
     METHOD_OPTIONS.find((option) => option.id === defaultMethod)?.id ??
     METHOD_OPTIONS[0].id;
-  const [method, setMethod] = useState(initialMethod);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<WithdrawRequestFormValues>({
+    resolver: zodResolver(withdrawRequestSchema),
+    defaultValues: {
+      amount: available,
+      method: initialMethod,
+    },
+  });
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -64,9 +77,11 @@ export default function WithdrawRequestDialog({
     }
   };
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    await onSubmit({ amount: amount.trim(), method });
+  const onFormSubmit = async (values: WithdrawRequestFormValues) => {
+    await onSubmit({
+      amount: values.amount.trim(),
+      method: values.method,
+    });
   };
 
   return (
@@ -108,20 +123,13 @@ export default function WithdrawRequestDialog({
           withdrawal threshold applies.
         </p>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit(onFormSubmit)} noValidate>
           <div className="mb-3">
-            <Label
-              htmlFor="withdraw-amount"
-              className="mb-1.5 block text-[12px] font-bold text-foreground"
-            >
-              Amount
-            </Label>
             <Input
               id="withdraw-amount"
-              value={amount}
-              onChange={(event) => setAmount(event.target.value)}
-              required
-              className={fieldClassName}
+              label="Amount"
+              errorMessage={errors.amount?.message}
+              {...register('amount')}
             />
           </div>
 
@@ -135,9 +143,8 @@ export default function WithdrawRequestDialog({
             <div className="relative">
               <select
                 id="withdraw-method"
-                value={method}
-                onChange={(event) => setMethod(event.target.value)}
                 className={cn(fieldClassName, 'appearance-none pr-10')}
+                {...register('method')}
               >
                 {METHOD_OPTIONS.map((option) => (
                   <option key={option.id} value={option.id}>
@@ -150,6 +157,11 @@ export default function WithdrawRequestDialog({
                 className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-muted-foreground"
               />
             </div>
+            {errors.method?.message ? (
+              <p className="mt-1.5 text-xs font-semibold text-destructive" role="alert">
+                {errors.method.message}
+              </p>
+            ) : null}
           </div>
 
           {error ? (

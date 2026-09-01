@@ -1,58 +1,49 @@
-import { useState, type FormEvent } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useNavigate } from '@tanstack/react-router';
+import { z } from 'zod';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import useAuth from '@/hooks/auth/use-auth';
 import { ADMIN_ROUTES } from '@/utils/constants/routes';
 
+const adminSignInSchema = z.object({
+  email: z
+    .string()
+    .trim()
+    .min(1, 'Admin email is required')
+    .email('Please enter a valid email address'),
+  password: z.string().min(1, 'Password is required'),
+});
+
+type AdminSignInFormValues = z.infer<typeof adminSignInSchema>;
+
 export default function AdminSignInPanel() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [validationError, setValidationError] = useState<string | null>(null);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<AdminSignInFormValues>({
+    resolver: zodResolver(adminSignInSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+  });
   const { login, isLoggingIn, loginError, resetLoginError } = useAuth();
   const navigate = useNavigate();
 
-  const handleEmailChange = (value: string) => {
-    setEmail(value);
-    if (loginError || validationError) {
-      resetLoginError();
-      setValidationError(null);
-    }
-  };
-
-  const handlePasswordChange = (value: string) => {
-    setPassword(value);
-    if (loginError || validationError) {
-      resetLoginError();
-      setValidationError(null);
-    }
-  };
-
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setValidationError(null);
-
-    if (!email.trim()) {
-      setValidationError('Email is required');
-      return;
-    }
-    if (!password.trim()) {
-      setValidationError('Password is required');
-      return;
-    }
-
+  const onSubmit = async (values: AdminSignInFormValues) => {
+    resetLoginError();
     try {
-      await login({ email, password });
+      await login(values);
       // Always land on the admin dashboard after sign-in.
       navigate({ to: ADMIN_ROUTES.dashboard, replace: true });
     } catch {
       // Failure surfaced via loginError.
     }
   };
-
-  const inlineError = validationError ?? loginError;
 
   return (
     <section className="flex min-h-svh items-center justify-center bg-surface-subtle p-11 lg:min-h-0">
@@ -74,50 +65,36 @@ export default function AdminSignInPanel() {
           Authorized administrators only. Enter your credentials to continue.
         </p>
 
-        <form className="mt-7" onSubmit={handleSubmit} noValidate>
+        <form className="mt-7" onSubmit={handleSubmit(onSubmit)} noValidate>
           <div className="mb-3.5">
-            <Label
-              htmlFor="admin-email"
-              className="mb-1.5 block text-[12px] font-bold text-foreground"
-            >
-              Admin email
-            </Label>
             <Input
               id="admin-email"
+              label="Admin email"
               type="email"
-              value={email}
-              onChange={(event) => handleEmailChange(event.target.value)}
               autoComplete="username"
               placeholder="admin@ideapad.app"
-              aria-invalid={Boolean(inlineError)}
-              className="h-auto w-full rounded-[12px] border-border bg-card px-[14px] py-[13px] text-sm text-foreground shadow-none focus-visible:border-brand-sage-light"
+              errorMessage={errors.email?.message}
+              {...register('email')}
             />
           </div>
 
           <div className="mb-[18px]">
-            <Label
-              htmlFor="admin-password"
-              className="mb-1.5 block text-[12px] font-bold text-foreground"
-            >
-              Password
-            </Label>
             <Input
               id="admin-password"
+              label="Password"
               type="password"
-              value={password}
-              onChange={(event) => handlePasswordChange(event.target.value)}
               autoComplete="current-password"
-              aria-invalid={Boolean(inlineError)}
-              className="h-auto w-full rounded-[12px] border-border bg-card px-[14px] py-[13px] text-sm text-foreground shadow-none focus-visible:border-brand-sage-light"
+              errorMessage={errors.password?.message}
+              {...register('password')}
             />
           </div>
 
-          {inlineError ? (
+          {loginError ? (
             <p
               className="mb-3 text-[12px] font-semibold text-destructive"
               role="alert"
             >
-              {inlineError}
+              {loginError}
             </p>
           ) : null}
 
