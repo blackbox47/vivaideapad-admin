@@ -1271,7 +1271,7 @@ const handlers: Record<string, MockHandler> = {
         const matchesSearch =
           search.length === 0 ||
           idea.title.toLowerCase().includes(search) ||
-          idea.topic.toLowerCase().includes(search);
+          (idea.conceptTitle ?? idea.topic ?? '').toLowerCase().includes(search);
         return matchesStatus && matchesSearch;
       })
       .sort((a, b) => {
@@ -1287,30 +1287,42 @@ const handlers: Record<string, MockHandler> = {
     return { ideas: filtered, total: myIdeasState.length };
   },
   [`POST ${CREATOR_IDEAS_SUBMIT_URL}`]: (request) => {
-    const body = request.body as Partial<SubmitIdeaBody> | undefined;
-    if (
-      !body ||
-      typeof body.title !== 'string' ||
-      typeof body.topicId !== 'string' ||
-      typeof body.summary !== 'string' ||
-      typeof body.body !== 'string'
-    ) {
+    let title: string;
+    let topicId: string;
+    let summary: string;
+    let bodyText: string;
+
+    if (typeof FormData !== 'undefined' && request.body instanceof FormData) {
+      title = String(request.body.get('title') ?? '').trim();
+      topicId = String(
+        request.body.get('concept_id') ?? request.body.get('topicId') ?? '',
+      ).trim();
+      bodyText = String(request.body.get('body') ?? '').trim();
+      summary = bodyText.slice(0, 240);
+    } else {
+      const body = request.body as Partial<SubmitIdeaBody> | undefined;
+      title = String(body?.title ?? '').trim();
+      topicId = String(body?.concept_id ?? body?.topicId ?? '').trim();
+      summary = String(body?.summary ?? '').trim();
+      bodyText = String(body?.body ?? summary).trim();
+      if (!summary) summary = bodyText.slice(0, 240);
+    }
+
+    if (!title || !topicId || !bodyText) {
       throw new Error('Invalid idea submission payload');
     }
-    if (body.title.length === 0 || body.title.length > 80) {
+    if (title.length > 80) {
       throw new Error('Title must be 1-80 characters');
     }
-    if (body.summary.length === 0 || body.summary.length > 240) {
+    if (summary.length > 240) {
       throw new Error('Summary must be 1-240 characters');
     }
-    if (body.body.length === 0 || body.body.length > 4000) {
+    if (bodyText.length > 4000) {
       throw new Error('Body must be 1-4000 characters');
     }
 
-    const topic = mockCreatorTopics.find((t) => t.id === body.topicId);
-    if (!topic) {
-      throw new Error('Unknown topic');
-    }
+    const topic =
+      mockCreatorTopics.find((t) => t.id === topicId) ?? mockCreatorTopics[0];
 
     const today = new Date();
     const dd = String(today.getDate()).padStart(2, '0');
@@ -1319,13 +1331,13 @@ const handlers: Record<string, MockHandler> = {
 
     const newIdea: MyIdea = {
       id: `idea_${Date.now()}`,
-      title: body.title,
-      topic: topic.title,
+      title,
+      topic: topic ? topic.title : 'General',
       submitted: `${dd}-${mm}-${yyyy}`,
       status: 'Submitted',
       reward: '—',
       comments: 0,
-      body: body.summary,
+      body: summary,
     };
     myIdeasState = [newIdea, ...myIdeasState];
 

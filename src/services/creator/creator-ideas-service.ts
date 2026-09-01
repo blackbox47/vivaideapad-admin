@@ -14,18 +14,36 @@ import {
 export const creatorIdeasService = baseService.injectEndpoints({
   endpoints: (builder) => ({
     submitIdea: builder.mutation<SubmitIdeaResponse, SubmitIdeaBody>({
-      query: (body) => ({
-        url: CREATOR_IDEAS_SUBMIT_URL,
-        method: 'POST',
-        body: {
-          concept_id: body.concept_id || body.topicId || '',
-          title: body.title,
-          body: body.body || body.summary || '',
-          attachments: body.attachmentUrl
-            ? { url: body.attachmentUrl }
-            : undefined,
-        },
-      }),
+      query: (body) => {
+        if (body.file) {
+          const formData = new FormData();
+          formData.append(
+            'concept_id',
+            body.concept_id || body.topicId || '',
+          );
+          formData.append('title', body.title);
+          formData.append('body', body.body || body.summary || '');
+          formData.append('file', body.file);
+          return {
+            url: CREATOR_IDEAS_SUBMIT_URL,
+            method: 'POST',
+            body: formData,
+          };
+        }
+
+        return {
+          url: CREATOR_IDEAS_SUBMIT_URL,
+          method: 'POST',
+          body: {
+            concept_id: body.concept_id || body.topicId || '',
+            title: body.title,
+            body: body.body || body.summary || '',
+            attachments: body.attachmentUrl
+              ? { url: body.attachmentUrl }
+              : undefined,
+          },
+        };
+      },
       transformResponse: (response: unknown): SubmitIdeaResponse => {
         const res = response as Record<string, unknown>;
         if (res && 'idea' in res) {

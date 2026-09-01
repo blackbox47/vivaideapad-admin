@@ -61,7 +61,7 @@ export default function SubmissionViewDialog({
         <div className="mb-3.5 flex items-start justify-between gap-4">
           <div>
             <p className="text-[12px] font-extrabold tracking-[0.12em] text-brand-sage uppercase">
-              {idea.topic}
+              {idea.conceptTitle ?? idea.topic ?? '—'}
             </p>
             <h2
               id="submission-view-title"

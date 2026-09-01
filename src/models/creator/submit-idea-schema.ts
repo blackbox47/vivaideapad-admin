@@ -25,14 +25,8 @@ export const submitIdeaSchema = z.object({
     .trim()
     .min(1, 'Body is required.')
     .max(BODY_MAX, `Body must be at most ${BODY_MAX} characters.`),
-  attachmentUrl: z
-    .string()
-    .trim()
-    .refine(
-      (val) => !val || URL_PATTERN.test(val),
-      'Attachment URL must start with http:// or https://',
-    )
-    .optional(),
+  attachmentUrl: z.string().optional(),
+  confirmedOriginal: z.boolean().optional(),
 });
 
 export type SubmitIdeaFormValues = z.infer<typeof submitIdeaSchema>;

@@ -36,6 +36,7 @@ export interface SubmitIdeaBody {
   summary?: string;
   body: string;
   attachmentUrl?: string;
+  file?: File;
 }
 
 export interface SubmitIdeaResponse {

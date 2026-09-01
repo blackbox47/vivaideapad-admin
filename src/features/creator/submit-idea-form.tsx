@@ -3,7 +3,9 @@ import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
+import { FileUploader } from '@/components/ui/file-uploader';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import useSubmitIdea from '@/hooks/creator/use-submit-idea';
@@ -21,6 +23,16 @@ import { CREATOR_ROUTES } from '@/utils/constants/routes';
 import { getApiErrorMessage } from '@/utils/helpers/api-error';
 import type { DropdownOption } from '@/utils/types/dropdown-option';
 
+function readFileAsDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result ?? ''));
+    reader.onerror = () =>
+      reject(new Error(reader.error?.message ?? 'Failed to read file'));
+    reader.readAsDataURL(file);
+  });
+}
+
 interface SubmitIdeaFormProps {
   topics: CreatorTopic[];
   isLoadingTopics: boolean;
@@ -35,6 +47,7 @@ export default function SubmitIdeaForm({
   onTopicChange,
 }: SubmitIdeaFormProps) {
   const [serverError, setServerError] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [submitIdea, { isLoading }] = useSubmitIdea();
   const navigate = useNavigate();
 
@@ -52,6 +65,7 @@ export default function SubmitIdeaForm({
       summary: '',
       body: '',
       attachmentUrl: '',
+      confirmedOriginal: false,
     },
   });
 
@@ -74,6 +88,20 @@ export default function SubmitIdeaForm({
     }
   }, [selectedTopicId, setValue]);
 
+  const handleFileChange = async (file: File | null) => {
+    setSelectedFile(file);
+    if (!file) {
+      setValue('attachmentUrl', '');
+      return;
+    }
+    try {
+      const dataUrl = await readFileAsDataUrl(file);
+      setValue('attachmentUrl', dataUrl);
+    } catch {
+      setValue('attachmentUrl', file.name);
+    }
+  };
+
   const onFormSubmit = async (values: SubmitIdeaFormValues) => {
     setServerError(null);
     try {
@@ -83,6 +111,7 @@ export default function SubmitIdeaForm({
         summary: values.summary.trim(),
         body: values.body.trim(),
         attachmentUrl: values.attachmentUrl?.trim() || undefined,
+        file: selectedFile ?? undefined,
       }).unwrap();
       navigate({ to: CREATOR_ROUTES.submissions, replace: true });
     } catch (err) {
@@ -156,18 +185,29 @@ export default function SubmitIdeaForm({
         </p>
       </div>
 
-      <div>
+      <FileUploader
+        id="attachment"
+        label="Supporting evidence"
+        acceptText="PDF, DOCX, JPG or PNG · up to 10 MB"
+        value={selectedFile}
+        onChange={handleFileChange}
+        disabled={isLoading || isLoadingTopics}
+        errorMessage={errors.attachmentUrl?.message}
+      />
+
+      <div className="flex items-center gap-2.5 pt-0.5">
         <Input
-          id="attachment"
-          label={
-            <>
-              Attachment URL <span className="font-normal text-text-subtle">(optional)</span>
-            </>
-          }
-          placeholder="https://"
-          errorMessage={errors.attachmentUrl?.message}
-          {...register('attachmentUrl')}
+          id="confirmedOriginal"
+          type="checkbox"
+          className="size-4 cursor-pointer rounded accent-primary disabled:opacity-60"
+          {...register('confirmedOriginal')}
         />
+        <Label
+          htmlFor="confirmedOriginal"
+          className="cursor-pointer text-[13px] font-normal text-foreground select-none"
+        >
+          I confirm this submission is original and follows the content guidelines
+        </Label>
       </div>
 
       {serverError ? (

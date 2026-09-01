@@ -1412,6 +1412,7 @@ export const mockMyIdeas: MyIdea[] = [
   {
     id: 's1',
     title: 'A Letter Amma Never Got',
+    conceptTitle: 'মা দিবসের গল্প — Mother\'s Day Stories',
     topic: 'মা দিবসের গল্প — Mother\'s Day Stories',
     submitted: '06-08-2026',
     status: 'Draft',
@@ -1422,6 +1423,7 @@ export const mockMyIdeas: MyIdea[] = [
   {
     id: 's2',
     title: 'The Man Who Taught Me to Ride',
+    conceptTitle: 'বাবা দিবসের অনুপ্রেরণা — Father\'s Day Inspiration',
     topic: 'বাবা দিবসের অনুপ্রেরণা — Father\'s Day Inspiration',
     submitted: '03-08-2026',
     status: 'Revision Requested',
@@ -1434,6 +1436,7 @@ export const mockMyIdeas: MyIdea[] = [
   {
     id: 's3',
     title: 'Songs My Grandfather Sang in \'71',
+    conceptTitle: 'মহান বিজয় দিবস — Victory Day (16 Dec)',
     topic: 'মহান বিজয় দিবস — Victory Day (16 Dec)',
     submitted: '28-07-2026',
     status: 'Approved',
@@ -1445,6 +1448,7 @@ export const mockMyIdeas: MyIdea[] = [
   {
     id: 's4',
     title: 'Mangal Shobhajatra: A Street Becomes a Story',
+    conceptTitle: 'পহেলা বৈশাখ ক্যাম্পেইন — Pohela Boishakh',
     topic: 'পহেলা বৈশাখ ক্যাম্পেইন — Pohela Boishakh',
     submitted: '16-07-2026',
     status: 'Published',

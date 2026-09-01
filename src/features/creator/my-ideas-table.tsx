@@ -35,7 +35,7 @@ export default function MyIdeasTable({
             <strong className="font-semibold text-foreground">{idea.title}</strong>
           </ProjectTableCell>
           <ProjectTableCell className="text-muted-foreground">
-            {idea.topic}
+            {idea.conceptTitle ?? idea.topic ?? '—'}
           </ProjectTableCell>
           <ProjectTableCell className="whitespace-nowrap text-muted-foreground">
             {idea.submitted}

@@ -5,6 +5,7 @@ import type { IdeaStatus } from '@/models/creator/creator-dashboard-model';
 export interface MyIdea {
   id: string;
   title: string;
+  conceptTitle?: string;
   topic: string;
   submitted: string;
   status: IdeaStatus;
