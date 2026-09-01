@@ -44,7 +44,16 @@ export const creatorRewardsService = baseService.injectEndpoints({
       query: (body) => ({
         url: CREATOR_REWARDS_WITHDRAW_URL,
         method: 'POST',
-        body,
+        body: {
+          amount: body.amount,
+          method: body.method,
+          details: {
+            mobile: body.mobile,
+            phone: body.mobile,
+            account_number: body.mobile,
+          },
+          ...(body.mobile ? { mobile: body.mobile } : {}),
+        },
       }),
       invalidatesTags: ['creator-rewards'],
     }),

@@ -1,5 +1,6 @@
 import { useEffect, type MouseEvent } from 'react';
 import { useNavigate } from '@tanstack/react-router';
+import { X } from 'lucide-react';
 
 import StatusBadge from '@/components/shared/status-badge';
 import { Button } from '@/components/ui/button';
@@ -75,7 +76,7 @@ export default function SubmissionViewDialog({
             className="text-[22px] leading-none text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
             aria-label="Close"
           >
-            ×
+            <X />
           </button>
         </div>
 

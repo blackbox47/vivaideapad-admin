@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { X } from 'lucide-react';
 
 import { Textarea } from '@/components/ui/textarea';
 import type {
@@ -64,7 +65,7 @@ export default function SubmissionReviewPanel({
             aria-label="Close review"
             onClick={onClose}
           >
-            ×
+            <X />
           </button>
         </div>
 

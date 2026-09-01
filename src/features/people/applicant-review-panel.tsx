@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { X } from 'lucide-react';
 
 import StatusBadge from '@/components/shared/status-badge';
 import { Input } from '@/components/ui/input';
@@ -46,7 +47,7 @@ export default function ApplicantReviewPanel({
             aria-label="Close review"
             onClick={onClose}
           >
-            ×
+            <X />
           </button>
         </div>
 

@@ -1,8 +1,9 @@
 import { useEffect, type MouseEvent } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
+import { Select } from '@/components/ui/select';
 import {
   changePayoutMethodSchema,
   type ChangePayoutMethodFormValues,
@@ -65,7 +66,7 @@ export default function ChangePayoutMethodDialog({
 
   const onFormSubmit = async (values: ChangePayoutMethodFormValues) => {
     const selected: UpdatePayoutMethodBody = {
-      method: values.method,
+      method: values.method as PayoutMethod['method'],
       label:
         METHOD_OPTIONS.find((option) => option.id === values.method)?.label ??
         METHOD_OPTIONS[0].label,
@@ -102,36 +103,19 @@ export default function ChangePayoutMethodDialog({
             className="text-[22px] leading-none text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
             aria-label="Close"
           >
-            ×
+            <X />
           </button>
         </div>
 
         <form onSubmit={handleSubmit(onFormSubmit)} noValidate>
-          <Label
-            htmlFor="payout-method"
-            className="mb-1.5 block text-[12px] font-bold text-foreground"
-          >
-            Payout method
-            <span className="ml-0.5 text-destructive" aria-hidden="true">
-              *
-            </span>
-          </Label>
-          <select
+          <Select
             id="payout-method"
+            label="Payout method"
+            required
+            options={METHOD_OPTIONS}
+            errorMessage={errors.method?.message}
             {...register('method')}
-            className="h-auto w-full rounded-[12px] border border-border bg-card text-foreground px-3.25 py-3 text-sm focus-visible:border-brand-sage-light"
-          >
-            {METHOD_OPTIONS.map((option) => (
-              <option key={option.id} value={option.id}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-          {errors.method?.message ? (
-            <p className="mt-1.5 text-xs font-semibold text-destructive" role="alert">
-              {errors.method.message}
-            </p>
-          ) : null}
+          />
 
           {error ? (
             <p className="mt-2 text-[12px] font-semibold text-destructive" role="alert">

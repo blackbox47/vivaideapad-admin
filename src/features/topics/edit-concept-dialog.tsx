@@ -7,7 +7,7 @@ import {
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { format, parse } from 'date-fns';
-import { CalendarIcon, ChevronDown } from 'lucide-react';
+import { CalendarIcon, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Input } from '@/components/ui/input';
@@ -17,6 +17,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import { Select } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import type {
@@ -114,51 +115,6 @@ function DateField({
         />
       </PopoverContent>
     </Popover>
-  );
-}
-
-function FieldSelect({
-  id,
-  value,
-  onChange,
-  options,
-  placeholder,
-  ariaLabel,
-}: {
-  id: string;
-  value: string;
-  onChange: (value: string) => void;
-  options: DropdownOption[];
-  placeholder?: string;
-  ariaLabel?: string;
-}) {
-  return (
-    <div className="relative">
-      <select
-        id={id}
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        aria-label={ariaLabel}
-        className={cn(fieldClassName, 'appearance-none pr-10')}
-      >
-        {options.length === 0 && placeholder ? (
-          <option value="">{placeholder}</option>
-        ) : null}
-        {options.map((option) => (
-          <option
-            key={option.id}
-            value={option.id}
-            disabled={option.disabled}
-          >
-            {option.label}
-          </option>
-        ))}
-      </select>
-      <ChevronDown
-        aria-hidden
-        className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-muted-foreground"
-      />
-    </div>
   );
 }
 
@@ -341,7 +297,7 @@ export default function EditConceptDialog({
             className="text-[22px] leading-none text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
             aria-label="Close"
           >
-            ×
+            <X />
           </button>
         </div>
 
@@ -358,48 +314,39 @@ export default function EditConceptDialog({
             </div>
 
             <div>
-              <div className="mb-1.5 flex items-center justify-between">
-                <Label
-                  htmlFor="edit-concept-category"
-                  className="text-[12px] font-bold text-foreground"
-                >
-                  Category
-                  <span className="ml-0.5 text-destructive" aria-hidden="true">
-                    *
-                  </span>
-                </Label>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsNewCategoryOpen((open) => !open);
-                    setNewCategoryName('');
-                    setCategoryDraftError(null);
-                    setNewCategoryIcon(CATEGORY_ICON_CHOICES[0]);
-                  }}
-                  className="text-[12px] font-bold text-brand-sage hover:underline cursor-pointer"
-                >
-                  + New category
-                </button>
-              </div>
               <Controller
                 control={control}
                 name="categoryId"
                 render={({ field }) => (
-                  <FieldSelect
+                  <Select
                     id="edit-concept-category"
+                    label={
+                      <div className="flex items-center justify-between">
+                        <span>Category</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsNewCategoryOpen((open) => !open);
+                            setNewCategoryName('');
+                            setCategoryDraftError(null);
+                            setNewCategoryIcon(CATEGORY_ICON_CHOICES[0]);
+                          }}
+                          className="text-[12px] font-bold text-brand-sage hover:underline cursor-pointer"
+                        >
+                          + New category
+                        </button>
+                      </div>
+                    }
+                    required
                     value={field.value}
                     onChange={field.onChange}
                     options={categoryOptions}
                     placeholder="Choose a category"
-                    ariaLabel="Concept category"
+                    aria-label="Concept category"
+                    errorMessage={errors.categoryId?.message}
                   />
                 )}
               />
-              {errors.categoryId?.message ? (
-                <p className="mt-1.5 text-xs font-semibold text-destructive" role="alert">
-                  {errors.categoryId.message}
-                </p>
-              ) : null}
               {isNewCategoryOpen ? (
                 <div className="mt-2.5 flex flex-col gap-2 rounded-[12px] bg-surface-subtle p-3">
                   <div className="flex flex-wrap gap-1.5">
@@ -517,22 +464,18 @@ export default function EditConceptDialog({
             </div>
 
             <div>
-              <Label
-                htmlFor="edit-concept-status"
-                className="mb-1.5 block text-[12px] font-bold text-foreground"
-              >
-                Status
-              </Label>
               <Controller
                 control={control}
                 name="status"
                 render={({ field }) => (
-                  <FieldSelect
+                  <Select
                     id="edit-concept-status"
+                    label="Status"
                     value={field.value}
-                    onChange={(value) => field.onChange(value as ConceptStatus)}
+                    onChange={(event) => field.onChange(event.target.value as ConceptStatus)}
                     options={STATUS_OPTIONS}
-                    ariaLabel="Concept status"
+                    aria-label="Concept status"
+                    errorMessage={errors.status?.message}
                   />
                 )}
               />

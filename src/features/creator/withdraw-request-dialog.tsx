@@ -1,11 +1,10 @@
 import { useEffect, type MouseEvent } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ChevronDown } from 'lucide-react';
+import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { cn } from '@/lib/utils';
+import { Select } from '@/components/ui/select';
 import {
   withdrawRequestSchema,
   type WithdrawRequestFormValues,
@@ -13,27 +12,30 @@ import {
 import type { DropdownOption } from '@/utils/types/dropdown-option';
 
 const METHOD_OPTIONS: DropdownOption[] = [
-  { id: 'bKash · 018•••42', label: 'bKash · 018•••42' },
+  { id: 'bKash', label: 'bKash' },
   { id: 'Nagad', label: 'Nagad' },
   { id: 'Rocket', label: 'Rocket' },
   { id: 'Bank transfer', label: 'Bank transfer' },
 ];
 
-const fieldClassName =
-  'h-auto w-full rounded-[12px] border border-border bg-card text-foreground px-[13px] py-3 text-sm shadow-none focus-visible:border-brand-sage-light';
-
 interface WithdrawRequestDialogProps {
   available: string;
   defaultMethod: string;
+  defaultMobile?: string;
   isSubmitting: boolean;
   error: string | null;
   onClose: () => void;
-  onSubmit: (payload: { amount: string; method: string }) => Promise<void>;
+  onSubmit: (payload: {
+    amount: string;
+    method: string;
+    mobile: string;
+  }) => Promise<void>;
 }
 
 export default function WithdrawRequestDialog({
   available,
   defaultMethod,
+  defaultMobile,
   isSubmitting,
   error,
   onClose,
@@ -42,6 +44,7 @@ export default function WithdrawRequestDialog({
   const initialMethod =
     METHOD_OPTIONS.find((option) => option.id === defaultMethod)?.id ??
     METHOD_OPTIONS[0].id;
+  const initialAmount = available ? available.replace(/[^0-9.]/g, '') : '';
 
   const {
     register,
@@ -50,8 +53,9 @@ export default function WithdrawRequestDialog({
   } = useForm<WithdrawRequestFormValues>({
     resolver: zodResolver(withdrawRequestSchema),
     defaultValues: {
-      amount: available,
+      amount: initialAmount,
       method: initialMethod,
+      mobile: defaultMobile ?? '',
     },
   });
 
@@ -76,6 +80,7 @@ export default function WithdrawRequestDialog({
     await onSubmit({
       amount: values.amount.trim(),
       method: values.method,
+      mobile: values.mobile.trim(),
     });
   };
 
@@ -108,7 +113,7 @@ export default function WithdrawRequestDialog({
             className="text-[22px] leading-none text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
             aria-label="Close"
           >
-            ×
+            <X />
           </button>
         </div>
 
@@ -122,6 +127,10 @@ export default function WithdrawRequestDialog({
           <div className="mb-3">
             <Input
               id="withdraw-amount"
+              type="number"
+              min="0"
+              step="any"
+              placeholder="0.00"
               label="Amount"
               required
               errorMessage={errors.amount?.message}
@@ -130,37 +139,26 @@ export default function WithdrawRequestDialog({
           </div>
 
           <div className="mb-3">
-            <Label
-              htmlFor="withdraw-method"
-              className="mb-1.5 block text-[12px] font-bold text-foreground"
-            >
-              Payout method
-              <span className="ml-0.5 text-destructive" aria-hidden="true">
-                *
-              </span>
-            </Label>
-            <div className="relative">
-              <select
-                id="withdraw-method"
-                className={cn(fieldClassName, 'appearance-none pr-10')}
-                {...register('method')}
-              >
-                {METHOD_OPTIONS.map((option) => (
-                  <option key={option.id} value={option.id}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown
-                aria-hidden
-                className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-muted-foreground"
-              />
-            </div>
-            {errors.method?.message ? (
-              <p className="mt-1.5 text-xs font-semibold text-destructive" role="alert">
-                {errors.method.message}
-              </p>
-            ) : null}
+            <Select
+              id="withdraw-method"
+              label="Payout method"
+              required
+              options={METHOD_OPTIONS}
+              errorMessage={errors.method?.message}
+              {...register('method')}
+            />
+          </div>
+
+          <div className="mb-3">
+            <Input
+              id="withdraw-mobile"
+              type="tel"
+              label="Mobile number"
+              placeholder="e.g. 018XXXXXXXX"
+              required
+              errorMessage={errors.mobile?.message}
+              {...register('mobile')}
+            />
           </div>
 
           {error ? (

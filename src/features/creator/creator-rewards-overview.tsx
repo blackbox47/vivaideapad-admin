@@ -103,7 +103,11 @@ export default function CreatorRewardsOverview() {
     setIsWithdrawOpen(false);
   };
 
-  const handleWithdraw = async (payload: { amount: string; method: string }) => {
+  const handleWithdraw = async (payload: {
+    amount: string;
+    method: string;
+    mobile: string;
+  }) => {
     try {
       await requestWithdrawal(payload).unwrap();
       closeWithdraw();

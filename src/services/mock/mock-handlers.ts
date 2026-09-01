@@ -1230,10 +1230,17 @@ const handlers: Record<string, MockHandler> = {
     }
 
     const methodLabel = request.body.method.split(' · ')[0] || 'bKash';
+    const mobileDetail =
+      (request.body as { mobile?: string; details?: { mobile?: string } })
+        .mobile ??
+      (request.body as { details?: { mobile?: string } }).details?.mobile;
+    const descMethod = mobileDetail
+      ? `${methodLabel} (${mobileDetail})`
+      : methodLabel;
     const reference = `TX${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
     const entry = {
       id: `wd-${Date.now()}`,
-      description: `${methodLabel} payout · ${reference}`,
+      description: `${descMethod} payout · ${reference}`,
       date: formatShortDate(new Date()),
       type: 'Withdrawal' as const,
       amount: `−${formatTaka(amount)}`,

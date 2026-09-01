@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Select } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import useSubmitIdea from '@/hooks/creator/use-submit-idea';
 import type { CreatorTopic } from '@/models/creator/submit-idea-model';
@@ -27,9 +27,6 @@ interface SubmitIdeaFormProps {
   selectedTopicId?: string;
   onTopicChange?: (topicId: string) => void;
 }
-
-const fieldClassName =
-  'h-auto w-full rounded-[12px] border border-border bg-card text-foreground px-[14px] py-[13px] text-sm shadow-none focus-visible:border-brand-sage-light focus-visible:ring-2 focus-visible:ring-success-muted';
 
 export default function SubmitIdeaForm({
   topics,
@@ -97,41 +94,20 @@ export default function SubmitIdeaForm({
 
   return (
     <form onSubmit={handleSubmit(onFormSubmit)} noValidate className="grid gap-4">
-      <div>
-        <Label
-          htmlFor="topic"
-          className="mb-1.5 block text-[12px] font-bold text-foreground"
-        >
-          Topic
-          <span className="ml-0.5 text-destructive" aria-hidden="true">
-            *
-          </span>
-        </Label>
-        <select
-          id="topic"
-          {...topicRegister}
-          onChange={(event) => {
-            topicRegister.onChange(event);
-            onTopicChange?.(event.target.value);
-          }}
-          disabled={isLoadingTopics}
-          className={fieldClassName + ' appearance-none'}
-        >
-          <option value="">
-            {isLoadingTopics ? 'Loading topics…' : 'Choose a topic'}
-          </option>
-          {topicOptions.map((topic) => (
-            <option key={topic.id} value={topic.id}>
-              {topic.label}
-            </option>
-          ))}
-        </select>
-        {errors.topicId?.message ? (
-          <p className="mt-1.5 text-xs font-semibold text-destructive" role="alert">
-            {errors.topicId.message}
-          </p>
-        ) : null}
-      </div>
+      <Select
+        id="topic"
+        label="Topic"
+        required
+        disabled={isLoadingTopics}
+        placeholder={isLoadingTopics ? 'Loading topics…' : 'Choose a topic'}
+        options={topicOptions}
+        errorMessage={errors.topicId?.message}
+        {...topicRegister}
+        onChange={(event) => {
+          topicRegister.onChange(event);
+          onTopicChange?.(event.target.value);
+        }}
+      />
 
       <div>
         <Input

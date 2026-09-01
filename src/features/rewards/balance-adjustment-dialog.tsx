@@ -1,6 +1,7 @@
 import { useEffect, useMemo, type MouseEvent } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -98,7 +99,7 @@ export default function BalanceAdjustmentDialog({
             className="text-[22px] leading-none text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
             aria-label="Close"
           >
-            ×
+            <X />
           </button>
         </div>
 

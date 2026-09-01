@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { X } from 'lucide-react';
 
 import { Textarea } from '@/components/ui/textarea';
 import type { Payout } from '@/models/payouts/payouts-model';
@@ -57,7 +58,7 @@ export default function PayoutProcessPanel({
             aria-label="Close payout panel"
             onClick={onClose}
           >
-            ×
+            <X />
           </button>
         </div>
 

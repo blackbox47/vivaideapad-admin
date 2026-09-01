@@ -1,5 +1,5 @@
 import { useEffect, type MouseEvent } from 'react';
-
+import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { WorkspaceAdmin } from '@/models/admins/admins-model';
 
@@ -61,10 +61,10 @@ export default function RemoveAdminDialog({
           <button
             type="button"
             onClick={onClose}
-            className="text-[22px] leading-none text-muted-foreground hover:text-foreground transition-colors"
+            className="text-[22px] leading-none text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
             aria-label="Close"
           >
-            ×
+            <X />
           </button>
         </div>
 

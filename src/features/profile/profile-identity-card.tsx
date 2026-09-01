@@ -3,7 +3,7 @@ import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Select } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import type {
   ProfileDetails,
@@ -155,20 +155,13 @@ export default function ProfileIdentityCard({
             />
           </div>
           <div>
-            <Label htmlFor="profile-display" className="mb-1.5 block text-[12px] font-bold text-foreground">
-              Public display
-            </Label>
-            <select
+            <Select
               id="profile-display"
+              label="Public display"
+              options={PUBLIC_DISPLAY_OPTIONS}
+              errorMessage={profileErrors.publicDisplay?.message}
               {...registerProfile('publicDisplay')}
-              className="h-auto w-full rounded-[12px] border border-border bg-card text-foreground px-3.25 py-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-            >
-              {PUBLIC_DISPLAY_OPTIONS.map((option) => (
-                <option key={option.id} value={option.id}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+            />
           </div>
           <div className="sm:col-span-2">
             <Textarea
