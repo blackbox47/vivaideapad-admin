@@ -23,8 +23,7 @@ import usePayouts from '@/hooks/payouts/use-payouts';
 import type {
   PayoutStatus,
 } from '@/models/payouts/payouts-model';
-
-const PAGE_SIZE = 6;
+import { DEFAULT_PAGE_SIZE as PAGE_SIZE } from '@/utils/constants/pagination';
 
 export default function PayoutsOverview() {
   const [searchParams, setSearchParams] = useTanstackSearchParams();

@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 
-export type ThemeMode = 'light' | 'dark' | 'system';
+import { THEME_STORAGE_KEY } from '@/utils/constants/storage-keys';
 
-const THEME_KEY = 'ideapad_theme_preference';
+export type ThemeMode = 'light' | 'dark' | 'system';
 
 export default function useTheme() {
   const [theme, setThemeState] = useState<ThemeMode>(() => {
     if (typeof window === 'undefined') return 'system';
-    return (localStorage.getItem(THEME_KEY) as ThemeMode) || 'system';
+    return (localStorage.getItem(THEME_STORAGE_KEY) as ThemeMode) || 'system';
   });
 
   const applyTheme = (mode: ThemeMode) => {
@@ -40,7 +40,7 @@ export default function useTheme() {
   const setTheme = (nextTheme: ThemeMode) => {
     setThemeState(nextTheme);
     try {
-      localStorage.setItem(THEME_KEY, nextTheme);
+      localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
     } catch {
       // Ignore storage errors
     }

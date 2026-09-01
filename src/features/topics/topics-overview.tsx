@@ -24,6 +24,7 @@ import type {
   CreateConceptBody,
   UpdateConceptBody,
 } from '@/models/topics/topics-model';
+import { DEFAULT_PAGE_SIZE as PAGE_SIZE } from '@/utils/constants/pagination';
 import { getApiErrorMessage } from '@/utils/helpers/api-error';
 
 const STATUS_FILTERS = [
@@ -33,8 +34,6 @@ const STATUS_FILTERS = [
   'scheduled',
   'archived',
 ] as const;
-
-const PAGE_SIZE = 6;
 
 type StatusFilter = (typeof STATUS_FILTERS)[number];
 

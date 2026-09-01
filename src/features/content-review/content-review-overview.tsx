@@ -21,8 +21,7 @@ import ReviewTable from '@/features/content-review/review-table';
 import SubmissionReviewPanel from '@/features/content-review/submission-review-panel';
 import useContentReview from '@/hooks/content-review/use-content-review';
 import type { SubmissionStatus } from '@/models/content-review/content-review-model';
-
-const PAGE_SIZE = 6;
+import { DEFAULT_PAGE_SIZE as PAGE_SIZE } from '@/utils/constants/pagination';
 
 export default function ContentReviewOverview() {
   const [searchParams, setSearchParams] = useTanstackSearchParams();

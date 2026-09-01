@@ -19,8 +19,7 @@ import {
   OPPORTUNITY_CATEGORIES,
   type OpportunityCategoryFilter,
 } from '@/models/creator/submit-idea-model';
-
-const PAGE_SIZE = 6;
+import { DEFAULT_PAGE_SIZE as PAGE_SIZE } from '@/utils/constants/pagination';
 
 function parseCategory(value: string | null): OpportunityCategoryFilter {
   if (

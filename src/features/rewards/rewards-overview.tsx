@@ -22,9 +22,8 @@ import RewardTable from '@/features/rewards/reward-table';
 import useCreateAdjustment from '@/hooks/rewards/use-create-adjustment';
 import useRewards from '@/hooks/rewards/use-rewards';
 import type { CreateAdjustmentBody } from '@/models/rewards/rewards-model';
+import { DEFAULT_PAGE_SIZE as PAGE_SIZE } from '@/utils/constants/pagination';
 import { getApiErrorMessage } from '@/utils/helpers/api-error';
-
-const PAGE_SIZE = 6;
 
 export default function RewardsOverview() {
   const [searchParams, setSearchParams] = useTanstackSearchParams();
