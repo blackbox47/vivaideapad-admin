@@ -103,4 +103,11 @@ export const CREATOR_PROFILE_NOTIFICATIONS_URL =
   '/contributor/profile/notifications';
 export const CREATOR_PROFILE_AVATAR_URL = '/contributor/profile/avatar';
 export const CREATOR_PROFILE_PAYOUT_URL = '/contributor/profile/payout-method';
+export const CREATOR_PAYMENT_METHODS_URL = '/contributor/payment-methods';
+
+// Payment methods API
+export const PAYMENT_METHODS_URL = '/admin/payment-methods';
+export const PAYMENT_METHOD_DETAIL_URL = (id: string) =>
+  `/admin/payment-methods/${id}`;
+export const PAYMENT_METHOD_OPTIONS_URL = '/payment-methods/options';
 

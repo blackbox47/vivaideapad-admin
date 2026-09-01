@@ -38,6 +38,7 @@ export const baseService = createApi({
     'creator-leaderboard',
     'creator-notifications',
     'creator-profile',
+    'payment-methods',
   ],
   endpoints: () => ({}),
 });

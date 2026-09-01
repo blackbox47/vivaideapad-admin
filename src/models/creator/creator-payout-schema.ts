@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const changePayoutMethodSchema = z.object({
-  method: z.enum(['bKash', 'Nagad', 'Rocket', 'Bank']),
+  method: z.string().min(1, 'Payout method is required.'),
 });
 
 export type ChangePayoutMethodFormValues = z.infer<
