@@ -18,7 +18,7 @@ export const creatorIdeasService = baseService.injectEndpoints({
         url: CREATOR_IDEAS_SUBMIT_URL,
         method: 'POST',
         body: {
-          concept_id: (body.concept_id || body.topicId)!,
+          concept_id: body.concept_id || body.topicId || '',
           title: body.title,
           body: body.body || body.summary || '',
           attachments: body.attachmentUrl

@@ -33,6 +33,8 @@ export default function useTheme() {
       mediaQuery.addEventListener('change', listener);
       return () => mediaQuery.removeEventListener('change', listener);
     }
+
+    return undefined;
   }, [theme]);
 
   const setTheme = (nextTheme: ThemeMode) => {

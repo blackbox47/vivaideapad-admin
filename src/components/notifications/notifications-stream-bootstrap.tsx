@@ -38,11 +38,8 @@ interface Props {
  */
 export function NotificationsStreamBootstrap({ role }: Props) {
   useEffect(() => {
-    if (env.useMockApi) {
-      return;
-    }
-    if (!store.getState().auth.isAuthenticated) {
-      return;
+    if (env.useMockApi || !store.getState().auth.isAuthenticated) {
+      return undefined;
     }
 
     const teardown =
