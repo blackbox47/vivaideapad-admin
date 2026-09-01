@@ -23,6 +23,7 @@ function Input({
   errorClassName,
   id,
   type,
+  required,
   "aria-invalid": ariaInvalidProp,
   "aria-describedby": ariaDescribedByProp,
   ...props
@@ -42,6 +43,7 @@ function Input({
     <InputPrimitive
       id={inputId}
       type={type}
+      required={required}
       data-slot="input"
       aria-invalid={isInvalid ? "true" : undefined}
       aria-describedby={ariaDescribedBy}
@@ -73,6 +75,11 @@ function Input({
           className={cn("mb-1.5 block text-[12px] font-bold text-foreground", labelClassName)}
         >
           {label}
+          {required ? (
+            <span className="ml-0.5 text-destructive" aria-hidden="true">
+              *
+            </span>
+          ) : null}
         </Label>
       ) : null}
       {inputElement}

@@ -73,6 +73,7 @@ export default function CategoryFormDialog({
         <form onSubmit={handleSubmit(onFormSubmit)} noValidate>
           <Input
             label="Name"
+            required
             placeholder="e.g. Climate Action"
             containerClassName="mt-4"
             errorMessage={errors.name?.message}

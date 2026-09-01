@@ -1,8 +1,11 @@
 import * as React from "react"
 
+import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
 
 export interface TextareaProps extends React.ComponentProps<"textarea"> {
+  label?: React.ReactNode
+  labelClassName?: string
   errorMessage?: string | null
   error?: string | null
   containerClassName?: string
@@ -12,26 +15,43 @@ export interface TextareaProps extends React.ComponentProps<"textarea"> {
 function Textarea({
   className,
   containerClassName,
+  label,
+  labelClassName,
   errorMessage,
   error,
   errorClassName,
   id,
+  required,
   "aria-invalid": ariaInvalidProp,
   "aria-describedby": ariaDescribedByProp,
   ...props
 }: TextareaProps) {
   const generatedId = React.useId()
-  const textareaId = id || generatedId
+  const textareaId = id || (label ? generatedId : undefined)
   const activeError = errorMessage ?? error
-  const errorId = activeError ? `${textareaId}-error` : undefined
+  const errorId = activeError && textareaId ? `${textareaId}-error` : undefined
   const isInvalid = ariaInvalidProp !== undefined ? ariaInvalidProp : Boolean(activeError)
 
   const ariaDescribedBy = [ariaDescribedByProp, errorId].filter(Boolean).join(" ") || undefined
 
   return (
     <div className={cn("w-full", containerClassName)}>
+      {label ? (
+        <Label
+          htmlFor={textareaId}
+          className={cn("mb-1.5 block text-[12px] font-bold text-foreground", labelClassName)}
+        >
+          {label}
+          {required ? (
+            <span className="ml-0.5 text-destructive" aria-hidden="true">
+              *
+            </span>
+          ) : null}
+        </Label>
+      ) : null}
       <textarea
         id={textareaId}
+        required={required}
         data-slot="textarea"
         aria-invalid={isInvalid ? "true" : undefined}
         aria-describedby={ariaDescribedBy}

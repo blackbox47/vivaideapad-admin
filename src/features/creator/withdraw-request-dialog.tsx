@@ -128,6 +128,7 @@ export default function WithdrawRequestDialog({
             <Input
               id="withdraw-amount"
               label="Amount"
+              required
               errorMessage={errors.amount?.message}
               {...register('amount')}
             />
@@ -139,6 +140,9 @@ export default function WithdrawRequestDialog({
               className="mb-1.5 block text-[12px] font-bold text-foreground"
             >
               Payout method
+              <span className="ml-0.5 text-destructive" aria-hidden="true">
+                *
+              </span>
             </Label>
             <div className="relative">
               <select

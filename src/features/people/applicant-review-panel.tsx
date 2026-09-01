@@ -93,11 +93,9 @@ export default function ApplicantReviewPanel({
           Applicant confirmed originality and accepted content guidelines.
         </label>
 
-        <label className="mb-1.5 block text-xs font-bold text-foreground" htmlFor="reviewer-comment">
-          Reviewer comment
-        </label>
         <Textarea
           id="reviewer-comment"
+          label="Reviewer comment"
           value={comment}
           onChange={(event) => setComment(event.target.value)}
           placeholder="Required if requesting revision or rejecting"

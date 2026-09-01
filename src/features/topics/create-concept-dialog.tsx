@@ -323,6 +323,7 @@ export default function CreateConceptDialog({
               <Input
                 id="concept-title"
                 label="Title"
+                required
                 errorMessage={errors.title?.message}
                 {...register('title')}
               />
@@ -335,6 +336,9 @@ export default function CreateConceptDialog({
                   className="text-[12px] font-bold text-foreground"
                 >
                   Category
+                  <span className="ml-0.5 text-destructive" aria-hidden="true">
+                    *
+                  </span>
                 </Label>
                 <button
                   type="button"
@@ -416,14 +420,10 @@ export default function CreateConceptDialog({
             </div>
 
             <div className="sm:col-span-2">
-              <Label
-                htmlFor="concept-description"
-                className="mb-1.5 block text-[12px] font-bold text-foreground"
-              >
-                Description
-              </Label>
               <Textarea
                 id="concept-description"
+                label="Description"
+                required
                 className="min-h-[70px]"
                 errorMessage={errors.description?.message}
                 {...register('description')}

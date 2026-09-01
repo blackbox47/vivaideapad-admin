@@ -5,7 +5,6 @@ import { z } from 'zod';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import type { CreateAdjustmentBody } from '@/models/rewards/rewards-model';
 import type { DropdownOption } from '@/utils/types/dropdown-option';
@@ -135,6 +134,7 @@ export default function BalanceAdjustmentDialog({
             <Input
               id="adjustment-contributor"
               label="Contributor"
+              required
               list="adjustment-contributors"
               placeholder="Search contributor"
               autoComplete="off"
@@ -156,6 +156,7 @@ export default function BalanceAdjustmentDialog({
             <Input
               id="adjustment-amount"
               label="Amount"
+              required
               placeholder="e.g. -20 or +50"
               errorMessage={errors.amount?.message}
               {...register('amount')}
@@ -163,14 +164,10 @@ export default function BalanceAdjustmentDialog({
           </div>
 
           <div className="mb-3">
-            <Label
-              htmlFor="adjustment-reason"
-              className="mb-1.5 block text-[12px] font-bold text-foreground"
-            >
-              Reason (required, recorded in audit log)
-            </Label>
             <Textarea
               id="adjustment-reason"
+              label="Reason (recorded in audit log)"
+              required
               className="min-h-[60px]"
               errorMessage={errors.reason?.message}
               {...register('reason')}

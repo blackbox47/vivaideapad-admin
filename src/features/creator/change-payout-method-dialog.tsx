@@ -116,6 +116,9 @@ export default function ChangePayoutMethodDialog({
             className="mb-1.5 block text-[12px] font-bold text-foreground"
           >
             Payout method
+            <span className="ml-0.5 text-destructive" aria-hidden="true">
+              *
+            </span>
           </Label>
           <select
             id="payout-method"

@@ -200,6 +200,7 @@ export default function SubmissionDecisionDialog({
                 label="Reward amount (৳)"
                 type="number"
                 min={1}
+                required
                 errorMessage={errors.rewardAmount?.message}
                 {...register('rewardAmount')}
               />
@@ -211,13 +212,11 @@ export default function SubmissionDecisionDialog({
           )}
 
           <div>
-            <label className="text-xs font-medium text-muted-foreground">
-              Feedback
-            </label>
             <Textarea
+              label="Feedback"
+              required={decision !== 'approve'}
               rows={4}
               placeholder="Reviewer notes shared with the contributor…"
-              className="mt-1"
               errorMessage={errors.feedback?.message}
               {...register('feedback')}
             />

@@ -81,14 +81,9 @@ export default function PayoutProcessPanel({
           the amount to the contributor&apos;s available balance.
         </p>
 
-        <label
-          className="mb-1.5 block text-xs font-bold text-foreground"
-          htmlFor="payout-process-note"
-        >
-          Admin note
-        </label>
         <Textarea
           id="payout-process-note"
+          label="Admin note"
           value={note}
           onChange={(event) => {
             setNote(event.target.value);

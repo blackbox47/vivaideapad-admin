@@ -93,6 +93,7 @@ export default function LoginPanel({ role }: LoginPanelProps) {
               id="email"
               label="Email address"
               type="email"
+              required
               autoComplete="username"
               errorMessage={errors.email?.message}
               {...register('email')}
@@ -104,6 +105,7 @@ export default function LoginPanel({ role }: LoginPanelProps) {
               id="password"
               label="Password"
               type="password"
+              required
               autoComplete="current-password"
               errorMessage={errors.password?.message}
               {...register('password')}

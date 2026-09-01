@@ -370,6 +370,7 @@ export default function EditConceptDialog({
               <Input
                 id="edit-concept-title-input"
                 label="Title"
+                required
                 errorMessage={errors.title?.message}
                 {...register('title')}
               />
@@ -382,6 +383,9 @@ export default function EditConceptDialog({
                   className="text-[12px] font-bold text-foreground"
                 >
                   Category
+                  <span className="ml-0.5 text-destructive" aria-hidden="true">
+                    *
+                  </span>
                 </Label>
                 <button
                   type="button"
@@ -463,14 +467,10 @@ export default function EditConceptDialog({
             </div>
 
             <div className="sm:col-span-2">
-              <Label
-                htmlFor="edit-concept-description"
-                className="mb-1.5 block text-[12px] font-bold text-foreground"
-              >
-                Description
-              </Label>
               <Textarea
                 id="edit-concept-description"
+                label="Description"
+                required
                 className="min-h-[70px]"
                 errorMessage={errors.description?.message}
                 {...register('description')}

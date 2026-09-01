@@ -150,6 +150,7 @@ export default function ProfileIdentityCard({
             <Input
               id="profile-name"
               label="Display name"
+              required
               errorMessage={profileErrors.name?.message}
               {...registerProfile('name')}
             />
@@ -159,6 +160,7 @@ export default function ProfileIdentityCard({
               id="profile-email"
               label="Email address"
               type="email"
+              required
               errorMessage={profileErrors.email?.message}
               {...registerProfile('email')}
             />
@@ -188,11 +190,9 @@ export default function ProfileIdentityCard({
             </select>
           </div>
           <div className="sm:col-span-2">
-            <Label htmlFor="profile-bio" className="mb-1.5 block text-[12px] font-bold text-foreground">
-              Short bio
-            </Label>
             <Textarea
               id="profile-bio"
+              label="Short bio"
               rows={3}
               errorMessage={profileErrors.bio?.message}
               {...registerProfile('bio')}
@@ -230,6 +230,7 @@ export default function ProfileIdentityCard({
                 id="profile-password"
                 label="New password"
                 type="password"
+                required
                 placeholder="••••••••"
                 errorMessage={passwordErrors.newPassword?.message}
                 {...registerPassword('newPassword')}
@@ -240,6 +241,7 @@ export default function ProfileIdentityCard({
                 id="profile-password-confirm"
                 label="Confirm password"
                 type="password"
+                required
                 placeholder="••••••••"
                 errorMessage={passwordErrors.confirmPassword?.message}
                 {...registerPassword('confirmPassword')}

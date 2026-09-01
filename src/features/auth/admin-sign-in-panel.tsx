@@ -71,6 +71,7 @@ export default function AdminSignInPanel() {
               id="admin-email"
               label="Admin email"
               type="email"
+              required
               autoComplete="username"
               placeholder="admin@ideapad.app"
               errorMessage={errors.email?.message}
@@ -83,6 +84,7 @@ export default function AdminSignInPanel() {
               id="admin-password"
               label="Password"
               type="password"
+              required
               autoComplete="current-password"
               errorMessage={errors.password?.message}
               {...register('password')}

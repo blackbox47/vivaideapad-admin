@@ -132,6 +132,9 @@ export default function SubmitIdeaForm({
           className="mb-1.5 block text-[12px] font-bold text-foreground"
         >
           Topic
+          <span className="ml-0.5 text-destructive" aria-hidden="true">
+            *
+          </span>
         </Label>
         <select
           id="topic"
@@ -163,6 +166,7 @@ export default function SubmitIdeaForm({
         <Input
           id="title"
           label="Title"
+          required
           maxLength={TITLE_MAX}
           placeholder="Give it a working title"
           errorMessage={errors.title?.message}
@@ -174,14 +178,10 @@ export default function SubmitIdeaForm({
       </div>
 
       <div>
-        <Label
-          htmlFor="summary"
-          className="mb-1.5 block text-[12px] font-bold text-foreground"
-        >
-          Summary
-        </Label>
         <Textarea
           id="summary"
+          label="Summary"
+          required
           maxLength={SUMMARY_MAX}
           rows={2}
           placeholder="One or two lines — what is the idea and who is it for?"
@@ -194,14 +194,10 @@ export default function SubmitIdeaForm({
       </div>
 
       <div>
-        <Label
-          htmlFor="body"
-          className="mb-1.5 block text-[12px] font-bold text-foreground"
-        >
-          Body
-        </Label>
         <Textarea
           id="body"
+          label="Body"
+          required
           maxLength={BODY_MAX}
           rows={8}
           placeholder="Describe the idea, the steps to pilot it, and how you'd measure success."

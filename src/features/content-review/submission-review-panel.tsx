@@ -99,14 +99,9 @@ export default function SubmissionReviewPanel({
           final decision.
         </p>
 
-        <label
-          className="mb-1.5 block text-xs font-bold text-foreground"
-          htmlFor="content-reviewer-comment"
-        >
-          Feedback to contributor
-        </label>
         <Textarea
           id="content-reviewer-comment"
+          label="Feedback to contributor"
           value={comment}
           onChange={(event) => {
             setComment(event.target.value);

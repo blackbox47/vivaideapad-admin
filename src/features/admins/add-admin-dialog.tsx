@@ -113,6 +113,7 @@ export default function AddAdminDialog({
             <Input
               id="admin-name"
               label="Name"
+              required
               placeholder="Full name"
               errorMessage={errors.name?.message}
               {...register('name')}
@@ -124,6 +125,7 @@ export default function AddAdminDialog({
               id="admin-email"
               label="Email"
               type="email"
+              required
               placeholder="name@ideapad.app"
               errorMessage={errors.email?.message}
               {...register('email')}
@@ -135,6 +137,7 @@ export default function AddAdminDialog({
               id="admin-password"
               label="Temporary password"
               type="password"
+              required
               placeholder="At least 8 characters"
               autoComplete="new-password"
               errorMessage={errors.password?.message}
