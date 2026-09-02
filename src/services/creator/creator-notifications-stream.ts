@@ -59,32 +59,26 @@ function wireToCreatorNotification(
 export function startCreatorNotificationsStream(store: {
   dispatch: (action: unknown) => unknown;
 }): () => void {
-  if (env.useMockApi) {
-    return () => {
-      /* no-op in mock mode */
-    };
-  }
-
   const url = `${env.apiBaseUrl.replace(/\/+$/, '')}${CREATOR_NOTIFICATIONS_STREAM_URL}`;
   const es = new EventSource(url, { withCredentials: true });
 
   const handle = (raw: MessageEvent<string>): void => {
-    let env: StreamEnvelope;
+    let envelope: StreamEnvelope;
     try {
-      env = JSON.parse(raw.data) as StreamEnvelope;
+      envelope = JSON.parse(raw.data) as StreamEnvelope;
     } catch {
       return;
     }
 
-    if (env.type === 'created') {
+    if (envelope.type === 'created') {
       store.dispatch(
         baseService.util.invalidateTags(['creator-notifications']),
       );
       return;
     }
 
-    if (env.type === 'updated') {
-      const incoming = wireToCreatorNotification(env.notification);
+    if (envelope.type === 'updated') {
+      const incoming = wireToCreatorNotification(envelope.notification);
       store.dispatch(
         creatorNotificationsService.util.updateQueryData(
           'getCreatorNotifications',
@@ -102,8 +96,8 @@ export function startCreatorNotificationsStream(store: {
       return;
     }
 
-    if (env.type === 'deleted') {
-      const id = env.notification.id;
+    if (envelope.type === 'deleted') {
+      const id = envelope.notification.id;
       store.dispatch(
         creatorNotificationsService.util.updateQueryData(
           'getCreatorNotifications',

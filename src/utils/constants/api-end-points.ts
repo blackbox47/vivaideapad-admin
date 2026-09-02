@@ -88,6 +88,10 @@ export const CREATOR_ME_URL = '/contributor/me';
 export const CREATOR_DASHBOARD_OVERVIEW_URL = '/contributor/dashboard';
 export const CREATOR_IDEAS_URL = '/contributor/submissions';
 export const CREATOR_IDEAS_SUBMIT_URL = '/contributor/submissions';
+export const CREATOR_IDEA_DETAIL_URL = (id: string) =>
+  `/contributor/submissions/${id}`;
+export const CREATOR_IDEA_SUBMIT_FOR_REVIEW_URL = (id: string) =>
+  `/contributor/submissions/${id}/submit`;
 export const CREATOR_TOPICS_URL = '/contributor/concepts';
 export const CREATOR_REWARDS_URL = '/contributor/wallet';
 export const CREATOR_REWARDS_WITHDRAW_URL = '/contributor/payouts';
@@ -103,4 +107,11 @@ export const CREATOR_PROFILE_NOTIFICATIONS_URL =
   '/contributor/profile/notifications';
 export const CREATOR_PROFILE_AVATAR_URL = '/contributor/profile/avatar';
 export const CREATOR_PROFILE_PAYOUT_URL = '/contributor/profile/payout-method';
+export const CREATOR_PAYMENT_METHODS_URL = '/contributor/payment-methods';
+
+// Payment methods API
+export const PAYMENT_METHODS_URL = '/admin/payment-methods';
+export const PAYMENT_METHOD_DETAIL_URL = (id: string) =>
+  `/admin/payment-methods/${id}`;
+export const PAYMENT_METHOD_OPTIONS_URL = '/payment-methods/options';
 

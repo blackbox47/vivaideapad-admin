@@ -64,20 +64,6 @@ afterEach(() => {
 });
 
 describe('startAdminNotificationsStream', () => {
-  it('returns a no-op teardown in mock mode', async () => {
-    vi.resetModules();
-    vi.doMock('@/config/env', () => ({
-      env: { apiBaseUrl: 'http://api', useMockApi: true },
-    }));
-    const { startAdminNotificationsStream } = await import(
-      './admin-notifications-stream'
-    );
-    const teardown = startAdminNotificationsStream({ dispatch: vi.fn() });
-    expect(typeof teardown).toBe('function');
-    expect(FakeEventSource.instances).toHaveLength(0);
-    expect(() => teardown()).not.toThrow();
-    vi.doUnmock('@/config/env');
-  });
 
   it('opens an EventSource pointing at the configured URL', async () => {
     vi.resetModules();

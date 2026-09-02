@@ -26,6 +26,7 @@ export interface CreatorRewardsOverview {
 export interface WithdrawRequestBody {
   amount: string;
   method: string;
+  mobile?: string;
 }
 
 export interface WithdrawRequestResponse {

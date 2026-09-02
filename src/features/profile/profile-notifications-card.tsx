@@ -1,3 +1,4 @@
+import { Input } from '@/components/ui/input';
 import type { NotificationPreferences } from '@/models/profile/profile-model';
 
 interface ProfileNotificationsCardProps {
@@ -22,7 +23,7 @@ export default function ProfileNotificationsCard({
   onToggle,
 }: ProfileNotificationsCardProps) {
   return (
-    <section className="rounded-[20px] border border-border bg-card p-[22px]">
+    <section className="rounded-[20px] border border-border bg-card p-5.5">
       <h3 className="mb-4 font-heading text-base font-semibold text-foreground">
         Notification preferences
       </h3>
@@ -35,7 +36,7 @@ export default function ProfileNotificationsCard({
               className="flex items-center justify-between text-[13px] text-foreground"
             >
               <span>{row.label}</span>
-              <input
+              <Input
                 type="checkbox"
                 checked={checked}
                 disabled={isUpdating}

@@ -15,3 +15,9 @@ export const CREATOR_AUTH_TOKEN_STORAGE_KEY = 'ideapad.creator.token';
  * Set when a creator signs out so a mock session is not re-seeded on reload.
  */
 export const CREATOR_SIGNED_OUT_STORAGE_KEY = 'ideapad.creator.signed-out';
+
+/**
+ * Local storage key for dark/light theme preference.
+ */
+export const THEME_STORAGE_KEY = 'ideapad_theme_preference';
+

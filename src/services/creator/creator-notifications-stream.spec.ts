@@ -52,19 +52,6 @@ afterEach(() => {
 });
 
 describe('startCreatorNotificationsStream', () => {
-  it('returns a no-op teardown in mock mode', async () => {
-    vi.resetModules();
-    vi.doMock('@/config/env', () => ({
-      env: { apiBaseUrl: 'http://api', useMockApi: true },
-    }));
-    const { startCreatorNotificationsStream } = await import(
-      './creator-notifications-stream'
-    );
-    const teardown = startCreatorNotificationsStream({ dispatch: vi.fn() });
-    expect(FakeEventSource.instances).toHaveLength(0);
-    expect(() => teardown()).not.toThrow();
-    vi.doUnmock('@/config/env');
-  });
 
   it('opens an EventSource pointing at the contributor URL', async () => {
     vi.resetModules();

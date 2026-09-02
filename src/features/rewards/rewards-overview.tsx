@@ -22,9 +22,8 @@ import RewardTable from '@/features/rewards/reward-table';
 import useCreateAdjustment from '@/hooks/rewards/use-create-adjustment';
 import useRewards from '@/hooks/rewards/use-rewards';
 import type { CreateAdjustmentBody } from '@/models/rewards/rewards-model';
+import { DEFAULT_PAGE_SIZE as PAGE_SIZE } from '@/utils/constants/pagination';
 import { getApiErrorMessage } from '@/utils/helpers/api-error';
-
-const PAGE_SIZE = 6;
 
 export default function RewardsOverview() {
   const [searchParams, setSearchParams] = useTanstackSearchParams();
@@ -151,7 +150,7 @@ export default function RewardsOverview() {
           ))}
         </div>
       ) : entries.length === 0 ? (
-        <div className="rounded-[22px] border border-border bg-card px-6 py-[60px] text-center text-muted-foreground">
+        <div className="rounded-[22px] border border-border bg-card px-6 py-15 text-center text-muted-foreground">
           <span className="mb-2.5 block text-[28px]">◇</span>
           <strong className="mb-1 block text-foreground">
             No entries match

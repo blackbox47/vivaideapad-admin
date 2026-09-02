@@ -1,51 +1,63 @@
-import { useEffect, useState, type FormEvent, type MouseEvent } from 'react';
-import { ChevronDown } from 'lucide-react';
-
+import { useEffect, type MouseEvent } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { cn } from '@/lib/utils';
+import { Select } from '@/components/ui/select';
+import {
+  withdrawRequestSchema,
+  type WithdrawRequestFormValues,
+} from '@/models/creator/creator-payout-schema';
 import type { DropdownOption } from '@/utils/types/dropdown-option';
 
-/**
- * Payout methods available for withdrawal requests. Each entry is a
- * `{ id, label }` pair — `id` is the stable identifier sent on submit,
- * `label` is the human-readable display. For static enums the id and
- * label are the same string; once the backend exposes real method IDs
- * we can split them without touching the dropdown markup.
- */
 const METHOD_OPTIONS: DropdownOption[] = [
-  { id: 'bKash · 018•••42', label: 'bKash · 018•••42' },
+  { id: 'bKash', label: 'bKash' },
   { id: 'Nagad', label: 'Nagad' },
   { id: 'Rocket', label: 'Rocket' },
   { id: 'Bank transfer', label: 'Bank transfer' },
 ];
 
-const fieldClassName =
-  'h-auto w-full rounded-[12px] border border-border bg-card text-foreground px-[13px] py-3 text-sm shadow-none focus-visible:border-brand-sage-light';
-
 interface WithdrawRequestDialogProps {
   available: string;
   defaultMethod: string;
+  defaultMobile?: string;
   isSubmitting: boolean;
   error: string | null;
   onClose: () => void;
-  onSubmit: (payload: { amount: string; method: string }) => Promise<void>;
+  onSubmit: (payload: {
+    amount: string;
+    method: string;
+    mobile: string;
+  }) => Promise<void>;
 }
 
 export default function WithdrawRequestDialog({
   available,
   defaultMethod,
+  defaultMobile,
   isSubmitting,
   error,
   onClose,
   onSubmit,
 }: WithdrawRequestDialogProps) {
-  const [amount, setAmount] = useState(available);
   const initialMethod =
     METHOD_OPTIONS.find((option) => option.id === defaultMethod)?.id ??
     METHOD_OPTIONS[0].id;
-  const [method, setMethod] = useState(initialMethod);
+  const initialAmount = available ? available.replace(/[^0-9.]/g, '') : '';
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<WithdrawRequestFormValues>({
+    resolver: zodResolver(withdrawRequestSchema),
+    defaultValues: {
+      amount: initialAmount,
+      method: initialMethod,
+      mobile: defaultMobile ?? '',
+    },
+  });
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -64,21 +76,24 @@ export default function WithdrawRequestDialog({
     }
   };
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    await onSubmit({ amount: amount.trim(), method });
+  const onFormSubmit = async (values: WithdrawRequestFormValues) => {
+    await onSubmit({
+      amount: values.amount.trim(),
+      method: values.method,
+      mobile: values.mobile.trim(),
+    });
   };
 
   return (
     <div
-      className="fixed inset-0 z-50 grid place-items-center bg-[var(--overlay-scrim)] p-5 backdrop-blur-xs"
+      className="fixed inset-0 z-50 grid place-items-center bg-(--overlay-scrim) p-5 backdrop-blur-xs"
       onClick={handleBackdropClick}
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="withdraw-title"
-        className="w-full max-w-[480px] rounded-[24px] border border-[var(--dialog-border)] bg-card p-7 shadow-2xl"
+        className="w-full max-w-120 rounded-[24px] border border-(--dialog-border) bg-card p-7 shadow-2xl"
       >
         <div className="mb-4 flex items-start justify-between gap-4">
           <div>
@@ -98,7 +113,7 @@ export default function WithdrawRequestDialog({
             className="text-[22px] leading-none text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
             aria-label="Close"
           >
-            ×
+            <X />
           </button>
         </div>
 
@@ -108,48 +123,42 @@ export default function WithdrawRequestDialog({
           withdrawal threshold applies.
         </p>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit(onFormSubmit)} noValidate>
           <div className="mb-3">
-            <Label
-              htmlFor="withdraw-amount"
-              className="mb-1.5 block text-[12px] font-bold text-foreground"
-            >
-              Amount
-            </Label>
             <Input
               id="withdraw-amount"
-              value={amount}
-              onChange={(event) => setAmount(event.target.value)}
+              type="number"
+              min="0"
+              step="any"
+              placeholder="0.00"
+              label="Amount"
               required
-              className={fieldClassName}
+              errorMessage={errors.amount?.message}
+              {...register('amount')}
             />
           </div>
 
           <div className="mb-3">
-            <Label
-              htmlFor="withdraw-method"
-              className="mb-1.5 block text-[12px] font-bold text-foreground"
-            >
-              Payout method
-            </Label>
-            <div className="relative">
-              <select
-                id="withdraw-method"
-                value={method}
-                onChange={(event) => setMethod(event.target.value)}
-                className={cn(fieldClassName, 'appearance-none pr-10')}
-              >
-                {METHOD_OPTIONS.map((option) => (
-                  <option key={option.id} value={option.id}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown
-                aria-hidden
-                className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-muted-foreground"
-              />
-            </div>
+            <Select
+              id="withdraw-method"
+              label="Payout method"
+              required
+              options={METHOD_OPTIONS}
+              errorMessage={errors.method?.message}
+              {...register('method')}
+            />
+          </div>
+
+          <div className="mb-3">
+            <Input
+              id="withdraw-mobile"
+              type="tel"
+              label="Mobile number"
+              placeholder="e.g. 018XXXXXXXX"
+              required
+              errorMessage={errors.mobile?.message}
+              {...register('mobile')}
+            />
           </div>
 
           {error ? (

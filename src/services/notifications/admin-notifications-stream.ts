@@ -67,19 +67,13 @@ function wireToAdminNotification(
 export function startAdminNotificationsStream(store: {
   dispatch: (action: unknown) => unknown;
 }): () => void {
-  if (env.useMockApi) {
-    return () => {
-      /* no-op in mock mode */
-    };
-  }
-
   const url = `${env.apiBaseUrl.replace(/\/+$/, '')}${ADMIN_NOTIFICATIONS_STREAM_URL}`;
   const es = new EventSource(url, { withCredentials: true });
 
   const handle = (raw: MessageEvent<string>): void => {
-    let env: StreamEnvelope;
+    let envelope: StreamEnvelope;
     try {
-      env = JSON.parse(raw.data) as StreamEnvelope;
+      envelope = JSON.parse(raw.data) as StreamEnvelope;
     } catch {
       // Malformed frame — swallow so a single bad message can't kill the
       // stream. The native EventSource will keep delivering subsequent
@@ -87,7 +81,7 @@ export function startAdminNotificationsStream(store: {
       return;
     }
 
-    if (env.type === 'created') {
+    if (envelope.type === 'created') {
       // Invalidate so the next getAdminNotifications call refetches and
       // the new row lands in the cache. One line, idempotent, correct for
       // pagination state.
@@ -97,8 +91,8 @@ export function startAdminNotificationsStream(store: {
       return;
     }
 
-    if (env.type === 'updated') {
-      const incoming = wireToAdminNotification(env.notification);
+    if (envelope.type === 'updated') {
+      const incoming = wireToAdminNotification(envelope.notification);
       store.dispatch(
         adminNotificationsService.util.updateQueryData(
           'getAdminNotifications',
@@ -116,8 +110,8 @@ export function startAdminNotificationsStream(store: {
       return;
     }
 
-    if (env.type === 'deleted') {
-      const id = env.notification.id;
+    if (envelope.type === 'deleted') {
+      const id = envelope.notification.id;
       store.dispatch(
         adminNotificationsService.util.updateQueryData(
           'getAdminNotifications',

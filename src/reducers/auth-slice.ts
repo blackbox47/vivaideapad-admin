@@ -1,6 +1,5 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
-import { env } from '@/config/env';
 import type { UserRole } from '@/models/auth/auth-model';
 
 /**
@@ -111,15 +110,12 @@ function readSessionHint(): Pick<AuthState, 'isAuthenticated' | 'role' | 'userId
   };
 }
 
-const initial: AuthState = env.useMockApi
-  ? // Mock API never sees real cookies; the short-circuit in customFetch lets
-    // every request through. Seed a fake admin session so role-aware UI works.
-    { isAuthenticated: true, role: 'admin', userId: 'mock-user' }
-  : {
-      isAuthenticated: readSessionHint().isAuthenticated,
-      role: readSessionHint().role,
-      userId: readSessionHint().userId,
-    };
+const initialSession = readSessionHint();
+const initial: AuthState = {
+  isAuthenticated: initialSession.isAuthenticated,
+  role: initialSession.role,
+  userId: initialSession.userId,
+};
 
 const authSlice = createSlice({
   name: 'auth',

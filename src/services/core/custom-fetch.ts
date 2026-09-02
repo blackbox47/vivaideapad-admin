@@ -3,7 +3,6 @@ import type { BaseQueryFn } from '@reduxjs/toolkit/query';
 import { env } from '@/config/env';
 import type { ApiError, ApiRequest } from '@/models/api/api-model';
 import { sessionExpired } from '@/reducers/auth-slice';
-import { resolveMockRequest } from '@/services/mock/mock-handlers';
 import { AUTH_REFRESH_URL } from '@/utils/constants/api-end-points';
 
 function buildQueryString(params: ApiRequest['params']): string {
@@ -117,11 +116,6 @@ export const customFetch: BaseQueryFn<ApiRequest, unknown, ApiError> = async (
   request,
   apiArg,
 ) => {
-  if (env.useMockApi) {
-    // Mock mode never hits the network; cookies are not relevant.
-    return resolveMockRequest(request, /* token */ undefined);
-  }
-
   const isRefreshRoute = request.url === AUTH_REFRESH_URL;
 
   try {

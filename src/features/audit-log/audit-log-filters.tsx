@@ -1,5 +1,6 @@
 import { Link } from '@tanstack/react-router';
 
+import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import {
   AUDIT_CATEGORY_FILTERS,
@@ -86,12 +87,12 @@ export default function AuditLogFilters({
           {categoryCounts[category]}{' '}
           {categoryCounts[category] === 1 ? 'event' : 'events'}
         </span>
-        <input
+        <Input
           value={search}
           onChange={(event) => onSearchChange(event.target.value)}
           placeholder="Search actor, action or target"
           aria-label="Search audit events"
-          className="min-w-[260px] rounded-full border border-border bg-card px-[18px] py-2.5 text-[13px] text-foreground outline-none placeholder:text-text-subtle focus-visible:border-brand-sage-light focus-visible:ring-2 focus-visible:ring-success-muted"
+          className="min-w-65 rounded-full px-4.5 py-2.5 text-[13px] placeholder:text-text-subtle"
         />
       </div>
     </div>

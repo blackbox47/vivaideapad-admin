@@ -10,6 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   Table,
@@ -124,11 +125,11 @@ export default function CategoriesOverview() {
         </CardHeader>
         <CardContent>
           <div className="mb-4 flex items-center justify-between gap-3">
-            <input
+            <Input
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Search by name…"
-              className="h-9 w-72 rounded-md border border-input bg-background px-3 text-sm"
+              className="h-9 w-72 rounded-md"
             />
             <span className="text-sm text-muted-foreground">{total} total</span>
           </div>

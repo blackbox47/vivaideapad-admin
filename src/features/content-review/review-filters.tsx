@@ -1,5 +1,6 @@
 import { Link } from '@tanstack/react-router';
 
+import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import type { ReviewStatusFilter } from '@/models/content-review/content-review-model';
 import { ADMIN_ROUTES } from '@/utils/constants/routes';
@@ -101,12 +102,12 @@ export default function ReviewFilters({
         <span className="whitespace-nowrap text-[13px] text-muted-foreground">
           {visibleCount} {visibleCount === 1 ? 'submission' : 'submissions'}
         </span>
-        <input
+        <Input
           value={search}
           onChange={(event) => onSearchChange(event.target.value)}
           placeholder="Search by title, contributor or topic"
           aria-label="Search submissions"
-          className="min-w-[260px] rounded-full border border-border bg-card px-[18px] py-2.5 text-[13px] text-foreground outline-none placeholder:text-text-subtle focus-visible:border-brand-sage-light focus-visible:ring-2 focus-visible:ring-success-muted"
+          className="min-w-65 rounded-full px-4.5 py-2.5 text-[13px] placeholder:text-text-subtle"
         />
       </div>
     </div>

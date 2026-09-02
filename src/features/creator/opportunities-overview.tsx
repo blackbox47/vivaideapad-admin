@@ -19,8 +19,7 @@ import {
   OPPORTUNITY_CATEGORIES,
   type OpportunityCategoryFilter,
 } from '@/models/creator/submit-idea-model';
-
-const PAGE_SIZE = 6;
+import { DEFAULT_PAGE_SIZE as PAGE_SIZE } from '@/utils/constants/pagination';
 
 function parseCategory(value: string | null): OpportunityCategoryFilter {
   if (
@@ -103,11 +102,11 @@ export default function OpportunitiesOverview() {
       {isLoading ? (
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, index) => (
-            <Skeleton key={index} className="h-[320px] rounded-[22px]" />
+            <Skeleton key={index} className="h-80 rounded-[22px]" />
           ))}
         </div>
       ) : topics.length === 0 ? (
-        <div className="rounded-[22px] border border-border bg-card px-6 py-[60px] text-center text-muted-foreground">
+        <div className="rounded-[22px] border border-border bg-card px-6 py-15 text-center text-muted-foreground">
           <span className="mb-2.5 block text-[28px]">◇</span>
           <strong className="mb-1 block text-foreground">
             No briefs match your search
@@ -127,7 +126,7 @@ export default function OpportunitiesOverview() {
             <div className="mt-7 flex justify-center">
               <button
                 type="button"
-                className="rounded-full border border-border bg-card px-[26px] py-3 text-[13px] font-bold text-foreground hover:bg-surface-subtle transition-colors cursor-pointer"
+                className="rounded-full border border-border bg-card px-6.5 py-3 text-[13px] font-bold text-foreground hover:bg-surface-subtle transition-colors cursor-pointer"
                 onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
               >
                 Show more briefs · {remainingCount} remaining

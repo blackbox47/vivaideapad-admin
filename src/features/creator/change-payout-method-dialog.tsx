@@ -1,18 +1,19 @@
-import { useEffect, useState, type FormEvent, type MouseEvent } from 'react';
-
+import { useEffect, type MouseEvent } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
+import { Select } from '@/components/ui/select';
+import {
+  changePayoutMethodSchema,
+  type ChangePayoutMethodFormValues,
+} from '@/models/creator/creator-payout-schema';
 import type {
   PayoutMethod,
   UpdatePayoutMethodBody,
 } from '@/models/profile/profile-model';
 import type { DropdownOption } from '@/utils/types/dropdown-option';
 
-/**
- * Payout-method options. `id` matches the `method` enum stored on
- * `UpdatePayoutMethodBody` (sent to the wire as `method`); `label` is the
- * human-readable display string in the dropdown.
- */
 const METHOD_OPTIONS: DropdownOption[] = [
   { id: 'bKash', label: 'bKash · 018•••42' },
   { id: 'Nagad', label: 'Nagad' },
@@ -35,7 +36,16 @@ export default function ChangePayoutMethodDialog({
   onClose,
   onSubmit,
 }: ChangePayoutMethodDialogProps) {
-  const [method, setMethod] = useState<PayoutMethod['method']>(current.method);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<ChangePayoutMethodFormValues>({
+    resolver: zodResolver(changePayoutMethodSchema),
+    defaultValues: {
+      method: current.method,
+    },
+  });
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -54,12 +64,11 @@ export default function ChangePayoutMethodDialog({
     }
   };
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const onFormSubmit = async (values: ChangePayoutMethodFormValues) => {
     const selected: UpdatePayoutMethodBody = {
-      method: method as PayoutMethod['method'],
+      method: values.method as PayoutMethod['method'],
       label:
-        METHOD_OPTIONS.find((option) => option.id === method)?.label ??
+        METHOD_OPTIONS.find((option) => option.id === values.method)?.label ??
         METHOD_OPTIONS[0].label,
     };
     await onSubmit(selected);
@@ -67,14 +76,14 @@ export default function ChangePayoutMethodDialog({
 
   return (
     <div
-      className="fixed inset-0 z-50 grid place-items-center bg-[var(--overlay-scrim)] p-5 backdrop-blur-xs"
+      className="fixed inset-0 z-50 grid place-items-center bg-(--overlay-scrim) p-5 backdrop-blur-xs"
       onClick={handleBackdropClick}
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="payout-method-title"
-        className="w-full max-w-[420px] rounded-[24px] border border-[var(--dialog-border)] bg-card p-7 shadow-2xl"
+        className="w-full max-w-105 rounded-[24px] border border-(--dialog-border) bg-card p-7 shadow-2xl"
       >
         <div className="mb-4 flex items-start justify-between gap-4">
           <div>
@@ -94,31 +103,19 @@ export default function ChangePayoutMethodDialog({
             className="text-[22px] leading-none text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
             aria-label="Close"
           >
-            ×
+            <X />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit}>
-          <Label
-            htmlFor="payout-method"
-            className="mb-1.5 block text-[12px] font-bold text-foreground"
-          >
-            Payout method
-          </Label>
-          <select
+        <form onSubmit={handleSubmit(onFormSubmit)} noValidate>
+          <Select
             id="payout-method"
-            value={method}
-            onChange={(event) =>
-              setMethod(event.target.value as PayoutMethod['method'])
-            }
-            className="h-auto w-full rounded-[12px] border border-border bg-card text-foreground px-[13px] py-3 text-sm focus-visible:border-brand-sage-light"
-          >
-            {METHOD_OPTIONS.map((option) => (
-              <option key={option.id} value={option.id}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+            label="Payout method"
+            required
+            options={METHOD_OPTIONS}
+            errorMessage={errors.method?.message}
+            {...register('method')}
+          />
 
           {error ? (
             <p className="mt-2 text-[12px] font-semibold text-destructive" role="alert">

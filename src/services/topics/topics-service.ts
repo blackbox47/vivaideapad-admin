@@ -28,13 +28,15 @@ export const topicsService = baseService.injectEndpoints({
       query: (params) => ({
         url: CONCEPTS_URL,
         method: 'GET',
-        params: {
-          status: params?.status,
-          search: params?.search,
-          category_id: params?.category_id,
-          page: params?.page,
-          limit: params?.limit,
-        },
+        params: params
+          ? {
+              status: params.status,
+              search: params.search,
+              category_id: params.category_id,
+              page: params.page,
+              limit: params.limit,
+            }
+          : undefined,
       }),
       transformResponse: (response: unknown): ConceptListResponse => {
         if (!response || typeof response !== 'object') {
@@ -64,7 +66,14 @@ export const topicsService = baseService.injectEndpoints({
               icon: String(metadata.icon ?? item.icon ?? '✦'),
               opensOn: item.open_date ? String(item.open_date).slice(0, 10) : String(item.opensOn ?? ''),
               closesOn: item.close_date ? String(item.close_date).slice(0, 10) : String(item.closesOn ?? ''),
-              reward: item.reward_budget ? `$${item.reward_budget}` : String(item.reward ?? '$0'),
+              reward: item.reward_budget
+                ? (String(item.reward_budget).startsWith('৳') || String(item.reward_budget).startsWith('$')
+                    ? String(item.reward_budget)
+                    : `৳${Number(item.reward_budget).toLocaleString('en-US')}`)
+                : String(item.reward ?? '৳0'),
+              categoryId: item.category_id ? String(item.category_id) : undefined,
+              openDate: item.open_date ? String(item.open_date) : undefined,
+              closeDate: item.close_date ? String(item.close_date) : undefined,
             };
           });
 

@@ -21,8 +21,7 @@ import ReviewTable from '@/features/content-review/review-table';
 import SubmissionReviewPanel from '@/features/content-review/submission-review-panel';
 import useContentReview from '@/hooks/content-review/use-content-review';
 import type { SubmissionStatus } from '@/models/content-review/content-review-model';
-
-const PAGE_SIZE = 6;
+import { DEFAULT_PAGE_SIZE as PAGE_SIZE } from '@/utils/constants/pagination';
 
 export default function ContentReviewOverview() {
   const [searchParams, setSearchParams] = useTanstackSearchParams();
@@ -131,7 +130,7 @@ export default function ContentReviewOverview() {
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <div className="rounded-[22px] border border-border bg-card px-6 py-[60px] text-center text-muted-foreground">
+        <div className="rounded-[22px] border border-border bg-card px-6 py-15 text-center text-muted-foreground">
           <span className="mb-2.5 block text-[28px]">◇</span>
           <strong className="mb-1 block text-foreground">
             No submissions match
@@ -147,7 +146,7 @@ export default function ContentReviewOverview() {
             <div className="mt-6 flex justify-center">
               <button
                 type="button"
-                className="rounded-full border border-border bg-card px-[26px] py-3 text-[13px] font-bold text-foreground hover:bg-surface-subtle transition-colors cursor-pointer"
+                className="rounded-full border border-border bg-card px-6.5 py-3 text-[13px] font-bold text-foreground hover:bg-surface-subtle transition-colors cursor-pointer"
                 onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
               >
                 Show more submissions · {remainingCount} remaining

@@ -1,5 +1,6 @@
 import { Link } from '@tanstack/react-router';
 
+import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import type { ConceptStatus } from '@/models/topics/topics-model';
 import { ADMIN_ROUTES } from '@/utils/constants/routes';
@@ -42,7 +43,7 @@ export default function ConceptFilters({
   onSearchChange,
 }: ConceptFiltersProps) {
   return (
-    <div className="mb-[22px] flex flex-wrap items-center justify-between gap-4">
+    <div className="mb-5.5 flex flex-wrap items-center justify-between gap-4">
       <div
         className="flex flex-wrap gap-2"
         role="navigation"
@@ -75,12 +76,12 @@ export default function ConceptFilters({
         <span className="whitespace-nowrap text-[13px] text-muted-foreground">
           {visibleCount} {visibleCount === 1 ? 'concept' : 'concepts'}
         </span>
-        <input
+        <Input
           value={search}
           onChange={(event) => onSearchChange(event.target.value)}
           placeholder="Search by title or category"
           aria-label="Search concepts"
-          className="min-w-[240px] rounded-full border border-border bg-card px-[18px] py-2.5 text-[13px] text-foreground outline-none placeholder:text-text-subtle focus-visible:border-brand-sage-light focus-visible:ring-2 focus-visible:ring-success-muted"
+          className="min-w-60 rounded-full px-4.5 py-2.5 text-[13px] placeholder:text-text-subtle"
         />
       </div>
     </div>

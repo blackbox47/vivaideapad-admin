@@ -1,14 +1,14 @@
-import { useEffect, useState, type FormEvent, type MouseEvent } from 'react';
-
+import { useEffect, type MouseEvent } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import type { CreateAdminBody } from '@/models/admins/admins-model';
-
-const fieldClassName =
-  'h-auto w-full rounded-[12px] border border-border bg-card px-[13px] py-3 text-sm text-foreground shadow-none focus-visible:border-ring';
-
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+import {
+  addAdminSchema,
+  type AddAdminFormValues,
+} from '@/models/admins/admins-schema';
 
 interface AddAdminDialogProps {
   isSubmitting: boolean;
@@ -23,10 +23,18 @@ export default function AddAdminDialog({
   onClose,
   onSubmit,
 }: AddAdminDialogProps) {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [validationError, setValidationError] = useState<string | null>(null);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<AddAdminFormValues>({
+    resolver: zodResolver(addAdminSchema),
+    defaultValues: {
+      name: '',
+      email: '',
+      password: '',
+    },
+  });
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -45,51 +53,24 @@ export default function AddAdminDialog({
     }
   };
 
-  const clearValidation = () => {
-    if (validationError) {
-      setValidationError(null);
-    }
-  };
-
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    const nextName = name.trim();
-    const nextEmail = email.trim().toLowerCase();
-    const nextPassword = password.trim();
-
-    if (!nextName) {
-      setValidationError('Name is required.');
-      return;
-    }
-    if (!EMAIL_PATTERN.test(nextEmail)) {
-      setValidationError('Enter a valid email address.');
-      return;
-    }
-    if (nextPassword.length < 8) {
-      setValidationError('Password must be at least 8 characters.');
-      return;
-    }
-
+  const onFormSubmit = async (values: AddAdminFormValues) => {
     await onSubmit({
-      display_name: nextName,
-      email: nextEmail,
-      password: nextPassword,
+      display_name: values.name.trim(),
+      email: values.email.trim().toLowerCase(),
+      password: values.password.trim(),
     });
   };
 
-  const inlineError = validationError ?? error;
-
   return (
     <div
-      className="fixed inset-0 z-50 grid place-items-center bg-[var(--overlay-scrim)] p-5 backdrop-blur-xs"
+      className="fixed inset-0 z-50 grid place-items-center bg-(--overlay-scrim) p-5 backdrop-blur-xs"
       onClick={handleBackdropClick}
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="add-admin-title"
-        className="max-h-[88vh] w-full max-w-[560px] overflow-auto rounded-[24px] border border-[var(--dialog-border)] bg-card p-[30px] shadow-2xl"
+        className="max-h-[88vh] w-full max-w-140 overflow-auto rounded-[24px] border border-(--dialog-border) bg-card p-7.5 shadow-2xl"
       >
         <div className="mb-4 flex items-start justify-between gap-4">
           <div>
@@ -106,10 +87,10 @@ export default function AddAdminDialog({
           <button
             type="button"
             onClick={onClose}
-            className="text-[22px] leading-none text-muted-foreground hover:text-foreground transition-colors"
+            className="text-[22px] leading-none text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
             aria-label="Close"
           >
-            ×
+            <X />
           </button>
         </div>
 
@@ -118,73 +99,49 @@ export default function AddAdminDialog({
           and start using the workspace immediately.
         </p>
 
-        <form onSubmit={handleSubmit} noValidate>
+        <form onSubmit={handleSubmit(onFormSubmit)} noValidate>
           <div className="mb-3">
-            <Label
-              htmlFor="admin-name"
-              className="mb-1.5 block text-[12px] font-bold text-foreground"
-            >
-              Name
-            </Label>
             <Input
               id="admin-name"
-              value={name}
-              onChange={(event) => {
-                setName(event.target.value);
-                clearValidation();
-              }}
+              label="Name"
+              required
               placeholder="Full name"
-              className={fieldClassName}
+              errorMessage={errors.name?.message}
+              {...register('name')}
             />
           </div>
 
           <div className="mb-3">
-            <Label
-              htmlFor="admin-email"
-              className="mb-1.5 block text-[12px] font-bold text-foreground"
-            >
-              Email
-            </Label>
             <Input
               id="admin-email"
+              label="Email"
               type="email"
-              value={email}
-              onChange={(event) => {
-                setEmail(event.target.value);
-                clearValidation();
-              }}
+              required
               placeholder="name@ideapad.app"
-              className={fieldClassName}
+              errorMessage={errors.email?.message}
+              {...register('email')}
             />
           </div>
 
           <div className="mb-3">
-            <Label
-              htmlFor="admin-password"
-              className="mb-1.5 block text-[12px] font-bold text-foreground"
-            >
-              Temporary password
-            </Label>
             <Input
               id="admin-password"
+              label="Temporary password"
               type="password"
-              value={password}
-              onChange={(event) => {
-                setPassword(event.target.value);
-                clearValidation();
-              }}
+              required
               placeholder="At least 8 characters"
-              className={fieldClassName}
               autoComplete="new-password"
+              errorMessage={errors.password?.message}
+              {...register('password')}
             />
           </div>
 
-          {inlineError ? (
+          {error ? (
             <p
               className="mt-3 text-[12px] font-semibold text-destructive"
               role="alert"
             >
-              {inlineError}
+              {error}
             </p>
           ) : null}
 

@@ -7,6 +7,7 @@ import {
   type AuditEvent,
 } from '@/models/audit-log/audit-log-model';
 import { useGetAuditLogQuery } from '@/services/audit-log/audit-log-service';
+import { DEFAULT_PAGE_SIZE } from '@/utils/constants/pagination';
 import { getApiErrorMessage } from '@/utils/helpers/api-error';
 
 interface UseAuditLogParams {
@@ -42,8 +43,6 @@ export function parseAuditCategory(value: string | null): AuditCategoryFilter {
   }
   return isAuditCategoryFilter(value) ? value : 'All';
 }
-
-const DEFAULT_PAGE_SIZE = 6;
 
 export default function useAuditLog({
   category,

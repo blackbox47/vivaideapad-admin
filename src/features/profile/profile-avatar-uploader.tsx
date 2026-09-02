@@ -2,6 +2,7 @@ import { Camera, Loader2 } from 'lucide-react';
 import { useRef } from 'react';
 
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Input } from '@/components/ui/input';
 
 interface ProfileAvatarUploaderProps {
   name: string;
@@ -54,7 +55,7 @@ export default function ProfileAvatarUploader({
         </AvatarFallback>
       </Avatar>
 
-      <input
+      <Input
         ref={inputRef}
         type="file"
         accept="image/*"
@@ -69,7 +70,7 @@ export default function ProfileAvatarUploader({
         disabled={isUploading}
         title="Upload profile photo"
         aria-label="Upload profile photo"
-        className="absolute right-[-2px] bottom-[-2px] grid size-[26px] place-items-center rounded-full border-2 border-card bg-primary p-0 text-primary-foreground transition-colors hover:bg-brand-forest disabled:opacity-60 cursor-pointer"
+        className="absolute -right-0.5 -bottom-0.5 grid size-6.5 place-items-center rounded-full border-2 border-card bg-primary p-0 text-primary-foreground transition-colors hover:bg-brand-forest disabled:opacity-60 cursor-pointer"
       >
         {isUploading ? (
           <Loader2 className="size-3 animate-spin" />

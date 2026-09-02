@@ -1,13 +1,12 @@
 import { useEffect } from 'react';
 
-import { env } from '@/config/env';
 import { startAdminNotificationsStream } from '@/services/notifications/admin-notifications-stream';
 import { startCreatorNotificationsStream } from '@/services/creator/creator-notifications-stream';
 import { store } from '@/store';
 
-type Props = {
+interface Props {
   role: 'admin' | 'creator';
-};
+}
 
 /**
  * Mounts the notification SSE stream for the lifetime of a protected layout.
@@ -38,11 +37,8 @@ type Props = {
  */
 export function NotificationsStreamBootstrap({ role }: Props) {
   useEffect(() => {
-    if (env.useMockApi) {
-      return;
-    }
     if (!store.getState().auth.isAuthenticated) {
-      return;
+      return undefined;
     }
 
     const teardown =

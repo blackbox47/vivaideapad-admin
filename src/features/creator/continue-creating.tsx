@@ -1,4 +1,4 @@
-import { Link } from '@tanstack/react-router';
+import { Link, useNavigate } from '@tanstack/react-router';
 
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -20,8 +20,9 @@ export default function ContinueCreating({
   items,
   isLoading,
 }: ContinueCreatingProps) {
+  const navigate = useNavigate();
   return (
-    <section className="rounded-[20px] border border-border bg-card p-[22px]">
+    <section className="rounded-[20px] border border-border bg-card p-5.5">
       <div className="mb-5 flex items-center justify-between gap-3">
         <h2 className="font-heading text-lg font-semibold text-foreground">
           Continue creating
@@ -38,7 +39,7 @@ export default function ContinueCreating({
       {isLoading ? (
         <div>
           {Array.from({ length: 2 }).map((_, index) => (
-            <Skeleton key={index} className="mt-2.5 h-[88px] rounded-[15px]" />
+            <Skeleton key={index} className="mt-2.5 h-22 rounded-[15px]" />
           ))}
         </div>
       ) : (
@@ -50,7 +51,7 @@ export default function ContinueCreating({
             >
               <span
                 className={cn(
-                  'grid size-[58px] place-items-center rounded-[15px] text-xl leading-none',
+                  'grid size-14.5 place-items-center rounded-[15px] text-xl leading-none',
                   ICON_TONE_CLASS[item.iconTone],
                 )}
                 aria-hidden
@@ -75,8 +76,13 @@ export default function ContinueCreating({
 
               {item.action === 'continue' ? (
                 <Button
-                  render={<Link to={CREATOR_ROUTES.submitIdea} />}
-                  className="h-auto rounded-full bg-primary px-3.5 py-2 text-xs font-bold text-primary-foreground hover:bg-brand-forest"
+                  type="button"
+                  onClick={() => {
+                    navigate({
+                      to: `${CREATOR_ROUTES.submitIdea}?id=${encodeURIComponent(item.id)}`,
+                    });
+                  }}
+                  className="h-auto rounded-full bg-primary px-3.5 py-2 text-xs font-bold text-primary-foreground hover:bg-brand-forest cursor-pointer"
                 >
                   Continue
                 </Button>

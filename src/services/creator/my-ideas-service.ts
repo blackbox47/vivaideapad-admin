@@ -23,7 +23,20 @@ export const myIdeasService = baseService.injectEndpoints({
         }
         const res = response as Record<string, unknown>;
         if (Array.isArray(res.ideas)) {
-          return response as MyIdeasResponse;
+          const ideas = (res.ideas as Array<Record<string, unknown>>).map((idea) => {
+            const conceptTitle =
+              (idea.concept_title as string) ||
+              (idea.conceptTitle as string) ||
+              (idea.topic as string) ||
+              '—';
+            return {
+              ...idea,
+              conceptTitle,
+              topic: conceptTitle,
+            } as MyIdea;
+          });
+          const total = typeof res.total === 'number' ? res.total : ideas.length;
+          return { ideas, total };
         }
         if (Array.isArray(res.data)) {
           const mapStatus = (status: string): MyIdea['status'] => {
@@ -40,17 +53,29 @@ export const myIdeasService = baseService.injectEndpoints({
                 return 'Draft';
             }
           };
-          const ideas = res.data.map((item: Record<string, unknown>) => ({
-            id: String(item.id ?? ''),
-            title: String(item.title ?? ''),
-            topic: String(item.concept_id ?? 'General'),
-            submitted: String(item.created_at ?? '').slice(0, 10),
-            status: mapStatus(String(item.status ?? 'draft')),
-            reward: item.reward_amount ? `$${item.reward_amount}` : '$0',
-            comments: 0,
-            body: String(item.body ?? ''),
-            feedback: (item.decision_notes as string) ?? undefined,
-          }));
+          const ideas = res.data.map((item: Record<string, unknown>) => {
+            const conceptObj =
+              item.concept && typeof item.concept === 'object'
+                ? (item.concept as Record<string, unknown>)
+                : null;
+            const conceptTitle =
+              (item.concept_title as string) ||
+              (conceptObj?.title as string) ||
+              (item.conceptTitle as string) ||
+              '—';
+            return {
+              id: String(item.id ?? ''),
+              title: String(item.title ?? ''),
+              conceptTitle,
+              topic: conceptTitle,
+              submitted: String(item.created_at ?? '').slice(0, 10),
+              status: mapStatus(String(item.status ?? 'draft')),
+              reward: item.reward_amount ? `$${item.reward_amount}` : '$0',
+              comments: 0,
+              body: String(item.body ?? ''),
+              feedback: (item.decision_notes as string) ?? undefined,
+            };
+          });
           const total = typeof (res.meta as Record<string, unknown>)?.total === 'number'
             ? ((res.meta as Record<string, unknown>).total as number)
             : ideas.length;

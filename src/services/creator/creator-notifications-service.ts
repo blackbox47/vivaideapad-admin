@@ -49,7 +49,7 @@ export const creatorNotificationsService = baseService.injectEndpoints({
         // 2. Live API paginated format: { data: [...], meta: { total, ... } }
         if (Array.isArray(res.data)) {
           const notifications: CreatorNotification[] = (
-            res.data as Record<string, unknown>[]
+            res.data as Array<Record<string, unknown>>
           ).map((item) => {
             const isRead = item.read_state === 'read' || item.read === true;
             return {

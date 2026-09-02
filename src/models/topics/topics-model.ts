@@ -35,6 +35,9 @@ export interface Concept {
   opensOn: string;
   closesOn: string;
   reward: string;
+  categoryId?: string;
+  openDate?: string;
+  closeDate?: string;
 }
 
 export interface ConceptListParams {

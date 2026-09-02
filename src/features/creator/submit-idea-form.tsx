@@ -1,77 +1,53 @@
-import { useMemo, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useForm, useWatch } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate } from '@tanstack/react-router';
-
 import { Button } from '@/components/ui/button';
+import { FileUploader } from '@/components/ui/file-uploader';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import useSubmitIdea from '@/hooks/creator/use-submit-idea';
-import type { CreatorTopic } from '@/models/creator/submit-idea-model';
+import {
+  useSubmitExistingSubmissionMutation,
+  useUpdateSubmissionMutation,
+} from '@/services/creator/creator-ideas-service';
+import type {
+  CreatorTopic,
+  SubmissionDetail,
+} from '@/models/creator/submit-idea-model';
 import {
   BODY_MAX,
   SUMMARY_MAX,
   TITLE_MAX,
 } from '@/models/creator/submit-idea-model';
+import {
+  submitIdeaSchema,
+  type SubmitIdeaFormValues,
+} from '@/models/creator/submit-idea-schema';
 import { CREATOR_ROUTES } from '@/utils/constants/routes';
 import { getApiErrorMessage } from '@/utils/helpers/api-error';
 import type { DropdownOption } from '@/utils/types/dropdown-option';
+
+function readFileAsDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result ?? ''));
+    reader.onerror = () =>
+      reject(new Error(reader.error?.message ?? 'Failed to read file'));
+    reader.readAsDataURL(file);
+  });
+}
 
 interface SubmitIdeaFormProps {
   topics: CreatorTopic[];
   isLoadingTopics: boolean;
   selectedTopicId?: string;
   onTopicChange?: (topicId: string) => void;
-}
-
-interface FormValues {
-  topicId: string;
-  title: string;
-  summary: string;
-  body: string;
-  attachmentUrl: string;
-}
-
-const EMPTY: FormValues = {
-  topicId: '',
-  title: '',
-  summary: '',
-  body: '',
-  attachmentUrl: '',
-};
-
-const URL_PATTERN = /^https?:\/\/\S+$/i;
-
-const fieldClassName =
-  'h-auto w-full rounded-[12px] border border-border bg-card text-foreground px-[14px] py-[13px] text-sm shadow-none focus-visible:border-brand-sage-light focus-visible:ring-2 focus-visible:ring-success-muted';
-
-function validate(values: FormValues): string | null {
-  if (!values.topicId) {
-    return 'Pick a topic before submitting.';
-  }
-  if (!values.title.trim()) {
-    return 'Title is required.';
-  }
-  if (values.title.length > TITLE_MAX) {
-    return `Title must be at most ${TITLE_MAX} characters.`;
-  }
-  if (!values.summary.trim()) {
-    return 'Summary is required.';
-  }
-  if (values.summary.length > SUMMARY_MAX) {
-    return `Summary must be at most ${SUMMARY_MAX} characters.`;
-  }
-  if (!values.body.trim()) {
-    return 'Body is required.';
-  }
-  if (values.body.length > BODY_MAX) {
-    return `Body must be at most ${BODY_MAX} characters.`;
-  }
-  if (
-    values.attachmentUrl.trim().length > 0 &&
-    !URL_PATTERN.test(values.attachmentUrl.trim())
-  ) {
-    return 'Attachment URL must start with http:// or https://';
-  }
-  return null;
+  submissionId?: string;
+  submission?: SubmissionDetail | null;
+  isLoadingSubmission?: boolean;
 }
 
 export default function SubmitIdeaForm({
@@ -79,18 +55,49 @@ export default function SubmitIdeaForm({
   isLoadingTopics,
   selectedTopicId = '',
   onTopicChange,
+  submissionId,
+  submission,
+  isLoadingSubmission = false,
 }: SubmitIdeaFormProps) {
-  const [values, setValues] = useState<FormValues>({
-    ...EMPTY,
-    topicId: selectedTopicId,
-  });
-  const [validationError, setValidationError] = useState<string | null>(null);
-  const [submitIdea, { isLoading }] = useSubmitIdea();
+  const [serverError, setServerError] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [submitIdea, { isLoading: isSubmittingNew }] = useSubmitIdea();
+  const [updateSubmission, { isLoading: isUpdating }] =
+    useUpdateSubmissionMutation();
+  const [submitExisting, { isLoading: isSubmittingExisting }] =
+    useSubmitExistingSubmissionMutation();
   const navigate = useNavigate();
 
-  // Map CreatorTopic[] → DropdownOption[] for the `<select>`. Keeps the
-  // canonical CreatorTopic shape intact for the cards / lists that also
-  // read it; only the dropdown consumes the flattened shape.
+  const isBusy =
+    isSubmittingNew ||
+    isUpdating ||
+    isSubmittingExisting ||
+    isLoadingTopics ||
+    isLoadingSubmission;
+
+  const {
+    register,
+    handleSubmit,
+    control,
+    setValue,
+    reset,
+    formState: { errors },
+  } = useForm<SubmitIdeaFormValues>({
+    resolver: zodResolver(submitIdeaSchema),
+    defaultValues: {
+      topicId: selectedTopicId,
+      title: '',
+      summary: '',
+      body: '',
+      attachmentUrl: '',
+      confirmedOriginal: false,
+    },
+  });
+
+  const titleValue = useWatch({ control, name: 'title' }) ?? '';
+  const summaryValue = useWatch({ control, name: 'summary' }) ?? '';
+  const bodyValue = useWatch({ control, name: 'body' }) ?? '';
+
   const topicOptions = useMemo<DropdownOption[]>(
     () =>
       topics.map((topic) => ({
@@ -100,175 +107,200 @@ export default function SubmitIdeaForm({
     [topics],
   );
 
-  // Sync the form's `topicId` when the parent changes `selectedTopicId`
-  // (React's "adjust state on prop change" pattern — render-time
-  // comparison queues the setState, avoiding `set-state-in-effect`).
-  const [prevSelectedTopicId, setPrevSelectedTopicId] = useState(selectedTopicId);
-  if (selectedTopicId !== prevSelectedTopicId) {
-    setPrevSelectedTopicId(selectedTopicId);
-    setValues((prev) =>
-      prev.topicId === selectedTopicId
-        ? prev
-        : { ...prev, topicId: selectedTopicId },
+  // Populate form with existing submission data
+  useEffect(() => {
+    if (submission) {
+      reset({
+        topicId: submission.conceptId || selectedTopicId || '',
+        title: submission.title || '',
+        summary: submission.summary || '',
+        body: submission.body || '',
+        attachmentUrl: submission.attachmentUrl || '',
+        confirmedOriginal: true,
+      });
+    }
+  }, [submission, reset, selectedTopicId]);
+
+  useEffect(() => {
+    if (selectedTopicId) {
+      setValue('topicId', selectedTopicId);
+    }
+  }, [selectedTopicId, setValue]);
+
+  const handleFileChange = async (file: File | null) => {
+    setSelectedFile(file);
+    if (!file) {
+      setValue('attachmentUrl', submission?.attachmentUrl ?? '');
+      return;
+    }
+    try {
+      const dataUrl = await readFileAsDataUrl(file);
+      setValue('attachmentUrl', dataUrl);
+    } catch {
+      setValue('attachmentUrl', file.name);
+    }
+  };
+
+  const onFormSubmit = async (values: SubmitIdeaFormValues) => {
+    setServerError(null);
+    try {
+      if (submissionId) {
+        await updateSubmission({
+          id: submissionId,
+          body: {
+            concept_id: values.topicId,
+            topicId: values.topicId,
+            title: values.title.trim(),
+            summary: values.summary?.trim(),
+            body: values.body.trim(),
+            attachmentUrl: values.attachmentUrl?.trim() || undefined,
+            file: selectedFile ?? undefined,
+          },
+        }).unwrap();
+        await submitExisting(submissionId).unwrap();
+      } else {
+        await submitIdea({
+          topicId: values.topicId,
+          concept_id: values.topicId,
+          title: values.title.trim(),
+          summary: values.summary?.trim(),
+          body: values.body.trim(),
+          attachmentUrl: values.attachmentUrl?.trim() || undefined,
+          file: selectedFile ?? undefined,
+        }).unwrap();
+      }
+      navigate({ to: CREATOR_ROUTES.submissions, replace: true });
+    } catch (err) {
+      setServerError(getApiErrorMessage(err));
+    }
+  };
+
+  const topicRegister = register('topicId');
+
+  if (isLoadingSubmission) {
+    return (
+      <div className="space-y-4 py-4" aria-busy="true">
+        <div className="h-10 animate-pulse rounded-md bg-surface-subtle" />
+        <div className="h-12 animate-pulse rounded-md bg-surface-subtle" />
+        <div className="h-20 animate-pulse rounded-md bg-surface-subtle" />
+        <div className="h-40 animate-pulse rounded-md bg-surface-subtle" />
+      </div>
     );
   }
 
-  const serverError = getApiErrorMessage(null);
-  const inlineError = validationError ?? serverError;
-
-  const update = (key: keyof FormValues, value: string) => {
-    setValues((prev) => ({ ...prev, [key]: value }));
-    if (validationError) {
-      setValidationError(null);
-    }
-  };
-
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    const validation = validate(values);
-    if (validation) {
-      setValidationError(validation);
-      return;
-    }
-
-    try {
-      await submitIdea({
-        topicId: values.topicId,
-        title: values.title.trim(),
-        summary: values.summary.trim(),
-        body: values.body.trim(),
-        attachmentUrl: values.attachmentUrl.trim() || undefined,
-      }).unwrap();
-      navigate({ to: CREATOR_ROUTES.submissions, replace: true });
-    } catch (err) {
-      setValidationError(getApiErrorMessage(err));
-    }
-  };
-
   return (
-    <form onSubmit={handleSubmit} noValidate className="grid gap-4">
-      <div>
-        <Label
-          htmlFor="topic"
-          className="mb-1.5 block text-[12px] font-bold text-foreground"
-        >
-          Topic
-        </Label>
-        <select
-          id="topic"
-          value={values.topicId}
-          onChange={(event) => {
-            update('topicId', event.target.value);
-            onTopicChange?.(event.target.value);
-          }}
-          disabled={isLoadingTopics}
-          className={fieldClassName + ' appearance-none'}
-        >
-          <option value="">
-            {isLoadingTopics ? 'Loading topics…' : 'Choose a topic'}
-          </option>
-          {topicOptions.map((topic) => (
-            <option key={topic.id} value={topic.id}>
-              {topic.label}
-            </option>
-          ))}
-        </select>
-      </div>
+    <form onSubmit={handleSubmit(onFormSubmit)} noValidate className="grid gap-4">
+      <Select
+        id="topic"
+        label="Topic"
+        required
+        disabled={isLoadingTopics || isBusy}
+        placeholder={isLoadingTopics ? 'Loading topics…' : 'Choose a topic'}
+        options={topicOptions}
+        errorMessage={errors.topicId?.message}
+        {...topicRegister}
+        onChange={(event) => {
+          topicRegister.onChange(event);
+          onTopicChange?.(event.target.value);
+        }}
+      />
 
       <div>
-        <Label
-          htmlFor="title"
-          className="mb-1.5 block text-[12px] font-bold text-foreground"
-        >
-          Title
-        </Label>
         <Input
           id="title"
-          value={values.title}
-          onChange={(event) => update('title', event.target.value)}
+          label="Title"
+          required
+          disabled={isBusy}
           maxLength={TITLE_MAX}
           placeholder="Give it a working title"
-          className={fieldClassName}
+          errorMessage={errors.title?.message}
+          {...register('title')}
         />
         <p className="mt-1 text-right text-xs text-text-subtle">
-          {values.title.length}/{TITLE_MAX}
+          {titleValue.length}/{TITLE_MAX}
         </p>
       </div>
 
       <div>
-        <Label
-          htmlFor="summary"
-          className="mb-1.5 block text-[12px] font-bold text-foreground"
-        >
-          Summary
-        </Label>
-        <textarea
+        <Textarea
           id="summary"
-          value={values.summary}
-          onChange={(event) => update('summary', event.target.value)}
+          label="Summary"
+          disabled={isBusy}
           maxLength={SUMMARY_MAX}
           rows={2}
           placeholder="One or two lines — what is the idea and who is it for?"
-          className={fieldClassName}
+          errorMessage={errors.summary?.message}
+          {...register('summary')}
         />
         <p className="mt-1 text-right text-xs text-text-subtle">
-          {values.summary.length}/{SUMMARY_MAX}
+          {summaryValue.length}/{SUMMARY_MAX}
         </p>
       </div>
 
       <div>
-        <Label
-          htmlFor="body"
-          className="mb-1.5 block text-[12px] font-bold text-foreground"
-        >
-          Body
-        </Label>
-        <textarea
+        <Textarea
           id="body"
-          value={values.body}
-          onChange={(event) => update('body', event.target.value)}
+          label="Body"
+          required
+          disabled={isBusy}
           maxLength={BODY_MAX}
           rows={8}
           placeholder="Describe the idea, the steps to pilot it, and how you'd measure success."
-          className={fieldClassName}
+          errorMessage={errors.body?.message}
+          {...register('body')}
         />
         <p className="mt-1 text-right text-xs text-text-subtle">
-          {values.body.length}/{BODY_MAX}
+          {bodyValue.length}/{BODY_MAX}
         </p>
       </div>
 
-      <div>
-        <Label
-          htmlFor="attachment"
-          className="mb-1.5 block text-[12px] font-bold text-foreground"
-        >
-          Attachment URL <span className="font-normal text-text-subtle">(optional)</span>
-        </Label>
+      <FileUploader
+        id="attachment"
+        label="Supporting evidence"
+        acceptText="PDF, DOCX, JPG or PNG · up to 10 MB"
+        value={selectedFile}
+        onChange={handleFileChange}
+        disabled={isBusy}
+        errorMessage={errors.attachmentUrl?.message}
+      />
+
+      <div className="flex items-center gap-2.5 pt-0.5">
         <Input
-          id="attachment"
-          value={values.attachmentUrl}
-          onChange={(event) => update('attachmentUrl', event.target.value)}
-          placeholder="https://"
-          className={fieldClassName}
+          id="confirmedOriginal"
+          type="checkbox"
+          disabled={isBusy}
+          className="size-4 cursor-pointer rounded accent-primary disabled:opacity-60"
+          {...register('confirmedOriginal')}
         />
+        <Label
+          htmlFor="confirmedOriginal"
+          className="cursor-pointer text-[13px] font-normal text-foreground select-none"
+        >
+          I confirm this submission is original and follows the content guidelines
+        </Label>
       </div>
 
-      {inlineError ? (
+      {serverError ? (
         <p
           className="text-[12px] font-semibold text-destructive"
           role="alert"
         >
-          {inlineError}
+          {serverError}
         </p>
       ) : null}
 
       <Button
         type="submit"
-        disabled={isLoading || isLoadingTopics}
-        className="h-auto w-full rounded-full bg-primary px-5 py-[14px] text-sm font-bold text-primary-foreground hover:bg-brand-forest disabled:opacity-60 sm:w-auto sm:self-start"
+        disabled={isBusy}
+        className="h-auto w-full rounded-full bg-primary px-5 py-3.5 text-sm font-bold text-primary-foreground hover:bg-brand-forest disabled:opacity-60 sm:w-auto sm:self-start"
       >
-        {isLoading ? 'Submitting…' : 'Submit idea'}
+        {isSubmittingNew || isUpdating || isSubmittingExisting
+          ? submissionId
+            ? 'Updating & submitting…'
+            : 'Submitting…'
+          : submissionId
+            ? 'Update & submit idea'
+            : 'Submit idea'}
       </Button>
     </form>
   );
