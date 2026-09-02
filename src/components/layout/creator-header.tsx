@@ -22,7 +22,7 @@ import {
 } from '@/components/ui/sheet';
 import useCreatorUser from '@/hooks/auth/use-creator-user';
 import useAuth from '@/hooks/auth/use-auth';
-import useCreatorNotifications from '@/hooks/creator/use-creator-notifications';
+import NotificationPopover from '@/components/notifications/notification-popover';
 import useMobileNav from '@/hooks/ui/use-mobile-nav';
 import useTheme from '@/hooks/ui/use-theme';
 import { CREATOR_ROUTES } from '@/utils/constants/routes';
@@ -30,7 +30,6 @@ import { CREATOR_ROUTES } from '@/utils/constants/routes';
 export default function CreatorHeader() {
   const { isOpen, setOpen } = useMobileNav();
   const { user } = useCreatorUser();
-  const { unreadCount } = useCreatorNotifications();
   const { logout } = useAuth();
   const { isDarkMode, toggleTheme } = useTheme();
   const navigate = useNavigate();
@@ -83,38 +82,7 @@ export default function CreatorHeader() {
           )}
         </Button>
 
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => navigate({ to: CREATOR_ROUTES.notifications })}
-          className="relative size-10 rounded-full border-border bg-card text-foreground transition-colors hover:border-foreground"
-          aria-label={
-            unreadCount > 0
-              ? `Notifications, ${unreadCount} unread`
-              : 'Notifications'
-          }
-        >
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden
-          >
-            <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
-            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-          </svg>
-          {unreadCount > 0 ? (
-            <span
-              className="absolute top-1.5 right-1.5 size-2 rounded-full bg-brand-lime"
-              aria-hidden
-            />
-          ) : null}
-        </Button>
+        <NotificationPopover role="creator" />
 
         <DropdownMenu>
           <DropdownMenuTrigger
