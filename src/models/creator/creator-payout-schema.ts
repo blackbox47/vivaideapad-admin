@@ -1,7 +1,10 @@
 import { z } from 'zod';
 
 export const changePayoutMethodSchema = z.object({
-  method: z.string().min(1, 'Payout method is required.'),
+  method: z
+    .string()
+    .min(1, 'Payout method is required.')
+    .max(40, 'Payout method must be at most 40 characters.'),
 });
 
 export type ChangePayoutMethodFormValues = z.infer<
@@ -16,7 +19,10 @@ export const withdrawRequestSchema = z.object({
     .refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
       message: 'Amount must be a positive number.',
     }),
-  method: z.string().min(1, 'Payout method is required.'),
+  method: z
+    .string()
+    .min(1, 'Payout method is required.')
+    .max(40, 'Payout method must be at most 40 characters.'),
   mobile: z
     .string()
     .trim()

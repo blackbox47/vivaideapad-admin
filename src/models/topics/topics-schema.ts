@@ -4,7 +4,11 @@ import { z } from 'zod';
 export const LOCAL_CATEGORY_PREFIX = 'local:';
 
 export const createConceptSchema = z.object({
-  title: z.string().trim().min(1, 'Title is required.'),
+  title: z
+    .string()
+    .trim()
+    .min(1, 'Title is required.')
+    .max(255, 'Title must be at most 255 characters.'),
   categoryId: z
     .string()
     .min(1, 'Pick a category before saving.')
@@ -12,7 +16,11 @@ export const createConceptSchema = z.object({
       (id) => !id.startsWith(LOCAL_CATEGORY_PREFIX),
       'Draft category must be saved from the Categories page first.',
     ),
-  description: z.string().trim().min(1, 'Description is required.'),
+  description: z
+    .string()
+    .trim()
+    .min(1, 'Description is required.')
+    .max(10_000, 'Description must be at most 10,000 characters.'),
   opensOn: z.date().optional(),
   closesOn: z.date().optional(),
   reward: z.string(),
@@ -22,7 +30,11 @@ export const createConceptSchema = z.object({
 export type CreateConceptFormValues = z.infer<typeof createConceptSchema>;
 
 export const editConceptSchema = z.object({
-  title: z.string().trim().min(1, 'Title is required.'),
+  title: z
+    .string()
+    .trim()
+    .min(1, 'Title is required.')
+    .max(255, 'Title must be at most 255 characters.'),
   categoryId: z
     .string()
     .min(1, 'Pick a category before saving.')
@@ -30,7 +42,11 @@ export const editConceptSchema = z.object({
       (id) => !id.startsWith(LOCAL_CATEGORY_PREFIX),
       'Draft category must be saved from the Categories page first.',
     ),
-  description: z.string().trim().min(1, 'Description is required.'),
+  description: z
+    .string()
+    .trim()
+    .min(1, 'Description is required.')
+    .max(10_000, 'Description must be at most 10,000 characters.'),
   opensOn: z.date().optional(),
   closesOn: z.date().optional(),
   reward: z.string(),

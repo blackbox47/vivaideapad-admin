@@ -24,7 +24,11 @@ export const balanceAdjustmentSchema = z.object({
       (raw) => parseAdjustmentAmount(raw) !== null,
       'Enter a non-zero amount such as -20 or +50.',
     ),
-  reason: z.string().trim().min(1, 'Reason is required.'),
+  reason: z
+    .string()
+    .trim()
+    .min(1, 'Reason is required.')
+    .max(500, 'Reason must be at most 500 characters.'),
 });
 
 export type BalanceAdjustmentFormValues = z.infer<

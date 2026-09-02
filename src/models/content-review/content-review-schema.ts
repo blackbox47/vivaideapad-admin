@@ -4,7 +4,10 @@ export const submissionDecisionSchema = z
   .object({
     decision: z.enum(['approve', 'request_revision', 'reject']),
     rewardAmount: z.string().optional(),
-    feedback: z.string().optional(),
+    feedback: z
+      .string()
+      .max(2000, 'Feedback must be at most 2000 characters.')
+      .optional(),
   })
   .superRefine((data, ctx) => {
     if (
