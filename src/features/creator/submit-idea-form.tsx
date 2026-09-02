@@ -9,7 +9,14 @@ import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import useSubmitIdea from '@/hooks/creator/use-submit-idea';
-import type { CreatorTopic } from '@/models/creator/submit-idea-model';
+import {
+  useSubmitExistingSubmissionMutation,
+  useUpdateSubmissionMutation,
+} from '@/services/creator/creator-ideas-service';
+import type {
+  CreatorTopic,
+  SubmissionDetail,
+} from '@/models/creator/submit-idea-model';
 import {
   BODY_MAX,
   SUMMARY_MAX,
@@ -38,6 +45,9 @@ interface SubmitIdeaFormProps {
   isLoadingTopics: boolean;
   selectedTopicId?: string;
   onTopicChange?: (topicId: string) => void;
+  submissionId?: string;
+  submission?: SubmissionDetail | null;
+  isLoadingSubmission?: boolean;
 }
 
 export default function SubmitIdeaForm({
@@ -45,17 +55,32 @@ export default function SubmitIdeaForm({
   isLoadingTopics,
   selectedTopicId = '',
   onTopicChange,
+  submissionId,
+  submission,
+  isLoadingSubmission = false,
 }: SubmitIdeaFormProps) {
   const [serverError, setServerError] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [submitIdea, { isLoading }] = useSubmitIdea();
+  const [submitIdea, { isLoading: isSubmittingNew }] = useSubmitIdea();
+  const [updateSubmission, { isLoading: isUpdating }] =
+    useUpdateSubmissionMutation();
+  const [submitExisting, { isLoading: isSubmittingExisting }] =
+    useSubmitExistingSubmissionMutation();
   const navigate = useNavigate();
+
+  const isBusy =
+    isSubmittingNew ||
+    isUpdating ||
+    isSubmittingExisting ||
+    isLoadingTopics ||
+    isLoadingSubmission;
 
   const {
     register,
     handleSubmit,
     control,
     setValue,
+    reset,
     formState: { errors },
   } = useForm<SubmitIdeaFormValues>({
     resolver: zodResolver(submitIdeaSchema),
@@ -82,6 +107,20 @@ export default function SubmitIdeaForm({
     [topics],
   );
 
+  // Populate form with existing submission data
+  useEffect(() => {
+    if (submission) {
+      reset({
+        topicId: submission.conceptId || selectedTopicId || '',
+        title: submission.title || '',
+        summary: submission.summary || '',
+        body: submission.body || '',
+        attachmentUrl: submission.attachmentUrl || '',
+        confirmedOriginal: true,
+      });
+    }
+  }, [submission, reset, selectedTopicId]);
+
   useEffect(() => {
     if (selectedTopicId) {
       setValue('topicId', selectedTopicId);
@@ -91,7 +130,7 @@ export default function SubmitIdeaForm({
   const handleFileChange = async (file: File | null) => {
     setSelectedFile(file);
     if (!file) {
-      setValue('attachmentUrl', '');
+      setValue('attachmentUrl', submission?.attachmentUrl ?? '');
       return;
     }
     try {
@@ -105,14 +144,31 @@ export default function SubmitIdeaForm({
   const onFormSubmit = async (values: SubmitIdeaFormValues) => {
     setServerError(null);
     try {
-      await submitIdea({
-        topicId: values.topicId,
-        title: values.title.trim(),
-        summary: values.summary.trim(),
-        body: values.body.trim(),
-        attachmentUrl: values.attachmentUrl?.trim() || undefined,
-        file: selectedFile ?? undefined,
-      }).unwrap();
+      if (submissionId) {
+        await updateSubmission({
+          id: submissionId,
+          body: {
+            concept_id: values.topicId,
+            topicId: values.topicId,
+            title: values.title.trim(),
+            summary: values.summary?.trim(),
+            body: values.body.trim(),
+            attachmentUrl: values.attachmentUrl?.trim() || undefined,
+            file: selectedFile ?? undefined,
+          },
+        }).unwrap();
+        await submitExisting(submissionId).unwrap();
+      } else {
+        await submitIdea({
+          topicId: values.topicId,
+          concept_id: values.topicId,
+          title: values.title.trim(),
+          summary: values.summary?.trim(),
+          body: values.body.trim(),
+          attachmentUrl: values.attachmentUrl?.trim() || undefined,
+          file: selectedFile ?? undefined,
+        }).unwrap();
+      }
       navigate({ to: CREATOR_ROUTES.submissions, replace: true });
     } catch (err) {
       setServerError(getApiErrorMessage(err));
@@ -121,13 +177,24 @@ export default function SubmitIdeaForm({
 
   const topicRegister = register('topicId');
 
+  if (isLoadingSubmission) {
+    return (
+      <div className="space-y-4 py-4" aria-busy="true">
+        <div className="h-10 animate-pulse rounded-md bg-surface-subtle" />
+        <div className="h-12 animate-pulse rounded-md bg-surface-subtle" />
+        <div className="h-20 animate-pulse rounded-md bg-surface-subtle" />
+        <div className="h-40 animate-pulse rounded-md bg-surface-subtle" />
+      </div>
+    );
+  }
+
   return (
     <form onSubmit={handleSubmit(onFormSubmit)} noValidate className="grid gap-4">
       <Select
         id="topic"
         label="Topic"
         required
-        disabled={isLoadingTopics}
+        disabled={isLoadingTopics || isBusy}
         placeholder={isLoadingTopics ? 'Loading topics…' : 'Choose a topic'}
         options={topicOptions}
         errorMessage={errors.topicId?.message}
@@ -143,6 +210,7 @@ export default function SubmitIdeaForm({
           id="title"
           label="Title"
           required
+          disabled={isBusy}
           maxLength={TITLE_MAX}
           placeholder="Give it a working title"
           errorMessage={errors.title?.message}
@@ -157,7 +225,7 @@ export default function SubmitIdeaForm({
         <Textarea
           id="summary"
           label="Summary"
-          required
+          disabled={isBusy}
           maxLength={SUMMARY_MAX}
           rows={2}
           placeholder="One or two lines — what is the idea and who is it for?"
@@ -174,6 +242,7 @@ export default function SubmitIdeaForm({
           id="body"
           label="Body"
           required
+          disabled={isBusy}
           maxLength={BODY_MAX}
           rows={8}
           placeholder="Describe the idea, the steps to pilot it, and how you'd measure success."
@@ -191,7 +260,7 @@ export default function SubmitIdeaForm({
         acceptText="PDF, DOCX, JPG or PNG · up to 10 MB"
         value={selectedFile}
         onChange={handleFileChange}
-        disabled={isLoading || isLoadingTopics}
+        disabled={isBusy}
         errorMessage={errors.attachmentUrl?.message}
       />
 
@@ -199,6 +268,7 @@ export default function SubmitIdeaForm({
         <Input
           id="confirmedOriginal"
           type="checkbox"
+          disabled={isBusy}
           className="size-4 cursor-pointer rounded accent-primary disabled:opacity-60"
           {...register('confirmedOriginal')}
         />
@@ -221,10 +291,16 @@ export default function SubmitIdeaForm({
 
       <Button
         type="submit"
-        disabled={isLoading || isLoadingTopics}
+        disabled={isBusy}
         className="h-auto w-full rounded-full bg-primary px-5 py-3.5 text-sm font-bold text-primary-foreground hover:bg-brand-forest disabled:opacity-60 sm:w-auto sm:self-start"
       >
-        {isLoading ? 'Submitting…' : 'Submit idea'}
+        {isSubmittingNew || isUpdating || isSubmittingExisting
+          ? submissionId
+            ? 'Updating & submitting…'
+            : 'Submitting…'
+          : submissionId
+            ? 'Update & submit idea'
+            : 'Submit idea'}
       </Button>
     </form>
   );

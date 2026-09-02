@@ -11,7 +11,6 @@ type AppMode = 'local' | 'develop' | 'prod';
 interface Env {
   apiBaseUrl: string;
   mode: AppMode;
-  useMockApi: boolean;
 }
 
 function readMode(): AppMode {
@@ -36,20 +35,11 @@ function requireEnv(name: string): string {
   return value;
 }
 
-function readBoolean(name: string, fallback: boolean): boolean {
-  const value = import.meta.env[name];
-  if (value === undefined || value === null || value === '') {
-    return fallback;
-  }
-  return value === 'true';
-}
-
 const mode = readMode();
 
 export const env: Env = {
   apiBaseUrl: requireEnv('VITE_API_BASE_URL'),
   mode,
-  useMockApi: readBoolean('VITE_USE_MOCK_API', mode !== 'prod'),
 };
 
 export const isProd = env.mode === 'prod';

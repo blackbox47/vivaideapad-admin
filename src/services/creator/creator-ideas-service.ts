@@ -2,17 +2,65 @@ import type {
   CreatorTopic,
   CreatorTopicsResponse,
   OpportunityCategory,
+  SubmissionDetail,
   SubmitIdeaBody,
   SubmitIdeaResponse,
 } from '@/models/creator/submit-idea-model';
 import { baseService } from '@/services/core/base-service';
 import {
+  CREATOR_IDEA_DETAIL_URL,
+  CREATOR_IDEA_SUBMIT_FOR_REVIEW_URL,
   CREATOR_IDEAS_SUBMIT_URL,
   CREATOR_TOPICS_URL,
 } from '@/utils/constants/api-end-points';
 
 export const creatorIdeasService = baseService.injectEndpoints({
   endpoints: (builder) => ({
+    getSubmissionById: builder.query<SubmissionDetail, string>({
+      query: (id) => ({
+        url: CREATOR_IDEA_DETAIL_URL(id),
+        method: 'GET',
+      }),
+      transformResponse: (response: unknown): SubmissionDetail => {
+        const res = (response ?? {}) as Record<string, unknown>;
+        const conceptObj =
+          res.concept && typeof res.concept === 'object'
+            ? (res.concept as Record<string, unknown>)
+            : null;
+        const attachmentsObj =
+          res.attachments && typeof res.attachments === 'object'
+            ? (res.attachments as Record<string, unknown>)
+            : null;
+
+        return {
+          id: String(res.id ?? ''),
+          userId: String(res.user_id ?? ''),
+          conceptId: String(res.concept_id ?? conceptObj?.id ?? ''),
+          conceptTitle: String(
+            res.concept_title ?? conceptObj?.title ?? '',
+          ),
+          title: String(res.title ?? ''),
+          summary: String(res.summary ?? ''),
+          body: String(res.body ?? ''),
+          attachmentUrl:
+            (attachmentsObj?.url as string) ||
+            (res.attachmentUrl as string) ||
+            '',
+          attachments: attachmentsObj,
+          status: String(res.status ?? 'draft'),
+          rewardAmount: res.reward_amount
+            ? String(res.reward_amount)
+            : undefined,
+          decisionNotes: (res.decision_notes as string) ?? undefined,
+          createdAt: String(res.created_at ?? ''),
+          updatedAt: String(res.updated_at ?? ''),
+        };
+      },
+      providesTags: (_result, _error, id) => [
+        { type: 'submissions', id },
+        'my-ideas',
+      ],
+    }),
     submitIdea: builder.mutation<SubmitIdeaResponse, SubmitIdeaBody>({
       query: (body) => {
         if (body.file) {
@@ -69,6 +117,49 @@ export const creatorIdeasService = baseService.injectEndpoints({
       },
       invalidatesTags: ['my-ideas', 'creator-dashboard'],
     }),
+    updateSubmission: builder.mutation<
+      SubmitIdeaResponse,
+      { id: string; body: SubmitIdeaBody }
+    >({
+      query: ({ id, body }) => {
+        if (body.file) {
+          const formData = new FormData();
+          formData.append(
+            'concept_id',
+            body.concept_id || body.topicId || '',
+          );
+          formData.append('title', body.title);
+          formData.append('body', body.body || body.summary || '');
+          formData.append('file', body.file);
+          return {
+            url: CREATOR_IDEA_DETAIL_URL(id),
+            method: 'PATCH',
+            body: formData,
+          };
+        }
+
+        return {
+          url: CREATOR_IDEA_DETAIL_URL(id),
+          method: 'PATCH',
+          body: {
+            concept_id: body.concept_id || body.topicId || '',
+            title: body.title,
+            body: body.body || body.summary || '',
+            attachments: body.attachmentUrl
+              ? { url: body.attachmentUrl }
+              : undefined,
+          },
+        };
+      },
+      invalidatesTags: ['my-ideas', 'creator-dashboard'],
+    }),
+    submitExistingSubmission: builder.mutation<void, string>({
+      query: (id) => ({
+        url: CREATOR_IDEA_SUBMIT_FOR_REVIEW_URL(id),
+        method: 'POST',
+      }),
+      invalidatesTags: ['my-ideas', 'creator-dashboard'],
+    }),
     getCreatorTopics: builder.query<CreatorTopicsResponse, void>({
       query: () => ({ url: CREATOR_TOPICS_URL, method: 'GET' }),
       transformResponse: (response: unknown): CreatorTopicsResponse => {
@@ -111,5 +202,10 @@ export const creatorIdeasService = baseService.injectEndpoints({
   }),
 });
 
-export const { useSubmitIdeaMutation, useGetCreatorTopicsQuery } =
-  creatorIdeasService;
+export const {
+  useGetSubmissionByIdQuery,
+  useSubmitIdeaMutation,
+  useUpdateSubmissionMutation,
+  useSubmitExistingSubmissionMutation,
+  useGetCreatorTopicsQuery,
+} = creatorIdeasService;

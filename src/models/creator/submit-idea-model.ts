@@ -44,6 +44,23 @@ export interface SubmitIdeaResponse {
   createdAt: string;
 }
 
+export interface SubmissionDetail {
+  id: string;
+  userId?: string;
+  conceptId: string;
+  conceptTitle?: string;
+  title: string;
+  summary?: string;
+  body: string;
+  attachmentUrl?: string;
+  attachments?: Record<string, unknown> | null;
+  status: string;
+  rewardAmount?: string;
+  decisionNotes?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export interface ValidationIssue {
   field: keyof SubmitIdeaBody | 'topicId' | 'concept_id';
   message: string;

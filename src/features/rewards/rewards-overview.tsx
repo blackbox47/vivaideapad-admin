@@ -150,7 +150,7 @@ export default function RewardsOverview() {
           ))}
         </div>
       ) : entries.length === 0 ? (
-        <div className="rounded-[22px] border border-border bg-card px-6 py-[60px] text-center text-muted-foreground">
+        <div className="rounded-[22px] border border-border bg-card px-6 py-15 text-center text-muted-foreground">
           <span className="mb-2.5 block text-[28px]">◇</span>
           <strong className="mb-1 block text-foreground">
             No entries match

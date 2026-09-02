@@ -55,7 +55,7 @@ export const creatorRewardsService = baseService.injectEndpoints({
           ...(body.mobile ? { mobile: body.mobile } : {}),
         },
       }),
-      invalidatesTags: ['creator-rewards'],
+      invalidatesTags: ['creator-rewards', 'creator-dashboard'],
     }),
   }),
 });

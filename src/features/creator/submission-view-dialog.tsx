@@ -14,10 +14,16 @@ interface SubmissionViewDialogProps {
 
 function primaryAction(idea: MyIdea): { label: string; href: string } {
   if (idea.status === 'Draft') {
-    return { label: 'Continue editing', href: CREATOR_ROUTES.submitIdea };
+    return {
+      label: 'Continue editing',
+      href: `${CREATOR_ROUTES.submitIdea}?id=${encodeURIComponent(idea.id)}`,
+    };
   }
   if (idea.status === 'Revision Requested') {
-    return { label: 'Edit & resubmit', href: CREATOR_ROUTES.submitIdea };
+    return {
+      label: 'Edit & resubmit',
+      href: `${CREATOR_ROUTES.submitIdea}?id=${encodeURIComponent(idea.id)}`,
+    };
   }
   return { label: 'View in wallet', href: CREATOR_ROUTES.rewards };
 }
@@ -49,14 +55,14 @@ export default function SubmissionViewDialog({
 
   return (
     <div
-      className="fixed inset-0 z-50 grid place-items-center bg-[var(--overlay-scrim)] p-5 backdrop-blur-xs"
+      className="fixed inset-0 z-50 grid place-items-center bg-(--overlay-scrim) p-5 backdrop-blur-xs"
       onClick={handleBackdropClick}
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="submission-view-title"
-        className="max-h-[88vh] w-full max-w-[560px] overflow-auto rounded-[24px] border border-[var(--dialog-border)] bg-card p-[30px] shadow-2xl"
+        className="max-h-[88vh] w-full max-w-140 overflow-auto rounded-[24px] border border-(--dialog-border) bg-card p-7.5 shadow-2xl"
       >
         <div className="mb-3.5 flex items-start justify-between gap-4">
           <div>

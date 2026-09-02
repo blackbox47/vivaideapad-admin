@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 
-import { env } from '@/config/env';
 import { startAdminNotificationsStream } from '@/services/notifications/admin-notifications-stream';
 import { startCreatorNotificationsStream } from '@/services/creator/creator-notifications-stream';
 import { store } from '@/store';
@@ -38,7 +37,7 @@ interface Props {
  */
 export function NotificationsStreamBootstrap({ role }: Props) {
   useEffect(() => {
-    if (env.useMockApi || !store.getState().auth.isAuthenticated) {
+    if (!store.getState().auth.isAuthenticated) {
       return undefined;
     }
 

@@ -137,8 +137,8 @@ export default function CreatorRewardsOverview() {
 
       <CreatorStatsCards stats={stats} isLoading={isLoading} />
 
-      <section className="mt-[18px] rounded-[20px] border border-border bg-card p-[22px]">
-        <div className="mb-[18px] flex items-center justify-between gap-3">
+      <section className="mt-4.5 rounded-[20px] border border-border bg-card p-5.5">
+        <div className="mb-4.5 flex items-center justify-between gap-3">
           <h2 className="font-heading text-lg font-semibold text-foreground">
             Transaction history
           </h2>
@@ -170,7 +170,7 @@ export default function CreatorRewardsOverview() {
       ) : null}
 
       {toast ? (
-        <div className="fixed bottom-[26px] left-1/2 z-[60] -translate-x-1/2 rounded-full bg-primary px-[22px] py-3.5 text-[13px] font-semibold text-primary-foreground shadow-2xl">
+        <div className="fixed bottom-6.5 left-1/2 z-60 -translate-x-1/2 rounded-full bg-primary px-5.5 py-3.5 text-[13px] font-semibold text-primary-foreground shadow-2xl">
           {toast}
         </div>
       ) : null}

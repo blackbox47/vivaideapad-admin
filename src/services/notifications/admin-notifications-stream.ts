@@ -67,12 +67,6 @@ function wireToAdminNotification(
 export function startAdminNotificationsStream(store: {
   dispatch: (action: unknown) => unknown;
 }): () => void {
-  if (env.useMockApi) {
-    return () => {
-      /* no-op in mock mode */
-    };
-  }
-
   const url = `${env.apiBaseUrl.replace(/\/+$/, '')}${ADMIN_NOTIFICATIONS_STREAM_URL}`;
   const es = new EventSource(url, { withCredentials: true });
 
