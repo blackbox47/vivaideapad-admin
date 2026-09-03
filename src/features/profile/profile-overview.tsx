@@ -37,7 +37,7 @@ export default function ProfileOverview() {
     uploadAvatar,
     isUploadingAvatar,
   } = useProfile();
-  const { logout } = useAuth();
+  const { logout, isSigningOut } = useAuth();
 
   if (isError || !overview) {
     return (
@@ -105,7 +105,7 @@ export default function ProfileOverview() {
             payoutMethod={payoutMethod}
             onChange={() => undefined}
           />
-          <ProfileSignOutCard onSignOut={logout} />
+          <ProfileSignOutCard onSignOut={logout} isSigningOut={isSigningOut} />
         </div>
       </div>
     </div>

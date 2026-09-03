@@ -164,13 +164,14 @@ export default function RewardsOverview() {
           <RewardTable entries={visibleEntries} />
           {remainingCount > 0 ? (
             <div className="mt-6 flex justify-center">
-              <button
+              <Button
                 type="button"
-                className="rounded-full border border-border bg-card px-6.5 py-3 text-[13px] font-bold text-foreground hover:bg-surface-subtle transition-colors cursor-pointer"
+                variant="outline"
+                className="h-auto rounded-full border-border bg-card px-6.5 py-3 text-[13px] font-bold text-foreground hover:bg-surface-subtle"
                 onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
               >
                 Show more entries · {remainingCount} remaining
-              </button>
+              </Button>
             </div>
           ) : null}
         </>

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { AlertCircle } from 'lucide-react';
 
 import PageHeader from '@/components/layout/page-header';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -48,13 +49,14 @@ export default function SubmitIdeaOverview() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <button
+          <Button
             type="button"
+            loading={isLoading}
             onClick={() => void refetch()}
-            className="rounded-full bg-primary px-5 py-2 text-sm font-bold text-primary-foreground hover:bg-brand-forest cursor-pointer"
+            className="h-auto rounded-full bg-primary px-5 py-2 text-sm font-bold text-primary-foreground hover:bg-brand-forest"
           >
             Try again
-          </button>
+          </Button>
         </CardContent>
       </Card>
     );

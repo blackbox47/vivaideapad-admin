@@ -200,6 +200,7 @@ export default function SubmissionDecisionDialog({
                   variant="ghost"
                   onClick={handleScan}
                   disabled={scanning || isDeciding}
+                  loading={scanning}
                 >
                   {scanning ? 'Scanning…' : 'Risk scan'}
                 </Button>
@@ -210,6 +211,7 @@ export default function SubmissionDecisionDialog({
                   variant="ghost"
                   onClick={handlePublish}
                   disabled={publishing || isDeciding}
+                  loading={publishing}
                 >
                   {publishing ? 'Publishing…' : 'Publish'}
                 </Button>
@@ -222,6 +224,7 @@ export default function SubmissionDecisionDialog({
               <Button
                 type="submit"
                 disabled={isDeciding}
+                loading={isDeciding}
                 className={ACTION_TONE[decision]}
               >
                 {isDeciding ? 'Saving…' : `Confirm: ${ACTION_LABELS[decision]}`}

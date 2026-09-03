@@ -116,6 +116,7 @@ export default function LoginPanel({ role }: LoginPanelProps) {
           <Button
             type="submit"
             disabled={isLoggingIn}
+            loading={isLoggingIn}
             className="h-auto w-full rounded-full bg-primary px-5 py-3.5 text-sm font-bold text-primary-foreground hover:bg-brand-forest disabled:opacity-60"
           >
             {isLoggingIn ? 'Signing in…' : 'Continue'}

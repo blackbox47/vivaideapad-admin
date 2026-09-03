@@ -60,6 +60,7 @@ export default function AdminNotificationsOverview() {
             type="button"
             variant="outline"
             disabled={isMarkingAll || unreadCount === 0}
+            loading={isMarkingAll}
             onClick={markAllRead}
             className="h-auto rounded-full border-border bg-card px-[18px] py-[11px] font-bold text-foreground hover:border-foreground transition-colors"
           >

@@ -1,6 +1,7 @@
 import * as React from "react"
 import { Button as ButtonPrimitive } from "@base-ui/react/button"
 import { cva, type VariantProps } from "class-variance-authority"
+import { Loader2 } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
@@ -41,14 +42,29 @@ const buttonVariants = cva(
   }
 )
 
+export interface ButtonProps
+  extends ButtonPrimitive.Props,
+    VariantProps<typeof buttonVariants> {
+  loading?: boolean
+  isLoading?: boolean
+  loadingText?: React.ReactNode
+}
+
 function Button({
   className,
   variant = "default",
   size = "default",
   nativeButton,
   render,
+  loading,
+  isLoading,
+  loadingText,
+  disabled,
+  children,
   ...props
-}: ButtonPrimitive.Props & VariantProps<typeof buttonVariants>) {
+}: ButtonProps) {
+  const isBusy = Boolean(loading || isLoading)
+
   const isExplicitNativeButton =
     React.isValidElement(render) &&
     typeof render.type === "string" &&
@@ -61,14 +77,38 @@ function Button({
         ? isExplicitNativeButton
         : undefined
 
+  const spinnerSize =
+    size === "xs" || size === "icon-xs"
+      ? "size-3"
+      : size === "sm" || size === "icon-sm"
+        ? "size-3.5"
+        : "size-4"
+
+  const isIconOnly = typeof size === "string" && size.startsWith("icon")
+
   return (
     <ButtonPrimitive
       data-slot="button"
       nativeButton={resolvedNativeButton}
       render={render}
+      disabled={disabled || isBusy}
+      aria-busy={isBusy ? "true" : undefined}
       className={cn(buttonVariants({ variant, size, className }))}
       {...props}
-    />
+    >
+      {isBusy ? (
+        <>
+          <Loader2 className={cn("animate-spin shrink-0", spinnerSize)} />
+          {loadingText ? (
+            <span>{loadingText}</span>
+          ) : isIconOnly ? null : (
+            children
+          )}
+        </>
+      ) : (
+        children
+      )}
+    </ButtonPrimitive>
   )
 }
 

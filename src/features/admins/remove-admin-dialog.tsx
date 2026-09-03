@@ -94,6 +94,7 @@ export default function RemoveAdminDialog({
           <Button
             type="button"
             disabled={isSubmitting}
+            loading={isSubmitting}
             onClick={() => {
               void onConfirm();
             }}
