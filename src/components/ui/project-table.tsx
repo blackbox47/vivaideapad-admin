@@ -1,5 +1,4 @@
-import * as React from 'react';
-
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Table,
   TableBody,
@@ -98,7 +97,9 @@ function ProjectTable({
                   <TableCell
                     key={colIndex}
                     className={cn(CELL_BASE, 'h-12')}
-                  />
+                  >
+                    <Skeleton className="h-4 w-4/5" />
+                  </TableCell>
                 ))}
               </TableRow>
             ))

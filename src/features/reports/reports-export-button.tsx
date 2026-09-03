@@ -1,5 +1,7 @@
-import { Download, Loader2 } from 'lucide-react';
+import { Download } from 'lucide-react';
 import { useState } from 'react';
+
+import { Button } from '@/components/ui/button';
 
 interface ReportsExportButtonProps {
   onExport: () => Promise<string | null>;
@@ -23,23 +25,20 @@ export default function ReportsExportButton({
     window.setTimeout(() => setFeedback(null), 3000);
   };
 
-  const Icon = isExporting ? Loader2 : Download;
-
   return (
     <div className="flex flex-col items-end gap-1.5">
-      <button
+      <Button
         type="button"
         onClick={handleClick}
         disabled={isExporting}
-        className="inline-flex items-center gap-2 rounded-full bg-primary px-[18px] py-[11px] font-bold text-primary-foreground transition-colors hover:bg-brand-forest disabled:opacity-60 cursor-pointer"
+        loading={isExporting}
+        className="h-auto rounded-full bg-primary px-[18px] py-[11px] font-bold text-primary-foreground hover:bg-brand-forest"
       >
-        <Icon
-          className={`size-4 ${isExporting ? 'animate-spin' : ''}`}
-          strokeWidth={2.25}
-          aria-hidden
-        />
+        {!isExporting && (
+          <Download className="size-4 shrink-0" strokeWidth={2.25} aria-hidden />
+        )}
         Export report (.csv)
-      </button>
+      </Button>
       {feedback ? (
         <span
           className={`text-[11px] font-semibold ${

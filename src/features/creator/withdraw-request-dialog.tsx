@@ -182,6 +182,7 @@ export default function WithdrawRequestDialog({
             <Button
               type="submit"
               disabled={isSubmitting}
+              loading={isSubmitting}
               className="h-auto rounded-full bg-primary px-5 py-3 font-bold text-primary-foreground hover:bg-brand-forest disabled:opacity-60"
             >
               {isSubmitting ? 'Submitting…' : 'Submit request'}

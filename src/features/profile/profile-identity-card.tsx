@@ -178,6 +178,7 @@ export default function ProfileIdentityCard({
           <Button
             type="submit"
             disabled={isSavingProfile}
+            loading={isSavingProfile}
             className="h-auto rounded-full bg-primary px-5 py-3 font-bold text-primary-foreground hover:bg-brand-forest disabled:opacity-60"
           >
             {isSavingProfile ? 'Saving…' : 'Save changes'}
@@ -228,6 +229,7 @@ export default function ProfileIdentityCard({
               type="submit"
               variant="outline"
               disabled={isChangingPassword || !newPasswordValue}
+              loading={isChangingPassword}
               className="h-auto rounded-full border-border bg-card px-4.5 py-2.75 text-[13px] font-bold text-foreground hover:bg-surface-subtle disabled:opacity-60"
             >
               {isChangingPassword ? 'Updating…' : 'Update password'}

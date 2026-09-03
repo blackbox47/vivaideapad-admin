@@ -105,6 +105,7 @@ function AdminNotificationContent({
           variant="ghost"
           size="sm"
           disabled={unreadCount === 0 || isMarkingAll}
+          loading={isMarkingAll}
           onClick={markAllRead}
           className="h-auto p-0 text-xs font-semibold text-brand-forest hover:bg-transparent hover:text-foreground hover:underline dark:text-brand-lime dark:hover:text-brand-lime/80 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
         >
@@ -226,6 +227,7 @@ function CreatorNotificationContent({
           variant="ghost"
           size="sm"
           disabled={unreadCount === 0 || isMarkingAll}
+          loading={isMarkingAll}
           onClick={markAllRead}
           className="h-auto p-0 text-xs font-semibold text-brand-forest hover:bg-transparent hover:text-foreground hover:underline dark:text-brand-lime dark:hover:text-brand-lime/80 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
         >

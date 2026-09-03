@@ -3,6 +3,9 @@ import { TanStackRouterDevtools } from '@tanstack/router-devtools';
 
 import type { RootState } from '@/store';
 
+import { RouteProgressBar } from '@/components/shared/route-progress-bar';
+import { ScreenLoader } from '@/components/shared/screen-loader';
+
 /**
  * Shape of the runtime context shared with every route via
  * `createRouter({ context })` in `src/main.tsx`. Routes can read this from
@@ -14,11 +17,13 @@ export interface RouterAppContext {
 
 export const Route = createRootRouteWithContext<RouterAppContext>()({
   component: RootComponent,
+  pendingComponent: () => <ScreenLoader fullScreen />,
 });
 
 function RootComponent() {
   return (
     <>
+      <RouteProgressBar />
       <Outlet />
       {import.meta.env.DEV ? (
         <TanStackRouterDevtools position="bottom-right" />

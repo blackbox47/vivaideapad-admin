@@ -2,10 +2,12 @@ import { Button } from '@/components/ui/button';
 
 interface ProfileSignOutCardProps {
   onSignOut: () => void;
+  isSigningOut?: boolean;
 }
 
 export default function ProfileSignOutCard({
   onSignOut,
+  isSigningOut,
 }: ProfileSignOutCardProps) {
   return (
     <section className="rounded-[20px] bg-warning-subtle p-[22px] border border-warning-subtle">
@@ -18,6 +20,8 @@ export default function ProfileSignOutCard({
       <Button
         type="button"
         onClick={onSignOut}
+        disabled={isSigningOut}
+        loading={isSigningOut}
         className="h-auto rounded-full bg-primary px-[18px] py-[11px] text-[13px] font-bold text-primary-foreground hover:bg-brand-forest"
       >
         Sign out

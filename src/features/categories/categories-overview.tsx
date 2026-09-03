@@ -211,7 +211,7 @@ export default function CategoriesOverview() {
           )}
 
           <div className="mt-3 text-right">
-            <Button size="sm" variant="ghost" onClick={() => refetch()}>
+            <Button size="sm" variant="ghost" onClick={() => refetch()} loading={isLoading}>
               Refresh
             </Button>
           </div>
@@ -256,6 +256,7 @@ export default function CategoriesOverview() {
               <Button
                 onClick={() => handleDelete(confirmDelete.id)}
                 disabled={isDeleting}
+                loading={isDeleting}
               >
                 {isDeleting ? 'Deleting…' : 'Delete'}
               </Button>

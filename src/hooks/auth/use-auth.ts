@@ -30,6 +30,7 @@ interface LoginOptions {
 interface UseAuthResult {
   isAuthenticated: boolean;
   isLoggingIn: boolean;
+  isSigningOut: boolean;
   loginError: string | null;
   login: (
     credentials: LoginRequest,
@@ -45,7 +46,7 @@ export default function useAuth(): UseAuthResult {
   const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
   const role = useAppSelector((state) => state.auth.role);
   const [requestLogin, { isLoading, error }] = useLoginMutation();
-  const [requestSignOut] = useSignOutMutation();
+  const [requestSignOut, { isLoading: isSigningOut }] = useSignOutMutation();
 
   // RTK Query only exposes the latest server-reported error; keep a local
   // copy so the form can clear it as soon as the user edits an input.
@@ -98,6 +99,7 @@ export default function useAuth(): UseAuthResult {
   return {
     isAuthenticated,
     isLoggingIn: isLoading,
+    isSigningOut,
     loginError,
     login,
     logout,
