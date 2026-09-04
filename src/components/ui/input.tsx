@@ -11,6 +11,8 @@ export interface InputProps extends React.ComponentProps<"input"> {
   error?: string | null
   containerClassName?: string
   errorClassName?: string
+  rightSlot?: React.ReactNode
+  showRequiredIndicator?: boolean
 }
 
 function Input({
@@ -21,6 +23,8 @@ function Input({
   errorMessage,
   error,
   errorClassName,
+  rightSlot,
+  showRequiredIndicator = true,
   id,
   type,
   required,
@@ -36,7 +40,7 @@ function Input({
 
   const ariaDescribedBy = [ariaDescribedByProp, errorId].filter(Boolean).join(" ") || undefined
 
-  const hasWrapper = Boolean(label || activeError || containerClassName)
+  const hasWrapper = Boolean(label || activeError || containerClassName || rightSlot)
   const isSpecialType = type === "checkbox" || type === "radio" || type === "file"
 
   const inputElement = (
@@ -56,6 +60,7 @@ function Input({
               "focus-visible:border-brand-sage-light focus-visible:ring-2 focus-visible:ring-success-muted",
               "disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-input/50 disabled:opacity-50",
               "aria-invalid:border-destructive aria-invalid:ring-2 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40",
+              rightSlot && "pr-10",
               className
             )
       )}
@@ -67,6 +72,15 @@ function Input({
     return inputElement
   }
 
+  const renderedInput = rightSlot ? (
+    <div className="relative flex items-center">
+      {inputElement}
+      <div className="absolute right-3 flex items-center">{rightSlot}</div>
+    </div>
+  ) : (
+    inputElement
+  )
+
   return (
     <div className={cn("w-full", containerClassName)}>
       {label ? (
@@ -75,14 +89,14 @@ function Input({
           className={cn("mb-1.5 block text-[12px] font-bold text-foreground", labelClassName)}
         >
           {label}
-          {required ? (
+          {required && showRequiredIndicator ? (
             <span className="ml-0.5 text-destructive" aria-hidden="true">
               *
             </span>
           ) : null}
         </Label>
       ) : null}
-      {inputElement}
+      {renderedInput}
       {activeError ? (
         <p
           id={errorId}

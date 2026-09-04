@@ -19,6 +19,7 @@ import { Route as PrivatecreatorOpportunitiesRouteImport } from './routes/_priva
 import { Route as PrivatecreatorProfileRouteImport } from './routes/_privatecreator/profile'
 import { Route as PrivatecreatorRewardsRouteImport } from './routes/_privatecreator/rewards'
 import { Route as PrivatecreatorSubmissionsRouteImport } from './routes/_privatecreator/submissions'
+import { Route as PubliccreatorForgotPasswordRouteImport } from './routes/_publiccreator/forgot-password'
 import { Route as PubliccreatorLoginRouteImport } from './routes/_publiccreator/login'
 import { Route as AdminAdminRouteImport } from './routes/admin/_admin'
 import { Route as AdminLoginRouteImport } from './routes/admin/login'
@@ -90,6 +91,12 @@ const PrivatecreatorSubmissionsRoute =
     id: '/submissions',
     path: '/submissions',
     getParentRoute: () => PrivatecreatorRouteRoute,
+  } as any)
+const PubliccreatorForgotPasswordRoute =
+  PubliccreatorForgotPasswordRouteImport.update({
+    id: '/forgot-password',
+    path: '/forgot-password',
+    getParentRoute: () => PubliccreatorRouteRoute,
   } as any)
 const PubliccreatorLoginRoute = PubliccreatorLoginRouteImport.update({
   id: '/login',
@@ -198,6 +205,7 @@ export interface FileRoutesByFullPath {
   '/profile': typeof PrivatecreatorProfileRoute
   '/rewards': typeof PrivatecreatorRewardsRoute
   '/submissions': typeof PrivatecreatorSubmissionsRoute
+  '/forgot-password': typeof PubliccreatorForgotPasswordRoute
   '/login': typeof PubliccreatorLoginRoute
   '/admin': typeof AdminAdminRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
@@ -228,6 +236,7 @@ export interface FileRoutesByTo {
   '/profile': typeof PrivatecreatorProfileRoute
   '/rewards': typeof PrivatecreatorRewardsRoute
   '/submissions': typeof PrivatecreatorSubmissionsRoute
+  '/forgot-password': typeof PubliccreatorForgotPasswordRoute
   '/login': typeof PubliccreatorLoginRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/sign-in': typeof AdminSignInRoute
@@ -259,6 +268,7 @@ export interface FileRoutesById {
   '/_privatecreator/profile': typeof PrivatecreatorProfileRoute
   '/_privatecreator/rewards': typeof PrivatecreatorRewardsRoute
   '/_privatecreator/submissions': typeof PrivatecreatorSubmissionsRoute
+  '/_publiccreator/forgot-password': typeof PubliccreatorForgotPasswordRoute
   '/_publiccreator/login': typeof PubliccreatorLoginRoute
   '/admin/_admin': typeof AdminAdminRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
@@ -291,6 +301,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/rewards'
     | '/submissions'
+    | '/forgot-password'
     | '/login'
     | '/admin'
     | '/admin/login'
@@ -321,6 +332,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/rewards'
     | '/submissions'
+    | '/forgot-password'
     | '/login'
     | '/admin/login'
     | '/admin/sign-in'
@@ -351,6 +363,7 @@ export interface FileRouteTypes {
     | '/_privatecreator/profile'
     | '/_privatecreator/rewards'
     | '/_privatecreator/submissions'
+    | '/_publiccreator/forgot-password'
     | '/_publiccreator/login'
     | '/admin/_admin'
     | '/admin/login'
@@ -452,6 +465,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/submissions'
       preLoaderRoute: typeof PrivatecreatorSubmissionsRouteImport
       parentRoute: typeof PrivatecreatorRouteRoute
+    }
+    '/_publiccreator/forgot-password': {
+      id: '/_publiccreator/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof PubliccreatorForgotPasswordRouteImport
+      parentRoute: typeof PubliccreatorRouteRoute
     }
     '/_publiccreator/login': {
       id: '/_publiccreator/login'
@@ -617,10 +637,12 @@ const PrivatecreatorRouteRouteWithChildren =
   PrivatecreatorRouteRoute._addFileChildren(PrivatecreatorRouteRouteChildren)
 
 interface PubliccreatorRouteRouteChildren {
+  PubliccreatorForgotPasswordRoute: typeof PubliccreatorForgotPasswordRoute
   PubliccreatorLoginRoute: typeof PubliccreatorLoginRoute
 }
 
 const PubliccreatorRouteRouteChildren: PubliccreatorRouteRouteChildren = {
+  PubliccreatorForgotPasswordRoute: PubliccreatorForgotPasswordRoute,
   PubliccreatorLoginRoute: PubliccreatorLoginRoute,
 }
 

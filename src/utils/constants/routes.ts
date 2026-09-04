@@ -25,6 +25,7 @@ export const ADMIN_ROUTES = {
 export const CREATOR_ROUTES = {
   dashboard: '/dashboard',
   login: '/login',
+  forgotPassword: '/forgot-password',
   opportunities: '/opportunities',
   submissions: '/submissions',
   rewards: '/rewards',

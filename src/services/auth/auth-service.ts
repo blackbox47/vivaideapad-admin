@@ -5,6 +5,7 @@ import type {
 import type { ProfileOverview } from '@/models/profile/profile-model';
 import { baseService } from '@/services/core/base-service';
 import {
+  AUTH_FORGOT_PASSWORD_URL,
   AUTH_SIGN_IN_URL,
   AUTH_SIGN_OUT_URL,
   PROFILE_OVERVIEW_URL,
@@ -36,6 +37,9 @@ export const authService = baseService.injectEndpoints({
     signOut: builder.mutation<void, void>({
       query: () => ({ url: AUTH_SIGN_OUT_URL, method: 'POST' }),
     }),
+    forgotPassword: builder.mutation<void, { email: string }>({
+      query: (body) => ({ url: AUTH_FORGOT_PASSWORD_URL, method: 'POST', body }),
+    }),
   }),
 });
 
@@ -43,4 +47,5 @@ export const {
   useGetCurrentAdminQuery,
   useLoginMutation,
   useSignOutMutation,
+  useForgotPasswordMutation,
 } = authService;

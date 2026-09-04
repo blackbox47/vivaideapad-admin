@@ -1,8 +1,9 @@
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useNavigate } from '@tanstack/react-router';
+import { ArrowLeft, Eye, EyeOff, Loader2 } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import useAuth from '@/hooks/auth/use-auth';
 import type { UserRole } from '@/models/auth/auth-model';
@@ -14,6 +15,7 @@ import { ADMIN_ROUTES, CREATOR_ROUTES } from '@/utils/constants/routes';
 
 interface LoginPanelProps {
   role: UserRole;
+  brandName?: string;
 }
 
 function homeForRole(role: UserRole): string {
@@ -24,17 +26,12 @@ function loginForRole(role: UserRole): string {
   return role === 'admin' ? ADMIN_ROUTES.login : CREATOR_ROUTES.login;
 }
 
-function titleForRole(role: UserRole): string {
-  return role === 'admin' ? 'Sign in' : 'Sign in to your creator workspace';
-}
+export default function LoginPanel({
+  role,
+  brandName = 'sparkory',
+}: LoginPanelProps) {
+  const [showPassword, setShowPassword] = useState(false);
 
-function descriptionForRole(role: UserRole): string {
-  return role === 'admin'
-    ? 'Enter your account details to continue.'
-    : 'Pick a topic, share your idea, and track it from draft to payout.';
-}
-
-export default function LoginPanel({ role }: LoginPanelProps) {
   const {
     register,
     handleSubmit,
@@ -50,6 +47,7 @@ export default function LoginPanel({ role }: LoginPanelProps) {
   const navigate = useNavigate();
 
   const loginPath = loginForRole(role);
+  const forgotPasswordPath = CREATOR_ROUTES.forgotPassword;
 
   const onSubmit = async (values: LoginFormValues) => {
     resetLoginError();
@@ -62,70 +60,114 @@ export default function LoginPanel({ role }: LoginPanelProps) {
   };
 
   return (
-    <section className="flex min-h-svh items-center justify-center bg-surface-subtle p-11 lg:min-h-0">
-      <div className="w-full max-w-95">
+    <section className="relative flex min-h-svh w-full flex-col items-center justify-center overflow-y-auto bg-surface-subtle p-6 font-jakarta md:min-h-0 md:w-1/2 md:p-12 lg:p-14">
+      <div className="w-full max-w-sm">
+        {/* Mobile-only brand badge (when left hero panel is hidden) */}
+        <div className="mb-6 flex items-center gap-2.5 md:hidden">
+          <div className="flex size-9 items-center justify-center rounded-tr-xl rounded-bl-xl rounded-br-xs rounded-tl-xs bg-brand-lime">
+            <div className="size-2.5 rounded-full bg-brand-pine-deep" />
+          </div>
+          <span className="text-xl font-bold tracking-tight text-foreground lowercase">
+            {brandName}
+          </span>
+        </div>
+
+        {/* Back to Home */}
         <Link
           to={loginPath}
-          className="inline-flex items-center rounded-full border border-border bg-card px-3.5 py-2 text-[13px] font-bold text-foreground no-underline transition-colors hover:bg-surface-subtle"
+          className="inline-flex items-center gap-2 rounded-full border border-[#c1c8c3] bg-white px-4 py-2 text-xs font-semibold text-foreground no-underline shadow-xs transition-colors hover:bg-neutral-100"
         >
-          ← Back to home
+          <ArrowLeft className="size-3.5" />
+          <span>Back to home</span>
         </Link>
 
-        <span className="mt-8.75 block text-[12px] font-extrabold tracking-[0.12em] text-brand-sage uppercase">
-          Secure access
-        </span>
-        <h2 className="mt-2 mb-2 font-heading text-[38px] tracking-[-0.035em] text-foreground">
-          {titleForRole(role)}
-        </h2>
-        <p className="text-muted-foreground">{descriptionForRole(role)}</p>
+        {/* Header */}
+        <div className="mt-10 mb-8">
+          <h2 className="text-3xl font-bold tracking-tight text-foreground md:text-4xl">
+            Sign in
+          </h2>
+        </div>
 
-        <form className="mt-7" onSubmit={handleSubmit(onSubmit)} noValidate>
-          <div className="mb-3.5">
+        {/* Form */}
+        <form className="space-y-5" onSubmit={handleSubmit(onSubmit)} noValidate>
+          <div>
             <Input
               id="email"
               label="Email address"
               type="email"
-              required
-              autoComplete="username"
+              autoComplete="email"
+              placeholder="Email"
+              showRequiredIndicator={false}
+              labelClassName="text-xs font-semibold text-foreground mb-1.5"
+              className="bg-white border-[#c1c8c3] rounded-lg px-4 py-3 text-sm focus-visible:border-brand-pine-deep focus-visible:ring-2 focus-visible:ring-brand-pine-deep/20 shadow-none placeholder:text-muted-foreground"
               errorMessage={errors.email?.message}
               {...register('email')}
             />
           </div>
 
-          <div className="mb-4.5">
+          <div>
             <Input
               id="password"
               label="Password"
-              type="password"
-              required
+              type={showPassword ? 'text' : 'password'}
               autoComplete="current-password"
+              placeholder="Password"
+              showRequiredIndicator={false}
+              labelClassName="text-xs font-semibold text-foreground mb-1.5"
+              className="bg-white border-[#c1c8c3] rounded-lg px-4 py-3 text-sm focus-visible:border-brand-pine-deep focus-visible:ring-2 focus-visible:ring-brand-pine-deep/20 shadow-none placeholder:text-muted-foreground"
               errorMessage={errors.password?.message}
+              rightSlot={
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="flex items-center justify-center text-muted-foreground transition-colors hover:text-foreground cursor-pointer"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  tabIndex={-1}
+                >
+                  {showPassword ? (
+                    <EyeOff className="size-4" />
+                  ) : (
+                    <Eye className="size-4" />
+                  )}
+                </button>
+              }
               {...register('password')}
             />
           </div>
 
           {loginError ? (
-            <p
-              className="mb-3 text-[12px] font-semibold text-destructive"
+            <div
+              className="rounded-lg bg-destructive/10 p-3 text-xs font-semibold text-destructive"
               role="alert"
             >
               {loginError}
-            </p>
+            </div>
           ) : null}
 
-          <Button
+          <button
             type="submit"
             disabled={isLoggingIn}
-            loading={isLoggingIn}
-            className="h-auto w-full rounded-full bg-primary px-5 py-3.5 text-sm font-bold text-primary-foreground hover:bg-brand-forest disabled:opacity-60"
+            className="mt-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-brand-pine py-3.5 text-sm font-semibold text-white transition-colors hover:bg-brand-pine-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pine-deep/20 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {isLoggingIn ? 'Signing in…' : 'Continue'}
-          </Button>
-        </form>
+            {isLoggingIn ? (
+              <>
+                <Loader2 className="size-4 animate-spin" />
+                <span>Signing in...</span>
+              </>
+            ) : (
+              'Sign in'
+            )}
+          </button>
 
-        <p className="mt-5.5 text-center text-[12px] text-muted-foreground">
-          Approved contributors receive a secure activation link by email.
-        </p>
+          <div className="mt-6 text-center">
+            <Link
+              to={forgotPasswordPath}
+              className="cursor-pointer text-sm text-muted-foreground transition-colors hover:text-foreground no-underline"
+            >
+              Forgot password?
+            </Link>
+          </div>
+        </form>
       </div>
     </section>
   );
