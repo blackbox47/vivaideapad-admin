@@ -5,6 +5,7 @@ import type {
 import type { ProfileOverview } from '@/models/profile/profile-model';
 import { baseService } from '@/services/core/base-service';
 import {
+  AUTH_ADMIN_SIGN_IN_URL,
   AUTH_FORGOT_PASSWORD_URL,
   AUTH_SIGN_IN_URL,
   AUTH_SIGN_OUT_URL,
@@ -30,6 +31,20 @@ export const authService = baseService.injectEndpoints({
       invalidatesTags: ['admin-user', 'dashboard'],
     }),
     /**
+     * Admin-only sign-in. Hits `POST /auth/admin/sign-in`, which rejects
+     * non-admin (e.g. CONTRIBUTOR) users with the same generic 401 used for
+     * bad credentials. The wire payload is identical to `login`, so the
+     * response types are shared.
+     */
+    adminLogin: builder.mutation<LoginResponse, LoginRequest>({
+      query: (body) => ({
+        url: AUTH_ADMIN_SIGN_IN_URL,
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['admin-user', 'dashboard'],
+    }),
+    /**
      * Server-side sign-out. The backend clears the auth cookies via
      * `Set-Cookie` with `Max-Age=0`; the SPA then dispatches
      * `sessionCleared` to reset Redux.
@@ -46,6 +61,7 @@ export const authService = baseService.injectEndpoints({
 export const {
   useGetCurrentAdminQuery,
   useLoginMutation,
+  useAdminLoginMutation,
   useSignOutMutation,
   useForgotPasswordMutation,
 } = authService;

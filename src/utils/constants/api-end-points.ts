@@ -1,4 +1,5 @@
 export const AUTH_SIGN_IN_URL = '/auth/sign-in';
+export const AUTH_ADMIN_SIGN_IN_URL = '/auth/admin/sign-in';
 export const AUTH_SIGN_OUT_URL = '/auth/sign-out';
 export const AUTH_REFRESH_URL = '/auth/refresh';
 export const AUTH_FORGOT_PASSWORD_URL = '/auth/password/forgot';
