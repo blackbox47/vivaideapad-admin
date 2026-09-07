@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import {
   changePayoutMethodSchema,
@@ -12,14 +13,23 @@ import type {
   PayoutMethod,
   UpdatePayoutMethodBody,
 } from '@/models/profile/profile-model';
+import { toBdLocalMobile } from '@/utils/helpers/bd-mobile';
 import type { DropdownOption } from '@/utils/types/dropdown-option';
 
 const METHOD_OPTIONS: DropdownOption[] = [
-  { id: 'bKash', label: 'bKash · 018•••42' },
+  { id: 'bKash', label: 'bKash' },
   { id: 'Nagad', label: 'Nagad' },
   { id: 'Rocket', label: 'Rocket' },
   { id: 'Bank', label: 'Bank transfer' },
 ];
+
+function mobileFromCurrent(current: PayoutMethod): string {
+  return (
+    toBdLocalMobile(current.account) ??
+    toBdLocalMobile(current.label?.split('·')[1] ?? '') ??
+    ''
+  );
+}
 
 interface ChangePayoutMethodDialogProps {
   current: PayoutMethod;
@@ -44,6 +54,7 @@ export default function ChangePayoutMethodDialog({
     resolver: zodResolver(changePayoutMethodSchema),
     defaultValues: {
       method: current.method,
+      mobile: mobileFromCurrent(current),
     },
   });
 
@@ -65,13 +76,18 @@ export default function ChangePayoutMethodDialog({
   };
 
   const onFormSubmit = async (values: ChangePayoutMethodFormValues) => {
-    const selected: UpdatePayoutMethodBody = {
-      method: values.method as PayoutMethod['method'],
-      label:
-        METHOD_OPTIONS.find((option) => option.id === values.method)?.label ??
-        METHOD_OPTIONS[0].label,
-    };
-    await onSubmit(selected);
+    const method = values.method as PayoutMethod['method'];
+    const account = toBdLocalMobile(values.mobile);
+    if (!account) {
+      return;
+    }
+    const methodLabel =
+      METHOD_OPTIONS.find((option) => option.id === method)?.label ?? method;
+    await onSubmit({
+      method,
+      account,
+      label: `${methodLabel} · ${account}`,
+    });
   };
 
   return (
@@ -86,17 +102,12 @@ export default function ChangePayoutMethodDialog({
         className="w-full max-w-105 rounded-[24px] border border-(--dialog-border) bg-card p-7 shadow-2xl"
       >
         <div className="mb-4 flex items-start justify-between gap-4">
-          <div>
-            <p className="text-[12px] font-extrabold tracking-[0.12em] text-brand-sage uppercase">
-              Account
-            </p>
-            <h2
-              id="payout-method-title"
-              className="mt-1.5 font-heading text-[22px] text-foreground"
-            >
-              Change payout method
-            </h2>
-          </div>
+          <h2
+            id="payout-method-title"
+            className="font-heading text-[22px] text-foreground"
+          >
+            Change payout method
+          </h2>
           <button
             type="button"
             onClick={onClose}
@@ -108,13 +119,27 @@ export default function ChangePayoutMethodDialog({
         </div>
 
         <form onSubmit={handleSubmit(onFormSubmit)} noValidate>
-          <Select
-            id="payout-method"
-            label="Payout method"
+          <div className="mb-3.5">
+            <Select
+              id="payout-method"
+              label="Payout method"
+              required
+              options={METHOD_OPTIONS}
+              errorMessage={errors.method?.message}
+              {...register('method')}
+            />
+          </div>
+
+          <Input
+            id="payout-mobile"
+            type="tel"
+            inputMode="tel"
+            label="Mobile number"
             required
-            options={METHOD_OPTIONS}
-            errorMessage={errors.method?.message}
-            {...register('method')}
+            placeholder="e.g. 018XXXXXXXX"
+            autoComplete="tel"
+            errorMessage={errors.mobile?.message}
+            {...register('mobile')}
           />
 
           {error ? (

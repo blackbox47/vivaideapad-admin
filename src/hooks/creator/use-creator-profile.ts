@@ -106,7 +106,6 @@ export default function useCreatorProfile(): UseCreatorProfileResult {
           email: body.email,
           phone: body.phone,
           bio: body.bio,
-          publicDisplay: body.publicDisplay,
           avatarUrl: body.avatarUrl ?? data?.profile.avatarUrl ?? null,
         } satisfies ProfileDetails;
       } catch {

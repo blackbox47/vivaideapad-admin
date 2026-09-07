@@ -91,9 +91,7 @@ export default function CreatorProfileOverview() {
             passwordFeedback={passwordFeedback}
             passwordError={passwordError}
             onSaveProfile={saveProfile}
-            onChangePassword={(password) => {
-              void changePassword({ password });
-            }}
+            onChangePassword={(input) => changePassword(input)}
             avatar={
               <ProfileAvatarUploader
                 name={overview.profile.name}

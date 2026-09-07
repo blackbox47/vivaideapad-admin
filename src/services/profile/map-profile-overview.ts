@@ -1,8 +1,8 @@
 import type {
   PayoutMethod,
   ProfileOverview,
-  PublicDisplay,
 } from '@/models/profile/profile-model';
+import { toBdLocalMobile } from '@/utils/helpers/bd-mobile';
 import { deriveInitials } from '@/utils/helpers/initials';
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -11,10 +11,6 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function asString(value: unknown, fallback = ''): string {
   return typeof value === 'string' ? value : fallback;
-}
-
-function isPublicDisplay(value: unknown): value is PublicDisplay {
-  return value === 'Public name' || value === 'Pseudonymous';
 }
 
 function isPayoutMethod(value: unknown): value is PayoutMethod['method'] {
@@ -28,7 +24,7 @@ function isPayoutMethod(value: unknown): value is PayoutMethod['method'] {
 
 function payoutMethodFromWire(raw: unknown): PayoutMethod {
   if (!isRecord(raw)) {
-    return { method: 'bKash', label: 'bKash · 018•••42' };
+    return { method: 'bKash', label: 'bKash', account: '' };
   }
 
   const type = asString(raw.type || raw.method, 'bKash');
@@ -45,12 +41,15 @@ function payoutMethodFromWire(raw: unknown): PayoutMethod {
               ? type
               : 'bKash';
 
-  const account = asString(raw.account);
+  const account =
+    toBdLocalMobile(asString(raw.account)) ??
+    toBdLocalMobile(asString(raw.label).split('·')[1] ?? '') ??
+    '';
   const label =
     asString(raw.label) ||
     (account ? `${normalized} · ${account}` : normalized);
 
-  return { method: normalized, label };
+  return { method: normalized, label, account };
 }
 
 function roleLabelFrom(role: unknown, fallback: string): string {
@@ -80,11 +79,10 @@ const emptyOverview = (roleLabel: string): ProfileOverview => ({
     email: '',
     phone: '',
     bio: '',
-    publicDisplay: 'Public name',
     avatarUrl: null,
   },
   notifications: { email: true, inApp: true },
-  payoutMethod: { method: 'bKash', label: 'bKash · 018•••42' },
+  payoutMethod: { method: 'bKash', label: 'bKash', account: '' },
   roleLabel,
 });
 
@@ -123,11 +121,6 @@ export function toProfileOverview(
     asString(prefs.phone) ||
     asString(nestedProfile.phone);
   const bio = asString(response.bio) || asString(nestedProfile.bio);
-  const publicDisplayRaw =
-    response.public_display ??
-    response.publicDisplay ??
-    prefs.public_display ??
-    prefs.publicDisplay;
   const avatarUrl =
     asString(response.avatar_url) ||
     asString(nestedProfile.avatar_url) ||
@@ -142,9 +135,6 @@ export function toProfileOverview(
       email,
       phone,
       bio,
-      publicDisplay: isPublicDisplay(publicDisplayRaw)
-        ? publicDisplayRaw
-        : 'Public name',
       avatarUrl: avatarUrl || null,
     },
     notifications: {

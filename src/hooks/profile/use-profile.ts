@@ -4,7 +4,6 @@ import type {
   NotificationPreferences,
   ProfileDetails,
   ProfileOverview,
-  PublicDisplay,
   UpdateNotificationsBody,
   UpdatePasswordBody,
   UpdateProfileBody,
@@ -102,7 +101,6 @@ export default function useProfile(): UseProfileResult {
           email: body.email,
           phone: body.phone,
           bio: body.bio,
-          publicDisplay: body.publicDisplay,
           avatarUrl: body.avatarUrl ?? data?.profile.avatarUrl ?? null,
         } satisfies ProfileDetails;
       } catch {
@@ -170,5 +168,3 @@ export default function useProfile(): UseProfileResult {
     isUploadingAvatar,
   };
 }
-
-export type { PublicDisplay };

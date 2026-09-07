@@ -77,9 +77,7 @@ export default function ProfileOverview() {
           passwordFeedback={passwordFeedback}
           passwordError={passwordError}
           onSaveProfile={saveProfile}
-          onChangePassword={(password) =>
-            void changePassword({ password })
-          }
+          onChangePassword={(input) => changePassword(input)}
           avatar={
             <ProfileAvatarUploader
               name={profile.name}

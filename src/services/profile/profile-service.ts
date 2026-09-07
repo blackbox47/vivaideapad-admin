@@ -5,7 +5,6 @@ import type {
   ProfileDetails,
   ProfileOverview,
   ProfileUpdateResponse,
-  PublicDisplay,
   UpdateNotificationsBody,
   UpdatePasswordBody,
   UpdateProfileBody,
@@ -34,11 +33,10 @@ export const profileService = baseService.injectEndpoints({
               email: '',
               phone: '',
               bio: '',
-              publicDisplay: 'Public name',
               avatarUrl: null,
             },
             notifications: { email: true, inApp: true },
-            payoutMethod: { label: 'Bank Account', method: 'Bank' },
+            payoutMethod: { label: 'Bank Account', method: 'Bank', account: '' },
             roleLabel: 'Administrator',
           };
         }
@@ -71,7 +69,6 @@ export const profileService = baseService.injectEndpoints({
             email: String(res.email ?? ''),
             phone: String(res.phone ?? ''),
             bio: String(res.bio ?? ''),
-            publicDisplay: (res.publicDisplay ?? 'Public name') as PublicDisplay,
             avatarUrl: (res.avatar_url as string | null) ?? null,
           },
           notifications: {
@@ -81,6 +78,7 @@ export const profileService = baseService.injectEndpoints({
           payoutMethod: {
             label: 'Bank Account',
             method: 'Bank',
+            account: '',
           },
           roleLabel: 'Administrator',
         };
@@ -102,7 +100,11 @@ export const profileService = baseService.injectEndpoints({
         query: (body) => ({
           url: PROFILE_PASSWORD_URL,
           method: 'POST',
-          body,
+          body: {
+            password: body.password,
+            current_password: body.currentPassword,
+            currentPassword: body.currentPassword,
+          },
         }),
       },
     ),
@@ -125,18 +127,6 @@ export const profileService = baseService.injectEndpoints({
       }),
       invalidatesTags: ['profile', 'admin-user'],
     }),
-    /** Spec §1.6 — PATCH /admin/profile/display (alias of legacy mutation). */
-    changePublicDisplay: builder.mutation<
-      ProfileDetails,
-      { publicDisplay: PublicDisplay }
-    >({
-      query: (body) => ({
-        url: PROFILE_DISPLAY_URL,
-        method: 'PATCH',
-        body,
-      }),
-      invalidatesTags: ['profile'],
-    }),
     /** Spec §1.6 — PATCH /admin/profile/display (preferences variant). */
     updateDisplay: builder.mutation<
       DisplayPreferences,
@@ -158,6 +148,5 @@ export const {
   useUpdatePasswordMutation,
   useUpdateNotificationsMutation,
   useUploadAvatarUrlMutation,
-  useChangePublicDisplayMutation,
   useUpdateDisplayMutation,
 } = profileService;
