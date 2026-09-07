@@ -218,6 +218,7 @@
 @theme inline {
   --font-heading: 'Manrope Variable', sans-serif;
   --font-sans: 'DM Sans', sans-serif;
+  --font-jakarta: 'Plus Jakarta Sans', sans-serif;
   /* Fluid page-title scale shared by every route heading. */
   --text-display: clamp(28px, 3.5vw, 42px);
   --text-display--line-height: 1.1;

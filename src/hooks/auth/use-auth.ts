@@ -11,6 +11,7 @@ import {
   sessionEstablished,
 } from '@/reducers/auth-slice';
 import {
+  useAdminLoginMutation,
   useLoginMutation,
   useSignOutMutation,
 } from '@/services/auth/auth-service';
@@ -46,6 +47,7 @@ export default function useAuth(): UseAuthResult {
   const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
   const role = useAppSelector((state) => state.auth.role);
   const [requestLogin, { isLoading, error }] = useLoginMutation();
+  const [requestAdminLogin] = useAdminLoginMutation();
   const [requestSignOut, { isLoading: isSigningOut }] = useSignOutMutation();
 
   // RTK Query only exposes the latest server-reported error; keep a local
@@ -59,8 +61,12 @@ export default function useAuth(): UseAuthResult {
       setLocalError(null);
 
       try {
-        const session = await requestLogin(credentials).unwrap();
         const intendedRole: UserRole = options?.asRole ?? 'admin';
+        // The admin portal calls a dedicated endpoint that rejects
+        // non-admin users (e.g. contributors) server-side, so we branch
+        // here rather than relying on the response to filter them out.
+        const request = intendedRole === 'admin' ? requestAdminLogin : requestLogin;
+        const session = await request(credentials).unwrap();
 
         dispatch(
           sessionEstablished({
@@ -76,7 +82,7 @@ export default function useAuth(): UseAuthResult {
         throw err;
       }
     },
-    [dispatch, requestLogin],
+    [dispatch, requestAdminLogin, requestLogin],
   );
 
   const logout = useCallback(async () => {
