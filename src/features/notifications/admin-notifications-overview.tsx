@@ -1,4 +1,5 @@
 import { AlertCircle } from 'lucide-react';
+import { useNavigate } from '@tanstack/react-router';
 import { useTanstackSearchParams } from '@/lib/use-tanstack-search-params';
 
 import PageHeader from '@/components/layout/page-header';
@@ -16,10 +17,13 @@ import AdminNotificationList from '@/features/notifications/admin-notification-l
 import useAdminNotifications, {
   parseNotificationFilter,
 } from '@/hooks/notifications/use-admin-notifications';
+import type { AdminNotification } from '@/models/notifications/admin-notifications-model';
+import { getAdminNotificationLink } from '@/utils/notification-link';
 
 export default function AdminNotificationsOverview() {
   const [searchParams] = useTanstackSearchParams();
   const filter = parseNotificationFilter(searchParams.get('filter'));
+  const navigate = useNavigate();
   const {
     notifications,
     unreadCount,
@@ -31,6 +35,25 @@ export default function AdminNotificationsOverview() {
     markAllRead,
     isMarkingAll,
   } = useAdminNotifications(filter);
+
+  /**
+   * Centralised row-activation logic for the full notifications page.
+   * Mirrors the popover's behavior: route when possible, otherwise
+   * just mark read.
+   */
+  const handleActivate = (notification: AdminNotification) => {
+    const target = getAdminNotificationLink({
+      rawType: notification.rawType,
+      linkedRecordType: notification.linkedRecordType,
+      linkedRecordId: notification.linkedRecordId,
+    });
+
+    toggleRead(notification.id);
+
+    if (target) {
+      void navigate({ to: target });
+    }
+  };
 
   if (isError) {
     return (
@@ -90,7 +113,7 @@ export default function AdminNotificationsOverview() {
       ) : (
         <AdminNotificationList
           notifications={notifications}
-          onToggle={toggleRead}
+          onActivate={handleActivate}
         />
       )}
     </div>

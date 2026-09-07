@@ -3,12 +3,17 @@ import type { AdminNotification } from '@/models/notifications/admin-notificatio
 
 interface AdminNotificationListProps {
   notifications: AdminNotification[];
-  onToggle: (id: string) => void;
+  /**
+   * Receives the full notification so the parent can route, mark-read,
+   * and close any open UI in one place. The list component stays
+   * presentational and only forwards the click.
+   */
+  onActivate: (notification: AdminNotification) => void;
 }
 
 export default function AdminNotificationList({
   notifications,
-  onToggle,
+  onActivate,
 }: AdminNotificationListProps) {
   return (
     <section className="overflow-hidden rounded-[20px] border border-border bg-card">
@@ -19,7 +24,7 @@ export default function AdminNotificationList({
           <button
             key={notification.id}
             type="button"
-            onClick={() => onToggle(notification.id)}
+            onClick={() => onActivate(notification)}
             className={cn(
               'flex w-full items-start gap-3.5 border-t border-border-muted px-[18px] py-[18px] text-left first:border-t-0 hover:bg-surface-subtle transition-colors cursor-pointer',
               isUnread ? 'bg-brand-lime-tint' : 'bg-card',

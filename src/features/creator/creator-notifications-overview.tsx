@@ -1,4 +1,5 @@
 import { AlertCircle } from 'lucide-react';
+import { useNavigate } from '@tanstack/react-router';
 import { useTanstackSearchParams } from '@/lib/use-tanstack-search-params';
 
 import PageHeader from '@/components/layout/page-header';
@@ -16,10 +17,13 @@ import CreatorNotificationList from '@/features/creator/creator-notification-lis
 import useCreatorNotifications, {
   parseCreatorNotificationFilter,
 } from '@/hooks/creator/use-creator-notifications';
+import type { CreatorNotification } from '@/models/creator/creator-notifications-model';
+import { getCreatorNotificationLink } from '@/utils/notification-link';
 
 export default function CreatorNotificationsOverview() {
   const [searchParams] = useTanstackSearchParams();
   const filter = parseCreatorNotificationFilter(searchParams.get('filter'));
+  const navigate = useNavigate();
   const {
     notifications,
     unreadCount,
@@ -31,6 +35,25 @@ export default function CreatorNotificationsOverview() {
     markAllRead,
     isMarkingAll,
   } = useCreatorNotifications(filter);
+
+  /**
+   * Centralised row-activation logic for the creator notifications page.
+   * Mirrors the popover's behavior: route when possible, otherwise
+   * just mark read.
+   */
+  const handleActivate = (notification: CreatorNotification) => {
+    const target = getCreatorNotificationLink({
+      rawType: notification.rawType,
+      linkedRecordType: notification.linkedRecordType,
+      linkedRecordId: notification.linkedRecordId,
+    });
+
+    toggleRead(notification.id);
+
+    if (target) {
+      void navigate({ to: target });
+    }
+  };
 
   if (isError) {
     return (
@@ -90,7 +113,7 @@ export default function CreatorNotificationsOverview() {
       ) : (
         <CreatorNotificationList
           notifications={notifications}
-          onToggle={toggleRead}
+          onActivate={handleActivate}
         />
       )}
     </div>

@@ -52,6 +52,11 @@ function wireToAdminNotification(
     iconBg: 'bg-primary/10',
     read: wire.read_state === 'read',
     occurredAt: wire.created_at,
+    // Carry routing inputs through so cache mutations from SSE look
+    // identical to refetched entries and clicks can route.
+    rawType: wire.type,
+    linkedRecordType: wire.linked_record_type,
+    linkedRecordId: wire.linked_record_id,
   };
 }
 
