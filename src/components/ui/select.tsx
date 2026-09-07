@@ -1,11 +1,12 @@
 import * as React from "react"
+import { Select as SelectPrimitive } from "@base-ui/react/select"
 import { ChevronDown } from "lucide-react"
 
 import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
 import type { DropdownOption } from "@/utils/types/dropdown-option"
 
-export interface SelectProps extends React.ComponentProps<"select"> {
+export interface SelectProps extends Omit<React.ComponentProps<"select">, "children"> {
   label?: React.ReactNode
   /** Alias for label to support alternate naming */
   level?: React.ReactNode
@@ -20,6 +21,18 @@ export interface SelectProps extends React.ComponentProps<"select"> {
   deselectOption?: boolean | string
   deselectLabel?: string
   hideChevron?: boolean
+  showRequiredIndicator?: boolean
+}
+
+function emitSelectChange(
+  onChange: React.ChangeEventHandler<HTMLSelectElement> | undefined,
+  value: string,
+  name?: string,
+) {
+  onChange?.({
+    target: { value, name: name ?? "" },
+    currentTarget: { value, name: name ?? "" },
+  } as React.ChangeEvent<HTMLSelectElement>)
 }
 
 function Select({
@@ -39,10 +52,17 @@ function Select({
   deselectOption,
   deselectLabel,
   hideChevron = false,
-  children,
+  showRequiredIndicator = true,
+  value,
+  defaultValue,
+  onChange,
+  onBlur,
+  name,
+  disabled,
+  ref,
   "aria-invalid": ariaInvalidProp,
   "aria-describedby": ariaDescribedByProp,
-  ...props
+  "aria-label": ariaLabel,
 }: SelectProps) {
   const generatedId = React.useId()
   const displayLabel = label ?? level
@@ -50,7 +70,6 @@ function Select({
   const activeError = errorMessage ?? error
   const errorId = activeError && selectId ? `${selectId}-error` : undefined
   const isInvalid = ariaInvalidProp !== undefined ? ariaInvalidProp : Boolean(activeError)
-
   const ariaDescribedBy = [ariaDescribedByProp, errorId].filter(Boolean).join(" ") || undefined
 
   const shouldShowDeselect =
@@ -64,44 +83,97 @@ function Select({
       : deselectLabel || placeholder || (shouldShowDeselect ? "Select an option" : undefined)
 
   const hasEmptyOptionInList = options?.some((opt) => opt.id === "")
-
   const showDeselectOption = shouldShowDeselect && !hasEmptyOptionInList && Boolean(deselectText)
 
+  const items: DropdownOption[] = [
+    ...(showDeselectOption && deselectText ? [{ id: "", label: deselectText }] : []),
+    ...(options ?? []),
+  ]
+
+  const stringValue =
+    value === undefined || value === null ? undefined : String(value)
+  const stringDefaultValue =
+    defaultValue === undefined || defaultValue === null
+      ? undefined
+      : String(defaultValue)
+
   const selectElement = (
-    <div className="relative w-full">
-      <select
-        id={selectId}
-        required={required}
-        data-slot="select"
-        aria-invalid={isInvalid ? "true" : undefined}
-        aria-describedby={ariaDescribedBy}
-        className={cn(
-          "flex h-auto w-full min-w-0 appearance-none rounded-[12px] border border-border bg-card px-3.5 py-3 pr-10 text-sm text-foreground shadow-none outline-none transition-colors",
-          "placeholder:text-muted-foreground",
-          "focus-visible:border-brand-sage-light focus-visible:ring-2 focus-visible:ring-success-muted",
-          "disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-input/50 disabled:opacity-50",
-          "aria-invalid:border-destructive aria-invalid:ring-2 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40",
-          className
-        )}
-        {...props}
-      >
-        {showDeselectOption ? (
-          <option value="">{deselectText}</option>
-        ) : null}
-        {options?.map((option) => (
-          <option key={option.id} value={option.id} disabled={option.disabled}>
-            {option.label}
-          </option>
-        ))}
-        {children}
-      </select>
-      {!hideChevron ? (
-        <ChevronDown
-          aria-hidden
-          className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-muted-foreground"
-        />
-      ) : null}
-    </div>
+    <SelectPrimitive.Root
+      value={stringValue}
+      defaultValue={stringDefaultValue}
+      onValueChange={(next) => emitSelectChange(onChange, next ?? "", name)}
+      disabled={disabled}
+      required={required}
+      name={name}
+      id={selectId}
+      inputRef={ref as React.Ref<HTMLInputElement>}
+      modal={false}
+      items={items.map((item) => ({ value: item.id, label: item.label }))}
+    >
+      <div className="relative w-full">
+        <SelectPrimitive.Trigger
+          id={selectId}
+          data-slot="select"
+          aria-invalid={isInvalid ? "true" : undefined}
+          aria-describedby={ariaDescribedBy}
+          aria-label={ariaLabel}
+          onBlur={onBlur}
+          className={cn(
+            "flex h-auto w-full min-w-0 items-center justify-between gap-2 rounded-[12px] border border-border bg-card px-3.5 py-3 text-left text-sm font-normal text-foreground shadow-none outline-none transition-colors",
+            "focus-visible:border-brand-sage-light focus-visible:ring-2 focus-visible:ring-success-muted",
+            "disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-input/50 disabled:opacity-50",
+            "aria-invalid:border-destructive aria-invalid:ring-2 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40",
+            className
+          )}
+        >
+          <SelectPrimitive.Value
+            placeholder={placeholder || deselectText}
+            className="min-w-0 flex-1 truncate data-placeholder:text-muted-foreground"
+          />
+          {!hideChevron ? (
+            <SelectPrimitive.Icon className="pointer-events-none shrink-0 text-muted-foreground">
+              <ChevronDown className="size-4" aria-hidden />
+            </SelectPrimitive.Icon>
+          ) : null}
+        </SelectPrimitive.Trigger>
+      </div>
+      <SelectPrimitive.Portal>
+        <SelectPrimitive.Positioner
+          className="isolate z-[80] outline-none"
+          side="bottom"
+          align="start"
+          sideOffset={4}
+          alignItemWithTrigger={false}
+        >
+          <SelectPrimitive.Popup
+            data-slot="select-popup"
+            className={cn(
+              "z-[80] max-h-(--available-height) w-(--anchor-width) origin-(--transform-origin) overflow-y-auto rounded-[12px] border border-border bg-card p-1 text-sm text-foreground shadow-md outline-none",
+              "data-[side=bottom]:slide-in-from-top-2 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95",
+              "data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
+            )}
+          >
+            <SelectPrimitive.List>
+              {items.map((option) => (
+                <SelectPrimitive.Item
+                  key={option.id || "empty"}
+                  value={option.id}
+                  disabled={option.disabled}
+                  label={option.label}
+                  className={cn(
+                    "flex min-h-9 cursor-pointer items-center rounded-[8px] px-3 py-2 text-sm outline-none select-none",
+                    "data-highlighted:bg-muted data-selected:font-semibold",
+                    "data-disabled:pointer-events-none data-disabled:opacity-50",
+                  )}
+                >
+                  <SelectPrimitive.ItemText>{option.label}</SelectPrimitive.ItemText>
+                </SelectPrimitive.Item>
+              ))}
+            </SelectPrimitive.List>
+          </SelectPrimitive.Popup>
+        </SelectPrimitive.Positioner>
+      </SelectPrimitive.Portal>
+    </SelectPrimitive.Root>
   )
 
   const hasWrapper = Boolean(displayLabel || activeError || containerClassName)
@@ -118,7 +190,7 @@ function Select({
           className={cn("mb-1.5 block text-[12px] font-bold text-foreground", labelClassName)}
         >
           {displayLabel}
-          {required ? (
+          {required && showRequiredIndicator ? (
             <span className="ml-0.5 text-destructive" aria-hidden="true">
               *
             </span>
