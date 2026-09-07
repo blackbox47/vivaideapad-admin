@@ -18,15 +18,17 @@ export const submitIdeaSchema = z.object({
   summary: z
     .string()
     .trim()
-    .min(1, 'Summary is required.')
-    .max(SUMMARY_MAX, `Summary must be at most ${SUMMARY_MAX} characters.`),
+    .max(SUMMARY_MAX, `Summary must be at most ${SUMMARY_MAX} characters.`)
+    .optional(),
   body: z
     .string()
     .trim()
     .min(1, 'Body is required.')
     .max(BODY_MAX, `Body must be at most ${BODY_MAX} characters.`),
   attachmentUrl: z.string().optional(),
-  confirmedOriginal: z.boolean().optional(),
+  confirmedOriginal: z.boolean().refine((val) => val === true, {
+    message: 'You must confirm that your submission is original and follows the content guidelines.',
+  }),
 });
 
 export type SubmitIdeaFormValues = z.infer<typeof submitIdeaSchema>;
