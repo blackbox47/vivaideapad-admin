@@ -194,7 +194,7 @@ export default function SubmitIdeaForm({
   }
 
   return (
-    <form onSubmit={handleSubmit(onFormSubmit)} noValidate className="space-y-8">
+    <form onSubmit={handleSubmit(onFormSubmit)} noValidate className="space-y-4">
       {/* Field: Topic (disabled - selection handled by topic cards above) */}
       <div className="space-y-2.5">
         <Label
