@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useForm, useWatch } from 'react-hook-form';
+import { Controller, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
 import { FileUploader } from '@/components/ui/file-uploader';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { Select } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import useSubmitIdea from '@/hooks/creator/use-submit-idea';
@@ -96,6 +97,14 @@ export default function SubmitIdeaForm({
   const summaryValue = useWatch({ control, name: 'summary' }) ?? '';
   const bodyValue = useWatch({ control, name: 'body' }) ?? '';
 
+  // Plain-text length of the body's HTML for the counter (matches zod).
+  const bodyPlainTextLength = useMemo(() => {
+    if (typeof document === 'undefined') return 0;
+    const tmp = document.createElement('div');
+    tmp.innerHTML = bodyValue;
+    return (tmp.textContent ?? '').length;
+  }, [bodyValue]);
+
   const topicOptions = useMemo<DropdownOption[]>(
     () =>
       topics.map((topic) => ({
@@ -150,7 +159,7 @@ export default function SubmitIdeaForm({
             topicId: values.topicId,
             title: values.title.trim(),
             summary: values.summary?.trim(),
-            body: values.body.trim(),
+            body: values.body,
             attachmentUrl: values.attachmentUrl?.trim() || undefined,
             file: selectedFile ?? undefined,
           },
@@ -162,7 +171,7 @@ export default function SubmitIdeaForm({
           concept_id: values.topicId,
           title: values.title.trim(),
           summary: values.summary?.trim(),
-          body: values.body.trim(),
+          body: values.body,
           attachmentUrl: values.attachmentUrl?.trim() || undefined,
           file: selectedFile ?? undefined,
         }).unwrap();
@@ -275,23 +284,25 @@ export default function SubmitIdeaForm({
         >
           Body <span className="text-emerald-600 font-semibold">*</span>
         </Label>
-        <div>
-          <Textarea
-            id="body"
-            required
-            disabled={isBusy}
-            maxLength={BODY_MAX}
-            rows={6}
-            placeholder="Describe the idea, the steps to pilot it, and how you'd measure success."
-            className="rounded-xl border border-border bg-card px-4 py-3.5 text-base text-foreground placeholder:text-muted-foreground focus-visible:border-brand-forest focus-visible:ring-2 focus-visible:ring-brand-forest/15 transition-colors resize-y"
-            errorMessage={errors.body?.message}
-            {...register('body')}
-          />
-          <div className="mt-1.5 flex justify-end">
-            <span className="text-xs font-semibold text-muted-foreground">
-              {bodyValue.length}/{BODY_MAX}
-            </span>
-          </div>
+        <Controller
+          control={control}
+          name="body"
+          render={({ field }) => (
+            <RichTextEditor
+              id="body"
+              value={field.value ?? ''}
+              onChange={field.onChange}
+              placeholder="Describe the idea, the steps to pilot it, and how you'd measure success."
+              disabled={isBusy}
+              aria-invalid={errors.body ? 'true' : 'false'}
+              errorMessage={errors.body?.message}
+            />
+          )}
+        />
+        <div className="flex justify-end">
+          <span className="text-xs font-semibold text-muted-foreground">
+            {bodyPlainTextLength}/{BODY_MAX}
+          </span>
         </div>
       </div>
 

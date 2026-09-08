@@ -20,11 +20,19 @@ export const submitIdeaSchema = z.object({
     .trim()
     .max(SUMMARY_MAX, `Summary must be at most ${SUMMARY_MAX} characters.`)
     .optional(),
-  body: z
-    .string()
-    .trim()
-    .min(1, 'Body is required.')
-    .max(BODY_MAX, `Body must be at most ${BODY_MAX} characters.`),
+  body: z.string().superRefine((html, ctx) => {
+    // Strip HTML tags to compute the visible plain-text length.
+    const plain = html.replace(/<[^>]*>/g, '').trim();
+    if (plain.length === 0) {
+      ctx.addIssue({ code: 'custom', message: 'Body is required.' });
+    }
+    if (plain.length > BODY_MAX) {
+      ctx.addIssue({
+        code: 'custom',
+        message: `Body must be at most ${BODY_MAX} characters.`,
+      });
+    }
+  }),
   attachmentUrl: z.string().optional(),
   confirmedOriginal: z.boolean().refine((val) => val === true, {
     message: 'You must confirm that your submission is original and follows the content guidelines.',
