@@ -119,7 +119,10 @@ export const profileService = baseService.injectEndpoints({
       }),
       invalidatesTags: ['profile'],
     }),
-    uploadAvatarUrl: builder.mutation<ProfileDetails, { dataUrl: string }>({
+    uploadAvatarUrl: builder.mutation<
+      ProfileDetails,
+      FormData | { dataUrl?: string; avatar_url?: string }
+    >({
       query: (body) => ({
         url: PROFILE_AVATAR_URL_URL,
         method: 'POST',

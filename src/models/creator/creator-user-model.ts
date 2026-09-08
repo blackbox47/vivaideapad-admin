@@ -11,6 +11,7 @@ export interface CreatorUser {
   name: string;
   initials: string;
   email: string;
+  avatarUrl?: string | null;
   /** Display-only — not the same as the route-gating `UserRole`. */
   bio?: string;
   joined?: string;

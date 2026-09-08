@@ -26,6 +26,12 @@ function normalizeAuthUser(data: unknown): AuthUser | null {
     'id' in (record.profile as Record<string, unknown>)
   ) {
     const p = record.profile as Record<string, unknown>;
+    const avatar =
+      typeof p.avatar_url === 'string'
+        ? p.avatar_url
+        : typeof p.avatarUrl === 'string'
+          ? p.avatarUrl
+          : null;
     return {
       id: String(p.id ?? ''),
       email: String(p.email ?? ''),
@@ -35,6 +41,7 @@ function normalizeAuthUser(data: unknown): AuthUser | null {
           : typeof p.display_name === 'string'
             ? p.display_name
             : null,
+      avatar_url: avatar,
       role: parsePlatformRole(p.role),
       access_status: (typeof p.access_status === 'string'
         ? p.access_status.toLowerCase()
@@ -44,6 +51,12 @@ function normalizeAuthUser(data: unknown): AuthUser | null {
 
   // 2. Wire SerializedProfile shape from GET /admin/profile: { id, email, display_name, role, access_status }
   if ('id' in record && typeof record.id === 'string') {
+    const avatar =
+      typeof record.avatar_url === 'string'
+        ? record.avatar_url
+        : typeof record.avatarUrl === 'string'
+          ? record.avatarUrl
+          : null;
     return {
       id: record.id,
       email: typeof record.email === 'string' ? record.email : '',
@@ -53,6 +66,7 @@ function normalizeAuthUser(data: unknown): AuthUser | null {
           : typeof record.name === 'string'
             ? record.name
             : null,
+      avatar_url: avatar,
       role: parsePlatformRole(record.role),
       access_status: (typeof record.access_status === 'string'
         ? record.access_status.toLowerCase()

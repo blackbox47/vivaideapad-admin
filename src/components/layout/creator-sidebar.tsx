@@ -1,6 +1,6 @@
 import { NavLink } from '@/lib/nav-link';
 
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import useCreatorUser from '@/hooks/auth/use-creator-user';
@@ -8,6 +8,7 @@ import useMobileNav from '@/hooks/ui/use-mobile-nav';
 import { cn } from '@/lib/utils';
 import { CREATOR_NAV_ITEMS } from '@/utils/constants/nav-items';
 import { CREATOR_ROUTES } from '@/utils/constants/routes';
+import { resolveAvatarUrl } from '@/utils/helpers/resolve-avatar-url';
 
 function BrandMark() {
   return (
@@ -31,6 +32,7 @@ interface CreatorSidebarProps {
 export default function CreatorSidebar({ className }: CreatorSidebarProps) {
   const { user, isLoading } = useCreatorUser();
   const { close } = useMobileNav();
+  const resolvedAvatarUrl = resolveAvatarUrl(user?.avatarUrl);
 
   return (
     <aside
@@ -89,6 +91,9 @@ export default function CreatorSidebar({ className }: CreatorSidebarProps) {
         ) : (
           <>
             <Avatar className="size-9 after:border-transparent">
+              {resolvedAvatarUrl && (
+                <AvatarImage src={resolvedAvatarUrl} alt={user.name} />
+              )}
               <AvatarFallback className="bg-sidebar-primary text-xs font-bold text-sidebar-primary-foreground">
                 {user.initials}
               </AvatarFallback>

@@ -87,7 +87,10 @@ export const creatorProfileService = baseService.injectEndpoints({
       },
       invalidatesTags: ['creator-profile'],
     }),
-    uploadCreatorAvatar: builder.mutation<ProfileDetails, { dataUrl: string }>({
+    uploadCreatorAvatar: builder.mutation<
+      ProfileDetails,
+      FormData | { dataUrl?: string; avatar_url?: string }
+    >({
       query: (body) => ({
         url: CREATOR_PROFILE_AVATAR_URL,
         method: 'POST',

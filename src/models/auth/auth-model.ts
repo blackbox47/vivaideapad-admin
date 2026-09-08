@@ -27,6 +27,7 @@ export interface AuthUser {
   id: string;
   email: string;
   display_name: string | null;
+  avatar_url?: string | null;
   role: PlatformRole;
   access_status: UserAccessStatus;
 }

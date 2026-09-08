@@ -26,6 +26,13 @@ function normalizeCreatorUser(data: unknown): CreatorUser | null {
         : '';
   const name = displayName || email;
 
+  const avatarUrl =
+    typeof record.avatar_url === 'string'
+      ? record.avatar_url
+      : typeof record.avatarUrl === 'string'
+        ? record.avatarUrl
+        : null;
+
   return {
     id: String(record.id ?? ''),
     name,
@@ -34,6 +41,7 @@ function normalizeCreatorUser(data: unknown): CreatorUser | null {
         ? record.initials
         : deriveInitials(displayName, email),
     email,
+    avatarUrl,
     bio: typeof record.bio === 'string' ? record.bio : undefined,
     joined:
       typeof record.created_at === 'string' ? record.created_at : undefined,

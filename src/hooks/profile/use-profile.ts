@@ -44,20 +44,7 @@ interface UseProfileResult {
   isUploadingAvatar: boolean;
 }
 
-function readFileAsDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === 'string') {
-        resolve(reader.result);
-      } else {
-        reject(new Error('Unable to read file'));
-      }
-    };
-    reader.onerror = () => reject(reader.error ?? new Error('File error'));
-    reader.readAsDataURL(file);
-  });
-}
+export const MAX_AVATAR_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
 
 export default function useProfile(): UseProfileResult {
   const { data, isLoading, isError, error, refetch } =
@@ -138,14 +125,21 @@ export default function useProfile(): UseProfileResult {
 
   const uploadAvatar = useCallback(
     async (file: File) => {
+      if (file.size > MAX_AVATAR_SIZE_BYTES) {
+        flash(setProfileFeedback, 'File size exceeds 5MB limit');
+        return null;
+      }
       try {
-        const dataUrl = await readFileAsDataUrl(file);
-        return await triggerAvatar({ dataUrl }).unwrap();
+        const formData = new FormData();
+        formData.append('file', file);
+        const res = await triggerAvatar(formData).unwrap();
+        flash(setProfileFeedback, 'Profile photo updated');
+        return res;
       } catch {
         return null;
       }
     },
-    [triggerAvatar],
+    [flash, triggerAvatar],
   );
 
   return {
