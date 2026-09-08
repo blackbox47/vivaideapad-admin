@@ -15,9 +15,7 @@ import ProfileAvatarUploader from '@/features/profile/profile-avatar-uploader';
 import ProfileIdentityCard from '@/features/profile/profile-identity-card';
 import ProfileNotificationsCard from '@/features/profile/profile-notifications-card';
 import ProfilePayoutMethodCard from '@/features/profile/profile-payout-method-card';
-import ProfileSignOutCard from '@/features/profile/profile-sign-out-card';
 import { ScreenLoader } from '@/components/shared/screen-loader';
-import useAuth from '@/hooks/auth/use-auth';
 import useCreatorProfile from '@/hooks/creator/use-creator-profile';
 import type { UpdatePayoutMethodBody } from '@/models/profile/profile-model';
 
@@ -44,7 +42,6 @@ export default function CreatorProfileOverview() {
     isChangingPayoutMethod,
     payoutError,
   } = useCreatorProfile();
-  const { logout, isSigningOut } = useAuth();
   const [isPayoutOpen, setIsPayoutOpen] = useState(false);
 
   if (isError) {
@@ -117,7 +114,6 @@ export default function CreatorProfileOverview() {
               payoutMethod={overview.payoutMethod}
               onChange={() => setIsPayoutOpen(true)}
             />
-            <ProfileSignOutCard onSignOut={logout} isSigningOut={isSigningOut} />
           </div>
         </div>
       ) : (

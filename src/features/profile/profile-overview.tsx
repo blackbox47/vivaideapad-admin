@@ -13,8 +13,6 @@ import ProfileAvatarUploader from '@/features/profile/profile-avatar-uploader';
 import ProfileIdentityCard from '@/features/profile/profile-identity-card';
 import ProfileNotificationsCard from '@/features/profile/profile-notifications-card';
 import ProfilePayoutMethodCard from '@/features/profile/profile-payout-method-card';
-import ProfileSignOutCard from '@/features/profile/profile-sign-out-card';
-import useAuth from '@/hooks/auth/use-auth';
 import useProfile from '@/hooks/profile/use-profile';
 
 export default function ProfileOverview() {
@@ -37,7 +35,6 @@ export default function ProfileOverview() {
     uploadAvatar,
     isUploadingAvatar,
   } = useProfile();
-  const { logout, isSigningOut } = useAuth();
 
   if (isError || !overview) {
     return (
@@ -103,7 +100,6 @@ export default function ProfileOverview() {
             payoutMethod={payoutMethod}
             onChange={() => undefined}
           />
-          <ProfileSignOutCard onSignOut={logout} isSigningOut={isSigningOut} />
         </div>
       </div>
     </div>
