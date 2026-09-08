@@ -1,5 +1,6 @@
 import EmptyState from '@/components/shared/empty-state';
 import StatusBadge from '@/components/shared/status-badge';
+import TableActions from '@/components/shared/table-actions';
 import type { Applicant } from '@/models/people/people-model';
 import PeopleTable from '@/features/people/people-table';
 
@@ -39,13 +40,15 @@ export default function ApplicantsTable({
             <StatusBadge status={applicant.status} />
           </td>
           <td className="px-[18px] py-3.5">
-            <button
-              type="button"
-              className="rounded-full border border-border bg-card px-[13px] py-[7px] text-xs font-bold text-foreground hover:bg-surface-subtle transition-colors cursor-pointer"
-              onClick={() => onReview(applicant.id)}
-            >
-              Review
-            </button>
+            <TableActions>
+              <button
+                type="button"
+                className="rounded-full border border-border bg-card px-[13px] py-[7px] text-xs font-bold text-foreground hover:bg-surface-subtle transition-colors cursor-pointer"
+                onClick={() => onReview(applicant.id)}
+              >
+                Review
+              </button>
+            </TableActions>
           </td>
         </tr>
       ))}

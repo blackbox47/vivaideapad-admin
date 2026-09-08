@@ -1,4 +1,5 @@
 import StatusBadge from '@/components/shared/status-badge';
+import TableActions from '@/components/shared/table-actions';
 import {
   ProjectTable,
   ProjectTableCell,
@@ -48,13 +49,15 @@ export default function PayoutTable({ payouts, onProcess }: PayoutTableProps) {
             </ProjectTableCell>
             <ProjectTableCell>
               {canProcess ? (
-                <button
-                  type="button"
-                  className="rounded-full bg-primary px-3.5 py-2 text-xs font-bold whitespace-nowrap text-primary-foreground hover:bg-brand-forest transition-colors cursor-pointer"
-                  onClick={() => onProcess(payout.id)}
-                >
-                  Process
-                </button>
+                <TableActions>
+                  <button
+                    type="button"
+                    className="rounded-full bg-primary px-3.5 py-2 text-xs font-bold whitespace-nowrap text-primary-foreground hover:bg-brand-forest transition-colors cursor-pointer"
+                    onClick={() => onProcess(payout.id)}
+                  >
+                    Process
+                  </button>
+                </TableActions>
               ) : null}
             </ProjectTableCell>
           </ProjectTableRow>

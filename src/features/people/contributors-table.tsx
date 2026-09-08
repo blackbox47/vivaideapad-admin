@@ -1,5 +1,6 @@
 import EmptyState from '@/components/shared/empty-state';
 import StatusBadge from '@/components/shared/status-badge';
+import TableActions from '@/components/shared/table-actions';
 import { Button } from '@/components/ui/button';
 import type { PlatformUser } from '@/models/people/people-model';
 import PeopleTable from '@/features/people/people-table';
@@ -43,17 +44,19 @@ export default function ContributorsTable({
             <StatusBadge status={user.status} />
           </td>
           <td className="px-[18px] py-3.5">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={isToggling}
-              loading={isToggling}
-              className="h-auto rounded-full border border-border bg-card px-[13px] py-[7px] text-xs font-bold text-foreground hover:bg-surface-subtle"
-              onClick={() => onToggle(user)}
-            >
-              {user.status === 'Suspended' ? 'Reactivate' : 'Suspend'}
-            </Button>
+            <TableActions>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={isToggling}
+                loading={isToggling}
+                className="h-auto rounded-full border border-border bg-card px-[13px] py-[7px] text-xs font-bold text-foreground hover:bg-surface-subtle"
+                onClick={() => onToggle(user)}
+              >
+                {user.status === 'Suspended' ? 'Reactivate' : 'Suspend'}
+              </Button>
+            </TableActions>
           </td>
         </tr>
       ))}

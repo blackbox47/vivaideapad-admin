@@ -25,6 +25,7 @@ import type { Category } from '@/models/categories/categories-model';
 import { getApiErrorMessage } from '@/utils/helpers/api-error';
 import CategoryFormDialog from '@/features/categories/category-form-dialog';
 import EmptyState from '@/components/shared/empty-state';
+import TableActions from '@/components/shared/table-actions';
 
 export default function CategoriesOverview() {
   const [search, setSearch] = useState('');
@@ -179,21 +180,23 @@ export default function CategoriesOverview() {
                         {category.isActive ? 'Active' : 'Inactive'}
                       </span>
                     </TableCell>
-                    <TableCell className="space-x-2 text-right">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => setEditing(category)}
-                      >
-                        Edit
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => setConfirmDelete(category)}
-                      >
-                        Delete
-                      </Button>
+                    <TableCell className="text-right">
+                      <TableActions>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => setEditing(category)}
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => setConfirmDelete(category)}
+                        >
+                          Delete
+                        </Button>
+                      </TableActions>
                     </TableCell>
                   </TableRow>
                 ))}
