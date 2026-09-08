@@ -1,4 +1,4 @@
-import { useEffect, type MouseEvent } from 'react';
+import { useEffect } from 'react';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { WorkspaceAdmin } from '@/models/admins/admins-model';
@@ -29,17 +29,8 @@ export default function RemoveAdminDialog({
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [isSubmitting, onClose]);
 
-  const handleBackdropClick = (event: MouseEvent<HTMLDivElement>) => {
-    if (event.target === event.currentTarget && !isSubmitting) {
-      onClose();
-    }
-  };
-
   return (
-    <div
-      className="fixed inset-0 z-50 grid place-items-center bg-(--overlay-scrim) p-5 backdrop-blur-xs"
-      onClick={handleBackdropClick}
-    >
+    <div className="fixed inset-0 z-50 grid place-items-center bg-(--overlay-scrim) p-5 backdrop-blur-xs">
       <div
         role="dialog"
         aria-modal="true"

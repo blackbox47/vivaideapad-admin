@@ -2,7 +2,6 @@ import {
   useEffect,
   useMemo,
   useState,
-  type MouseEvent,
 } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -146,12 +145,6 @@ export default function EditConceptDialog({
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [isSubmitting, onClose]);
 
-  const handleBackdropClick = (event: MouseEvent<HTMLDivElement>) => {
-    if (event.target === event.currentTarget && !isSubmitting) {
-      onClose();
-    }
-  };
-
   const handleAddCategory = () => {
     const name = newCategoryName.trim();
     if (!name) {
@@ -199,10 +192,7 @@ export default function EditConceptDialog({
   };
 
   return (
-    <div
-      className="fixed inset-0 z-50 grid place-items-center bg-(--overlay-scrim) p-5 backdrop-blur-xs"
-      onClick={handleBackdropClick}
-    >
+    <div className="fixed inset-0 z-50 grid place-items-center bg-(--overlay-scrim) p-5 backdrop-blur-xs">
       <div
         role="dialog"
         aria-modal="true"

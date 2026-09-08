@@ -1,4 +1,4 @@
-import { useEffect, type MouseEvent } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { X } from 'lucide-react';
 
@@ -47,17 +47,8 @@ export default function SubmissionViewDialog({
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [onClose]);
 
-  const handleBackdropClick = (event: MouseEvent<HTMLDivElement>) => {
-    if (event.target === event.currentTarget) {
-      onClose();
-    }
-  };
-
   return (
-    <div
-      className="fixed inset-0 z-50 grid place-items-center bg-(--overlay-scrim) p-5 backdrop-blur-xs"
-      onClick={handleBackdropClick}
-    >
+    <div className="fixed inset-0 z-50 grid place-items-center bg-(--overlay-scrim) p-5 backdrop-blur-xs">
       <div
         role="dialog"
         aria-modal="true"
