@@ -1,5 +1,3 @@
-export type PublicDisplay = 'Public name' | 'Pseudonymous';
-
 export interface ProfileDetails {
   id: string;
   name: string;
@@ -7,8 +5,6 @@ export interface ProfileDetails {
   email: string;
   phone: string;
   bio: string;
-  /** Stored display preference. */
-  publicDisplay: PublicDisplay;
   /** Optional uploaded avatar (data URL or hosted URL). */
   avatarUrl: string | null;
 }
@@ -19,10 +15,12 @@ export interface NotificationPreferences {
 }
 
 export interface PayoutMethod {
-  /** Display label e.g. "bKash · 018•••42". */
+  /** Display label e.g. "bKash · 018XXXXXXXX". */
   label: string;
   /** Identifier used when routing to the change-method flow. */
   method: 'bKash' | 'Nagad' | 'Rocket' | 'Bank';
+  /** Wallet / mobile account number, when set. */
+  account: string;
 }
 
 export interface ProfileOverview {
@@ -36,6 +34,7 @@ export interface ProfileOverview {
 export interface UpdatePayoutMethodBody {
   method: PayoutMethod['method'];
   label: string;
+  account: string;
 }
 
 export interface UpdateProfileBody {
@@ -43,12 +42,12 @@ export interface UpdateProfileBody {
   email: string;
   phone: string;
   bio: string;
-  publicDisplay: PublicDisplay;
   avatarUrl?: string | null;
 }
 
 export interface UpdatePasswordBody {
   password: string;
+  currentPassword: string;
 }
 
 export interface UpdateNotificationsBody {

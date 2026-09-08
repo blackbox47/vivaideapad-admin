@@ -1,6 +1,6 @@
 import { NavLink } from '@/lib/nav-link';
 
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import useAdminUser from '@/hooks/auth/use-admin-user';
@@ -10,6 +10,7 @@ import { ADMIN_NAV_ITEMS } from '@/utils/constants/nav-items';
 import { ADMIN_ROUTES } from '@/utils/constants/routes';
 import { deriveInitials } from '@/utils/helpers/initials';
 import { formatPlatformRole } from '@/utils/helpers/platform-role';
+import { resolveAvatarUrl } from '@/utils/helpers/resolve-avatar-url';
 
 function BrandMark() {
   return (
@@ -33,6 +34,7 @@ interface AdminSidebarProps {
 export default function AdminSidebar({ className }: AdminSidebarProps) {
   const { user, isLoading } = useAdminUser();
   const { close } = useMobileNav();
+  const resolvedAvatarUrl = resolveAvatarUrl(user?.avatar_url);
 
   return (
     <aside
@@ -91,6 +93,12 @@ export default function AdminSidebar({ className }: AdminSidebarProps) {
         ) : (
           <>
             <Avatar className="size-9 after:border-transparent">
+              {resolvedAvatarUrl && (
+                <AvatarImage
+                  src={resolvedAvatarUrl}
+                  alt={user.display_name ?? user.email}
+                />
+              )}
               <AvatarFallback className="bg-sidebar-primary text-xs font-bold text-sidebar-primary-foreground">
                 {deriveInitials(user.display_name, user.email)}
               </AvatarFallback>

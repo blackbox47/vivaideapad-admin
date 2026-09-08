@@ -108,7 +108,7 @@ export default function CategoryFormDialog({
             <Button variant="ghost" type="button" onClick={onClose} disabled={isSubmitting}>
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
+            <Button type="submit" disabled={isSubmitting} loading={isSubmitting}>
               {isSubmitting
                 ? 'Saving…'
                 : mode === 'create'

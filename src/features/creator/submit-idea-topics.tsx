@@ -16,27 +16,32 @@ export default function SubmitIdeaTopics({
   selectedTopicId,
 }: SubmitIdeaTopicsProps) {
   return (
-    <section className="mb-5">
-      <div className="mb-3 flex items-baseline justify-between">
-        <h2 className="text-base font-semibold text-foreground">
+    <section className="mb-10 sm:mb-12" data-purpose="topic-picker-section">
+      <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
+        <h2 className="text-lg sm:text-xl font-bold text-foreground">
           Browse active topics
         </h2>
-        <p className="text-xs text-muted-foreground">
+        <span className="text-xs sm:text-sm font-medium text-muted-foreground">
           Tap a topic to fill in the form below
-        </p>
+        </span>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
         {isLoading
-          ? Array.from({ length: 4 }).map((_, index) => (
+          ? Array.from({ length: 3 }).map((_, index) => (
               <article
                 key={index}
-                className="rounded-[16px] border border-border-subtle bg-card p-4"
+                className="flex min-h-[145px] flex-col justify-between rounded-2xl border border-border bg-card p-5 sm:p-6 shadow-xs"
               >
-                <Skeleton className="h-4 w-32" />
-                <Skeleton className="mt-3 h-3 w-full" />
-                <Skeleton className="mt-2 h-3 w-3/4" />
-                <Skeleton className="mt-4 h-4 w-16" />
+                <div>
+                  <Skeleton className="h-5 w-36" />
+                  <Skeleton className="mt-2.5 h-3.5 w-full" />
+                  <Skeleton className="mt-1.5 h-3.5 w-4/5" />
+                </div>
+                <div className="flex items-center justify-between border-t border-border-subtle pt-4 mt-3">
+                  <Skeleton className="h-5 w-20" />
+                  <Skeleton className="h-3.5 w-24" />
+                </div>
               </article>
             ))
           : topics.map((topic) => {
@@ -47,23 +52,32 @@ export default function SubmitIdeaTopics({
                   type="button"
                   onClick={() => onSelectTopic?.(topic.id)}
                   className={cn(
-                    'rounded-[16px] border bg-card p-4 text-left transition-colors cursor-pointer',
+                    'group relative flex min-h-[145px] flex-col justify-between rounded-2xl border bg-card p-5 sm:p-6 text-left shadow-xs transition-all duration-200 cursor-pointer hover:shadow-md',
                     isActive
-                      ? 'border-foreground ring-2 ring-brand-lime'
-                      : 'border-border-subtle hover:border-brand-lime',
+                      ? 'border-primary ring-2 ring-primary/20 shadow-md bg-secondary/15'
+                      : 'border-border hover:border-brand-forest/80',
                   )}
                 >
-                  <p className="text-[13px] font-semibold text-foreground">
-                    {topic.title}
-                  </p>
-                  <p className="mt-1.5 line-clamp-3 text-xs text-muted-foreground">
-                    {topic.description}
-                  </p>
-                  <div className="mt-3 flex items-center justify-between text-xs">
-                    <span className="font-bold text-foreground">
+                  <div>
+                    <div
+                      className={cn(
+                        'mb-1 text-base sm:text-lg font-bold text-foreground transition-colors',
+                        isActive
+                          ? 'text-primary'
+                          : 'group-hover:text-brand-forest',
+                      )}
+                    >
+                      {topic.title}
+                    </div>
+                    <p className="line-clamp-2 text-xs sm:text-sm leading-relaxed text-muted-foreground">
+                      {topic.description}
+                    </p>
+                  </div>
+                  <div className="flex items-center justify-between border-t border-border-subtle pt-4 mt-3">
+                    <span className="text-base sm:text-lg font-bold text-foreground">
                       {topic.reward}
                     </span>
-                    <span className="text-text-subtle">
+                    <span className="text-xs font-medium lowercase tracking-wide text-muted-foreground">
                       closes {topic.closesOn}
                     </span>
                   </div>

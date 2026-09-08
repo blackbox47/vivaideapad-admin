@@ -47,21 +47,6 @@ interface UseCreatorProfileResult {
   payoutError: string | null;
 }
 
-function readFileAsDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === 'string') {
-        resolve(reader.result);
-      } else {
-        reject(new Error('Unable to read file'));
-      }
-    };
-    reader.onerror = () => reject(reader.error ?? new Error('File error'));
-    reader.readAsDataURL(file);
-  });
-}
-
 export default function useCreatorProfile(): UseCreatorProfileResult {
   const { data, isLoading, isError, error, refetch } =
     useGetCreatorProfileQuery();
@@ -106,7 +91,6 @@ export default function useCreatorProfile(): UseCreatorProfileResult {
           email: body.email,
           phone: body.phone,
           bio: body.bio,
-          publicDisplay: body.publicDisplay,
           avatarUrl: body.avatarUrl ?? data?.profile.avatarUrl ?? null,
         } satisfies ProfileDetails;
       } catch {
@@ -144,14 +128,21 @@ export default function useCreatorProfile(): UseCreatorProfileResult {
 
   const uploadAvatar = useCallback(
     async (file: File) => {
+      if (file.size > 5 * 1024 * 1024) {
+        flash(setProfileFeedback, 'File size exceeds 5MB limit');
+        return null;
+      }
       try {
-        const dataUrl = await readFileAsDataUrl(file);
-        return await triggerAvatar({ dataUrl }).unwrap();
+        const formData = new FormData();
+        formData.append('file', file);
+        const res = await triggerAvatar(formData).unwrap();
+        flash(setProfileFeedback, 'Profile photo updated');
+        return res;
       } catch {
         return null;
       }
     },
-    [triggerAvatar],
+    [flash, triggerAvatar],
   );
 
   const changePayoutMethod = useCallback(

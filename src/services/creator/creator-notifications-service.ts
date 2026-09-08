@@ -73,6 +73,16 @@ export const creatorNotificationsService = baseService.injectEndpoints({
                 typeof item.created_at === 'string'
                   ? item.created_at
                   : new Date().toISOString(),
+              // Routing inputs — used by notification-link helpers.
+              rawType: typeof item.type === 'string' ? item.type : null,
+              linkedRecordType:
+                typeof item.linked_record_type === 'string'
+                  ? item.linked_record_type
+                  : null,
+              linkedRecordId:
+                typeof item.linked_record_id === 'string'
+                  ? item.linked_record_id
+                  : null,
             };
           });
 

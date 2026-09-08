@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { X } from 'lucide-react';
 
+import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import type {
   ContentSubmission,
@@ -114,30 +115,33 @@ export default function SubmissionReviewPanel({
         />
 
         <div className="mt-4.5 flex flex-wrap justify-end gap-2.5">
-          <button
+          <Button
             type="button"
             disabled={isDeciding}
-            className="shrink-0 whitespace-nowrap rounded-full border border-danger-subtle bg-card px-4 py-3 text-[13px] font-bold text-danger hover:bg-danger-subtle transition-colors disabled:opacity-60 cursor-pointer"
+            loading={isDeciding}
+            className="h-auto shrink-0 whitespace-nowrap rounded-full border border-danger-subtle bg-card px-4 py-3 text-[13px] font-bold text-danger hover:bg-danger-subtle transition-colors disabled:opacity-60"
             onClick={() => handleDecide('Rejected')}
           >
             Reject
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
             disabled={isDeciding}
-            className="shrink-0 whitespace-nowrap rounded-full border border-border bg-card px-4 py-3 text-[13px] font-bold text-foreground hover:bg-surface-subtle transition-colors disabled:opacity-60 cursor-pointer"
+            loading={isDeciding}
+            className="h-auto shrink-0 whitespace-nowrap rounded-full border border-border bg-card px-4 py-3 text-[13px] font-bold text-foreground hover:bg-surface-subtle transition-colors disabled:opacity-60"
             onClick={() => handleDecide('Revision Requested')}
           >
             Request revision
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
             disabled={isDeciding}
-            className="shrink-0 whitespace-nowrap rounded-full bg-primary px-4 py-3 text-[13px] font-bold text-primary-foreground hover:bg-brand-forest transition-colors disabled:opacity-60 cursor-pointer"
+            loading={isDeciding}
+            className="h-auto shrink-0 whitespace-nowrap rounded-full bg-primary px-4 py-3 text-[13px] font-bold text-primary-foreground hover:bg-brand-forest transition-colors disabled:opacity-60"
             onClick={() => handleDecide('Approved')}
           >
             Approve & assign reward
-          </button>
+          </Button>
         </div>
       </div>
     </div>

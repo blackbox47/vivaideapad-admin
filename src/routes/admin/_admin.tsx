@@ -2,6 +2,7 @@ import { createFileRoute } from '@tanstack/react-router';
 
 import { authGuard } from '@/lib/auth-guard';
 import AdminLayout from '@/layouts/admin-layout';
+import { ScreenLoader } from '@/components/shared/screen-loader';
 
 /**
  * Pathless layout for every authenticated admin page (everything under
@@ -21,4 +22,5 @@ export const Route = createFileRoute('/admin/_admin')({
   beforeLoad: ({ context, location }) =>
     authGuard.private(context.store, 'admin', location.href),
   component: AdminLayout,
+  pendingComponent: () => <ScreenLoader />,
 });

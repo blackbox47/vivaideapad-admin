@@ -2,25 +2,19 @@ import {
   useEffect,
   useMemo,
   useState,
-  type MouseEvent,
 } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { format } from 'date-fns';
-import { CalendarIcon, X } from 'lucide-react';
+import { X } from 'lucide-react';
 
+import DateField from '@/components/shared/date-field';
 import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
 import { Select } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
+import { formatConceptDate } from '@/utils/helpers/concept-date';
 import type {
   ConceptStatus,
   CreateConceptBody,
@@ -32,9 +26,6 @@ import {
   type CreateConceptFormValues,
 } from '@/models/topics/topics-schema';
 import type { DropdownOption } from '@/utils/types/dropdown-option';
-
-const fieldClassName =
-  'h-auto w-full rounded-[12px] border border-border bg-card text-foreground px-[13px] py-3 text-sm shadow-none focus-visible:border-brand-sage-light';
 
 const STATUS_OPTIONS: DropdownOption[] = [
   { id: 'draft', label: 'Draft' },
@@ -49,61 +40,6 @@ interface CreateConceptDialogProps {
   error: string | null;
   onClose: () => void;
   onSubmit: (body: CreateConceptBody) => Promise<void>;
-}
-
-function formatConceptDate(date: Date): string {
-  return format(date, 'd MMM');
-}
-
-function DateField({
-  id,
-  value,
-  onChange,
-  placeholder,
-  disabledBefore,
-}: {
-  id: string;
-  value: Date | undefined;
-  onChange: (date: Date | undefined) => void;
-  placeholder: string;
-  disabledBefore?: Date;
-}) {
-  const [open, setOpen] = useState(false);
-
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger
-        render={
-          <Button
-            type="button"
-            variant="outline"
-            id={id}
-            className={cn(
-              fieldClassName,
-              'justify-between font-normal hover:bg-card',
-              !value && 'text-text-subtle',
-            )}
-          />
-        }
-      >
-        <span>{value ? formatConceptDate(value) : placeholder}</span>
-        <CalendarIcon className="size-4 text-muted-foreground" />
-      </PopoverTrigger>
-      <PopoverContent align="start" className="w-auto p-0 border border-border bg-card">
-        <Calendar
-          mode="single"
-          selected={value}
-          onSelect={(date) => {
-            onChange(date);
-            if (date) {
-              setOpen(false);
-            }
-          }}
-          disabled={disabledBefore ? { before: disabledBefore } : undefined}
-        />
-      </PopoverContent>
-    </Popover>
-  );
 }
 
 export default function CreateConceptDialog({
@@ -170,12 +106,6 @@ export default function CreateConceptDialog({
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [isSubmitting, onClose]);
 
-  const handleBackdropClick = (event: MouseEvent<HTMLDivElement>) => {
-    if (event.target === event.currentTarget && !isSubmitting) {
-      onClose();
-    }
-  };
-
   const handleAddCategory = () => {
     const name = newCategoryName.trim();
     if (!name) {
@@ -223,10 +153,7 @@ export default function CreateConceptDialog({
   };
 
   return (
-    <div
-      className="fixed inset-0 z-50 grid place-items-center bg-(--overlay-scrim) p-5 backdrop-blur-xs"
-      onClick={handleBackdropClick}
-    >
+    <div className="fixed inset-0 z-50 grid place-items-center bg-(--overlay-scrim) p-5 backdrop-blur-xs">
       <div
         role="dialog"
         aria-modal="true"
@@ -275,8 +202,13 @@ export default function CreateConceptDialog({
                   <Select
                     id="concept-category"
                     label={
-                      <div className="flex items-center justify-between">
-                        <span>Category</span>
+                      <div className="flex items-center justify-between gap-2">
+                        <span>
+                          Category
+                          <span className="ml-0.5 text-destructive" aria-hidden="true">
+                            *
+                          </span>
+                        </span>
                         <button
                           type="button"
                           onClick={() => {
@@ -292,6 +224,7 @@ export default function CreateConceptDialog({
                       </div>
                     }
                     required
+                    showRequiredIndicator={false}
                     value={field.value}
                     onChange={field.onChange}
                     options={categoryOptions}
@@ -457,6 +390,7 @@ export default function CreateConceptDialog({
             <Button
               type="submit"
               disabled={isSubmitting}
+              loading={isSubmitting}
               className="h-auto rounded-full bg-primary px-5 py-3 font-bold text-primary-foreground hover:bg-brand-forest disabled:opacity-60"
             >
               {isSubmitting ? 'Saving…' : 'Save concept'}

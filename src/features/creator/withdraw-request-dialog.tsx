@@ -1,4 +1,4 @@
-import { useEffect, type MouseEvent } from 'react';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { X } from 'lucide-react';
@@ -70,12 +70,6 @@ export default function WithdrawRequestDialog({
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [isSubmitting, onClose]);
 
-  const handleBackdropClick = (event: MouseEvent<HTMLDivElement>) => {
-    if (event.target === event.currentTarget && !isSubmitting) {
-      onClose();
-    }
-  };
-
   const onFormSubmit = async (values: WithdrawRequestFormValues) => {
     await onSubmit({
       amount: values.amount.trim(),
@@ -85,10 +79,7 @@ export default function WithdrawRequestDialog({
   };
 
   return (
-    <div
-      className="fixed inset-0 z-50 grid place-items-center bg-(--overlay-scrim) p-5 backdrop-blur-xs"
-      onClick={handleBackdropClick}
-    >
+    <div className="fixed inset-0 z-50 grid place-items-center bg-(--overlay-scrim) p-5 backdrop-blur-xs">
       <div
         role="dialog"
         aria-modal="true"
@@ -182,6 +173,7 @@ export default function WithdrawRequestDialog({
             <Button
               type="submit"
               disabled={isSubmitting}
+              loading={isSubmitting}
               className="h-auto rounded-full bg-primary px-5 py-3 font-bold text-primary-foreground hover:bg-brand-forest disabled:opacity-60"
             >
               {isSubmitting ? 'Submitting…' : 'Submit request'}

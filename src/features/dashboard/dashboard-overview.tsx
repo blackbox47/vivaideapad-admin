@@ -1,5 +1,4 @@
 import { AlertCircle } from 'lucide-react';
-import { Link } from '@tanstack/react-router';
 
 import PageHeader from '@/components/layout/page-header';
 import { Button } from '@/components/ui/button';
@@ -16,7 +15,6 @@ import PlatformHealthCards from '@/features/dashboard/platform-health-cards';
 import ReviewQueue from '@/features/dashboard/review-queue';
 import useAdminUser from '@/hooks/auth/use-admin-user';
 import useDashboard from '@/hooks/dashboard/use-dashboard';
-import { ADMIN_ROUTES } from '@/utils/constants/routes';
 
 export default function DashboardOverview() {
   const { data, isLoading, isError, error, refetch } = useDashboard();
@@ -48,14 +46,6 @@ export default function DashboardOverview() {
         eyebrow="Platform health"
         title={`Good morning, ${firstName}.`}
         description="Here is what needs attention across IdeaPad today."
-        action={
-          <Button
-            render={<Link to={ADMIN_ROUTES.topics} />}
-            className="h-auto rounded-full bg-primary px-5 py-3 font-bold text-primary-foreground hover:bg-brand-forest"
-          >
-            + Create concept
-          </Button>
-        }
       />
 
       <PlatformHealthCards stats={data?.stats ?? []} isLoading={isLoading} />

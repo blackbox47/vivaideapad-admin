@@ -1,17 +1,19 @@
 import AdminSignInPanel from '@/features/auth/admin-sign-in-panel';
 import LoginHero from '@/features/auth/login-hero';
+import { CREATOR_ROUTES } from '@/utils/constants/routes';
 
 export default function AdminSignInOverview() {
   return (
-    <div className="grid min-h-svh grid-cols-1 lg:grid-cols-2">
+    <div className="flex min-h-svh w-full flex-col overflow-hidden md:h-screen md:flex-row">
       <LoginHero
-        brandName="ideapad"
-        eyebrow="Admin console"
-        title="Operate the Ideapad platform."
-        description="Sign in with your administrator credentials to manage topics, review content, and run payouts."
-        footer="Authorized personnel only"
+        brandName="sparkory"
+        eyebrow="ADMIN PORTAL"
+        title="Manage, review, and govern with confidence."
+        description="Secure portal for Sparkory platform owners, reviewers, and system administrators."
+        footer="Sparkory community platform"
+        homeLink={CREATOR_ROUTES.login}
       />
-      <AdminSignInPanel />
+      <AdminSignInPanel brandName="sparkory" />
     </div>
   );
 }

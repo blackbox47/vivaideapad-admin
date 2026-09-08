@@ -12,6 +12,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import EmptyState from '@/components/shared/empty-state';
 import OpportunityCard from '@/features/creator/opportunity-card';
 import OpportunityFilters from '@/features/creator/opportunity-filters';
 import useCreatorTopics from '@/hooks/creator/use-creator-topics';
@@ -106,15 +107,10 @@ export default function OpportunitiesOverview() {
           ))}
         </div>
       ) : topics.length === 0 ? (
-        <div className="rounded-[22px] border border-border bg-card px-6 py-15 text-center text-muted-foreground">
-          <span className="mb-2.5 block text-[28px]">◇</span>
-          <strong className="mb-1 block text-foreground">
-            No briefs match your search
-          </strong>
-          <span className="text-[13px]">
-            Try a different keyword or clear the category filter.
-          </span>
-        </div>
+        <EmptyState
+          title="No briefs match your search"
+          description="Try a different keyword or clear the category filter."
+        />
       ) : (
         <>
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -124,13 +120,14 @@ export default function OpportunitiesOverview() {
           </div>
           {remainingCount > 0 ? (
             <div className="mt-7 flex justify-center">
-              <button
+              <Button
                 type="button"
-                className="rounded-full border border-border bg-card px-6.5 py-3 text-[13px] font-bold text-foreground hover:bg-surface-subtle transition-colors cursor-pointer"
+                variant="outline"
+                className="h-auto rounded-full border border-border bg-card px-6.5 py-3 text-[13px] font-bold text-foreground hover:bg-surface-subtle"
                 onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
               >
                 Show more briefs · {remainingCount} remaining
-              </button>
+              </Button>
             </div>
           ) : null}
         </>

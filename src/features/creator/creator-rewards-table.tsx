@@ -1,3 +1,4 @@
+import EmptyState from '@/components/shared/empty-state';
 import StatusBadge from '@/components/shared/status-badge';
 import type { CreatorRewardEntry } from '@/models/creator/creator-rewards-model';
 
@@ -27,7 +28,12 @@ export default function CreatorRewardsTable({
 
   if (entries.length === 0) {
     return (
-      <p className="py-6 text-sm text-muted-foreground">No transactions yet.</p>
+      <EmptyState
+        card={false}
+        size="sm"
+        title="No transactions yet"
+        description="Your reward earnings and payouts will appear here."
+      />
     );
   }
 

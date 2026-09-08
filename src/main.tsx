@@ -6,6 +6,7 @@ import { RouterProvider, createRouter } from '@tanstack/react-router';
 import { startSessionExpiredListener } from '@/lib/session-expired-listener';
 import { store } from '@/store';
 import { routeTree } from '@/routeTree.gen';
+import { ScreenLoader } from '@/components/shared/screen-loader';
 import './index.css';
 
 // One-shot migration: drop the legacy localStorage token/signed-out keys
@@ -33,6 +34,8 @@ const router = createRouter({
   routeTree,
   context: { store },
   defaultPreload: 'intent',
+  defaultPendingComponent: () => <ScreenLoader fullScreen />,
+  defaultPendingMs: 0,
 });
 
 // Boot the session-expired listener: when `customFetch` dispatches

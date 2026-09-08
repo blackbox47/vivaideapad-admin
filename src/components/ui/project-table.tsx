@@ -1,5 +1,5 @@
-import * as React from 'react';
-
+import { EmptyState } from '@/components/shared/empty-state';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Table,
   TableBody,
@@ -46,6 +46,14 @@ interface ProjectTableProps {
   loadingRows?: number;
   /** Whether to render skeleton rows. */
   isLoading?: boolean;
+  /** When true, renders an empty state row across all columns. */
+  isEmpty?: boolean;
+  /** Title for empty state when isEmpty is true. */
+  emptyTitle?: React.ReactNode;
+  /** Description for empty state when isEmpty is true. */
+  emptyDescription?: React.ReactNode;
+  /** Action for empty state when isEmpty is true. */
+  emptyAction?: React.ReactNode;
   /** Optional className applied to the outer shell wrapper. */
   className?: string;
   children?: React.ReactNode;
@@ -65,6 +73,10 @@ function ProjectTable({
   columns,
   isLoading = false,
   loadingRows = 6,
+  isEmpty = false,
+  emptyTitle,
+  emptyDescription,
+  emptyAction,
   className,
   children,
 }: ProjectTableProps) {
@@ -98,10 +110,27 @@ function ProjectTable({
                   <TableCell
                     key={colIndex}
                     className={cn(CELL_BASE, 'h-12')}
-                  />
+                  >
+                    <Skeleton className="h-4 w-4/5" />
+                  </TableCell>
                 ))}
               </TableRow>
             ))
+          ) : isEmpty ? (
+            <TableRow className="hover:bg-transparent">
+              <TableCell
+                colSpan={columns.length}
+                className="p-0 border-t border-border-muted"
+              >
+                <EmptyState
+                  card={false}
+                  size="md"
+                  title={emptyTitle}
+                  description={emptyDescription}
+                  action={emptyAction}
+                />
+              </TableCell>
+            </TableRow>
           ) : (
             children
           )}

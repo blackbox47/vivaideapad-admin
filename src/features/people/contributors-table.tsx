@@ -1,4 +1,7 @@
+import EmptyState from '@/components/shared/empty-state';
 import StatusBadge from '@/components/shared/status-badge';
+import TableActions from '@/components/shared/table-actions';
+import { Button } from '@/components/ui/button';
 import type { PlatformUser } from '@/models/people/people-model';
 import PeopleTable from '@/features/people/people-table';
 
@@ -15,10 +18,10 @@ export default function ContributorsTable({
 }: ContributorsTableProps) {
   if (users.length === 0) {
     return (
-      <div className="rounded-[22px] border border-border bg-card px-6 py-[50px] text-center text-muted-foreground">
-        No contributors yet — approve applicants and wait for their first live
-        submission.
-      </div>
+      <EmptyState
+        title="No contributors yet"
+        description="Approve applicants and wait for their first live submission."
+      />
     );
   }
 
@@ -41,14 +44,19 @@ export default function ContributorsTable({
             <StatusBadge status={user.status} />
           </td>
           <td className="px-[18px] py-3.5">
-            <button
-              type="button"
-              disabled={isToggling}
-              className="rounded-full border border-border bg-card px-[13px] py-[7px] text-xs font-bold text-foreground hover:bg-surface-subtle transition-colors disabled:opacity-60 cursor-pointer"
-              onClick={() => onToggle(user)}
-            >
-              {user.status === 'Suspended' ? 'Reactivate' : 'Suspend'}
-            </button>
+            <TableActions>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={isToggling}
+                loading={isToggling}
+                className="h-auto rounded-full border border-border bg-card px-[13px] py-[7px] text-xs font-bold text-foreground hover:bg-surface-subtle"
+                onClick={() => onToggle(user)}
+              >
+                {user.status === 'Suspended' ? 'Reactivate' : 'Suspend'}
+              </Button>
+            </TableActions>
           </td>
         </tr>
       ))}

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { X } from 'lucide-react';
 
 import StatusBadge from '@/components/shared/status-badge';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import type { Applicant, ApplicantStatus } from '@/models/people/people-model';
@@ -108,30 +109,33 @@ export default function ApplicantReviewPanel({
         </p>
 
         <div className="mt-4.5 flex flex-wrap justify-end gap-2.5">
-          <button
+          <Button
             type="button"
             disabled={isDeciding}
-            className="rounded-full border border-danger-subtle bg-card px-4.5 py-3 font-bold text-danger hover:bg-danger-subtle transition-colors disabled:opacity-60 cursor-pointer"
+            loading={isDeciding}
+            className="h-auto rounded-full border border-danger-subtle bg-card px-4.5 py-3 font-bold text-danger hover:bg-danger-subtle transition-colors disabled:opacity-60"
             onClick={() => onDecide('Rejected', comment)}
           >
             Reject
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
             disabled={isDeciding}
-            className="rounded-full border border-border bg-card px-4.5 py-3 font-bold text-foreground hover:bg-surface-subtle transition-colors disabled:opacity-60 cursor-pointer"
+            loading={isDeciding}
+            className="h-auto rounded-full border border-border bg-card px-4.5 py-3 font-bold text-foreground hover:bg-surface-subtle transition-colors disabled:opacity-60"
             onClick={() => onDecide('Revision Requested', comment)}
           >
             Request revision
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
             disabled={isDeciding}
-            className="rounded-full bg-primary px-4.5 py-3 font-bold text-primary-foreground hover:bg-brand-forest transition-colors disabled:opacity-60 cursor-pointer"
+            loading={isDeciding}
+            className="h-auto rounded-full bg-primary px-4.5 py-3 font-bold text-primary-foreground hover:bg-brand-forest transition-colors disabled:opacity-60"
             onClick={() => onDecide('Approved', comment)}
           >
             Approve applicant
-          </button>
+          </Button>
         </div>
       </div>
     </div>

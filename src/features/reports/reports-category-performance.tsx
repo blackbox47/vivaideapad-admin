@@ -1,3 +1,4 @@
+import EmptyState from '@/components/shared/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { ReportsCategoryPerformance } from '@/models/reports/reports-model';
 
@@ -44,7 +45,18 @@ export default function ReportsCategoryPerformanceTable({
                     </td>
                   </tr>
                 ))
-              : rows.map((row) => (
+              : rows.length === 0 ? (
+                  <tr className="border-t border-border-muted">
+                    <td colSpan={4} className="p-0">
+                      <EmptyState
+                        card={false}
+                        size="sm"
+                        title="No category data"
+                        description="Performance metrics will populate as ideas are submitted."
+                      />
+                    </td>
+                  </tr>
+                ) : rows.map((row) => (
                   <tr
                     key={row.id}
                     className="border-t border-border-muted"

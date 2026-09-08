@@ -1,4 +1,5 @@
 import { AlertCircle } from 'lucide-react';
+import { useNavigate } from '@tanstack/react-router';
 import { useTanstackSearchParams } from '@/lib/use-tanstack-search-params';
 
 import PageHeader from '@/components/layout/page-header';
@@ -11,15 +12,19 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import EmptyState from '@/components/shared/empty-state';
 import CreatorNotificationFilters from '@/features/creator/creator-notification-filters';
 import CreatorNotificationList from '@/features/creator/creator-notification-list';
 import useCreatorNotifications, {
   parseCreatorNotificationFilter,
 } from '@/hooks/creator/use-creator-notifications';
+import type { CreatorNotification } from '@/models/creator/creator-notifications-model';
+import { getCreatorNotificationLink } from '@/utils/notification-link';
 
 export default function CreatorNotificationsOverview() {
   const [searchParams] = useTanstackSearchParams();
   const filter = parseCreatorNotificationFilter(searchParams.get('filter'));
+  const navigate = useNavigate();
   const {
     notifications,
     unreadCount,
@@ -31,6 +36,25 @@ export default function CreatorNotificationsOverview() {
     markAllRead,
     isMarkingAll,
   } = useCreatorNotifications(filter);
+
+  /**
+   * Centralised row-activation logic for the creator notifications page.
+   * Mirrors the popover's behavior: route when possible, otherwise
+   * just mark read.
+   */
+  const handleActivate = (notification: CreatorNotification) => {
+    const target = getCreatorNotificationLink({
+      rawType: notification.rawType,
+      linkedRecordType: notification.linkedRecordType,
+      linkedRecordId: notification.linkedRecordId,
+    });
+
+    toggleRead(notification.id);
+
+    if (target) {
+      void navigate({ to: target });
+    }
+  };
 
   if (isError) {
     return (
@@ -60,6 +84,7 @@ export default function CreatorNotificationsOverview() {
             type="button"
             variant="outline"
             disabled={isMarkingAll || unreadCount === 0}
+            loading={isMarkingAll}
             onClick={markAllRead}
             className="h-auto rounded-full border-border bg-card px-[18px] py-[11px] font-bold text-foreground hover:border-foreground transition-colors"
           >
@@ -77,19 +102,14 @@ export default function CreatorNotificationsOverview() {
           ))}
         </div>
       ) : notifications.length === 0 ? (
-        <div className="rounded-[22px] border border-border bg-card px-6 py-[60px] text-center text-muted-foreground">
-          <span className="mb-2.5 block text-[28px]" aria-hidden>
-            ◇
-          </span>
-          <strong className="mb-1 block text-foreground">Nothing here</strong>
-          <span className="text-[13px]">
-            Try a different filter, or check back after new activity.
-          </span>
-        </div>
+        <EmptyState
+          title="Nothing here"
+          description="Try a different filter, or check back after new activity."
+        />
       ) : (
         <CreatorNotificationList
           notifications={notifications}
-          onToggle={toggleRead}
+          onActivate={handleActivate}
         />
       )}
     </div>

@@ -1,3 +1,5 @@
+import { Button } from '@/components/ui/button';
+
 interface AuditLogLoadMoreProps {
   remainingCount: number;
   onLoadMore: () => void;
@@ -9,13 +11,14 @@ export default function AuditLogLoadMore({
 }: AuditLogLoadMoreProps) {
   return (
     <div className="mt-6 flex justify-center">
-      <button
+      <Button
         type="button"
+        variant="outline"
         onClick={onLoadMore}
-        className="rounded-full border border-border bg-card px-[26px] py-3 text-[13px] font-bold text-foreground transition-colors hover:bg-surface-subtle cursor-pointer"
+        className="h-auto rounded-full border-border bg-card px-[26px] py-3 text-[13px] font-bold text-foreground hover:bg-surface-subtle"
       >
         Show more events · {remainingCount} remaining
-      </button>
+      </Button>
     </div>
   );
 }

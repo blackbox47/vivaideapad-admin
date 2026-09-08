@@ -1,4 +1,5 @@
 import StatusBadge from '@/components/shared/status-badge';
+import TableActions from '@/components/shared/table-actions';
 import {
   ProjectTable,
   ProjectTableCell,
@@ -42,13 +43,15 @@ export default function AdminsTable({
           </ProjectTableCell>
           <ProjectTableCell>
             {canManage && admin.access !== 'owner' ? (
-              <button
-                type="button"
-                className="rounded-full border border-danger-subtle bg-card px-[13px] py-[7px] text-xs font-bold text-danger hover:bg-danger-subtle transition-colors cursor-pointer"
-                onClick={() => onRemove(admin)}
-              >
-                Remove
-              </button>
+              <TableActions>
+                <button
+                  type="button"
+                  className="rounded-full border border-danger-subtle bg-card px-[13px] py-[7px] text-xs font-bold text-danger hover:bg-danger-subtle transition-colors cursor-pointer"
+                  onClick={() => onRemove(admin)}
+                >
+                  Remove
+                </button>
+              </TableActions>
             ) : (
               <span className="text-[12px] text-text-tertiary">
                 {admin.access === 'owner' ? 'Protected' : '—'}

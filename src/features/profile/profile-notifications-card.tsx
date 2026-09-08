@@ -1,4 +1,5 @@
 import { Input } from '@/components/ui/input';
+import AccordionSection from '@/components/shared/accordion-section';
 import type { NotificationPreferences } from '@/models/profile/profile-model';
 
 interface ProfileNotificationsCardProps {
@@ -24,10 +25,8 @@ export default function ProfileNotificationsCard({
 }: ProfileNotificationsCardProps) {
   return (
     <section className="rounded-[20px] border border-border bg-card p-5.5">
-      <h3 className="mb-4 font-heading text-base font-semibold text-foreground">
-        Notification preferences
-      </h3>
-      <div className="flex flex-col gap-3.5">
+      <AccordionSection title="Notification preferences">
+        <div className="flex flex-col gap-3.5">
         {TOGGLE_ROWS.map((row) => {
           const checked = preferences[row.id];
           return (
@@ -46,7 +45,8 @@ export default function ProfileNotificationsCard({
             </label>
           );
         })}
-      </div>
+        </div>
+      </AccordionSection>
     </section>
   );
 }

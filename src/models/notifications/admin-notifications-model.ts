@@ -31,6 +31,22 @@ export interface AdminNotification {
   read: boolean;
   /** ISO timestamp used for sorting. */
   occurredAt: string;
+  /**
+   * Raw backend notification `type` enum string (e.g. `application_decision`,
+   * `submission_decision`, `payout_status_changed`). Kept alongside the
+   * friendly UI bucket `type` so routing logic can branch on the original
+   * category without losing the existing display type. `null` indicates
+   * the field was absent on the wire — the helper treats it as "unknown".
+   */
+  rawType?: string | null;
+  /**
+   * Entity bucket attached by the backend
+   * (`application`, `submission`, `payout`, `user`, `concept`, …). Consumed
+   * by `getAdminNotificationLink` to build a router path.
+   */
+  linkedRecordType?: string | null;
+  /** Entity id used to construct the routed path. */
+  linkedRecordId?: string | null;
 }
 
 export interface AdminNotificationsResponse {

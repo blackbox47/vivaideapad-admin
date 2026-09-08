@@ -1,10 +1,19 @@
 import { z } from 'zod';
 
+import { isBdMobileNumber } from '@/utils/helpers/bd-mobile';
+
 export const changePayoutMethodSchema = z.object({
   method: z
     .string()
     .min(1, 'Payout method is required.')
     .max(40, 'Payout method must be at most 40 characters.'),
+  mobile: z
+    .string()
+    .trim()
+    .min(1, 'Mobile number is required.')
+    .refine((value) => isBdMobileNumber(value), {
+      message: 'Enter a valid Bangladeshi mobile number.',
+    }),
 });
 
 export type ChangePayoutMethodFormValues = z.infer<

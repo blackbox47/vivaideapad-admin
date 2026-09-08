@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { X } from 'lucide-react';
 
+import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import type { Payout } from '@/models/payouts/payouts-model';
 
@@ -96,22 +97,24 @@ export default function PayoutProcessPanel({
         />
 
         <div className="mt-4.5 flex flex-wrap justify-end gap-2.5">
-          <button
+          <Button
             type="button"
             disabled={isDeciding}
-            className="rounded-full border border-danger-subtle bg-card px-4.5 py-3 font-bold text-danger hover:bg-danger-subtle transition-colors disabled:opacity-60 cursor-pointer"
+            loading={isDeciding}
+            className="h-auto rounded-full border border-danger-subtle bg-card px-4.5 py-3 font-bold text-danger hover:bg-danger-subtle transition-colors disabled:opacity-60"
             onClick={() => handleDecide('Rejected')}
           >
             Reject
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
             disabled={isDeciding}
-            className="rounded-full bg-primary px-4.5 py-3 font-bold text-primary-foreground hover:bg-brand-forest transition-colors disabled:opacity-60 cursor-pointer"
+            loading={isDeciding}
+            className="h-auto rounded-full bg-primary px-4.5 py-3 font-bold text-primary-foreground hover:bg-brand-forest transition-colors disabled:opacity-60"
             onClick={() => handleDecide('Paid')}
           >
             Mark as paid
-          </button>
+          </Button>
         </div>
       </div>
     </div>

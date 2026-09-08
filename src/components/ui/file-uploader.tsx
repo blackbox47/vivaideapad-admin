@@ -243,9 +243,9 @@ export function FileUploader({
         aria-describedby={errorId}
         aria-invalid={Boolean(activeError)}
         className={cn(
-          'group relative flex min-h-[84px] w-full cursor-pointer flex-col items-center justify-center rounded-[14px] border border-dashed px-4 py-4 text-center transition-all duration-200 outline-none',
-          'border-border bg-card hover:border-brand-sage-light hover:bg-surface-subtle/60',
-          'focus-visible:border-brand-sage-light focus-visible:ring-2 focus-visible:ring-success-muted',
+          'group relative flex min-h-[140px] w-full cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed px-6 py-10 text-center transition-colors outline-none',
+          'border-border bg-[#fdfefd] dark:bg-card/40 hover:border-brand-forest/70 hover:bg-[#f7faf9] dark:hover:bg-card',
+          'focus-visible:border-brand-forest focus-visible:ring-2 focus-visible:ring-brand-forest/15',
           isDragOver &&
             'border-primary bg-secondary/30 ring-2 ring-primary/20 scale-[0.995]',
           disabled &&
@@ -255,21 +255,21 @@ export function FileUploader({
         )}
       >
         {hasFile ? (
-          <div className="flex w-full items-center justify-between gap-3 px-2">
+          <div className="flex w-full max-w-md items-center justify-between gap-3 rounded-xl border border-border bg-card p-3 shadow-xs">
             <div className="flex items-center gap-3 min-w-0 text-left">
-              <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-surface-subtle border border-border">
+              <div className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-surface-subtle border border-border">
                 {getFileIcon(currentFileName || '', selectedFile?.type)}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-semibold text-foreground">
+                <p className="truncate text-sm font-bold text-foreground">
                   {currentFileName}
                 </p>
-                <p className="text-xs text-text-subtle">
+                <p className="text-xs text-muted-foreground">
                   {currentFileSize
                     ? formatBytes(currentFileSize)
                     : 'File selected'}{' '}
                   ·{' '}
-                  <span className="text-brand-forest hover:underline">
+                  <span className="text-brand-forest font-semibold hover:underline">
                     Click to replace
                   </span>
                 </p>
@@ -282,21 +282,23 @@ export function FileUploader({
               disabled={disabled}
               title="Remove file"
               aria-label="Remove file"
-              className="shrink-0 rounded-full p-1.5 text-text-subtle transition-colors hover:bg-destructive-subtle hover:text-destructive cursor-pointer disabled:opacity-50"
+              className="shrink-0 rounded-full p-2 text-muted-foreground transition-colors hover:bg-destructive-subtle hover:text-destructive cursor-pointer disabled:opacity-50"
             >
               <X className="size-4" />
             </button>
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center gap-1">
-            <p className="text-sm font-medium text-foreground">
+          <div className="flex flex-col items-center justify-center space-y-1">
+            <p className="text-base text-foreground font-medium">
               Drop files here or{' '}
-              <span className="font-semibold text-primary underline underline-offset-2 group-hover:text-brand-forest">
+              <span className="font-semibold text-brand-forest underline decoration-brand-forest/40 underline-offset-2">
                 browse
               </span>
             </p>
             {acceptText ? (
-              <p className="text-xs text-text-subtle">{acceptText}</p>
+              <p className="text-xs sm:text-sm text-muted-foreground font-normal">
+                {acceptText}
+              </p>
             ) : null}
           </div>
         )}

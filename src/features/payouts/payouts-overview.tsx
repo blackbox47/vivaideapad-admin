@@ -13,6 +13,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import EmptyState from '@/components/shared/empty-state';
 import PayoutFilters, {
   parsePayoutStatus,
 } from '@/features/payouts/payout-filters';
@@ -141,27 +142,23 @@ export default function PayoutsOverview() {
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <div className="rounded-[22px] border border-border bg-card px-6 py-15 text-center text-muted-foreground">
-          <span className="mb-2.5 block text-[28px]">◇</span>
-          <strong className="mb-1 block text-foreground">
-            No payouts match
-          </strong>
-          <span className="text-[13px]">
-            Try a different keyword or status filter.
-          </span>
-        </div>
+        <EmptyState
+          title="No payouts match"
+          description="Try a different keyword or status filter."
+        />
       ) : (
         <>
           <PayoutTable payouts={visible} onProcess={setProcessId} />
           {remainingCount > 0 ? (
             <div className="mt-6 flex justify-center">
-              <button
+              <Button
                 type="button"
-                className="rounded-full border border-border bg-card px-6.5 py-3 text-[13px] font-bold text-foreground hover:bg-surface-subtle transition-colors cursor-pointer"
+                variant="outline"
+                className="h-auto rounded-full border-border bg-card px-6.5 py-3 text-[13px] font-bold text-foreground hover:bg-surface-subtle"
                 onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
               >
                 Show more requests · {remainingCount} remaining
-              </button>
+              </Button>
             </div>
           ) : null}
         </>

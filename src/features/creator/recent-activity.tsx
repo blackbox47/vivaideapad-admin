@@ -1,3 +1,4 @@
+import EmptyState from '@/components/shared/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { CreatorActivityItem } from '@/models/creator/creator-dashboard-model';
 
@@ -28,6 +29,13 @@ export default function RecentActivity({
             </div>
           ))}
         </div>
+      ) : items.length === 0 ? (
+        <EmptyState
+          card={false}
+          size="sm"
+          title="No recent activity"
+          description="Activity will be logged here as you work on briefs."
+        />
       ) : (
         <ul className="m-0 list-none p-0">
           {items.map((item) => (

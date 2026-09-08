@@ -1,4 +1,5 @@
 import StatusBadge from '@/components/shared/status-badge';
+import TableActions from '@/components/shared/table-actions';
 import { Button } from '@/components/ui/button';
 import {
   ProjectTable,
@@ -28,7 +29,14 @@ export default function MyIdeasTable({
   onView,
 }: MyIdeasTableProps) {
   return (
-    <ProjectTable columns={columns} isLoading={isLoading} loadingRows={4}>
+    <ProjectTable
+      columns={columns}
+      isLoading={isLoading}
+      loadingRows={4}
+      isEmpty={items.length === 0}
+      emptyTitle="No submissions yet"
+      emptyDescription="Submit your first idea from the available briefs."
+    >
       {items.map((idea) => (
         <ProjectTableRow key={idea.id}>
           <ProjectTableCell>
@@ -47,14 +55,16 @@ export default function MyIdeasTable({
             <strong className="font-semibold text-foreground">{idea.reward}</strong>
           </ProjectTableCell>
           <ProjectTableCell>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onView(idea)}
-              className="h-auto rounded-full border-border bg-card px-3.5 py-1.5 text-xs font-bold text-foreground hover:bg-surface-subtle"
-            >
-              View
-            </Button>
+            <TableActions>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onView(idea)}
+                className="h-auto rounded-full border-border bg-card px-3.5 py-1.5 text-xs font-bold text-foreground hover:bg-surface-subtle"
+              >
+                View
+              </Button>
+            </TableActions>
           </ProjectTableCell>
         </ProjectTableRow>
       ))}

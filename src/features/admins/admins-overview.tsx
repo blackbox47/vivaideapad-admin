@@ -11,6 +11,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import EmptyState from '@/components/shared/empty-state';
 import AddAdminDialog from '@/features/admins/add-admin-dialog';
 import AdminsTable from '@/features/admins/admins-table';
 import RemoveAdminDialog from '@/features/admins/remove-admin-dialog';
@@ -129,14 +130,11 @@ export default function AdminsOverview() {
           ))}
         </div>
       ) : admins.length === 0 ? (
-        <div className="rounded-[22px] border border-border bg-card px-6 py-[60px] text-center text-muted-foreground">
-          <span className="mb-2.5 block text-[28px]">◇</span>
-          <strong className="mb-1 block text-foreground">No admins yet</strong>
-          <span className="text-[13px]">
-            Add an operator so they can sign in to the admin workspace.
-          </span>
-          {canManage ? (
-            <div className="mt-5">
+        <EmptyState
+          title="No admins yet"
+          description="Add an operator so they can sign in to the admin workspace."
+          action={
+            canManage ? (
               <Button
                 type="button"
                 onClick={() => setIsAddOpen(true)}
@@ -144,9 +142,9 @@ export default function AdminsOverview() {
               >
                 + Add admin
               </Button>
-            </div>
-          ) : null}
-        </div>
+            ) : null
+          }
+        />
       ) : (
         <AdminsTable
           admins={admins}

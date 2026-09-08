@@ -2,6 +2,7 @@ import { createFileRoute } from '@tanstack/react-router';
 
 import { authGuard } from '@/lib/auth-guard';
 import CreatorLayout from '@/layouts/creator-layout';
+import { ScreenLoader } from '@/components/shared/screen-loader';
 
 /**
  * Pathless layout for every authenticated creator page (everything under
@@ -19,4 +20,5 @@ export const Route = createFileRoute('/_privatecreator')({
   beforeLoad: ({ context, location }) =>
     authGuard.private(context.store, 'creator', location.href),
   component: CreatorLayout,
+  pendingComponent: () => <ScreenLoader />,
 });

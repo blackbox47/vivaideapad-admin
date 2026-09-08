@@ -14,18 +14,22 @@ export const profileDetailsSchema = z.object({
     .email('Enter a valid email address.'),
   phone: z.string().max(40, 'Phone number must be at most 40 characters.'),
   bio: z.string().max(2000, 'Bio must be at most 2000 characters.'),
-  publicDisplay: z.enum(['Public name', 'Pseudonymous']),
 });
 
 export type ProfileDetailsFormValues = z.infer<typeof profileDetailsSchema>;
 
 export const passwordChangeSchema = z
   .object({
+    currentPassword: z.string().min(1, 'Current password is required.'),
     newPassword: z
       .string()
       .min(8, 'Password must be at least 8 characters.')
       .max(128, 'Password must be at most 128 characters.'),
     confirmPassword: z.string().min(1, 'Please confirm your password.'),
+  })
+  .refine((data) => data.newPassword !== data.currentPassword, {
+    message: 'New password must be different from current password.',
+    path: ['newPassword'],
   })
   .refine((data) => data.newPassword === data.confirmPassword, {
     message: 'Passwords do not match.',

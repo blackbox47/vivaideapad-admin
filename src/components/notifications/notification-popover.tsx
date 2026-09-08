@@ -21,8 +21,14 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import useAdminNotifications from '@/hooks/notifications/use-admin-notifications';
 import useCreatorNotifications from '@/hooks/creator/use-creator-notifications';
+import type { AdminNotification } from '@/models/notifications/admin-notifications-model';
+import type { CreatorNotification } from '@/models/creator/creator-notifications-model';
 import { cn } from '@/lib/utils';
 import { ADMIN_ROUTES, CREATOR_ROUTES } from '@/utils/constants/routes';
+import {
+  getAdminNotificationLink,
+  getCreatorNotificationLink,
+} from '@/utils/notification-link';
 
 interface NotificationPopoverProps {
   role?: 'admin' | 'creator';
@@ -89,6 +95,37 @@ function AdminNotificationContent({
     void navigate({ to: ADMIN_ROUTES.notifications });
   };
 
+  /**
+   * Single click action for a notification row:
+   * 1. Resolve the target route from the cached link fields.
+   * 2. If a route exists, navigate to it (after closing the popover so the
+   *    popover animation doesn't fight the route transition).
+   * 3. Mark the notification read so the unread dot clears regardless.
+   *
+   * Notifications without a routable target fall through to the existing
+   * "mark read only" behavior.
+   */
+  const handleActivate = (item: AdminNotification) => {
+    const target = getAdminNotificationLink({
+      rawType: item.rawType,
+      linkedRecordType: item.linkedRecordType,
+      linkedRecordId: item.linkedRecordId,
+    });
+
+    if (target) {
+      onClose();
+      toggleRead(item.id);
+      // `target` is a fully-qualified path built from ADMIN_ROUTES (with an
+      // optional `?focus=...` query). Navigate via the string overload —
+      // typing every concrete dynamic path here would couple this component
+      // to the full router tree for no benefit.
+      void navigate({ to: target });
+      return;
+    }
+
+    toggleRead(item.id);
+  };
+
   return (
     <div className="flex flex-col">
       {/* Header */}
@@ -105,6 +142,7 @@ function AdminNotificationContent({
           variant="ghost"
           size="sm"
           disabled={unreadCount === 0 || isMarkingAll}
+          loading={isMarkingAll}
           onClick={markAllRead}
           className="h-auto p-0 text-xs font-semibold text-brand-forest hover:bg-transparent hover:text-foreground hover:underline dark:text-brand-lime dark:hover:text-brand-lime/80 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
         >
@@ -143,7 +181,7 @@ function AdminNotificationContent({
               <button
                 key={item.id}
                 type="button"
-                onClick={() => toggleRead(item.id)}
+                onClick={() => handleActivate(item)}
                 className={cn(
                   'flex w-full items-start gap-3.5 p-4 text-left transition-colors cursor-pointer group',
                   isUnread
@@ -210,6 +248,28 @@ function CreatorNotificationContent({
     void navigate({ to: CREATOR_ROUTES.notifications });
   };
 
+  /**
+   * Mirror of `handleActivate` in `AdminNotificationContent`. Routes creator
+   * notifications to the contributor SPA's relevant pages — see
+   * `getCreatorNotificationLink` for the routing table.
+   */
+  const handleActivate = (item: CreatorNotification) => {
+    const target = getCreatorNotificationLink({
+      rawType: item.rawType,
+      linkedRecordType: item.linkedRecordType,
+      linkedRecordId: item.linkedRecordId,
+    });
+
+    if (target) {
+      onClose();
+      toggleRead(item.id);
+      void navigate({ to: target });
+      return;
+    }
+
+    toggleRead(item.id);
+  };
+
   return (
     <div className="flex flex-col">
       {/* Header */}
@@ -226,6 +286,7 @@ function CreatorNotificationContent({
           variant="ghost"
           size="sm"
           disabled={unreadCount === 0 || isMarkingAll}
+          loading={isMarkingAll}
           onClick={markAllRead}
           className="h-auto p-0 text-xs font-semibold text-brand-forest hover:bg-transparent hover:text-foreground hover:underline dark:text-brand-lime dark:hover:text-brand-lime/80 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
         >
@@ -264,7 +325,7 @@ function CreatorNotificationContent({
               <button
                 key={item.id}
                 type="button"
-                onClick={() => toggleRead(item.id)}
+                onClick={() => handleActivate(item)}
                 className={cn(
                   'flex w-full items-start gap-3.5 p-4 text-left transition-colors cursor-pointer group',
                   isUnread

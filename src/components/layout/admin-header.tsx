@@ -2,7 +2,7 @@ import { LogOut, Menu, Moon, Sun, User } from 'lucide-react';
 import { useNavigate } from '@tanstack/react-router';
 
 import AdminSidebar from '@/components/layout/admin-sidebar';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -27,6 +27,7 @@ import useMobileNav from '@/hooks/ui/use-mobile-nav';
 import useTheme from '@/hooks/ui/use-theme';
 import { ADMIN_ROUTES } from '@/utils/constants/routes';
 import { deriveInitials } from '@/utils/helpers/initials';
+import { resolveAvatarUrl } from '@/utils/helpers/resolve-avatar-url';
 
 export default function AdminHeader() {
   const { isOpen, setOpen } = useMobileNav();
@@ -34,6 +35,8 @@ export default function AdminHeader() {
   const { logout } = useAuth();
   const { isDarkMode, toggleTheme } = useTheme();
   const navigate = useNavigate();
+
+  const resolvedAvatarUrl = resolveAvatarUrl(user?.avatar_url);
 
   return (
     <header className="flex h-[82px] items-center justify-between gap-3">
@@ -96,6 +99,12 @@ export default function AdminHeader() {
             }
           >
             <Avatar className="size-7 after:border-transparent">
+              {resolvedAvatarUrl && (
+                <AvatarImage
+                  src={resolvedAvatarUrl}
+                  alt={user?.display_name ?? 'Admin'}
+                />
+              )}
               <AvatarFallback className="bg-brand-lime text-[11px] font-bold text-brand-lime-foreground">
                 {user ? deriveInitials(user.display_name, user.email) : '—'}
               </AvatarFallback>

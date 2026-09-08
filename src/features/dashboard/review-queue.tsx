@@ -1,6 +1,7 @@
 import { Diamond } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
 
+import EmptyState from '@/components/shared/empty-state';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { ReviewQueueItem } from '@/models/dashboard/dashboard-model';
@@ -32,7 +33,14 @@ export default function ReviewQueue({ items, isLoading }: ReviewQueueProps) {
           ? Array.from({ length: 3 }).map((_, index) => (
               <Skeleton key={index} className="mt-2 h-[86px] rounded-[15px]" />
             ))
-          : items.map((item) => (
+          : items.length === 0 ? (
+              <EmptyState
+                card={false}
+                size="sm"
+                title="Queue is clear"
+                description="No submissions currently require review."
+              />
+            ) : items.map((item) => (
               <article
                 key={item.id}
                 className="mt-2 grid grid-cols-[58px_minmax(0,1fr)_auto] items-center gap-3.5 rounded-[15px] border border-border p-3.5 bg-card"

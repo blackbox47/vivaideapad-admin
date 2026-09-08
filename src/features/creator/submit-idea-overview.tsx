@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { AlertCircle } from 'lucide-react';
 
-import PageHeader from '@/components/layout/page-header';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -48,13 +48,14 @@ export default function SubmitIdeaOverview() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <button
+          <Button
             type="button"
+            loading={isLoading}
             onClick={() => void refetch()}
-            className="rounded-full bg-primary px-5 py-2 text-sm font-bold text-primary-foreground hover:bg-brand-forest cursor-pointer"
+            className="h-auto rounded-full bg-primary px-5 py-2 text-sm font-bold text-primary-foreground hover:bg-brand-forest"
           >
             Try again
-          </button>
+          </Button>
         </CardContent>
       </Card>
     );
@@ -63,16 +64,21 @@ export default function SubmitIdeaOverview() {
   const topics = data?.topics ?? [];
 
   return (
-    <div className="pb-4">
-      <PageHeader
-        eyebrow={submissionId ? 'Edit submission' : 'Contributor space'}
-        title={submissionId ? 'Edit your idea' : 'Submit a new idea'}
-        description={
-          submissionId
+    <div className="mx-auto w-full max-w-[1200px] py-4 sm:py-8">
+      {/* Section Header */}
+      <section className="mb-10" data-purpose="header-section">
+        <span className="mb-2 block text-xs font-bold uppercase tracking-widest text-muted-foreground">
+          {submissionId ? 'Edit submission' : 'Contributor Space'}
+        </span>
+        <h1 className="mb-3 text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight text-foreground">
+          {submissionId ? 'Edit your idea' : 'Submit a new idea'}
+        </h1>
+        <p className="text-base sm:text-lg font-normal text-muted-foreground">
+          {submissionId
             ? 'Refine your idea and submit it for review.'
-            : 'Pick a topic, draft the idea, and we\'ll route it to the right reviewer.'
-        }
-      />
+            : 'Pick a topic, draft the idea, and we\'ll route it to the right reviewer.'}
+        </p>
+      </section>
 
       <SubmitIdeaTopics
         topics={topics}
@@ -81,12 +87,14 @@ export default function SubmitIdeaOverview() {
         selectedTopicId={activeTopicId}
       />
 
-      <section className="rounded-[20px] border border-border bg-card p-6">
+      <section
+        className="mb-16 rounded-3xl border border-border bg-card p-8 sm:p-12 lg:p-14 shadow-[0_4px_24px_rgba(0,0,0,0.02)] dark:shadow-[0_4px_24px_rgba(0,0,0,0.2)]"
+        data-purpose="submission-form"
+      >
         <SubmitIdeaForm
           topics={topics}
           isLoadingTopics={isLoading}
           selectedTopicId={activeTopicId ?? ''}
-          onTopicChange={setSelectedTopicId}
           submissionId={submissionId || undefined}
           submission={submissionData}
           isLoadingSubmission={isLoadingSubmission}

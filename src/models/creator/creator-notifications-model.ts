@@ -29,6 +29,22 @@ export interface CreatorNotification {
   iconBg: string;
   read: boolean;
   occurredAt: string;
+  /**
+   * Raw backend notification `type` enum string (e.g. `submission_decision`,
+   * `payout_status_changed`). Kept alongside the friendly UI bucket `type`
+   * so routing logic can branch on the original category without losing
+   * the existing display type. `null` indicates the field was absent on
+   * the wire — the helper treats it as "unknown".
+   */
+  rawType?: string | null;
+  /**
+   * Entity bucket attached by the backend
+   * (`submission`, `payout`, `concept`, …). Consumed by
+   * `getCreatorNotificationLink` to build a router path.
+   */
+  linkedRecordType?: string | null;
+  /** Entity id used to construct the routed path. */
+  linkedRecordId?: string | null;
 }
 
 export interface CreatorNotificationsResponse {

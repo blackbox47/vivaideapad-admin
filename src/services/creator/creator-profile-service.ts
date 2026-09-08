@@ -39,8 +39,6 @@ export const creatorProfileService = baseService.injectEndpoints({
           email: body.email,
           phone: body.phone,
           bio: body.bio,
-          public_display: body.publicDisplay,
-          publicDisplay: body.publicDisplay,
           avatar_url: body.avatarUrl ?? undefined,
         },
       }),
@@ -53,7 +51,11 @@ export const creatorProfileService = baseService.injectEndpoints({
       query: (body) => ({
         url: CREATOR_PROFILE_PASSWORD_URL,
         method: 'POST',
-        body,
+        body: {
+          password: body.password,
+          current_password: body.currentPassword,
+          currentPassword: body.currentPassword,
+        },
       }),
     }),
     updateCreatorNotifications: builder.mutation<
@@ -85,7 +87,10 @@ export const creatorProfileService = baseService.injectEndpoints({
       },
       invalidatesTags: ['creator-profile'],
     }),
-    uploadCreatorAvatar: builder.mutation<ProfileDetails, { dataUrl: string }>({
+    uploadCreatorAvatar: builder.mutation<
+      ProfileDetails,
+      FormData | { dataUrl?: string; avatar_url?: string }
+    >({
       query: (body) => ({
         url: CREATOR_PROFILE_AVATAR_URL,
         method: 'POST',
@@ -100,7 +105,12 @@ export const creatorProfileService = baseService.injectEndpoints({
       query: (body) => ({
         url: CREATOR_PROFILE_PAYOUT_URL,
         method: 'PATCH',
-        body,
+        body: {
+          method: body.method,
+          label: body.label,
+          account: body.account,
+          mobile: body.account,
+        },
       }),
       transformResponse: (
         response: unknown,
@@ -112,10 +122,27 @@ export const creatorProfileService = baseService.injectEndpoints({
           const method = record.payout_method ?? record;
           if (method && typeof method === 'object') {
             const row = method as Record<string, unknown>;
-            if (typeof row.label === 'string' && typeof row.method === 'string') {
+            const account =
+              typeof row.account === 'string' ? row.account : arg.account;
+            if (typeof row.label === 'string') {
+              const resolvedMethod =
+                typeof row.method === 'string'
+                  ? row.method
+                  : typeof row.type === 'string'
+                    ? row.type
+                    : arg.method;
               return {
-                method: row.method as ProfileOverview['payoutMethod']['method'],
+                method: (resolvedMethod === 'bkash'
+                  ? 'bKash'
+                  : resolvedMethod === 'nagad'
+                    ? 'Nagad'
+                    : resolvedMethod === 'rocket'
+                      ? 'Rocket'
+                      : resolvedMethod === 'bank'
+                        ? 'Bank'
+                        : arg.method) as ProfileOverview['payoutMethod']['method'],
                 label: row.label,
+                account,
               };
             }
           }
