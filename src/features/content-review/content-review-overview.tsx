@@ -13,6 +13,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import EmptyState from '@/components/shared/empty-state';
 import ReviewFilters, {
   parseReviewStatus,
 } from '@/features/content-review/review-filters';
@@ -130,15 +131,10 @@ export default function ContentReviewOverview() {
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <div className="rounded-[22px] border border-border bg-card px-6 py-15 text-center text-muted-foreground">
-          <span className="mb-2.5 block text-[28px]">◇</span>
-          <strong className="mb-1 block text-foreground">
-            No submissions match
-          </strong>
-          <span className="text-[13px]">
-            Try a different keyword or status filter.
-          </span>
-        </div>
+        <EmptyState
+          title="No submissions match"
+          description="Try a different keyword or status filter."
+        />
       ) : (
         <>
           <ReviewTable submissions={visible} onReview={setReviewId} />

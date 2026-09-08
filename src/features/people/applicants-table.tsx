@@ -1,3 +1,4 @@
+import EmptyState from '@/components/shared/empty-state';
 import StatusBadge from '@/components/shared/status-badge';
 import type { Applicant } from '@/models/people/people-model';
 import PeopleTable from '@/features/people/people-table';
@@ -11,6 +12,15 @@ export default function ApplicantsTable({
   applicants,
   onReview,
 }: ApplicantsTableProps) {
+  if (applicants.length === 0) {
+    return (
+      <EmptyState
+        title="No applicants yet"
+        description="New contributor applications will appear here."
+      />
+    );
+  }
+
   return (
     <PeopleTable columns={['Applicant', 'Topic', 'Submitted', 'Status', '']}>
       {applicants.map((applicant) => (

@@ -1,5 +1,6 @@
 import { Link, useNavigate } from '@tanstack/react-router';
 
+import EmptyState from '@/components/shared/empty-state';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
@@ -42,6 +43,13 @@ export default function ContinueCreating({
             <Skeleton key={index} className="mt-2.5 h-22 rounded-[15px]" />
           ))}
         </div>
+      ) : items.length === 0 ? (
+        <EmptyState
+          card={false}
+          size="sm"
+          title="No ideas in progress"
+          description="Start drafting a new submission from opportunities."
+        />
       ) : (
         <div>
           {items.map((item) => (

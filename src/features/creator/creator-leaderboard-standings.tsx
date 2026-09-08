@@ -1,3 +1,4 @@
+import EmptyState from '@/components/shared/empty-state';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatLeaderboardPoints } from '@/hooks/creator/use-creator-leaderboard';
@@ -34,9 +35,16 @@ export default function CreatorLeaderboardStandings({
           ))}
         </div>
       ) : entries.length === 0 ? (
-        <p className="py-6 text-center text-sm text-brand-sage-light">
-          No standings yet.
-        </p>
+        <EmptyState
+          card={false}
+          size="sm"
+          title={<span className="text-white">No standings yet</span>}
+          description={
+            <span className="text-brand-sage-light">
+              Standings will appear once contributors earn points.
+            </span>
+          }
+        />
       ) : (
         <div className="flex flex-col gap-2.5">
           {entries.map((entry) => (

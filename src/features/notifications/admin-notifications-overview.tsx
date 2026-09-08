@@ -12,6 +12,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import EmptyState from '@/components/shared/empty-state';
 import AdminNotificationFilters from '@/features/notifications/admin-notification-filters';
 import AdminNotificationList from '@/features/notifications/admin-notification-list';
 import useAdminNotifications, {
@@ -101,15 +102,10 @@ export default function AdminNotificationsOverview() {
           ))}
         </div>
       ) : notifications.length === 0 ? (
-        <div className="rounded-[22px] border border-border bg-card px-6 py-[60px] text-center text-muted-foreground">
-          <span className="mb-2.5 block text-[28px]" aria-hidden>
-            ◇
-          </span>
-          <strong className="mb-1 block text-foreground">Nothing here</strong>
-          <span className="text-[13px]">
-            Try a different filter, or check back after new activity.
-          </span>
-        </div>
+        <EmptyState
+          title="Nothing here"
+          description="Try a different filter, or check back after new activity."
+        />
       ) : (
         <AdminNotificationList
           notifications={notifications}

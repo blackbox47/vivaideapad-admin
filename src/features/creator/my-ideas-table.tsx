@@ -28,7 +28,14 @@ export default function MyIdeasTable({
   onView,
 }: MyIdeasTableProps) {
   return (
-    <ProjectTable columns={columns} isLoading={isLoading} loadingRows={4}>
+    <ProjectTable
+      columns={columns}
+      isLoading={isLoading}
+      loadingRows={4}
+      isEmpty={items.length === 0}
+      emptyTitle="No submissions yet"
+      emptyDescription="Submit your first idea from the available briefs."
+    >
       {items.map((idea) => (
         <ProjectTableRow key={idea.id}>
           <ProjectTableCell>

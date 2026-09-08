@@ -117,7 +117,17 @@ function Select({
           aria-invalid={isInvalid ? "true" : undefined}
           aria-describedby={ariaDescribedBy}
           aria-label={ariaLabel}
-          onBlur={onBlur}
+          onBlur={
+            onBlur
+              ? (event) => {
+                  onBlur({
+                    ...event,
+                    target: event.target as unknown as HTMLSelectElement,
+                    currentTarget: event.currentTarget as unknown as HTMLSelectElement,
+                  } as unknown as React.FocusEvent<HTMLSelectElement>);
+                }
+              : undefined
+          }
           className={cn(
             "flex h-auto w-full min-w-0 items-center justify-between gap-2 rounded-[12px] border border-border bg-card px-3.5 py-3 text-left text-sm font-normal text-foreground shadow-none outline-none transition-colors",
             "focus-visible:border-brand-sage-light focus-visible:ring-2 focus-visible:ring-success-muted",

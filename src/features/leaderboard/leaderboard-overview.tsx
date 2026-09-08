@@ -11,6 +11,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import EmptyState from '@/components/shared/empty-state';
 import LeaderboardFilters from '@/features/leaderboard/leaderboard-filters';
 import LeaderboardKpiCards from '@/features/leaderboard/leaderboard-kpi-cards';
 import LeaderboardPodium from '@/features/leaderboard/leaderboard-podium';
@@ -111,15 +112,10 @@ export default function LeaderboardOverview() {
           ) : null}
 
           {totalEntries === 0 ? (
-            <div className="rounded-[22px] border border-border bg-card px-6 py-[60px] text-center text-muted-foreground">
-              <span className="mb-2.5 block text-[28px]">◇</span>
-              <strong className="mb-1 block text-foreground">
-                No matches
-              </strong>
-              <span className="text-[13px]">
-                Try a different keyword.
-              </span>
-            </div>
+            <EmptyState
+              title="No data available"
+              description="Try a different keyword."
+            />
           ) : (
             <LeaderboardTable entries={standings} />
           )}

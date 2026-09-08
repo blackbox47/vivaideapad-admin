@@ -1,3 +1,4 @@
+import EmptyState from '@/components/shared/empty-state';
 import StatusBadge from '@/components/shared/status-badge';
 import { Button } from '@/components/ui/button';
 import type { PlatformUser } from '@/models/people/people-model';
@@ -16,9 +17,10 @@ export default function InvitedTable({
 }: InvitedTableProps) {
   if (users.length === 0) {
     return (
-      <div className="rounded-[22px] border border-border bg-card px-6 py-[50px] text-center text-muted-foreground">
-        No one is currently waiting on their first live-task submission.
-      </div>
+      <EmptyState
+        title="No invited applicants"
+        description="No one is currently waiting on their first live-task submission."
+      />
     );
   }
 

@@ -24,6 +24,7 @@ import useCategories from '@/hooks/categories/use-categories';
 import type { Category } from '@/models/categories/categories-model';
 import { getApiErrorMessage } from '@/utils/helpers/api-error';
 import CategoryFormDialog from '@/features/categories/category-form-dialog';
+import EmptyState from '@/components/shared/empty-state';
 
 export default function CategoriesOverview() {
   const [search, setSearch] = useState('');
@@ -197,12 +198,17 @@ export default function CategoriesOverview() {
                   </TableRow>
                 ))}
                 {!categories.length && (
-                  <TableRow>
+                  <TableRow className="hover:bg-transparent">
                     <TableCell
                       colSpan={4}
-                      className="py-8 text-center text-sm text-muted-foreground"
+                      className="p-0 border-0"
                     >
-                      No categories match your search.
+                      <EmptyState
+                        card={false}
+                        size="sm"
+                        title="No categories match"
+                        description="Try a different search keyword."
+                      />
                     </TableCell>
                   </TableRow>
                 )}

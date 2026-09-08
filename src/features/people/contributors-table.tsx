@@ -1,3 +1,4 @@
+import EmptyState from '@/components/shared/empty-state';
 import StatusBadge from '@/components/shared/status-badge';
 import { Button } from '@/components/ui/button';
 import type { PlatformUser } from '@/models/people/people-model';
@@ -16,10 +17,10 @@ export default function ContributorsTable({
 }: ContributorsTableProps) {
   if (users.length === 0) {
     return (
-      <div className="rounded-[22px] border border-border bg-card px-6 py-[50px] text-center text-muted-foreground">
-        No contributors yet — approve applicants and wait for their first live
-        submission.
-      </div>
+      <EmptyState
+        title="No contributors yet"
+        description="Approve applicants and wait for their first live submission."
+      />
     );
   }
 
