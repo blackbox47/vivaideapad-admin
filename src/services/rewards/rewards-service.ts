@@ -12,6 +12,7 @@ import {
   REWARDS_LEDGER_ADJUST_URL,
   REWARDS_LEDGER_URL,
 } from '@/utils/constants/api-end-points';
+import { formatDisplayDate } from '@/utils/helpers/format-display-date';
 
 export const rewardsService = baseService.injectEndpoints({
   endpoints: (builder) => ({
@@ -34,7 +35,10 @@ export const rewardsService = baseService.injectEndpoints({
         // 1. Mock format: { entries: [...], total }
         if (Array.isArray(res.entries)) {
           return {
-            entries: res.entries as LedgerEntry[],
+            entries: (res.entries as LedgerEntry[]).map((entry) => ({
+              ...entry,
+              date: formatDisplayDate(entry.date),
+            })),
             total: typeof res.total === 'number' ? res.total : res.entries.length,
           };
         }
@@ -64,7 +68,7 @@ export const rewardsService = baseService.injectEndpoints({
             }
 
             const dateStr = item.created_at || item.posted_at
-              ? new Date(String(item.created_at || item.posted_at)).toLocaleDateString()
+              ? formatDisplayDate(String(item.created_at || item.posted_at))
               : '';
             const metadata = (item.metadata as Record<string, unknown>) ?? {};
 

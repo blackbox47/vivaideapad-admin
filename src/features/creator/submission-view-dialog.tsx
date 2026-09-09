@@ -6,6 +6,7 @@ import StatusBadge from '@/components/shared/status-badge';
 import { Button } from '@/components/ui/button';
 import type { MyIdea } from '@/models/creator/my-ideas-model';
 import { CREATOR_ROUTES } from '@/utils/constants/routes';
+import { formatDisplayDate } from '@/utils/helpers/format-display-date';
 
 interface SubmissionViewDialogProps {
   idea: MyIdea;
@@ -82,7 +83,9 @@ export default function SubmissionViewDialog({
             status={idea.status}
             className="px-3 py-1.5 text-xs"
           />
-          <span className="text-xs text-muted-foreground">Updated {idea.submitted}</span>
+          <span className="text-xs text-muted-foreground">
+            Updated {formatDisplayDate(idea.submitted)}
+          </span>
         </div>
 
         <p className="rounded-[14px] bg-surface-subtle p-4 text-sm leading-[1.7] text-foreground">

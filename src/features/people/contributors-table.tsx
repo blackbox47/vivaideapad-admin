@@ -1,6 +1,5 @@
 import EmptyState from '@/components/shared/empty-state';
 import StatusBadge from '@/components/shared/status-badge';
-import TableActions from '@/components/shared/table-actions';
 import { Button } from '@/components/ui/button';
 import {
   ProjectTableCell,
@@ -8,6 +7,7 @@ import {
 } from '@/components/ui/project-table';
 import PeopleTable from '@/features/people/people-table';
 import type { PlatformUser } from '@/models/people/people-model';
+import { formatDisplayDate } from '@/utils/helpers/format-display-date';
 
 interface ContributorsTableProps {
   users: PlatformUser[];
@@ -31,7 +31,14 @@ export default function ContributorsTable({
 
   return (
     <PeopleTable
-      columns={['Contributor', 'Approved', 'Balance', 'Joined', 'Status', '']}
+      columns={[
+        'Contributor',
+        'Approved',
+        'Balance',
+        'Joined',
+        'Status',
+        { label: 'Action', align: 'right' },
+      ]}
     >
       {users.map((user) => (
         <ProjectTableRow key={user.id}>
@@ -42,25 +49,23 @@ export default function ContributorsTable({
           <ProjectTableCell className="text-foreground">{user.approved}</ProjectTableCell>
           <ProjectTableCell className="text-foreground">{user.balance}</ProjectTableCell>
           <ProjectTableCell className="whitespace-nowrap text-muted-foreground">
-            {user.joined}
+            {formatDisplayDate(user.joined)}
           </ProjectTableCell>
           <ProjectTableCell>
             <StatusBadge status={user.status} />
           </ProjectTableCell>
-          <ProjectTableCell>
-            <TableActions>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                disabled={isToggling}
-                loading={isToggling}
-                className="h-auto rounded-full border border-border bg-card px-[13px] py-[7px] text-xs font-bold text-foreground hover:bg-surface-subtle"
-                onClick={() => onToggle(user)}
-              >
-                {user.status === 'Suspended' ? 'Reactivate' : 'Suspend'}
-              </Button>
-            </TableActions>
+          <ProjectTableCell align="right">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={isToggling}
+              loading={isToggling}
+              className="h-auto rounded-full border border-border bg-card px-4 py-1.5 text-xs font-semibold text-foreground shadow-xs hover:bg-surface-subtle active:scale-95 transition-all cursor-pointer"
+              onClick={() => onToggle(user)}
+            >
+              {user.status === 'Suspended' ? 'Reactivate' : 'Suspend'}
+            </Button>
           </ProjectTableCell>
         </ProjectTableRow>
       ))}

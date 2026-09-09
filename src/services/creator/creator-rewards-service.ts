@@ -8,6 +8,7 @@ import {
   CREATOR_REWARDS_URL,
   CREATOR_REWARDS_WITHDRAW_URL,
 } from '@/utils/constants/api-end-points';
+import { formatDisplayDate } from '@/utils/helpers/format-display-date';
 
 export const creatorRewardsService = baseService.injectEndpoints({
   endpoints: (builder) => ({
@@ -25,7 +26,10 @@ export const creatorRewardsService = baseService.injectEndpoints({
         }
         const res = response as Record<string, unknown>;
         const entries = Array.isArray(res.entries)
-          ? (res.entries as CreatorRewardsOverview['entries'])
+          ? (res.entries as CreatorRewardsOverview['entries']).map((entry) => ({
+              ...entry,
+              date: formatDisplayDate(entry.date),
+            }))
           : [];
         return {
           available: String(res.available ?? (res.balance ? `Tk ${res.balance}` : 'Tk 0')),

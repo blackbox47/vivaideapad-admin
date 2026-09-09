@@ -6,6 +6,7 @@ import {
   type ProjectTableColumn,
 } from '@/components/ui/project-table';
 import type { CreatorRewardEntry } from '@/models/creator/creator-rewards-model';
+import { formatDisplayDate } from '@/utils/helpers/format-display-date';
 
 interface CreatorRewardsTableProps {
   entries: CreatorRewardEntry[];
@@ -38,7 +39,7 @@ export default function CreatorRewardsTable({
       {entries.map((entry) => (
         <ProjectTableRow key={entry.id}>
           <ProjectTableCell className="whitespace-nowrap text-muted-foreground">
-            {entry.date}
+            {formatDisplayDate(entry.date)}
           </ProjectTableCell>
           <ProjectTableCell className="font-medium text-foreground">
             {entry.description}

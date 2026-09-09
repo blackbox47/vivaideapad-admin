@@ -353,7 +353,7 @@ export default function EditConceptDialog({
                         setValue('closesOn', undefined);
                       }
                     }}
-                    placeholder="20 Jul"
+                    placeholder="02.06.2026"
                   />
                 )}
               />
@@ -374,7 +374,7 @@ export default function EditConceptDialog({
                     id="edit-concept-closes"
                     value={field.value}
                     onChange={field.onChange}
-                    placeholder="11 May"
+                    placeholder="30.06.2026"
                     disabledBefore={opensOn}
                   />
                 )}

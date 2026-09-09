@@ -14,7 +14,7 @@ export interface LedgerEntry {
   id: string;
   contributor: string;
   description: string;
-  /** Pre-formatted date string (DD-MM-YYYY) used by the table. */
+  /** Pre-formatted date string (DD.MM.YYYY) used by the table. */
   date: string;
   /** ISO timestamp used internally for sorting and aggregation. */
   occurredAt: string;

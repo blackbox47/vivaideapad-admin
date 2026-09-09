@@ -226,7 +226,7 @@ const MONTH_INDEX: Record<string, number> = {
 };
 
 /**
- * Parse "27 Aug" / "27 Aug 2026" / "27/08/2026" → ISO `YYYY-MM-DD`.
+ * Parse "27 Aug" / "02.06.2026" / "27/08/2026" → ISO `YYYY-MM-DD`.
  * Returns `undefined` for blank / unparseable input.
  */
 export function parseConceptDate(input: string | undefined): string | undefined {
@@ -247,10 +247,22 @@ export function parseConceptDate(input: string | undefined): string | undefined 
     return d.toISOString().slice(0, 10);
   }
 
-  // 2. ISO `YYYY-MM-DD` already
+  // 2. `02.06.2026` / `02-06-2026`
+  const dotted = /^(\d{1,2})[.-](\d{1,2})[.-](\d{4})$/.exec(trimmed);
+  if (dotted) {
+    const day = Number(dotted[1]);
+    const month = Number(dotted[2]);
+    const year = Number(dotted[3]);
+    if (month < 1 || month > 12 || day < 1 || day > 31) return '';
+    const d = new Date(Date.UTC(year, month - 1, day));
+    if (Number.isNaN(d.getTime())) return '';
+    return d.toISOString().slice(0, 10);
+  }
+
+  // 3. ISO `YYYY-MM-DD` already
   if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return trimmed;
 
-  // 3. Last resort — `new Date(...)` for any other locale format.
+  // 4. Last resort — `new Date(...)` for any other locale format.
   const d = new Date(trimmed);
   if (!Number.isNaN(d.getTime())) return d.toISOString().slice(0, 10);
   return '';

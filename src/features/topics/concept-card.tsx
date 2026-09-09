@@ -3,6 +3,7 @@ import { Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { Concept } from '@/models/topics/topics-model';
 import { cn } from '@/lib/utils';
+import { formatDisplayDate } from '@/utils/helpers/format-display-date';
 
 const STATUS_STYLES: Record<Concept['status'], string> = {
   active: 'bg-success-subtle text-success',
@@ -94,7 +95,8 @@ export default function ConceptCard({
           {concept.description}
         </p>
         <p className="mb-4 text-xs text-muted-foreground">
-          Opens {concept.opensOn} · Closes {concept.closesOn} ·{' '}
+          Opens {formatDisplayDate(concept.opensOn)} · Closes{' '}
+          {formatDisplayDate(concept.closesOn)} ·{' '}
           <strong className="text-foreground">{concept.reward}</strong>
         </p>
       </div>

@@ -15,6 +15,7 @@ import {
   PAYOUT_DETAIL_URL,
   PAYOUT_PROCESS_URL,
 } from '@/utils/constants/api-end-points';
+import { formatDisplayDate } from '@/utils/helpers/format-display-date';
 
 export type PayoutsListParamsSpec = PayoutListParamsSpec;
 
@@ -67,7 +68,10 @@ export const payoutsService = baseService.injectEndpoints({
         // 1. Mock format: { payouts: [...], total }
         if (Array.isArray(res.payouts)) {
           return {
-            payouts: res.payouts as Payout[],
+            payouts: (res.payouts as Payout[]).map((payout) => ({
+              ...payout,
+              requested: formatDisplayDate(payout.requested),
+            })),
             total:
               typeof res.total === 'number'
                 ? res.total
@@ -114,20 +118,14 @@ export const payoutsService = baseService.injectEndpoints({
                 ? `${method} · ${acctNumber}`
                 : method;
 
-              const dateStr =
+              const rawRequested =
                 item.created_at ||
                 item.createdAt ||
                 item.requested_at ||
-                item.requestedAt
-                  ? new Date(
-                      String(
-                        item.created_at ||
-                          item.createdAt ||
-                          item.requested_at ||
-                          item.requestedAt,
-                      ),
-                    ).toLocaleDateString()
-                  : '';
+                item.requestedAt;
+              const dateStr = rawRequested
+                ? formatDisplayDate(String(rawRequested))
+                : '';
 
               return {
                 id: String(item.id ?? ''),

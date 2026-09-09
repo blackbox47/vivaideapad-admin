@@ -160,6 +160,7 @@ function ProjectTable({
     <div className={cn(SHELL_CLASS, className)}>
       <Table
         containerRef={scrollContainerRef}
+        containerClassName="no-scrollbar"
         className={cn(INNER_BASE, minWidth, pinnedContainerClasses)}
       >
         <TableHeader>
