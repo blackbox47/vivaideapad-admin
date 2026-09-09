@@ -1,46 +1,43 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Link, useNavigate } from '@tanstack/react-router';
 import { Award, CheckCircle2, TrendingUp, Users } from 'lucide-react';
 
-import Hero from '@/features/landing/hero-section';
-import FeaturedRequests from '@/features/landing/featured-requests';
+import Hero, { type HeroStat } from '@/features/landing/hero-section';
+import FeaturedRequests, {
+  type FeaturedRequest,
+} from '@/features/landing/featured-requests';
 import ProcessSection from '@/features/landing/process-section';
-import LeaderboardSection from '@/features/landing/leaderboard-section';
+import LeaderboardSection, {
+  type LeaderboardRowData,
+} from '@/features/landing/leaderboard-section';
 import FaqSection from '@/features/landing/faq-section';
 import CtaSection from '@/features/landing/cta-section';
 import ContributorApplicationDialog from '@/features/landing/contributor-application-dialog';
 import HomeNav, { SparkoryLogoMark } from '@/components/layout/home-nav';
 import { CREATOR_ROUTES } from '@/utils/constants/routes';
+import {
+  useGetPublicFeaturedRequestsQuery,
+  useGetPublicLandingStatsQuery,
+  useGetPublicLeaderboardQuery,
+} from '@/services/landing/landing-service';
+
+function formatBdt(amount: number): string {
+  if (amount >= 100000) {
+    const lakhs = (amount / 100000).toFixed(2).replace(/\.00$/, '');
+    return `৳ ${lakhs}L`;
+  }
+  return `৳ ${new Intl.NumberFormat('en-IN').format(amount)}`;
+}
+
+function formatUsd(amount: number): string {
+  return `$${new Intl.NumberFormat('en-US').format(amount)}+`;
+}
 
 const STATS = [
   { value: '$24,000+', label: 'Rewarded to creators', icon: Award },
   { value: '4,800+', label: 'Ideas submitted', icon: Users },
   { value: '78%', label: 'Approval rate', icon: CheckCircle2 },
   { value: '24h', label: 'Average review turnaround', icon: TrendingUp },
-];
-
-const WINNERS = [
-  {
-    title: 'Small rituals, lasting change',
-    category: 'Food systems',
-    contributor: 'Amina Rahman',
-    reward: '$180',
-    desc: 'A framework for zero-waste preparation that saved 4 local kitchens over $1,200/month.',
-  },
-  {
-    title: 'Shared seats, quieter streets',
-    category: 'Urban life',
-    contributor: 'Jonas Lee',
-    reward: '$240',
-    desc: 'A peer commute routing model optimizing micro-mobility stations around suburban transit stops.',
-  },
-  {
-    title: 'Curiosity on the corner',
-    category: 'Future skills',
-    contributor: 'Sara Idris',
-    reward: '$320',
-    desc: 'Interactive physical prompt stations turning mundane bus wait times into science explorations.',
-  },
 ];
 
 export function LandingOverview() {
@@ -52,6 +49,112 @@ export function LandingOverview() {
   const [selectedConceptId, setSelectedConceptId] = useState<
     string | undefined
   >();
+
+  const statsQuery = useGetPublicLandingStatsQuery();
+  const featuredQuery = useGetPublicFeaturedRequestsQuery(3);
+  const leaderboardQuery = useGetPublicLeaderboardQuery(5);
+
+  const heroStats = useMemo<HeroStat[] | undefined>(() => {
+    const stats = statsQuery.data?.data;
+    if (
+      !stats ||
+      stats.activeRequests === undefined ||
+      stats.ideasSubmitted === undefined ||
+      stats.totalPrizes === undefined
+    ) {
+      return undefined;
+    }
+
+    return [
+      { value: String(stats.activeRequests), label: 'Active Requests' },
+      {
+        value: new Intl.NumberFormat('en-US').format(stats.ideasSubmitted),
+        label: 'Ideas Submitted',
+      },
+      { value: formatBdt(stats.totalPrizes), label: 'Total Prizes' },
+    ];
+  }, [statsQuery.data]);
+
+  const barStats = useMemo(() => {
+    const stats = statsQuery.data?.data;
+    if (
+      !stats ||
+      stats.ideasRewardedUsd === undefined ||
+      stats.ideasCount === undefined ||
+      stats.approvalRatePct === undefined
+    ) {
+      return STATS;
+    }
+
+    return [
+      {
+        value: formatUsd(stats.ideasRewardedUsd),
+        label: 'Rewarded to creators',
+        icon: Award,
+      },
+      {
+        value: `${new Intl.NumberFormat('en-US').format(stats.ideasCount)}+`,
+        label: 'Ideas submitted',
+        icon: Users,
+      },
+      {
+        value: `${stats.approvalRatePct}%`,
+        label: 'Approval rate',
+        icon: CheckCircle2,
+      },
+      {
+        value:
+          stats.avgReviewTurnaroundHours != null
+            ? `${stats.avgReviewTurnaroundHours}h`
+            : '24h',
+        label: 'Average review turnaround',
+        icon: TrendingUp,
+      },
+    ];
+  }, [statsQuery.data]);
+
+  const requests = useMemo<FeaturedRequest[] | undefined>(() => {
+    const list = featuredQuery.data?.data;
+    if (!list || list.length === 0) {
+      return undefined;
+    }
+
+    return list.map((item) => ({
+      id: item.id,
+      category: item.category,
+      daysLeft: `${item.daysLeft}d left`,
+      title: item.title,
+      description: item.description,
+      tags: item.tags,
+      postedBy: item.postedBy,
+      amount: `৳ ${new Intl.NumberFormat('en-IN').format(item.amount)}`,
+      ideas: String(item.ideas),
+    }));
+  }, [featuredQuery.data]);
+
+  const rows = useMemo<LeaderboardRowData[] | undefined>(() => {
+    const list = leaderboardQuery.data?.data;
+    if (!list || list.length === 0) {
+      return undefined;
+    }
+
+    return list.map((item, idx) => {
+      const rankNum = item.rank ?? idx + 1;
+      let rankStr = `#${rankNum}`;
+      if (rankNum === 1) rankStr = '🏆';
+      else if (rankNum === 2) rankStr = '🥈';
+      else if (rankNum === 3) rankStr = '🥉';
+
+      return {
+        rank: rankStr,
+        initials: item.initials,
+        name: item.name,
+        stats: `${item.wins} wins · ${item.ideas} ideas`,
+        amount: `৳ ${new Intl.NumberFormat('en-IN').format(item.amount)}`,
+        highlighted: rankNum === 1,
+      };
+    });
+  }, [leaderboardQuery.data]);
 
   const handleOpenApplication = (title?: string, id?: string) => {
     setSelectedConceptTitle(title);
@@ -65,13 +168,13 @@ export function LandingOverview() {
       <HomeNav onJoinFreeClick={() => handleOpenApplication()} />
 
       {/* Hero Section */}
-      <Hero onCtaClick={() => handleOpenApplication()} />
+      <Hero onCtaClick={() => handleOpenApplication()} stats={heroStats} />
 
       {/* Stats Section */}
       <section className="border-y border-[#eaeaf0] bg-white py-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16">
           <div className="grid grid-cols-2 gap-6 md:grid-cols-4 md:gap-8">
-            {STATS.map((stat) => {
+            {barStats.map((stat) => {
               const Icon = stat.icon;
               return (
                 <div
@@ -98,6 +201,7 @@ export function LandingOverview() {
       <FeaturedRequests
         onViewAll={() => handleOpenApplication()}
         onRequestClick={(req) => handleOpenApplication(req.title, req.id)}
+        requests={requests}
       />
 
       {/* How it works Section */}
@@ -106,6 +210,7 @@ export function LandingOverview() {
       {/* Leaderboard Section */}
       <LeaderboardSection
         onCtaClick={() => navigate({ to: CREATOR_ROUTES.leaderboard })}
+        rows={rows}
       />
 
       {/* FAQ Section */}

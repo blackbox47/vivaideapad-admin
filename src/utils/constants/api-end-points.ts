@@ -50,6 +50,10 @@ export const PUBLIC_APPLICATION_STATUS_URL = (ref: string) =>
   `/public/applications/${ref}`;
 export const PUBLIC_CONCEPTS_URL = '/public/concepts';
 export const PUBLIC_CATEGORIES_URL = '/public/categories';
+export const PUBLIC_LANDING_STATS_URL = '/public/landing/stats';
+export const PUBLIC_LANDING_FEATURED_REQUESTS_URL =
+  '/public/landing/featured-requests';
+export const PUBLIC_LEADERBOARD_URL = '/public/leaderboard';
 
 // Spec Module 5 — Submissions (Content Review) detail + decision + publish + scan (REST spec §5.5)
 export const SUBMISSIONS_URL = '/admin/submissions';
