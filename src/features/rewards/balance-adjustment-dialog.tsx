@@ -101,7 +101,7 @@ export default function BalanceAdjustmentDialog({
               label="Contributor"
               required
               list="adjustment-contributors"
-              placeholder="Search contributor"
+              placeholder="Enter contributor"
               autoComplete="off"
               errorMessage={errors.contributor?.message}
               {...register('contributor')}
@@ -122,7 +122,7 @@ export default function BalanceAdjustmentDialog({
               id="adjustment-amount"
               label="Amount"
               required
-              placeholder="e.g. -20 or +50"
+              placeholder="Enter amount"
               errorMessage={errors.amount?.message}
               {...register('amount')}
             />
@@ -133,6 +133,7 @@ export default function BalanceAdjustmentDialog({
               id="adjustment-reason"
               label="Reason (recorded in audit log)"
               required
+              placeholder="Enter reason"
               className="min-h-15"
               errorMessage={errors.reason?.message}
               {...register('reason')}

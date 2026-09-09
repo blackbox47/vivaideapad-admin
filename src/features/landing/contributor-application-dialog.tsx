@@ -265,7 +265,7 @@ const ContributorApplicationForm: FC<FormProps> = ({
                   type="text"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  placeholder="e.g. Nora Ahmed"
+                  placeholder="Enter full name"
                   className="w-full rounded-[8px] border border-[#eaeaf0] bg-white px-3.5 py-2.5 font-urbanist text-[14px] text-[#0f0f1a] placeholder:text-[#a0a0b5] focus:outline-none focus:border-[#3281ff] focus:ring-1 focus:ring-[#3281ff] transition-all"
                 />
               </div>
@@ -282,7 +282,7 @@ const ContributorApplicationForm: FC<FormProps> = ({
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
+                  placeholder="Enter email address"
                   className="w-full rounded-[8px] border border-[#eaeaf0] bg-white px-3.5 py-2.5 font-urbanist text-[14px] text-[#0f0f1a] placeholder:text-[#a0a0b5] focus:outline-none focus:border-[#3281ff] focus:ring-1 focus:ring-[#3281ff] transition-all"
                 />
               </div>
@@ -329,7 +329,7 @@ const ContributorApplicationForm: FC<FormProps> = ({
                 type="text"
                 value={ideaTitle}
                 onChange={(e) => setIdeaTitle(e.target.value)}
-                placeholder="A clear, memorable title"
+                placeholder="Enter idea title"
                 className="w-full rounded-[8px] border border-[#eaeaf0] bg-white px-3.5 py-2.5 font-urbanist text-[14px] text-[#0f0f1a] placeholder:text-[#a0a0b5] focus:outline-none focus:border-[#3281ff] focus:ring-1 focus:ring-[#3281ff] transition-all"
               />
             </div>
@@ -347,7 +347,7 @@ const ContributorApplicationForm: FC<FormProps> = ({
                 rows={4}
                 value={ideaDescription}
                 onChange={(e) => setIdeaDescription(e.target.value)}
-                placeholder="What is the insight? Why does it matter? What makes your perspective original?"
+                placeholder="Enter idea description"
                 className="w-full rounded-[8px] border border-[#eaeaf0] bg-white p-3.5 font-urbanist text-[14px] text-[#0f0f1a] placeholder:text-[#a0a0b5] focus:outline-none focus:border-[#3281ff] focus:ring-1 focus:ring-[#3281ff] transition-all resize-y min-h-[96px]"
               />
             </div>

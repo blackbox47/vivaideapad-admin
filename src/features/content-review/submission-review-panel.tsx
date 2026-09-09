@@ -110,7 +110,7 @@ export default function SubmissionReviewPanel({
             setComment(event.target.value);
             setFeedbackError(null);
           }}
-          placeholder="Add reviewer notes (optional for approval, required for revision or rejection)"
+          placeholder="Enter feedback to contributor"
           className="min-h-17.5"
           errorMessage={feedbackError}
         />

@@ -171,7 +171,7 @@ export default function LoginPanel({
                 label="Email address"
                 type="email"
                 autoComplete="email"
-                placeholder="Email"
+                placeholder="Enter email address"
                 showRequiredIndicator={false}
                 labelClassName="text-xs font-semibold text-gray-700 tracking-wide mb-1.5"
                 className="bg-white border-gray-300 rounded-xl px-4 py-3 text-base md:text-sm focus-visible:border-brand-pine-deep focus-visible:ring-2 focus-visible:ring-brand-pine-deep/20 shadow-none placeholder:text-gray-400"
@@ -186,7 +186,7 @@ export default function LoginPanel({
                 label="Password"
                 type={showPassword ? 'text' : 'password'}
                 autoComplete="current-password"
-                placeholder="Password"
+                placeholder="Enter password"
                 showRequiredIndicator={false}
                 labelClassName="text-xs font-semibold text-gray-700 tracking-wide mb-1.5"
                 className="bg-white border-gray-300 rounded-xl pl-4 pr-11 py-3 text-base md:text-sm focus-visible:border-brand-pine-deep focus-visible:ring-2 focus-visible:ring-brand-pine-deep/20 shadow-none placeholder:text-gray-400"

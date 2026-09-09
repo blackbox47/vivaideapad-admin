@@ -230,6 +230,7 @@ export default function EditConceptDialog({
                 id="edit-concept-title-input"
                 label="Title"
                 required
+                placeholder="Enter title"
                 errorMessage={errors.title?.message}
                 {...register('title')}
               />
@@ -304,8 +305,8 @@ export default function EditConceptDialog({
                         setNewCategoryName(event.target.value);
                         setCategoryDraftError(null);
                       }}
-                      placeholder="New category name"
-                      className="h-auto flex-1 rounded-[10px] border border-border bg-card px-3 py-2.25text-[13px] text-foreground shadow-none"
+                      placeholder="Enter category name"
+                      className="h-auto flex-1 rounded-[10px] border border-border bg-card px-3 py-2.25 text-[13px] text-foreground shadow-none"
                     />
                     <Button
                       type="button"
@@ -327,6 +328,7 @@ export default function EditConceptDialog({
                 id="edit-concept-description"
                 label="Description"
                 required
+                placeholder="Enter description"
                 className="min-h-17.5"
                 errorMessage={errors.description?.message}
                 {...register('description')}
@@ -385,7 +387,7 @@ export default function EditConceptDialog({
               <Input
                 id="edit-concept-reward"
                 label="Reward guidance"
-                placeholder="৳3,000"
+                placeholder="Enter reward guidance"
                 errorMessage={errors.reward?.message}
                 {...register('reward')}
               />

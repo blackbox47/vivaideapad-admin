@@ -5,7 +5,7 @@ export const profileDetailsSchema = z.object({
     .string()
     .trim()
     .min(1, 'Display name is required.')
-    .max(120, 'Display name must be at most 120 characters.'),
+    .max(30, 'Display name must be at most 30 characters.'),
   email: z
     .string()
     .trim()

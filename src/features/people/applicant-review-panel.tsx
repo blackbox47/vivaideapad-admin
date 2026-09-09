@@ -103,7 +103,7 @@ export default function ApplicantReviewPanel({
           label="Reviewer comment"
           value={comment}
           onChange={(event) => setComment(event.target.value)}
-          placeholder="Required if requesting revision or rejecting"
+          placeholder="Enter reviewer comment"
           className="min-h-15"
         />
         <p className="mt-2.5 text-xs text-muted-foreground">

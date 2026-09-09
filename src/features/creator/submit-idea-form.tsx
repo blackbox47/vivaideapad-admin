@@ -243,7 +243,7 @@ export default function SubmitIdeaForm({
             required
             disabled={isBusy}
             maxLength={TITLE_MAX}
-            placeholder="Give it a working title"
+            placeholder="Enter title"
             className="h-auto rounded-xl border border-border bg-card px-4 py-3.5 text-base text-foreground placeholder:text-muted-foreground focus-visible:border-brand-forest focus-visible:ring-2 focus-visible:ring-brand-forest/15 transition-colors"
             errorMessage={errors.title?.message}
             {...register('title')}
@@ -270,7 +270,7 @@ export default function SubmitIdeaForm({
             disabled={isBusy}
             maxLength={SUMMARY_MAX}
             rows={3}
-            placeholder="One or two lines — what is the idea and who is it for?"
+            placeholder="Enter summary"
             className="rounded-xl border border-border bg-card px-4 py-3.5 text-base text-foreground placeholder:text-muted-foreground focus-visible:border-brand-forest focus-visible:ring-2 focus-visible:ring-brand-forest/15 transition-colors resize-y"
             errorMessage={errors.summary?.message}
             {...register('summary')}

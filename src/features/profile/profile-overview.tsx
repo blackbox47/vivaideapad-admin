@@ -12,7 +12,6 @@ import {
 import ProfileAvatarUploader from '@/features/profile/profile-avatar-uploader';
 import ProfileIdentityCard from '@/features/profile/profile-identity-card';
 import ProfileNotificationsCard from '@/features/profile/profile-notifications-card';
-import ProfilePayoutMethodCard from '@/features/profile/profile-payout-method-card';
 import useProfile from '@/hooks/profile/use-profile';
 
 export default function ProfileOverview() {
@@ -53,7 +52,7 @@ export default function ProfileOverview() {
     );
   }
 
-  const { profile, notifications, payoutMethod } = overview;
+  const { profile, notifications } = overview;
 
   return (
     <div>
@@ -95,10 +94,6 @@ export default function ProfileOverview() {
             onToggle={(key, value) => {
               void toggleNotification(key, value);
             }}
-          />
-          <ProfilePayoutMethodCard
-            payoutMethod={payoutMethod}
-            onChange={() => undefined}
           />
         </div>
       </div>
