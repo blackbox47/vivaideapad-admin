@@ -44,6 +44,13 @@ export const APPLICATION_DETAIL_URL = (id: string) =>
 export const APPLICATION_DECISION_URL = (id: string) =>
   `/admin/applications/${id}/decision`;
 
+// Public endpoints for visitor gate & applications
+export const PUBLIC_APPLICATIONS_URL = '/public/applications';
+export const PUBLIC_APPLICATION_STATUS_URL = (ref: string) =>
+  `/public/applications/${ref}`;
+export const PUBLIC_CONCEPTS_URL = '/public/concepts';
+export const PUBLIC_CATEGORIES_URL = '/public/categories';
+
 // Spec Module 5 — Submissions (Content Review) detail + decision + publish + scan (REST spec §5.5)
 export const SUBMISSIONS_URL = '/admin/submissions';
 export const SUBMISSION_DETAIL_URL = (id: string) =>

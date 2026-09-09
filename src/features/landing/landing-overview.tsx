@@ -1,16 +1,14 @@
+import { useState } from 'react';
 import { Link, useNavigate } from '@tanstack/react-router';
-import {
-  ArrowRight,
-  Award,
-  CheckCircle2,
-  Flame,
-  TrendingUp,
-  Users,
-} from 'lucide-react';
+import { Award, CheckCircle2, TrendingUp, Users } from 'lucide-react';
 
 import Hero from '@/features/landing/hero-section';
 import FeaturedRequests from '@/features/landing/featured-requests';
 import ProcessSection from '@/features/landing/process-section';
+import LeaderboardSection from '@/features/landing/leaderboard-section';
+import FaqSection from '@/features/landing/faq-section';
+import CtaSection from '@/features/landing/cta-section';
+import ContributorApplicationDialog from '@/features/landing/contributor-application-dialog';
 import HomeNav, { SparkoryLogoMark } from '@/components/layout/home-nav';
 import { CREATOR_ROUTES } from '@/utils/constants/routes';
 
@@ -45,40 +43,29 @@ const WINNERS = [
   },
 ];
 
-const LEADERBOARD_PREVIEW = [
-  {
-    rank: '1',
-    initials: 'AR',
-    name: 'Amina Rahman',
-    ideas: '9 ideas approved',
-    pts: '2,840',
-  },
-  {
-    rank: '2',
-    initials: 'JL',
-    name: 'Jonas Lee',
-    ideas: '8 ideas approved',
-    pts: '2,620',
-  },
-  {
-    rank: '3',
-    initials: 'SI',
-    name: 'Sara Idris',
-    ideas: '7 ideas approved',
-    pts: '2,410',
-  },
-];
-
 export function LandingOverview() {
   const navigate = useNavigate();
+  const [isApplicationOpen, setIsApplicationOpen] = useState(false);
+  const [selectedConceptTitle, setSelectedConceptTitle] = useState<
+    string | undefined
+  >();
+  const [selectedConceptId, setSelectedConceptId] = useState<
+    string | undefined
+  >();
+
+  const handleOpenApplication = (title?: string, id?: string) => {
+    setSelectedConceptTitle(title);
+    setSelectedConceptId(id);
+    setIsApplicationOpen(true);
+  };
 
   return (
     <div className="min-h-screen bg-[#fafbfc] text-[#12172b] font-urbanist selection:bg-[#3281ff]/15 selection:text-[#3281ff]">
       {/* Responsive Navbar */}
-      <HomeNav />
+      <HomeNav onJoinFreeClick={() => handleOpenApplication()} />
 
       {/* Hero Section */}
-      <Hero onCtaClick={() => navigate({ to: CREATOR_ROUTES.login })} />
+      <Hero onCtaClick={() => handleOpenApplication()} />
 
       {/* Stats Section */}
       <section className="border-y border-[#eaeaf0] bg-white py-12">
@@ -109,130 +96,30 @@ export function LandingOverview() {
 
       {/* Opportunities Section */}
       <FeaturedRequests
-        onViewAll={() => navigate({ to: CREATOR_ROUTES.login })}
-        onRequestClick={() => navigate({ to: CREATOR_ROUTES.login })}
+        onViewAll={() => handleOpenApplication()}
+        onRequestClick={(req) => handleOpenApplication(req.title, req.id)}
       />
 
       {/* How it works Section */}
       <ProcessSection />
 
-      {/* Proof / Winners Section */}
-      <section id="winners" className="scroll-mt-20 py-20 md:py-28">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16">
-          <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
-            <div>
-              <span className="text-xs font-bold uppercase tracking-widest text-[#3281ff]">
-                Proof, not promises
-              </span>
-              <h2 className="mt-2 text-3xl font-bold tracking-tight text-[#12172b] sm:text-4xl">
-                Ideas that earned their reward.
-              </h2>
-            </div>
-            <p className="max-w-md text-sm text-[#666680] sm:text-base">
-              A glimpse of approved contributions and what creators took home
-              once published.
-            </p>
-          </div>
+      {/* Leaderboard Section */}
+      <LeaderboardSection
+        onCtaClick={() => navigate({ to: CREATOR_ROUTES.leaderboard })}
+      />
 
-          <div className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-3">
-            {WINNERS.map((winner) => (
-              <div
-                key={winner.title}
-                className="rounded-2xl border border-[#eaeaf0] bg-white p-6 shadow-xs transition-all hover:shadow-md"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700">
-                    <CheckCircle2 className="size-3" /> Published
-                  </span>
-                  <span className="font-bold text-[#3281ff]">
-                    {winner.reward}
-                  </span>
-                </div>
+      {/* FAQ Section */}
+      <FaqSection
+        onContactClick={() => {
+          window.location.href = 'mailto:support@sparkory.com';
+        }}
+      />
 
-                <h3 className="mt-4 text-lg font-bold text-[#12172b]">
-                  {winner.title}
-                </h3>
-
-                <p className="mt-2 text-sm text-[#666680] line-clamp-3">
-                  {winner.desc}
-                </p>
-
-                <div className="mt-5 border-t border-[#f0f0f5] pt-3 text-xs text-[#8c8ca1]">
-                  <span>By {winner.contributor}</span> ·{' '}
-                  <span>{winner.category}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Community Leaderboard Pulse Section */}
-      <section id="leaderboard" className="scroll-mt-20 py-16 pb-24">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16">
-          <div className="relative overflow-hidden rounded-3xl bg-[#12231f] p-8 text-white md:p-12 lg:p-14">
-            <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 lg:items-center">
-              <div className="lg:col-span-6">
-                <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#c9f36d]">
-                  <Flame className="size-4" />
-                  <span>Community pulse</span>
-                </div>
-
-                <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
-                  Good ideas create momentum.
-                </h2>
-
-                <p className="mt-4 text-sm text-neutral-300 sm:text-base leading-relaxed">
-                  Celebrate creators who consistently bring clarity,
-                  originality, and positive impact to every brief.
-                </p>
-
-                <div className="mt-8">
-                  <Link
-                    to={CREATOR_ROUTES.login}
-                    className="inline-flex items-center gap-2 rounded-[8px] bg-[#c9f36d] px-6 py-3.5 text-sm font-bold text-[#12231f] transition-all hover:bg-[#b5e05a] active:scale-98"
-                  >
-                    <span>Join the community</span>
-                    <ArrowRight className="size-4" />
-                  </Link>
-                </div>
-              </div>
-
-              {/* Leaderboard Table Preview */}
-              <div className="lg:col-span-6">
-                <div className="space-y-3">
-                  {LEADERBOARD_PREVIEW.map((user) => (
-                    <div
-                      key={user.rank}
-                      className="flex items-center justify-between rounded-xl bg-white/10 px-4 py-3 backdrop-blur-xs transition-all hover:bg-white/15"
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="w-5 text-center font-bold text-[#c9f36d]">
-                          #{user.rank}
-                        </span>
-                        <div className="flex size-8 items-center justify-center rounded-full bg-white/20 text-xs font-bold text-white">
-                          {user.initials}
-                        </div>
-                        <div>
-                          <div className="text-sm font-bold text-white">
-                            {user.name}
-                          </div>
-                          <div className="text-xs text-neutral-400">
-                            {user.ideas}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="font-bold text-[#c9f36d]">
-                        {user.pts} pts
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Final Call to Action Section */}
+      <CtaSection
+        onPrimaryClick={() => navigate({ to: CREATOR_ROUTES.login })}
+        onSecondaryClick={() => handleOpenApplication()}
+      />
 
       {/* Footer */}
       <footer className="border-t border-[#eaeaf0] bg-white py-12">
@@ -256,12 +143,26 @@ export function LandingOverview() {
             <a href="#how" className="hover:text-[#12172b]">
               How it works
             </a>
+            <a href="#leaderboard" className="hover:text-[#12172b]">
+              Leaderboard
+            </a>
+            <a href="#faq" className="hover:text-[#12172b]">
+              FAQ
+            </a>
             <Link to={CREATOR_ROUTES.login} className="hover:text-[#12172b]">
               Sign in
             </Link>
           </div>
         </div>
       </footer>
+
+      {/* Contributor Application Modal Dialog */}
+      <ContributorApplicationDialog
+        isOpen={isApplicationOpen}
+        onClose={() => setIsApplicationOpen(false)}
+        preselectedConceptTitle={selectedConceptTitle}
+        preselectedConceptId={selectedConceptId}
+      />
     </div>
   );
 }

@@ -71,6 +71,32 @@ export const applicationsService = baseService.injectEndpoints({
         'admin-notifications',
       ],
     }),
+    submitPublicApplication: builder.mutation<
+      { reference_number: string; application: unknown },
+      {
+        display_name: string;
+        email: string;
+        category_id: string;
+        idea_title: string;
+        idea_description: string;
+        consent: boolean;
+        phone?: string;
+      }
+    >({
+      query: (body) => ({
+        url: '/public/applications',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['applications'],
+    }),
+    getPublicConcepts: builder.query<
+      { data: Array<{ id: string; title: string; category_id: string }> },
+      void
+    >({
+      query: () => ({ url: '/public/concepts', method: 'GET' }),
+      providesTags: ['concepts'],
+    }),
   }),
 });
 
@@ -79,4 +105,6 @@ export const {
   useLazyGetApplicationQuery,
   useGetApplicationQuery,
   useDecideApplicationMutation,
+  useSubmitPublicApplicationMutation,
+  useGetPublicConceptsQuery,
 } = applicationsService;
