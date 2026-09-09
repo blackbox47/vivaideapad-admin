@@ -2,8 +2,12 @@ import EmptyState from '@/components/shared/empty-state';
 import StatusBadge from '@/components/shared/status-badge';
 import TableActions from '@/components/shared/table-actions';
 import { Button } from '@/components/ui/button';
-import type { PlatformUser } from '@/models/people/people-model';
+import {
+  ProjectTableCell,
+  ProjectTableRow,
+} from '@/components/ui/project-table';
 import PeopleTable from '@/features/people/people-table';
+import type { PlatformUser } from '@/models/people/people-model';
 
 interface InvitedTableProps {
   users: PlatformUser[];
@@ -30,21 +34,21 @@ export default function InvitedTable({
       columns={['Invited applicant', 'Approved on', 'Status', 'Waiting on', '']}
     >
       {users.map((user) => (
-        <tr key={user.id} className="border-t border-border-muted">
-          <td className="px-[18px] py-3.5">
+        <ProjectTableRow key={user.id}>
+          <ProjectTableCell>
             <strong className="font-semibold text-foreground">{user.name}</strong>
             <div className="text-[11px] text-muted-foreground">{user.email}</div>
-          </td>
-          <td className="px-[18px] py-3.5 whitespace-nowrap text-muted-foreground">
+          </ProjectTableCell>
+          <ProjectTableCell className="whitespace-nowrap text-muted-foreground">
             {user.joined}
-          </td>
-          <td className="px-[18px] py-3.5">
+          </ProjectTableCell>
+          <ProjectTableCell>
             <StatusBadge status={user.status} />
-          </td>
-          <td className="px-[18px] py-3.5 text-[13px] text-muted-foreground">
+          </ProjectTableCell>
+          <ProjectTableCell className="text-[13px] text-muted-foreground">
             First submission on a live task
-          </td>
-          <td className="px-[18px] py-3.5">
+          </ProjectTableCell>
+          <ProjectTableCell>
             <TableActions>
               <Button
                 type="button"
@@ -58,8 +62,8 @@ export default function InvitedTable({
                 {user.status === 'Suspended' ? 'Reactivate' : 'Suspend'}
               </Button>
             </TableActions>
-          </td>
-        </tr>
+          </ProjectTableCell>
+        </ProjectTableRow>
       ))}
     </PeopleTable>
   );

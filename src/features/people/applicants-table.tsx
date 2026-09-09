@@ -1,8 +1,12 @@
 import EmptyState from '@/components/shared/empty-state';
 import StatusBadge from '@/components/shared/status-badge';
 import TableActions from '@/components/shared/table-actions';
-import type { Applicant } from '@/models/people/people-model';
+import {
+  ProjectTableCell,
+  ProjectTableRow,
+} from '@/components/ui/project-table';
 import PeopleTable from '@/features/people/people-table';
+import type { Applicant } from '@/models/people/people-model';
 
 interface ApplicantsTableProps {
   applicants: Applicant[];
@@ -25,21 +29,25 @@ export default function ApplicantsTable({
   return (
     <PeopleTable columns={['Applicant', 'Topic', 'Submitted', 'Status', '']}>
       {applicants.map((applicant) => (
-        <tr key={applicant.id} className="border-t border-border-muted">
-          <td className="px-[18px] py-3.5">
+        <ProjectTableRow key={applicant.id}>
+          <ProjectTableCell>
             <strong className="font-semibold text-foreground">
               {applicant.name}
             </strong>
-            <div className="text-[11px] text-muted-foreground">{applicant.title}</div>
-          </td>
-          <td className="px-[18px] py-3.5 text-muted-foreground">{applicant.topic}</td>
-          <td className="px-[18px] py-3.5 whitespace-nowrap text-muted-foreground">
+            <div className="text-[11px] text-muted-foreground">
+              {applicant.title}
+            </div>
+          </ProjectTableCell>
+          <ProjectTableCell className="text-muted-foreground">
+            {applicant.topic}
+          </ProjectTableCell>
+          <ProjectTableCell className="whitespace-nowrap text-muted-foreground">
             {applicant.submitted}
-          </td>
-          <td className="px-[18px] py-3.5">
+          </ProjectTableCell>
+          <ProjectTableCell>
             <StatusBadge status={applicant.status} />
-          </td>
-          <td className="px-[18px] py-3.5">
+          </ProjectTableCell>
+          <ProjectTableCell>
             <TableActions>
               <button
                 type="button"
@@ -49,8 +57,8 @@ export default function ApplicantsTable({
                 Review
               </button>
             </TableActions>
-          </td>
-        </tr>
+          </ProjectTableCell>
+        </ProjectTableRow>
       ))}
     </PeopleTable>
   );

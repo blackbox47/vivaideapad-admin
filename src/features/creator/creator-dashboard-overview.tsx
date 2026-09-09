@@ -40,7 +40,7 @@ export default function CreatorDashboardOverview() {
   }
 
   return (
-    <div className="pb-4">
+    <div className="mx-auto w-full max-w-xl pb-4 space-y-4 sm:space-y-[18px] lg:max-w-none">
       <PageHeader
         eyebrow={data?.eyebrow ?? 'Contributor space'}
         title={`Keep the momentum, ${firstName}.`}
@@ -51,7 +51,7 @@ export default function CreatorDashboardOverview() {
         action={
           <Button
             render={<Link to={CREATOR_ROUTES.opportunities} />}
-            className="h-auto rounded-full bg-primary px-5 py-3 font-bold text-primary-foreground hover:bg-brand-forest"
+            className="h-auto w-full sm:w-auto rounded-full bg-primary px-5 py-3 text-xs sm:text-sm font-semibold sm:font-bold text-primary-foreground shadow-xs hover:bg-brand-forest active:scale-[0.98] transition-all"
           >
             Explore opportunities ↗
           </Button>
@@ -60,7 +60,7 @@ export default function CreatorDashboardOverview() {
 
       <CreatorStatsCards stats={data?.stats ?? []} isLoading={isLoading} />
 
-      <div className="mt-[18px] grid gap-[18px] lg:grid-cols-[minmax(0,1.35fr)_minmax(250px,0.65fr)]">
+      <div className="grid gap-4 sm:gap-[18px] lg:grid-cols-[minmax(0,1.35fr)_minmax(250px,0.65fr)]">
         <ContinueCreating
           items={data?.inProgress ?? []}
           isLoading={isLoading}

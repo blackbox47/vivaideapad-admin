@@ -1,5 +1,10 @@
-import EmptyState from '@/components/shared/empty-state';
 import StatusBadge from '@/components/shared/status-badge';
+import {
+  ProjectTable,
+  ProjectTableCell,
+  ProjectTableRow,
+  type ProjectTableColumn,
+} from '@/components/ui/project-table';
 import type { CreatorRewardEntry } from '@/models/creator/creator-rewards-model';
 
 interface CreatorRewardsTableProps {
@@ -7,67 +12,48 @@ interface CreatorRewardsTableProps {
   isLoading: boolean;
 }
 
-const columns = ['Date', 'Description', 'Type', 'Status', 'Amount'] as const;
+const columns: ProjectTableColumn[] = [
+  { label: 'Date' },
+  { label: 'Description' },
+  { label: 'Type' },
+  { label: 'Status' },
+  { label: 'Amount', align: 'right' },
+];
 
 export default function CreatorRewardsTable({
   entries,
   isLoading,
 }: CreatorRewardsTableProps) {
-  if (isLoading) {
-    return (
-      <div className="space-y-3 py-2" aria-hidden>
-        {Array.from({ length: 3 }).map((_, index) => (
-          <div
-            key={index}
-            className="h-10 animate-pulse rounded-md bg-surface-subtle"
-          />
-        ))}
-      </div>
-    );
-  }
-
-  if (entries.length === 0) {
-    return (
-      <EmptyState
-        card={false}
-        size="sm"
-        title="No transactions yet"
-        description="Your reward earnings and payouts will appear here."
-      />
-    );
-  }
-
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full min-w-[640px] border-collapse text-left">
-        <thead>
-          <tr>
-            {columns.map((label) => (
-              <th
-                key={label}
-                className="py-2.5 text-xs font-medium text-muted-foreground"
-              >
-                {label}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {entries.map((entry) => (
-            <tr key={entry.id} className="border-t border-border-muted">
-              <td className="py-3 text-muted-foreground">{entry.date}</td>
-              <td className="py-3 font-medium text-foreground">
-                {entry.description}
-              </td>
-              <td className="py-3 text-muted-foreground">{entry.type}</td>
-              <td className="py-3">
-                <StatusBadge status={entry.status} />
-              </td>
-              <td className="py-3 font-bold text-foreground">{entry.amount}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <ProjectTable
+      columns={columns}
+      isLoading={isLoading}
+      loadingRows={4}
+      isEmpty={entries.length === 0}
+      emptyTitle="No transactions yet"
+      emptyDescription="Your reward earnings and payouts will appear here."
+      className="border-0 rounded-[14px]"
+      minWidth="min-w-[700px]"
+    >
+      {entries.map((entry) => (
+        <ProjectTableRow key={entry.id}>
+          <ProjectTableCell className="whitespace-nowrap text-muted-foreground">
+            {entry.date}
+          </ProjectTableCell>
+          <ProjectTableCell className="font-medium text-foreground">
+            {entry.description}
+          </ProjectTableCell>
+          <ProjectTableCell className="whitespace-nowrap text-muted-foreground">
+            {entry.type}
+          </ProjectTableCell>
+          <ProjectTableCell>
+            <StatusBadge status={entry.status} />
+          </ProjectTableCell>
+          <ProjectTableCell align="right" className="font-bold text-foreground">
+            {entry.amount}
+          </ProjectTableCell>
+        </ProjectTableRow>
+      ))}
+    </ProjectTable>
   );
 }

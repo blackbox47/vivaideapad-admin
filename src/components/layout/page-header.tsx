@@ -14,21 +14,23 @@ export default function PageHeader({
   action,
 }: PageHeaderProps) {
   return (
-    <section className="mb-5 mt-[18px] flex flex-wrap items-end justify-between gap-4">
+    <section className="mb-5 sm:mb-6 mt-3 sm:mt-[18px] flex flex-col sm:flex-row sm:items-end justify-between gap-3 sm:gap-4">
       <div>
         {eyebrow ? (
-          <p className="text-xs font-extrabold tracking-[0.12em] text-brand-sage uppercase">
+          <p className="text-[11px] sm:text-xs font-bold sm:font-extrabold tracking-wider sm:tracking-[0.12em] text-brand-sage uppercase">
             {eyebrow}
           </p>
         ) : null}
-        <h1 className="mt-1.5 font-heading text-display font-extrabold tracking-display text-foreground">
+        <h1 className="mt-1 font-heading text-2xl sm:text-3xl md:text-display font-bold sm:font-extrabold tracking-tight md:tracking-display text-foreground leading-tight">
           {title}
         </h1>
         {description ? (
-          <p className="mt-1.5 text-base text-muted-foreground">{description}</p>
+          <p className="mt-1 text-xs sm:text-sm md:text-base text-muted-foreground leading-relaxed">
+            {description}
+          </p>
         ) : null}
       </div>
-      {action}
+      {action ? <div className="w-full sm:w-auto">{action}</div> : null}
     </section>
   );
 }
