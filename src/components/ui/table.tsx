@@ -2,15 +2,33 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
-function Table({ className, ...props }: React.ComponentProps<"table">) {
+interface TableProps extends React.ComponentProps<"table"> {
+  containerClassName?: string;
+  containerRef?: React.Ref<HTMLDivElement>;
+  pinColumns?: boolean;
+}
+
+function Table({
+  className,
+  containerClassName,
+  containerRef,
+  pinColumns = false,
+  ...props
+}: TableProps) {
   return (
     <div
+      ref={containerRef}
       data-slot="table-container"
-      className="relative w-full overflow-x-auto"
+      className={cn("relative w-full overflow-x-auto", containerClassName)}
     >
       <table
         data-slot="table"
-        className={cn("w-full caption-bottom text-sm", className)}
+        className={cn(
+          "w-full caption-bottom text-sm",
+          pinColumns &&
+            "[&_th:first-child]:sticky [&_th:first-child]:left-0 [&_th:first-child]:z-20 [&_th:last-child]:sticky [&_th:last-child]:right-0 [&_th:last-child]:z-20 [&_td:first-child:not([colspan])]:sticky [&_td:first-child:not([colspan])]:left-0 [&_td:first-child:not([colspan])]:z-10 [&_td:first-child:not([colspan])]:bg-card [&_td:last-child:not([colspan])]:sticky [&_td:last-child:not([colspan])]:right-0 [&_td:last-child:not([colspan])]:z-10 [&_td:last-child:not([colspan])]:bg-card",
+          className
+        )}
         {...props}
       />
     </div>
@@ -104,6 +122,7 @@ function TableCaption({
 
 export {
   Table,
+  type TableProps,
   TableHeader,
   TableBody,
   TableFooter,

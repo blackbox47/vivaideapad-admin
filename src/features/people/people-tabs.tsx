@@ -30,10 +30,9 @@ export default function PeopleTabs({
   };
 
   return (
-    <div
-      className="mb-[18px] flex w-fit flex-wrap gap-2 rounded-full border border-border bg-card p-[5px]"
-      role="navigation"
-      aria-label="People lists"
+    <nav
+      className="mb-5 flex items-center gap-2 overflow-x-auto no-scrollbar pb-1"
+      aria-label="Filter tabs"
     >
       {TABS.map((item) => {
         const isActive = tab === item.id;
@@ -49,16 +48,16 @@ export default function PeopleTabs({
             replace
             aria-current={isActive ? 'page' : undefined}
             className={cn(
-              'rounded-full px-[18px] py-[9px] text-[13px] font-bold no-underline transition-colors',
+              'inline-flex items-center whitespace-nowrap rounded-full text-xs transition-colors no-underline',
               isActive
-                ? 'bg-primary text-primary-foreground'
-                : 'text-muted-foreground hover:text-foreground',
+                ? 'bg-primary text-primary-foreground shadow-xs font-semibold px-4 py-2'
+                : 'bg-card text-muted-foreground border border-border hover:border-foreground/30 hover:text-foreground font-medium px-3.5 py-2',
             )}
           >
             {item.label} · {counts[item.id]}
           </Link>
         );
       })}
-    </div>
+    </nav>
   );
 }

@@ -13,6 +13,7 @@ import {
   CREATOR_IDEAS_SUBMIT_URL,
   CREATOR_TOPICS_URL,
 } from '@/utils/constants/api-end-points';
+import { formatDisplayDate } from '@/utils/helpers/format-display-date';
 
 export const creatorIdeasService = baseService.injectEndpoints({
   endpoints: (builder) => ({
@@ -102,9 +103,8 @@ export const creatorIdeasService = baseService.injectEndpoints({
             id: String(res.id ?? ''),
             title: String(res.title ?? ''),
             topic: String(res.concept_id ?? ''),
-            submitted: String(res.created_at ?? new Date().toISOString()).slice(
-              0,
-              10,
+            submitted: formatDisplayDate(
+              String(res.created_at ?? new Date().toISOString()),
             ),
             status: 'Draft',
             reward: res.reward_amount ? `$${res.reward_amount}` : '$0',

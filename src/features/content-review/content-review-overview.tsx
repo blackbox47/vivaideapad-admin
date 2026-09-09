@@ -22,6 +22,7 @@ import ReviewTable from '@/features/content-review/review-table';
 import SubmissionReviewPanel from '@/features/content-review/submission-review-panel';
 import useContentReview from '@/hooks/content-review/use-content-review';
 import type { SubmissionStatus } from '@/models/content-review/content-review-model';
+import { toast } from '@/components/ui/sonner';
 import { DEFAULT_PAGE_SIZE as PAGE_SIZE } from '@/utils/constants/pagination';
 
 export default function ContentReviewOverview() {
@@ -73,8 +74,11 @@ export default function ContentReviewOverview() {
       .unwrap()
       .then(() => {
         setReviewId(null);
+        toast.success(`Submission marked as ${nextStatus.toLowerCase()}`);
       })
-      .catch(() => undefined);
+      .catch(() => {
+        toast.error('Failed to update submission decision');
+      });
   };
 
   if (isError) {

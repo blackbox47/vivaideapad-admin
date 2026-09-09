@@ -7,7 +7,6 @@ const STATUS_CLASS: Record<string, string> = {
   Suspended: 'bg-danger-subtle text-danger',
   Draft: 'bg-info-subtle text-info',
   Submitted: 'bg-info-subtle text-info',
-  Scheduled: 'bg-info-subtle text-info',
   'Revision Requested': 'bg-warning-subtle text-warning',
   Invited: 'bg-warning-subtle text-warning',
   'Under Review': 'bg-warning-subtle text-warning',

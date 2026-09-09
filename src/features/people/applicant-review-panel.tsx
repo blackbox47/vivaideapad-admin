@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import type { Applicant, ApplicantStatus } from '@/models/people/people-model';
+import { formatDisplayDate } from '@/utils/helpers/format-display-date';
 
 interface ApplicantReviewPanelProps {
   applicant: Applicant;
@@ -73,7 +74,9 @@ export default function ApplicantReviewPanel({
             <span className="mb-0.5 block text-[11px] text-muted-foreground">
               Submitted
             </span>
-            <strong className="text-foreground">{applicant.submitted}</strong>
+            <strong className="text-foreground">
+              {formatDisplayDate(applicant.submitted)}
+            </strong>
           </div>
           <div>
             <span className="mb-0.5 block text-[11px] text-muted-foreground">Source</span>

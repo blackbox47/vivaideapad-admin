@@ -19,7 +19,7 @@ export interface Payout {
   amount: string;
   /** Numeric amount (always positive). */
   amountValue: number;
-  /** Pre-formatted date string (DD-MM-YYYY) used by the table. */
+  /** Pre-formatted date string (DD.MM.YYYY) used by the table. */
   requested: string;
   /** ISO timestamp used internally for sorting and aggregation. */
   requestedAt: string;

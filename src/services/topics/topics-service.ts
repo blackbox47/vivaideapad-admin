@@ -14,10 +14,13 @@ import type {
   UpdateConceptBody,
   UpdateConceptResponse,
   ConceptDeleteResponse,
+  BulkConceptActionBody,
+  BulkConceptActionResponse,
 } from '@/models/topics/topics-model';
 import { baseService } from '@/services/core/base-service';
 import {
   CONCEPTS_URL,
+  CONCEPTS_BULK_ACTION_URL,
   CONCEPT_DETAIL_URL,
   CONCEPT_STATUS_URL,
 } from '@/utils/constants/api-end-points';
@@ -57,6 +60,15 @@ export const topicsService = baseService.injectEndpoints({
         if (Array.isArray(res.data)) {
           const concepts: Concept[] = res.data.map((item: Record<string, unknown>) => {
             const metadata = (item.metadata as Record<string, unknown>) ?? {};
+            const isOnboarding =
+              typeof item.is_onboarding === 'boolean'
+                ? item.is_onboarding
+                : item.is_onboarding !== undefined
+                  ? Boolean(item.is_onboarding)
+                  : item.isOnboarding !== undefined
+                    ? Boolean(item.isOnboarding)
+                    : Boolean(metadata.is_onboarding ?? metadata.isOnboarding ?? metadata.for_new_users ?? false);
+
             return {
               id: String(item.id ?? ''),
               title: String(item.title ?? ''),
@@ -74,6 +86,8 @@ export const topicsService = baseService.injectEndpoints({
               categoryId: item.category_id ? String(item.category_id) : undefined,
               openDate: item.open_date ? String(item.open_date) : undefined,
               closeDate: item.close_date ? String(item.close_date) : undefined,
+              forNewUsers: isOnboarding,
+              isOnboarding,
             };
           });
 
@@ -103,6 +117,15 @@ export const topicsService = baseService.injectEndpoints({
 
         // 2. Live API format: SerializedConcept
         const metadata = (res.metadata as Record<string, unknown>) ?? {};
+        const isOnboarding =
+          typeof res.is_onboarding === 'boolean'
+            ? res.is_onboarding
+            : res.is_onboarding !== undefined
+              ? Boolean(res.is_onboarding)
+              : res.isOnboarding !== undefined
+                ? Boolean(res.isOnboarding)
+                : Boolean(metadata.is_onboarding ?? metadata.isOnboarding ?? metadata.for_new_users ?? false);
+
         const concept: ConceptDetail = {
           id: String(res.id ?? ''),
           title: String(res.title ?? ''),
@@ -117,6 +140,8 @@ export const topicsService = baseService.injectEndpoints({
           closeDate: res.close_date ? String(res.close_date) : undefined,
           categoryId: res.category_id ? String(res.category_id) : undefined,
           rewardGuidance: typeof res.reward_budget === 'string' ? `$${res.reward_budget}` : undefined,
+          forNewUsers: isOnboarding,
+          isOnboarding,
         };
 
         return { concept };
@@ -160,6 +185,17 @@ export const topicsService = baseService.injectEndpoints({
       }),
       invalidatesTags: ['concepts', 'categories'],
     }),
+    bulkConceptAction: builder.mutation<
+      BulkConceptActionResponse,
+      BulkConceptActionBody
+    >({
+      query: (body) => ({
+        url: CONCEPTS_BULK_ACTION_URL,
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['concepts', 'categories'],
+    }),
   }),
 });
 
@@ -171,6 +207,7 @@ export const {
   useUpdateConceptMutation,
   useTransitionConceptStatusMutation,
   useDeleteConceptMutation,
+  useBulkConceptActionMutation,
 } = topicsService;
 
 // =====================================================================
@@ -189,7 +226,7 @@ const MONTH_INDEX: Record<string, number> = {
 };
 
 /**
- * Parse "27 Aug" / "27 Aug 2026" / "27/08/2026" → ISO `YYYY-MM-DD`.
+ * Parse "27 Aug" / "02.06.2026" / "27/08/2026" → ISO `YYYY-MM-DD`.
  * Returns `undefined` for blank / unparseable input.
  */
 export function parseConceptDate(input: string | undefined): string | undefined {
@@ -210,10 +247,22 @@ export function parseConceptDate(input: string | undefined): string | undefined 
     return d.toISOString().slice(0, 10);
   }
 
-  // 2. ISO `YYYY-MM-DD` already
+  // 2. `02.06.2026` / `02-06-2026`
+  const dotted = /^(\d{1,2})[.-](\d{1,2})[.-](\d{4})$/.exec(trimmed);
+  if (dotted) {
+    const day = Number(dotted[1]);
+    const month = Number(dotted[2]);
+    const year = Number(dotted[3]);
+    if (month < 1 || month > 12 || day < 1 || day > 31) return '';
+    const d = new Date(Date.UTC(year, month - 1, day));
+    if (Number.isNaN(d.getTime())) return '';
+    return d.toISOString().slice(0, 10);
+  }
+
+  // 3. ISO `YYYY-MM-DD` already
   if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return trimmed;
 
-  // 3. Last resort — `new Date(...)` for any other locale format.
+  // 4. Last resort — `new Date(...)` for any other locale format.
   const d = new Date(trimmed);
   if (!Number.isNaN(d.getTime())) return d.toISOString().slice(0, 10);
   return '';
@@ -236,10 +285,9 @@ export function parseReward(input: string | undefined): number {
  */
 export function normalizeConceptStatus(raw: unknown): ConceptStatus {
   if (raw === 'published') return 'active';
-  if (raw === 'closed') return 'archived';
+  if (raw === 'closed' || raw === 'scheduled') return 'archived';
   if (
     raw === 'draft' ||
-    raw === 'scheduled' ||
     raw === 'active' ||
     raw === 'archived'
   ) {
@@ -252,7 +300,6 @@ export function normalizeConceptStatus(raw: unknown): ConceptStatus {
  * Map the FE `ConceptStatus` enum to the BE `BackendConceptStatus` enum.
  * Frontend and backend statuses are now fully aligned:
  *   draft     → draft
- *   scheduled → scheduled
  *   active    → active
  *   archived  → archived
  */
@@ -284,6 +331,7 @@ export function toApiCreateBody(input: CreateConceptBody): ApiCreateConceptBody 
     title: input.title,
     brief: input.description,
     reward_budget: parseReward(input.reward),
+    is_onboarding: Boolean(input.isOnboarding ?? false),
     status: mapStatusForBackend(input.status),
     metadata: { icon: input.icon || '✦' },
   };
@@ -306,6 +354,7 @@ export function toApiUpdateBody(
   if (input.description !== undefined) body.brief = input.description;
   if (input.icon !== undefined) body.metadata = { icon: input.icon || '✦' };
   if (input.reward !== undefined) body.reward_budget = parseReward(input.reward);
+  if (input.isOnboarding !== undefined) body.is_onboarding = input.isOnboarding;
   if (input.status !== undefined) body.status = mapStatusForBackend(input.status);
   if (input.opensOn !== undefined) {
     const openDate = parseConceptDate(input.opensOn);

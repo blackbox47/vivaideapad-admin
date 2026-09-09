@@ -216,9 +216,13 @@
 }
 
 @theme inline {
-  --font-heading: 'Manrope Variable', sans-serif;
-  --font-sans: 'DM Sans', sans-serif;
-  --font-jakarta: 'Plus Jakarta Sans', sans-serif;
+  --font-heading: "Manrope Variable", sans-serif;
+  --font-sans: "DM Sans", sans-serif;
+  --font-jakarta: "Plus Jakarta Sans", sans-serif;
+  --font-urbanist: "Urbanist", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+  --font-jetbrains: "JetBrains Mono", monospace;
+  --font-bengali: "Noto Sans Bengali", sans-serif;
   /* Fluid page-title scale shared by every route heading. */
   --text-display: clamp(28px, 3.5vw, 42px);
   --text-display--line-height: 1.1;
@@ -359,5 +363,13 @@
   [type="reset"]:disabled,
   [type="submit"]:disabled {
     cursor: not-allowed;
+  }
+}
+
+@utility no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
   }
 }

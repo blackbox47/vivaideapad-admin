@@ -1,8 +1,11 @@
 import { format, isValid, parse, startOfDay } from 'date-fns';
 
-const DISPLAY_FORMAT = 'd MMM';
+const DISPLAY_FORMAT = 'dd.MM.yyyy';
 
 const TYPED_FORMATS = [
+  'dd.MM.yyyy',
+  'd.M.yyyy',
+  'dd-MM-yyyy',
   'd MMM',
   'd MMMM',
   'd MMM yyyy',

@@ -5,6 +5,7 @@ import { Link, useNavigate } from '@tanstack/react-router';
 import { ArrowLeft, Eye, EyeOff, Loader2, Lock, ShieldCheck } from 'lucide-react';
 
 import { Input } from '@/components/ui/input';
+import { toast } from '@/components/ui/sonner';
 import useAuth from '@/hooks/auth/use-auth';
 import {
   adminSignInSchema,
@@ -40,6 +41,7 @@ export default function AdminSignInPanel({
     resetLoginError();
     try {
       await login(values, { asRole: 'admin' });
+      toast.success('Welcome to the admin workspace');
       // Always land on the admin dashboard after sign-in.
       navigate({ to: ADMIN_ROUTES.dashboard, replace: true });
     } catch {

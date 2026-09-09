@@ -1,13 +1,25 @@
 import EmptyState from '@/components/shared/empty-state';
 import StatusBadge from '@/components/shared/status-badge';
-import TableActions from '@/components/shared/table-actions';
-import type { Applicant } from '@/models/people/people-model';
+import {
+  ProjectTableCell,
+  ProjectTableRow,
+} from '@/components/ui/project-table';
 import PeopleTable from '@/features/people/people-table';
+import type { Applicant } from '@/models/people/people-model';
+import { formatDisplayDate } from '@/utils/helpers/format-display-date';
 
 interface ApplicantsTableProps {
   applicants: Applicant[];
   onReview: (id: string) => void;
 }
+
+const COLUMNS = [
+  'Applicant',
+  'Topic',
+  'Submitted',
+  'Status',
+  { label: 'Action', align: 'right' as const },
+];
 
 export default function ApplicantsTable({
   applicants,
@@ -23,34 +35,36 @@ export default function ApplicantsTable({
   }
 
   return (
-    <PeopleTable columns={['Applicant', 'Topic', 'Submitted', 'Status', '']}>
+    <PeopleTable columns={COLUMNS}>
       {applicants.map((applicant) => (
-        <tr key={applicant.id} className="border-t border-border-muted">
-          <td className="px-[18px] py-3.5">
-            <strong className="font-semibold text-foreground">
+        <ProjectTableRow key={applicant.id}>
+          <ProjectTableCell>
+            <div className="font-bold text-foreground text-sm">
               {applicant.name}
-            </strong>
-            <div className="text-[11px] text-muted-foreground">{applicant.title}</div>
-          </td>
-          <td className="px-[18px] py-3.5 text-muted-foreground">{applicant.topic}</td>
-          <td className="px-[18px] py-3.5 whitespace-nowrap text-muted-foreground">
-            {applicant.submitted}
-          </td>
-          <td className="px-[18px] py-3.5">
+            </div>
+            <div className="text-[11px] text-muted-foreground truncate">
+              {applicant.title}
+            </div>
+          </ProjectTableCell>
+          <ProjectTableCell className="font-medium text-foreground/80 whitespace-nowrap">
+            {applicant.topic}
+          </ProjectTableCell>
+          <ProjectTableCell className="whitespace-nowrap font-mono text-[11px] text-muted-foreground">
+            {formatDisplayDate(applicant.submitted)}
+          </ProjectTableCell>
+          <ProjectTableCell className="whitespace-nowrap">
             <StatusBadge status={applicant.status} />
-          </td>
-          <td className="px-[18px] py-3.5">
-            <TableActions>
-              <button
-                type="button"
-                className="rounded-full border border-border bg-card px-[13px] py-[7px] text-xs font-bold text-foreground hover:bg-surface-subtle transition-colors cursor-pointer"
-                onClick={() => onReview(applicant.id)}
-              >
-                Review
-              </button>
-            </TableActions>
-          </td>
-        </tr>
+          </ProjectTableCell>
+          <ProjectTableCell align="right" className="whitespace-nowrap">
+            <button
+              type="button"
+              className="inline-flex items-center justify-center rounded-full border border-border bg-card px-4 py-1.5 text-xs font-semibold text-foreground shadow-xs hover:bg-surface-subtle active:scale-95 transition-all cursor-pointer"
+              onClick={() => onReview(applicant.id)}
+            >
+              Review
+            </button>
+          </ProjectTableCell>
+        </ProjectTableRow>
       ))}
     </PeopleTable>
   );

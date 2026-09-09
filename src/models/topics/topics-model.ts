@@ -1,6 +1,5 @@
 export const CONCEPT_STATUSES = [
   'draft',
-  'scheduled',
   'active',
   'archived',
 ] as const;
@@ -38,6 +37,8 @@ export interface Concept {
   categoryId?: string;
   openDate?: string;
   closeDate?: string;
+  forNewUsers?: boolean;
+  isOnboarding?: boolean;
 }
 
 export interface ConceptListParams {
@@ -62,6 +63,7 @@ export interface CreateConceptBody {
   closesOn: string;
   reward: string;
   status: ConceptStatus;
+  isOnboarding?: boolean;
   /**
    * Resolved UUID of the chosen category. Set by `useCreateConcept` after
    * looking the category up via GET /admin/categories. Optional for
@@ -80,6 +82,7 @@ export interface ApiCreateConceptBody {
   title: string;
   brief: string;
   reward_budget: number;
+  is_onboarding?: boolean;
   status: BackendConceptStatus;
   open_date?: string;
   close_date?: string;
@@ -89,7 +92,6 @@ export interface ApiCreateConceptBody {
 /** Mirror of `CONCEPT_STATUSES` on the backend (`concept.entity.ts:11`). */
 export const BACKEND_CONCEPT_STATUSES = [
   'draft',
-  'scheduled',
   'active',
   'archived',
 ] as const;
@@ -121,6 +123,7 @@ export interface UpdateConceptBody {
   closesOn?: string;
   reward?: string;
   status?: ConceptStatus;
+  isOnboarding?: boolean;
   categoryId?: string;
 }
 
@@ -133,6 +136,7 @@ export interface ApiUpdateConceptBody {
   title?: string;
   brief?: string;
   reward_budget?: number;
+  is_onboarding?: boolean;
   status?: BackendConceptStatus;
   open_date?: string;
   close_date?: string;
@@ -157,4 +161,26 @@ export interface TransitionConceptStatusResponse {
 export interface ConceptDeleteResponse {
   id: string;
   deletedAt: string;
+}
+
+export type BulkConceptActionType =
+  | 'set_status'
+  | 'set_for_new_users'
+  | 'set_is_onboarding'
+  | 'remove_is_onboarding'
+  | 'duplicate'
+  | 'delete';
+
+export interface BulkConceptActionBody {
+  action: BulkConceptActionType;
+  ids: string[];
+  status?: ConceptStatus;
+  for_new_users?: boolean;
+  is_onboarding?: boolean;
+}
+
+export interface BulkConceptActionResponse {
+  success: boolean;
+  affected: number;
+  duplicated?: unknown[];
 }

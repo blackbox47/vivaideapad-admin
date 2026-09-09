@@ -7,6 +7,7 @@ import type {
   ContentSubmission,
   SubmissionStatus,
 } from '@/models/content-review/content-review-model';
+import { formatDisplayDate } from '@/utils/helpers/format-display-date';
 
 interface SubmissionReviewPanelProps {
   submission: ContentSubmission;
@@ -72,7 +73,7 @@ export default function SubmissionReviewPanel({
 
         <div className="mb-3.5 flex gap-3.5 text-xs text-muted-foreground">
           <span>{submission.contributor}</span>·<span>{submission.topic}</span>·
-          <span>{submission.submitted}</span>
+          <span>{formatDisplayDate(submission.submitted)}</span>
         </div>
 
         <div className="mb-3.5 flex flex-wrap gap-2.5">

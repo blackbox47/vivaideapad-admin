@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as SplatRouteImport } from './routes/$'
 import { Route as PrivatecreatorRouteRouteImport } from './routes/_privatecreator/route'
 import { Route as PubliccreatorRouteRouteImport } from './routes/_publiccreator/route'
@@ -40,6 +41,11 @@ import { Route as AdminAdminReportsRouteImport } from './routes/admin/_admin/rep
 import { Route as AdminAdminRewardsRouteImport } from './routes/admin/_admin/rewards'
 import { Route as AdminAdminTopicsRouteImport } from './routes/admin/_admin/topics'
 
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SplatRoute = SplatRouteImport.update({
   id: '/$',
   path: '/$',
@@ -196,7 +202,7 @@ const AdminAdminTopicsRoute = AdminAdminTopicsRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof PubliccreatorRouteRouteWithChildren
+  '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/dashboard': typeof PrivatecreatorDashboardRoute
   '/leaderboard': typeof PrivatecreatorLeaderboardRoute
@@ -227,7 +233,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminAdminIndexRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof PubliccreatorRouteRouteWithChildren
+  '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/dashboard': typeof PrivatecreatorDashboardRoute
   '/leaderboard': typeof PrivatecreatorLeaderboardRoute
@@ -258,6 +264,7 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
   '/_privatecreator': typeof PrivatecreatorRouteRouteWithChildren
   '/_publiccreator': typeof PubliccreatorRouteRouteWithChildren
   '/$': typeof SplatRoute
@@ -353,6 +360,7 @@ export interface FileRouteTypes {
     | '/admin'
   id:
     | '__root__'
+    | '/'
     | '/_privatecreator'
     | '/_publiccreator'
     | '/$'
@@ -386,6 +394,7 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
   PrivatecreatorRouteRoute: typeof PrivatecreatorRouteRouteWithChildren
   PubliccreatorRouteRoute: typeof PubliccreatorRouteRouteWithChildren
   SplatRoute: typeof SplatRoute
@@ -396,6 +405,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/$': {
       id: '/$'
       path: '/$'
@@ -686,6 +702,7 @@ const AdminAdminRouteWithChildren = AdminAdminRoute._addFileChildren(
 )
 
 const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
   PrivatecreatorRouteRoute: PrivatecreatorRouteRouteWithChildren,
   PubliccreatorRouteRoute: PubliccreatorRouteRouteWithChildren,
   SplatRoute: SplatRoute,

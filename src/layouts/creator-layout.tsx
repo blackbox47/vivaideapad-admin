@@ -1,5 +1,6 @@
 import { Outlet } from '@tanstack/react-router';
 
+import CreatorBottomNav from '@/components/layout/creator-bottom-nav';
 import CreatorHeader from '@/components/layout/creator-header';
 import CreatorSidebar from '@/components/layout/creator-sidebar';
 import { NotificationsStreamBootstrap } from '@/components/notifications/notifications-stream-bootstrap';
@@ -13,13 +14,14 @@ export default function CreatorLayout() {
         <div className="sticky top-0 hidden h-svh md:block">
           <CreatorSidebar />
         </div>
-        <div className="flex min-w-0 flex-1 flex-col px-3 pb-[90px] md:px-[34px] md:pb-[45px]">
+        <div className="flex min-w-0 flex-1 flex-col px-3 pb-24 md:px-[34px] md:pb-[45px]">
           <CreatorHeader />
           <main className="min-w-0 flex-1">
             <Outlet />
           </main>
         </div>
       </div>
+      <CreatorBottomNav />
     </TooltipProvider>
   );
 }

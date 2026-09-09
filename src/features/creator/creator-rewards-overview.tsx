@@ -16,6 +16,7 @@ import WithdrawRequestDialog from '@/features/creator/withdraw-request-dialog';
 import useCreatorRewards from '@/hooks/creator/use-creator-rewards';
 import type { CreatorStat } from '@/models/creator/creator-dashboard-model';
 import type { CreatorRewardEntry } from '@/models/creator/creator-rewards-model';
+import { toast } from '@/components/ui/sonner';
 
 function exportEntries(entries: CreatorRewardEntry[]) {
   const header = 'Date,Description,Type,Status,Amount';
@@ -37,6 +38,7 @@ function exportEntries(entries: CreatorRewardEntry[]) {
   link.download = `ideapad-rewards-${day}.csv`;
   link.click();
   URL.revokeObjectURL(url);
+  toast.success('Transaction history exported');
 }
 
 export default function CreatorRewardsOverview() {
@@ -52,7 +54,6 @@ export default function CreatorRewardsOverview() {
     withdrawError,
   } = useCreatorRewards();
   const [isWithdrawOpen, setIsWithdrawOpen] = useState(false);
-  const [toast, setToast] = useState<string | null>(null);
 
   if (isError) {
     return (
@@ -111,8 +112,7 @@ export default function CreatorRewardsOverview() {
     try {
       await requestWithdrawal(payload).unwrap();
       closeWithdraw();
-      setToast('Withdrawal request submitted');
-      window.setTimeout(() => setToast(null), 3200);
+      toast.success('Withdrawal request submitted');
     } catch {
       // Error is surfaced via withdrawError.
     }
@@ -167,12 +167,6 @@ export default function CreatorRewardsOverview() {
           onClose={closeWithdraw}
           onSubmit={handleWithdraw}
         />
-      ) : null}
-
-      {toast ? (
-        <div className="fixed bottom-6.5 left-1/2 z-60 -translate-x-1/2 rounded-full bg-primary px-5.5 py-3.5 text-[13px] font-semibold text-primary-foreground shadow-2xl">
-          {toast}
-        </div>
       ) : null}
     </div>
   );

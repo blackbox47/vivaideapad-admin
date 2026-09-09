@@ -24,6 +24,7 @@ import usePayouts from '@/hooks/payouts/use-payouts';
 import type {
   PayoutStatus,
 } from '@/models/payouts/payouts-model';
+import { toast } from '@/components/ui/sonner';
 import { DEFAULT_PAGE_SIZE as PAGE_SIZE } from '@/utils/constants/pagination';
 
 export default function PayoutsOverview() {
@@ -78,8 +79,11 @@ export default function PayoutsOverview() {
       .unwrap()
       .then(() => {
         setProcessId(null);
+        toast.success(`Payout marked as ${nextStatus.toLowerCase()}`);
       })
-      .catch(() => undefined);
+      .catch(() => {
+        toast.error('Failed to update payout status');
+      });
   };
 
   if (isError) {

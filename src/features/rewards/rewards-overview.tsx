@@ -23,6 +23,7 @@ import RewardTable from '@/features/rewards/reward-table';
 import useCreateAdjustment from '@/hooks/rewards/use-create-adjustment';
 import useRewards from '@/hooks/rewards/use-rewards';
 import type { CreateAdjustmentBody } from '@/models/rewards/rewards-model';
+import { toast } from '@/components/ui/sonner';
 import { DEFAULT_PAGE_SIZE as PAGE_SIZE } from '@/utils/constants/pagination';
 import { getApiErrorMessage } from '@/utils/helpers/api-error';
 
@@ -48,7 +49,6 @@ export default function RewardsOverview() {
   } = useRewards({ type, search });
   const [createAdjustment, createState] = useCreateAdjustment();
   const [isAdjustOpen, setIsAdjustOpen] = useState(false);
-  const [toast, setToast] = useState<string | null>(null);
 
   const contributors = useMemo(() => {
     return [...new Set(entries.map((entry) => entry.contributor))].sort((a, b) =>
@@ -65,8 +65,7 @@ export default function RewardsOverview() {
     try {
       await createAdjustment(body).unwrap();
       closeAdjustment();
-      setToast('Adjustment recorded');
-      window.setTimeout(() => setToast(null), 3200);
+      toast.success('Adjustment recorded');
     } catch {
       // Error is surfaced via createState.error.
     }
@@ -181,12 +180,6 @@ export default function RewardsOverview() {
           onClose={closeAdjustment}
           onSubmit={handleCreateAdjustment}
         />
-      ) : null}
-
-      {toast ? (
-        <div className="fixed bottom-6.5 left-1/2 z-60 -translate-x-1/2 rounded-full bg-primary px-5.5 py-3.5 text-[13px] font-semibold text-primary-foreground shadow-2xl">
-          {toast}
-        </div>
       ) : null}
     </div>
   );

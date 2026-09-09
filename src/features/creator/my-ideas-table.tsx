@@ -7,6 +7,7 @@ import {
   ProjectTableRow,
 } from '@/components/ui/project-table';
 import type { MyIdea } from '@/models/creator/my-ideas-model';
+import { formatDisplayDate } from '@/utils/helpers/format-display-date';
 
 interface MyIdeasTableProps {
   items: MyIdea[];
@@ -46,7 +47,7 @@ export default function MyIdeasTable({
             {idea.conceptTitle ?? idea.topic ?? '—'}
           </ProjectTableCell>
           <ProjectTableCell className="whitespace-nowrap text-muted-foreground">
-            {idea.submitted}
+            {formatDisplayDate(idea.submitted)}
           </ProjectTableCell>
           <ProjectTableCell>
             <StatusBadge status={idea.status} />

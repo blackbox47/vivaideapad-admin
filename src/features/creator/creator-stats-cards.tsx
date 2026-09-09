@@ -12,49 +12,60 @@ export default function CreatorStatsCards({
   isLoading,
 }: CreatorStatsCardsProps) {
   return (
-    <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid grid-cols-2 gap-3 sm:gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
       {isLoading
         ? Array.from({ length: 4 }).map((_, index) => (
             <div
               key={index}
-              className="rounded-[20px] border border-border-subtle bg-card p-[22px]"
+              className="rounded-2xl border border-border-subtle bg-card p-4 sm:rounded-[20px] sm:p-[22px]"
             >
-              <Skeleton className="h-4 w-36" />
-              <Skeleton className="mt-5 h-9 w-16" />
-              <Skeleton className="mt-4 h-3 w-24" />
+              <Skeleton className="h-3.5 w-24 sm:h-4 sm:w-36" />
+              <Skeleton className="mt-3.5 h-7 w-14 sm:mt-5 sm:h-9 sm:w-16" />
+              <Skeleton className="mt-2.5 h-3 w-20 sm:mt-4 sm:w-24" />
             </div>
           ))
         : stats.map((stat) => (
             <article
               key={stat.id}
-              className="relative rounded-[20px] border border-border-subtle bg-card p-[22px] shadow-xs transition-[transform,box-shadow,border-color] duration-200 hover:-translate-y-1 hover:border-brand-lime hover:shadow-lg motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+              className="relative flex flex-col justify-between rounded-2xl border border-border-subtle bg-card p-4 shadow-xs transition-[transform,box-shadow,border-color] duration-200 hover:-translate-y-1 hover:border-brand-lime hover:shadow-lg sm:rounded-[20px] sm:p-[22px] motion-reduce:transition-none motion-reduce:hover:translate-y-0"
             >
-              <p className="text-[13px] text-muted-foreground">{stat.label}</p>
-              <p
-                className={cn(
-                  'mt-2.5 font-heading leading-none font-extrabold tracking-[-0.02em] text-foreground',
-                  stat.valueSize === 'md'
-                    ? 'text-[18px]'
-                    : stat.valueSize === 'lg'
-                      ? 'text-[26px]'
-                      : 'text-[32px]',
-                )}
-              >
-                {stat.value}
-              </p>
-              {stat.description ? (
+              <div>
+                <p className="text-[11px] font-medium text-slate-500 sm:text-[13px] dark:text-muted-foreground">
+                  {stat.label}
+                </p>
                 <p
                   className={cn(
-                    'mt-1 text-xs',
-                    stat.tone === 'positive' && 'text-success',
-                    stat.tone === 'danger' && 'text-destructive',
-                    stat.tone === 'muted' && 'text-brand-sage',
-                    (stat.tone === 'default' || !stat.tone) && 'text-muted-foreground',
+                    'mt-2 font-heading font-bold sm:font-extrabold leading-none tracking-tight text-foreground sm:mt-2.5',
+                    stat.valueSize === 'md'
+                      ? 'text-lg sm:text-[18px]'
+                      : stat.valueSize === 'lg'
+                        ? 'text-xl sm:text-[26px]'
+                        : 'text-xl sm:text-2xl lg:text-[32px]',
                   )}
                 >
-                  {stat.description}
+                  {stat.value}
                 </p>
-              ) : null}
+              </div>
+              <div className="mt-1.5 sm:mt-2 min-h-[16px]">
+                {stat.description ? (
+                  <p
+                    className={cn(
+                      'text-[11px] sm:text-xs',
+                      stat.tone === 'positive' && 'font-medium text-teal-600 dark:text-success',
+                      stat.tone === 'danger' && 'font-medium text-destructive',
+                      stat.tone === 'muted' && 'text-slate-400 dark:text-brand-sage',
+                      (stat.tone === 'default' || !stat.tone) &&
+                        'text-slate-400 dark:text-muted-foreground',
+                    )}
+                  >
+                    {stat.description}
+                  </p>
+                ) : (
+                  <span className="inline-block text-[11px] select-none opacity-0">
+                    &nbsp;
+                  </span>
+                )}
+              </div>
             </article>
           ))}
     </div>

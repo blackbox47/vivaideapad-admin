@@ -26,13 +26,13 @@ import { getApiErrorMessage } from '@/utils/helpers/api-error';
 import CategoryFormDialog from '@/features/categories/category-form-dialog';
 import EmptyState from '@/components/shared/empty-state';
 import TableActions from '@/components/shared/table-actions';
+import { toast } from '@/components/ui/sonner';
 
 export default function CategoriesOverview() {
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [editing, setEditing] = useState<Category | null>(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [toast, setToast] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<Category | null>(null);
 
   useEffect(() => {
@@ -55,11 +55,6 @@ export default function CategoriesOverview() {
     isDeleting,
   } = useCategories({ search: debouncedSearch });
 
-  const flash = (message: string) => {
-    setToast(message);
-    window.setTimeout(() => setToast(null), 2200);
-  };
-
   const handleSubmit = async (
     body: { name: string; icon: string; isActive: boolean },
     id?: string,
@@ -67,18 +62,18 @@ export default function CategoriesOverview() {
     if (id) {
       const ok = await updateCategory(id, body);
       if (ok) {
-        flash(`Category "${body.name}" updated`);
+        toast.success(`Category "${body.name}" updated`);
         setEditing(null);
       } else {
-        flash('Could not update category');
+        toast.error('Could not update category');
       }
     } else {
       const created = await createCategory(body);
       if (created) {
-        flash(`Category "${created.name}" created`);
+        toast.success(`Category "${created.name}" created`);
         setIsCreateOpen(false);
       } else {
-        flash('Could not create category');
+        toast.error('Could not create category');
       }
     }
   };
@@ -86,10 +81,10 @@ export default function CategoriesOverview() {
   const handleDelete = async (id: string) => {
     const ok = await deleteCategory(id);
     if (ok) {
-      flash('Category deleted');
+      toast.success('Category deleted');
       setConfirmDelete(null);
     } else {
-      flash('Could not delete category');
+      toast.error('Could not delete category');
     }
   };
 
@@ -106,15 +101,6 @@ export default function CategoriesOverview() {
           </Button>
         }
       />
-
-      {toast && (
-        <div
-          role="status"
-          className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700"
-        >
-          {toast}
-        </div>
-      )}
 
       <Card>
         <CardHeader>

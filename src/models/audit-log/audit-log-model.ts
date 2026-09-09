@@ -16,7 +16,7 @@ export const AUDIT_CATEGORY_FILTERS: readonly AuditCategoryFilter[] = [
 
 export interface AuditEvent {
   id: string;
-  /** Pre-formatted date string (DD-MM-YYYY) used by the row. */
+  /** Pre-formatted date string (DD.MM.YYYY) used by the row. */
   time: string;
   /** ISO timestamp used for sorting. */
   occurredAt: string;

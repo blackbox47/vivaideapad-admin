@@ -18,6 +18,7 @@ import ProfilePayoutMethodCard from '@/features/profile/profile-payout-method-ca
 import { ScreenLoader } from '@/components/shared/screen-loader';
 import useCreatorProfile from '@/hooks/creator/use-creator-profile';
 import type { UpdatePayoutMethodBody } from '@/models/profile/profile-model';
+import { toast } from '@/components/ui/sonner';
 
 export default function CreatorProfileOverview() {
   const {
@@ -65,6 +66,9 @@ export default function CreatorProfileOverview() {
     const ok = await changePayoutMethod(body);
     if (ok) {
       setIsPayoutOpen(false);
+      toast.success('Payout method updated');
+    } else {
+      toast.error('Could not update payout method');
     }
   };
 

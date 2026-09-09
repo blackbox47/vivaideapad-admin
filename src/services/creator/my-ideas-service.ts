@@ -5,6 +5,7 @@ import type {
 } from '@/models/creator/my-ideas-model';
 import { baseService } from '@/services/core/base-service';
 import { CREATOR_IDEAS_URL } from '@/utils/constants/api-end-points';
+import { formatDisplayDate } from '@/utils/helpers/format-display-date';
 
 export const myIdeasService = baseService.injectEndpoints({
   endpoints: (builder) => ({
@@ -33,6 +34,9 @@ export const myIdeasService = baseService.injectEndpoints({
               ...idea,
               conceptTitle,
               topic: conceptTitle,
+              submitted: formatDisplayDate(
+                String(idea.submitted ?? idea.created_at ?? ''),
+              ),
             } as MyIdea;
           });
           const total = typeof res.total === 'number' ? res.total : ideas.length;
@@ -68,7 +72,7 @@ export const myIdeasService = baseService.injectEndpoints({
               title: String(item.title ?? ''),
               conceptTitle,
               topic: conceptTitle,
-              submitted: String(item.created_at ?? '').slice(0, 10),
+              submitted: formatDisplayDate(String(item.created_at ?? '')),
               status: mapStatus(String(item.status ?? 'draft')),
               reward: item.reward_amount ? `$${item.reward_amount}` : '$0',
               comments: 0,

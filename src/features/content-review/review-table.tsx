@@ -6,6 +6,7 @@ import {
   ProjectTableRow,
 } from '@/components/ui/project-table';
 import type { ContentSubmission } from '@/models/content-review/content-review-model';
+import { formatDisplayDate } from '@/utils/helpers/format-display-date';
 
 interface ReviewTableProps {
   submissions: ContentSubmission[];
@@ -38,7 +39,7 @@ export default function ReviewTable({ submissions, onReview }: ReviewTableProps)
             {submission.topic}
           </ProjectTableCell>
           <ProjectTableCell className="whitespace-nowrap text-muted-foreground">
-            {submission.submitted}
+            {formatDisplayDate(submission.submitted)}
           </ProjectTableCell>
           <ProjectTableCell className="whitespace-nowrap">
             <StatusBadge status={submission.risk} />

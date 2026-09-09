@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import EmptyState from '@/components/shared/empty-state';
+import BulkActionBar from '@/features/topics/bulk-action-bar';
 import ConceptCard from '@/features/topics/concept-card';
 import ConceptFilters from '@/features/topics/concept-filters';
 import CreateConceptDialog from '@/features/topics/create-concept-dialog';
@@ -20,19 +21,21 @@ import EditConceptDialog from '@/features/topics/edit-concept-dialog';
 import useCreateConcept from '@/hooks/topics/use-create-concept';
 import useEditConcept from '@/hooks/topics/use-edit-concept';
 import useTopics from '@/hooks/topics/use-topics';
+import { useBulkConceptActionMutation } from '@/services/topics/topics-service';
 import type {
   Concept,
+  ConceptStatus,
   CreateConceptBody,
   UpdateConceptBody,
 } from '@/models/topics/topics-model';
 import { DEFAULT_PAGE_SIZE as PAGE_SIZE } from '@/utils/constants/pagination';
 import { getApiErrorMessage } from '@/utils/helpers/api-error';
+import { toast } from '@/components/ui/sonner';
 
 const STATUS_FILTERS = [
   'all',
   'active',
   'draft',
-  'scheduled',
   'archived',
 ] as const;
 
@@ -51,11 +54,15 @@ export default function TopicsOverview() {
   const status = parseStatus(searchParams.get('status'));
   const search = searchParams.get('q') ?? '';
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   const { data, isLoading, isError, error, refetch } = useTopics({
     status,
     search,
   });
+  const [bulkActionMutation, { isLoading: isBulkLoading }] =
+    useBulkConceptActionMutation();
+
   const {
     categories,
     submit: submitConcept,
@@ -72,11 +79,11 @@ export default function TopicsOverview() {
   } = useEditConcept();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingConcept, setEditingConcept] = useState<Concept | null>(null);
-  const [toast, setToast] = useState<string | null>(null);
 
   useEffect(() => {
     setTimeout(() => {
       setVisibleCount(PAGE_SIZE);
+      setSelectedIds(new Set());
     }, 0);
   }, [status, search]);
 
@@ -106,12 +113,9 @@ export default function TopicsOverview() {
     try {
       await submitConcept(body);
       closeCreate();
-      setToast('Concept saved');
-      window.setTimeout(() => setToast(null), 3200);
+      toast.success('Concept saved');
     } catch {
-      // The hook's submit() rejects with a clear message on missing-category
-      // lookup, and the mutation itself surfaces API errors via createError.
-      // The dialog renders `createError` through the inherited `error` prop.
+      // Handled by createError
     }
   };
 
@@ -119,10 +123,135 @@ export default function TopicsOverview() {
     try {
       await submitEditConcept(id, body);
       closeEdit();
-      setToast('Concept updated');
-      window.setTimeout(() => setToast(null), 3200);
+      toast.success('Concept updated');
     } catch {
-      // API errors surfaced via editError
+      // Handled by editError
+    }
+  };
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const deselectAll = () => {
+    setSelectedIds(new Set());
+  };
+
+  const concepts = data?.concepts ?? [];
+  const visibleConcepts = concepts.slice(0, visibleCount);
+  const remainingCount = Math.max(0, concepts.length - visibleCount);
+
+  const allVisibleSelected =
+    visibleConcepts.length > 0 &&
+    visibleConcepts.every((c) => selectedIds.has(c.id));
+
+  const toggleSelectAll = () => {
+    if (allVisibleSelected) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(visibleConcepts.map((c) => c.id)));
+    }
+  };
+
+  const handleSetActive = async () => {
+    if (selectedIds.size === 0) return;
+    try {
+      await bulkActionMutation({
+        action: 'set_status',
+        ids: Array.from(selectedIds),
+        status: 'active',
+      }).unwrap();
+      toast.success(
+        `Set ${selectedIds.size} ${selectedIds.size === 1 ? 'concept' : 'concepts'} to Active`,
+      );
+      deselectAll();
+    } catch (err) {
+      toast.error(getApiErrorMessage(err) || 'Failed to update status');
+    }
+  };
+
+  const handleSetOnboarding = async (flag: boolean) => {
+    if (selectedIds.size === 0) return;
+    try {
+      await bulkActionMutation({
+        action: flag ? 'set_is_onboarding' : 'remove_is_onboarding',
+        ids: Array.from(selectedIds),
+        is_onboarding: flag,
+      }).unwrap();
+      toast.success(
+        flag
+          ? `Marked ${selectedIds.size} ${selectedIds.size === 1 ? 'concept' : 'concepts'} as Onboarding (NEW)`
+          : `Removed Onboarding from ${selectedIds.size} ${selectedIds.size === 1 ? 'concept' : 'concepts'}`,
+      );
+      deselectAll();
+    } catch (err) {
+      toast.error(getApiErrorMessage(err) || 'Failed to update concepts');
+    }
+  };
+
+  const handleToggleForNewUsers = async () => {
+    if (selectedIds.size === 0) return;
+    const selectedConcepts = concepts.filter((c) => selectedIds.has(c.id));
+    const allAreOnboarding =
+      selectedConcepts.length > 0 &&
+      selectedConcepts.every((c) => c.isOnboarding);
+    await handleSetOnboarding(!allAreOnboarding);
+  };
+
+  const handleChangeStatus = async (newStatus: ConceptStatus) => {
+    if (selectedIds.size === 0) return;
+    try {
+      await bulkActionMutation({
+        action: 'set_status',
+        ids: Array.from(selectedIds),
+        status: newStatus,
+      }).unwrap();
+      toast.success(
+        `Updated ${selectedIds.size} ${selectedIds.size === 1 ? 'concept' : 'concepts'} to ${newStatus}`,
+      );
+      deselectAll();
+    } catch (err) {
+      toast.error(getApiErrorMessage(err) || 'Failed to update status');
+    }
+  };
+
+  const handleDuplicate = async () => {
+    if (selectedIds.size === 0) return;
+    try {
+      await bulkActionMutation({
+        action: 'duplicate',
+        ids: Array.from(selectedIds),
+      }).unwrap();
+      toast.success(
+        `Duplicated ${selectedIds.size} ${selectedIds.size === 1 ? 'concept' : 'concepts'}`,
+      );
+      deselectAll();
+    } catch (err) {
+      toast.error(getApiErrorMessage(err) || 'Failed to duplicate concepts');
+    }
+  };
+
+  const handleDelete = async () => {
+    if (selectedIds.size === 0) return;
+    try {
+      await bulkActionMutation({
+        action: 'delete',
+        ids: Array.from(selectedIds),
+      }).unwrap();
+      toast.success(
+        `Deleted ${selectedIds.size} ${selectedIds.size === 1 ? 'concept' : 'concepts'}`,
+      );
+      deselectAll();
+    } catch (err) {
+      toast.error(getApiErrorMessage(err) || 'Failed to delete concepts');
     }
   };
 
@@ -143,10 +272,6 @@ export default function TopicsOverview() {
     );
   }
 
-  const concepts = data?.concepts ?? [];
-  const visibleConcepts = concepts.slice(0, visibleCount);
-  const remainingCount = Math.max(0, concepts.length - visibleCount);
-
   return (
     <div>
       <PageHeader
@@ -157,7 +282,7 @@ export default function TopicsOverview() {
           <Button
             type="button"
             onClick={() => setIsCreateOpen(true)}
-            className="h-auto rounded-full bg-primary px-5 py-3 font-bold text-primary-foreground hover:bg-brand-forest"
+            className="h-auto rounded-full bg-primary px-5 py-3 font-bold text-primary-foreground hover:bg-brand-forest cursor-pointer"
           >
             + Create concept
           </Button>
@@ -168,6 +293,9 @@ export default function TopicsOverview() {
         status={status}
         search={search}
         visibleCount={concepts.length}
+        selectedCount={selectedIds.size}
+        allSelected={allVisibleSelected}
+        onToggleSelectAll={toggleSelectAll}
         onSearchChange={setSearch}
       />
 
@@ -189,6 +317,8 @@ export default function TopicsOverview() {
               <ConceptCard
                 key={concept.id}
                 concept={concept}
+                isSelected={selectedIds.has(concept.id)}
+                onToggleSelect={toggleSelect}
                 onEdit={(c) => setEditingConcept(c)}
               />
             ))}
@@ -198,7 +328,7 @@ export default function TopicsOverview() {
               <Button
                 type="button"
                 variant="outline"
-                className="h-auto rounded-full border-border bg-card px-6.5 py-3 text-[13px] font-bold text-foreground hover:bg-surface-subtle"
+                className="h-auto rounded-full border-border bg-card px-6.5 py-3 text-[13px] font-bold text-foreground hover:bg-surface-subtle cursor-pointer"
                 onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
               >
                 Show more concepts · {remainingCount} remaining
@@ -207,6 +337,18 @@ export default function TopicsOverview() {
           ) : null}
         </>
       )}
+
+      <BulkActionBar
+        selectedCount={selectedIds.size}
+        isLoading={isBulkLoading}
+        onSetActive={handleSetActive}
+        onToggleForNewUsers={handleToggleForNewUsers}
+        onSetOnboarding={handleSetOnboarding}
+        onChangeStatus={handleChangeStatus}
+        onDuplicate={handleDuplicate}
+        onDelete={handleDelete}
+        onDeselectAll={deselectAll}
+      />
 
       {isCreateOpen ? (
         <CreateConceptDialog
@@ -228,12 +370,7 @@ export default function TopicsOverview() {
           onSubmit={handleEdit}
         />
       ) : null}
-
-      {toast ? (
-        <div className="fixed bottom-6.5 left-1/2 z-60 -translate-x-1/2 rounded-full bg-primary px-5.5 py-3.5 text-[13px] font-semibold text-primary-foreground shadow-2xl">
-          {toast}
-        </div>
-      ) : null}
     </div>
   );
 }
+

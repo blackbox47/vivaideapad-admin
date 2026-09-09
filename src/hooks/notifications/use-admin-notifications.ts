@@ -9,6 +9,7 @@ import {
   useToggleAdminNotificationMutation,
 } from '@/services/notifications/admin-notifications-service';
 import { getApiErrorMessage } from '@/utils/helpers/api-error';
+import { toast } from '@/components/ui/sonner';
 
 interface UseAdminNotificationsResult {
   notifications: AdminNotification[];
@@ -55,7 +56,14 @@ export default function useAdminNotifications(
       void toggleNotification({ id });
     },
     markAllRead: () => {
-      void markAll();
+      void markAll()
+        .unwrap()
+        .then(() => {
+          toast.success('All notifications marked as read');
+        })
+        .catch(() => {
+          toast.error('Failed to mark notifications as read');
+        });
     },
     isMarkingAll,
   };

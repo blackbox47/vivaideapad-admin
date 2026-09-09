@@ -1,6 +1,7 @@
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import type { CreatorTopic } from '@/models/creator/submit-idea-model';
+import { formatDisplayDate } from '@/utils/helpers/format-display-date';
 
 interface SubmitIdeaTopicsProps {
   topics: CreatorTopic[];
@@ -78,7 +79,7 @@ export default function SubmitIdeaTopics({
                       {topic.reward}
                     </span>
                     <span className="text-xs font-medium lowercase tracking-wide text-muted-foreground">
-                      closes {topic.closesOn}
+                      closes {formatDisplayDate(topic.closesOn)}
                     </span>
                   </div>
                 </button>

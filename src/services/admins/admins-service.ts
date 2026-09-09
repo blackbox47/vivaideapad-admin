@@ -6,18 +6,8 @@ import type {
 } from '@/models/admins/admins-model';
 import { baseService } from '@/services/core/base-service';
 import { ADMIN_DETAIL_URL, ADMINS_URL } from '@/utils/constants/api-end-points';
+import { formatDisplayDate } from '@/utils/helpers/format-display-date';
 import { deriveInitials } from '@/utils/helpers/initials';
-
-function formatAddedOn(iso: string): string {
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) {
-    return iso;
-  }
-
-  const day = String(date.getDate()).padStart(2, '0');
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  return `${day}-${month}-${date.getFullYear()}`;
-}
 
 function isSerializedAdmin(value: unknown): value is SerializedAdminAccount {
   return (
@@ -45,7 +35,7 @@ export function toWorkspaceAdmin(
     access: isOwner ? 'owner' : 'admin',
     roleLabel: isOwner ? 'Super Admin' : 'Admin',
     initials: deriveInitials(account.display_name, account.email),
-    addedOn: formatAddedOn(addedAt),
+    addedOn: formatDisplayDate(addedAt),
     addedAt,
   };
 }

@@ -5,22 +5,40 @@ import {
   type ProjectTableColumn,
 } from '@/components/ui/project-table';
 
-interface PeopleTableProps {
-  columns: string[];
+export interface PeopleTableProps {
+  columns: Array<string | ProjectTableColumn>;
+  minWidth?: string;
+  pinColumns?: boolean;
+  className?: string;
   children: ReactNode;
 }
 
 /**
- * Thin wrapper around the shared `ProjectTable` that accepts the legacy
- * `string[]` columns API used by the people feature. Each empty-string column
- * entry is treated as an action column (no header label).
+ * Responsive table shell for people lists (Applicants, Invited, Contributors).
+ * Defaults to `min-w-[640px]` with smooth horizontal scrolling matching Stitch mobile design.
  */
-export default function PeopleTable({ columns, children }: PeopleTableProps) {
-  const projectColumns: ProjectTableColumn[] = columns.map((label) =>
-    label === ''
-      ? { label: '', isAction: true }
-      : { label },
-  );
+export default function PeopleTable({
+  columns,
+  minWidth = 'min-w-[640px]',
+  pinColumns = false,
+  className,
+  children,
+}: PeopleTableProps) {
+  const projectColumns: ProjectTableColumn[] = columns.map((col) => {
+    if (typeof col === 'string') {
+      return col === '' ? { label: '', isAction: true } : { label: col };
+    }
+    return col;
+  });
 
-  return <ProjectTable columns={projectColumns}>{children}</ProjectTable>;
+  return (
+    <ProjectTable
+      columns={projectColumns}
+      minWidth={minWidth}
+      pinColumns={pinColumns}
+      className={className}
+    >
+      {children}
+    </ProjectTable>
+  );
 }

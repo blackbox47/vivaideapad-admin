@@ -32,7 +32,6 @@ export type PayoutStatus = (typeof PAYOUT_STATUSES)[number];
 
 export const CONCEPT_STATUSES_SPEC = [
   'Draft',
-  'Scheduled',
   'Active',
   'Archived',
 ] as const;

@@ -9,7 +9,7 @@ export interface WorkspaceAdmin {
   access: WorkspaceAdminAccess;
   roleLabel: string;
   initials: string;
-  /** Pre-formatted date string (DD-MM-YYYY) used by the table. */
+  /** Pre-formatted date string (DD.MM.YYYY) used by the table. */
   addedOn: string;
   /** ISO timestamp used for sorting. */
   addedAt: string;

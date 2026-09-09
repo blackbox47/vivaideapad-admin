@@ -23,6 +23,7 @@ import type {
   PeopleTab,
   PlatformUser,
 } from '@/models/people/people-model';
+import { toast } from '@/components/ui/sonner';
 
 const TABS: PeopleTab[] = ['applicants', 'invited', 'contributors'];
 
@@ -63,10 +64,18 @@ export default function PeopleOverview() {
   const reviewing = applicants.find((applicant) => applicant.id === reviewId);
 
   const handleToggle = (user: PlatformUser) => {
+    const nextStatus = user.status === 'Suspended' ? 'Active' : 'Suspended';
     void toggleUserStatus({
       id: user.id,
-      status: user.status === 'Suspended' ? 'Active' : 'Suspended',
-    });
+      status: nextStatus,
+    })
+      .unwrap()
+      .then(() => {
+        toast.success(`User marked as ${nextStatus.toLowerCase()}`);
+      })
+      .catch(() => {
+        toast.error('Failed to update user status');
+      });
   };
 
   const handleDecide = (status: ApplicantStatus, comment: string) => {
@@ -78,9 +87,10 @@ export default function PeopleOverview() {
       .unwrap()
       .then(() => {
         setReviewId(null);
+        toast.success(`Application marked as ${status.toLowerCase()}`);
       })
       .catch(() => {
-        // Error stays on the panel; the mutation hook surfaces it next fetch.
+        toast.error('Failed to record application decision');
       });
   };
 
@@ -104,6 +114,7 @@ export default function PeopleOverview() {
   return (
     <div>
       <PageHeader
+        eyebrow="Administration"
         title="Applicants & contributors"
         description="Review new applicants and manage contributor access."
       />

@@ -5,6 +5,7 @@ export const AUTH_REFRESH_URL = '/auth/refresh';
 export const AUTH_FORGOT_PASSWORD_URL = '/auth/password/forgot';
 export const DASHBOARD_OVERVIEW_URL = '/admin/dashboard/overview';
 export const CONCEPTS_URL = '/admin/concepts';
+export const CONCEPTS_BULK_ACTION_URL = '/admin/concepts/bulk-action';
 export const PEOPLE_URL = '/admin/people';
 export const APPLICANTS_URL = '/admin/applicants';
 export const USERS_URL = '/admin/users';
@@ -43,6 +44,17 @@ export const APPLICATION_DETAIL_URL = (id: string) =>
   `/admin/applications/${id}`;
 export const APPLICATION_DECISION_URL = (id: string) =>
   `/admin/applications/${id}/decision`;
+
+// Public endpoints for visitor gate & applications
+export const PUBLIC_APPLICATIONS_URL = '/public/applications';
+export const PUBLIC_APPLICATION_STATUS_URL = (ref: string) =>
+  `/public/applications/${ref}`;
+export const PUBLIC_CONCEPTS_URL = '/public/concepts';
+export const PUBLIC_CATEGORIES_URL = '/public/categories';
+export const PUBLIC_LANDING_STATS_URL = '/public/landing/stats';
+export const PUBLIC_LANDING_FEATURED_REQUESTS_URL =
+  '/public/landing/featured-requests';
+export const PUBLIC_LEADERBOARD_URL = '/public/leaderboard';
 
 // Spec Module 5 — Submissions (Content Review) detail + decision + publish + scan (REST spec §5.5)
 export const SUBMISSIONS_URL = '/admin/submissions';

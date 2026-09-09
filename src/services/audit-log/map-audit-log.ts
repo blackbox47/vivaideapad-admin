@@ -3,6 +3,7 @@ import type {
   AuditEvent,
   AuditLogResponse,
 } from '@/models/audit-log/audit-log-model';
+import { formatDisplayDate } from '@/utils/helpers/format-display-date';
 
 const ACTION_LABELS: Record<string, string> = {
   'admin.created': 'Created admin',
@@ -69,16 +70,6 @@ function toAuditCategory(raw: unknown): AuditCategory {
     return 'Payouts';
   }
   return 'System';
-}
-
-function formatAuditDate(iso: string): string {
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) {
-    return iso;
-  }
-  const day = String(date.getDate()).padStart(2, '0');
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  return `${day}-${month}-${date.getFullYear()}`;
 }
 
 function formatAction(action: string): string {
@@ -194,7 +185,7 @@ function toAuditEvent(item: unknown): AuditEvent | null {
   if (isUiAuditEvent(item)) {
     return {
       id: asString(item.id),
-      time: asString(item.time),
+      time: formatDisplayDate(asString(item.time) || asString(item.occurredAt)),
       occurredAt: asString(item.occurredAt),
       actor: asString(item.actor),
       action: asString(item.action),
@@ -210,7 +201,9 @@ function toAuditEvent(item: unknown): AuditEvent | null {
 
   return {
     id: item.id,
-    time: typeof item.time === 'string' ? item.time : formatAuditDate(occurredAt),
+    time: formatDisplayDate(
+      typeof item.time === 'string' ? item.time : occurredAt,
+    ),
     occurredAt,
     actor: actorName(item),
     action: formatAction(action),
