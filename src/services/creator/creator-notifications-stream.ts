@@ -6,6 +6,7 @@ import type {
 import { baseService } from '@/services/core/base-service';
 import { creatorNotificationsService } from '@/services/creator/creator-notifications-service';
 import { CREATOR_NOTIFICATIONS_STREAM_URL } from '@/utils/constants/api-end-points';
+import { toast } from '@/components/ui/sonner';
 
 /**
  * Wire shape emitted by the backend on
@@ -79,6 +80,9 @@ export function startCreatorNotificationsStream(store: {
       store.dispatch(
         baseService.util.invalidateTags(['creator-notifications']),
       );
+      toast.info(envelope.notification.title, {
+        description: envelope.notification.body ?? undefined,
+      });
       return;
     }
 

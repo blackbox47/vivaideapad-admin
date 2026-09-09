@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { Select } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { toast } from '@/components/ui/sonner';
 import useSubmitIdea from '@/hooks/creator/use-submit-idea';
 import {
   useSubmitExistingSubmissionMutation,
@@ -176,8 +177,14 @@ export default function SubmitIdeaForm({
           file: selectedFile ?? undefined,
         }).unwrap();
       }
+      toast.success(
+        submissionId
+          ? 'Idea updated and submitted for review'
+          : 'Idea submitted successfully',
+      );
       navigate({ to: CREATOR_ROUTES.submissions, replace: true });
     } catch (err) {
+      toast.error('Failed to submit idea');
       setServerError(getApiErrorMessage(err));
     }
   };

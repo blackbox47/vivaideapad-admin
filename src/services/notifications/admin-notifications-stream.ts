@@ -6,6 +6,7 @@ import type {
 import { baseService } from '@/services/core/base-service';
 import { adminNotificationsService } from '@/services/notifications/admin-notifications-service';
 import { ADMIN_NOTIFICATIONS_STREAM_URL } from '@/utils/constants/api-end-points';
+import { toast } from '@/components/ui/sonner';
 
 /**
  * Wire shape emitted by the backend on `GET /admin/notifications/stream`.
@@ -93,6 +94,9 @@ export function startAdminNotificationsStream(store: {
       store.dispatch(
         baseService.util.invalidateTags(['admin-notifications']),
       );
+      toast.info(envelope.notification.title, {
+        description: envelope.notification.body ?? undefined,
+      });
       return;
     }
 

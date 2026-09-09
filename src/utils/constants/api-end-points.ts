@@ -5,6 +5,7 @@ export const AUTH_REFRESH_URL = '/auth/refresh';
 export const AUTH_FORGOT_PASSWORD_URL = '/auth/password/forgot';
 export const DASHBOARD_OVERVIEW_URL = '/admin/dashboard/overview';
 export const CONCEPTS_URL = '/admin/concepts';
+export const CONCEPTS_BULK_ACTION_URL = '/admin/concepts/bulk-action';
 export const PEOPLE_URL = '/admin/people';
 export const APPLICANTS_URL = '/admin/applicants';
 export const USERS_URL = '/admin/users';

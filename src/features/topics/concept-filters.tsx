@@ -9,7 +9,6 @@ const STATUS_FILTERS: Array<{ id: 'all' | ConceptStatus; label: string }> = [
   { id: 'all', label: 'All' },
   { id: 'active', label: 'Active' },
   { id: 'draft', label: 'Draft' },
-  { id: 'scheduled', label: 'Scheduled' },
   { id: 'archived', label: 'Archived' },
 ];
 
@@ -17,6 +16,9 @@ interface ConceptFiltersProps {
   status: 'all' | ConceptStatus;
   search: string;
   visibleCount: number;
+  selectedCount?: number;
+  allSelected?: boolean;
+  onToggleSelectAll?: () => void;
   onSearchChange: (search: string) => void;
 }
 
@@ -40,6 +42,9 @@ export default function ConceptFilters({
   status,
   search,
   visibleCount,
+  selectedCount = 0,
+  allSelected = false,
+  onToggleSelectAll,
   onSearchChange,
 }: ConceptFiltersProps) {
   return (
@@ -72,8 +77,26 @@ export default function ConceptFilters({
         })}
       </div>
 
-      <div className="flex items-center gap-3.5">
-        <span className="whitespace-nowrap text-[13px] text-muted-foreground">
+      <div className="flex items-center gap-3.5 flex-wrap">
+        {visibleCount > 0 && onToggleSelectAll ? (
+          <button
+            type="button"
+            onClick={onToggleSelectAll}
+            className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground cursor-pointer transition"
+          >
+            <input
+              type="checkbox"
+              readOnly
+              checked={allSelected}
+              className="size-3.5 rounded border-border accent-[#0d221b] cursor-pointer"
+              aria-label={allSelected ? 'Deselect all concepts' : 'Select all visible concepts'}
+            />
+            <span>{allSelected ? 'Deselect all' : 'Select all'}</span>
+          </button>
+        ) : null}
+
+        <span className="whitespace-nowrap text-[13px] text-muted-foreground font-medium">
+          {selectedCount > 0 ? `${selectedCount} selected · ` : ''}
           {visibleCount} {visibleCount === 1 ? 'concept' : 'concepts'}
         </span>
         <Input

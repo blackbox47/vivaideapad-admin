@@ -24,7 +24,8 @@ export const createConceptSchema = z.object({
   opensOn: z.date().optional(),
   closesOn: z.date().optional(),
   reward: z.string(),
-  status: z.enum(['draft', 'scheduled', 'active', 'archived']),
+  isOnboarding: z.boolean().optional(),
+  status: z.enum(['draft', 'active', 'archived']),
 });
 
 export type CreateConceptFormValues = z.infer<typeof createConceptSchema>;
@@ -50,7 +51,8 @@ export const editConceptSchema = z.object({
   opensOn: z.date().optional(),
   closesOn: z.date().optional(),
   reward: z.string(),
-  status: z.enum(['draft', 'scheduled', 'active', 'archived']),
+  isOnboarding: z.boolean().optional(),
+  status: z.enum(['draft', 'active', 'archived']),
 });
 
 export type EditConceptFormValues = z.infer<typeof editConceptSchema>;

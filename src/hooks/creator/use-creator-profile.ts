@@ -18,6 +18,7 @@ import {
   useUploadCreatorAvatarMutation,
 } from '@/services/creator/creator-profile-service';
 import { getApiErrorMessage } from '@/utils/helpers/api-error';
+import { toast } from '@/components/ui/sonner';
 
 interface UseCreatorProfileResult {
   overview: ProfileOverview | null;
@@ -84,6 +85,7 @@ export default function useCreatorProfile(): UseCreatorProfileResult {
       try {
         await triggerProfile(body).unwrap();
         flash(setProfileFeedback, 'Profile updated');
+        toast.success('Profile updated');
         return {
           id: data?.profile.id ?? '',
           name: body.name,
@@ -93,7 +95,8 @@ export default function useCreatorProfile(): UseCreatorProfileResult {
           bio: body.bio,
           avatarUrl: body.avatarUrl ?? data?.profile.avatarUrl ?? null,
         } satisfies ProfileDetails;
-      } catch {
+      } catch (err) {
+        toast.error(getApiErrorMessage(err) || 'Could not update profile');
         return null;
       }
     },
@@ -105,8 +108,10 @@ export default function useCreatorProfile(): UseCreatorProfileResult {
       try {
         await triggerPassword(body).unwrap();
         flash(setPasswordFeedback, 'Password updated');
+        toast.success('Password updated');
         return true;
-      } catch {
+      } catch (err) {
+        toast.error(getApiErrorMessage(err) || 'Could not update password');
         return false;
       }
     },
@@ -130,6 +135,7 @@ export default function useCreatorProfile(): UseCreatorProfileResult {
     async (file: File) => {
       if (file.size > 5 * 1024 * 1024) {
         flash(setProfileFeedback, 'File size exceeds 5MB limit');
+        toast.error('File size exceeds 5MB limit');
         return null;
       }
       try {
@@ -137,8 +143,10 @@ export default function useCreatorProfile(): UseCreatorProfileResult {
         formData.append('file', file);
         const res = await triggerAvatar(formData).unwrap();
         flash(setProfileFeedback, 'Profile photo updated');
+        toast.success('Profile photo updated');
         return res;
-      } catch {
+      } catch (err) {
+        toast.error(getApiErrorMessage(err) || 'Could not upload profile photo');
         return null;
       }
     },

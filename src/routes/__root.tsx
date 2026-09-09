@@ -5,6 +5,7 @@ import type { RootState } from '@/store';
 
 import { RouteProgressBar } from '@/components/shared/route-progress-bar';
 import { ScreenLoader } from '@/components/shared/screen-loader';
+import { Toaster } from '@/components/ui/sonner';
 
 /**
  * Shape of the runtime context shared with every route via
@@ -25,6 +26,7 @@ function RootComponent() {
     <>
       <RouteProgressBar />
       <Outlet />
+      <Toaster position="top-right" />
       {import.meta.env.DEV ? (
         <TanStackRouterDevtools position="bottom-right" />
       ) : null}

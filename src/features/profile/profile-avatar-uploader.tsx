@@ -3,6 +3,7 @@ import { useRef, useState } from 'react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
+import { toast } from '@/components/ui/sonner';
 import { resolveAvatarUrl } from '@/utils/helpers/resolve-avatar-url';
 
 const MAX_AVATAR_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
@@ -33,6 +34,7 @@ export default function ProfileAvatarUploader({
     const file = event.target.files?.[0];
     if (file) {
       if (file.size > MAX_AVATAR_SIZE_BYTES) {
+        toast.error('File size exceeds 5MB limit');
         setErrorMessage('File size exceeds 5MB limit');
         window.setTimeout(() => setErrorMessage(null), 3500);
         event.target.value = '';

@@ -16,6 +16,7 @@ import {
   useUploadAvatarUrlMutation,
 } from '@/services/profile/profile-service';
 import { getApiErrorMessage } from '@/utils/helpers/api-error';
+import { toast } from '@/components/ui/sonner';
 
 interface UseProfileResult {
   overview: ProfileOverview | null;
@@ -79,6 +80,7 @@ export default function useProfile(): UseProfileResult {
       try {
         await triggerProfile(body).unwrap();
         flash(setProfileFeedback, 'Profile updated');
+        toast.success('Profile updated');
         // Optimistically build the returned shape; the cache invalidation will
         // refetch authoritative data.
         return {
@@ -90,7 +92,8 @@ export default function useProfile(): UseProfileResult {
           bio: body.bio,
           avatarUrl: body.avatarUrl ?? data?.profile.avatarUrl ?? null,
         } satisfies ProfileDetails;
-      } catch {
+      } catch (err) {
+        toast.error(getApiErrorMessage(err) || 'Could not update profile');
         return null;
       }
     },
@@ -102,8 +105,10 @@ export default function useProfile(): UseProfileResult {
       try {
         await triggerPassword(body).unwrap();
         flash(setPasswordFeedback, 'Password updated');
+        toast.success('Password updated');
         return true;
-      } catch {
+      } catch (err) {
+        toast.error(getApiErrorMessage(err) || 'Could not update password');
         return false;
       }
     },
@@ -127,6 +132,7 @@ export default function useProfile(): UseProfileResult {
     async (file: File) => {
       if (file.size > MAX_AVATAR_SIZE_BYTES) {
         flash(setProfileFeedback, 'File size exceeds 5MB limit');
+        toast.error('File size exceeds 5MB limit');
         return null;
       }
       try {
@@ -134,8 +140,10 @@ export default function useProfile(): UseProfileResult {
         formData.append('file', file);
         const res = await triggerAvatar(formData).unwrap();
         flash(setProfileFeedback, 'Profile photo updated');
+        toast.success('Profile photo updated');
         return res;
-      } catch {
+      } catch (err) {
+        toast.error(getApiErrorMessage(err) || 'Could not upload profile photo');
         return null;
       }
     },

@@ -5,6 +5,7 @@ import { Link, useNavigate } from '@tanstack/react-router';
 import { ArrowLeft, Eye, EyeOff, Loader2 } from 'lucide-react';
 
 import { Input } from '@/components/ui/input';
+import { toast } from '@/components/ui/sonner';
 import useAuth from '@/hooks/auth/use-auth';
 import type { UserRole } from '@/models/auth/auth-model';
 import {
@@ -72,6 +73,7 @@ export default function LoginPanel({
     resetLoginError();
     try {
       await login(values, { asRole: role });
+      toast.success('Welcome back!');
       navigate({ to: homeForRole(role), replace: true });
     } catch {
       // Failure surfaced via loginError.

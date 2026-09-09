@@ -33,7 +33,6 @@ import type { DropdownOption } from '@/utils/types/dropdown-option';
 
 const STATUS_OPTIONS: DropdownOption[] = [
   { id: 'draft', label: 'Draft' },
-  { id: 'scheduled', label: 'Scheduled' },
   { id: 'active', label: 'Active' },
   { id: 'archived', label: 'Archived' },
 ];
@@ -111,6 +110,7 @@ export default function EditConceptDialog({
       opensOn: parseInitialDate(concept.openDate || concept.opensOn),
       closesOn: parseInitialDate(concept.closeDate || concept.closesOn),
       reward: concept.reward,
+      isOnboarding: Boolean(concept.isOnboarding || concept.forNewUsers),
       status: concept.status,
     },
   });
@@ -123,6 +123,7 @@ export default function EditConceptDialog({
       opensOn: parseInitialDate(concept.openDate || concept.opensOn),
       closesOn: parseInitialDate(concept.closeDate || concept.closesOn),
       reward: concept.reward,
+      isOnboarding: Boolean(concept.isOnboarding || concept.forNewUsers),
       status: concept.status,
     });
   }, [concept, resolveCategoryId, reset]);
@@ -187,6 +188,7 @@ export default function EditConceptDialog({
       opensOn: values.opensOn ? formatConceptDate(values.opensOn) : '',
       closesOn: values.closesOn ? formatConceptDate(values.closesOn) : '',
       reward: values.reward.trim(),
+      isOnboarding: Boolean(values.isOnboarding),
       status: values.status,
     });
   };
@@ -406,6 +408,21 @@ export default function EditConceptDialog({
                 )}
               />
             </div>
+          </div>
+
+          <div className="mt-4 flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="edit-is-onboarding"
+              {...register('isOnboarding')}
+              className="size-4 rounded border-border accent-[#0d221b] cursor-pointer"
+            />
+            <label
+              htmlFor="edit-is-onboarding"
+              className="text-[13px] font-medium text-foreground cursor-pointer select-none"
+            >
+              Mark as Onboarding challenge (displays NEW chip)
+            </label>
           </div>
 
           {error ? (

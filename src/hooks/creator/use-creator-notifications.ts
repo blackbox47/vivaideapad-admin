@@ -9,6 +9,7 @@ import {
   useToggleCreatorNotificationMutation,
 } from '@/services/creator/creator-notifications-service';
 import { getApiErrorMessage } from '@/utils/helpers/api-error';
+import { toast } from '@/components/ui/sonner';
 
 interface UseCreatorNotificationsResult {
   notifications: CreatorNotification[];
@@ -57,7 +58,14 @@ export default function useCreatorNotifications(
       void toggleNotification({ id });
     },
     markAllRead: () => {
-      void markAll();
+      void markAll()
+        .unwrap()
+        .then(() => {
+          toast.success('All notifications marked as read');
+        })
+        .catch(() => {
+          toast.error('Failed to mark notifications as read');
+        });
     },
     isMarkingAll,
   };

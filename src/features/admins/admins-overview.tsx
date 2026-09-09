@@ -20,6 +20,7 @@ import type {
   CreateAdminBody,
   WorkspaceAdmin,
 } from '@/models/admins/admins-model';
+import { toast } from '@/components/ui/sonner';
 
 export default function AdminsOverview() {
   const {
@@ -40,7 +41,6 @@ export default function AdminsOverview() {
   } = useAdmins();
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [removing, setRemoving] = useState<WorkspaceAdmin | null>(null);
-  const [toast, setToast] = useState<string | null>(null);
 
   const closeAdd = () => {
     resetCreate();
@@ -52,16 +52,11 @@ export default function AdminsOverview() {
     setRemoving(null);
   };
 
-  const showToast = (message: string) => {
-    setToast(message);
-    window.setTimeout(() => setToast(null), 3200);
-  };
-
   const handleCreate = async (body: CreateAdminBody) => {
     try {
       await createAdmin(body).unwrap();
       closeAdd();
-      showToast('Admin added');
+      toast.success('Admin added');
     } catch {
       // Error is surfaced via createError.
     }
@@ -75,7 +70,7 @@ export default function AdminsOverview() {
     try {
       await removeAdmin(removing.id).unwrap();
       closeRemove();
-      showToast('Admin removed');
+      toast.success('Admin removed');
     } catch {
       // Error is surfaced via removeError.
     }
@@ -170,12 +165,6 @@ export default function AdminsOverview() {
           onClose={closeRemove}
           onConfirm={handleRemove}
         />
-      ) : null}
-
-      {toast ? (
-        <div className="fixed bottom-[26px] left-1/2 z-[60] -translate-x-1/2 rounded-full bg-primary px-[22px] py-3.5 text-[13px] font-semibold text-primary-foreground shadow-2xl">
-          {toast}
-        </div>
       ) : null}
     </div>
   );

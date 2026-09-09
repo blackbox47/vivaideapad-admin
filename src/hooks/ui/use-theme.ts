@@ -37,10 +37,36 @@ export default function useTheme() {
     return undefined;
   }, [theme]);
 
+  useEffect(() => {
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === THEME_STORAGE_KEY && e.newValue) {
+        setThemeState(e.newValue as ThemeMode);
+      }
+    };
+
+    const handleCustomEvent = (e: Event) => {
+      const customEvent = e as CustomEvent<ThemeMode>;
+      if (customEvent.detail) {
+        setThemeState(customEvent.detail);
+      }
+    };
+
+    window.addEventListener('storage', handleStorage);
+    window.addEventListener('ideapad-theme-change', handleCustomEvent);
+
+    return () => {
+      window.removeEventListener('storage', handleStorage);
+      window.removeEventListener('ideapad-theme-change', handleCustomEvent);
+    };
+  }, []);
+
   const setTheme = (nextTheme: ThemeMode) => {
     setThemeState(nextTheme);
     try {
       localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
+      window.dispatchEvent(
+        new CustomEvent('ideapad-theme-change', { detail: nextTheme }),
+      );
     } catch {
       // Ignore storage errors
     }
