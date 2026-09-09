@@ -93,7 +93,7 @@ export default function AdminSignInPanel({
               label="Admin work email"
               type="email"
               autoComplete="email"
-              placeholder="admin@sparkory.com"
+              placeholder="Enter admin work email"
               showRequiredIndicator={false}
               labelClassName="text-xs font-semibold text-foreground mb-1.5"
               className="bg-white border-[#c1c8c3] rounded-lg px-4 py-3 text-sm focus-visible:border-brand-pine-deep focus-visible:ring-2 focus-visible:ring-brand-pine-deep/20 shadow-none placeholder:text-muted-foreground"
@@ -108,7 +108,7 @@ export default function AdminSignInPanel({
               label="Password"
               type={showPassword ? 'text' : 'password'}
               autoComplete="current-password"
-              placeholder="Enter admin password"
+              placeholder="Enter password"
               showRequiredIndicator={false}
               labelClassName="text-xs font-semibold text-foreground mb-1.5"
               className="bg-white border-[#c1c8c3] rounded-lg px-4 py-3 text-sm focus-visible:border-brand-pine-deep focus-visible:ring-2 focus-visible:ring-brand-pine-deep/20 shadow-none placeholder:text-muted-foreground"

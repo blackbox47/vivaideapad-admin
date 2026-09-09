@@ -162,6 +162,7 @@ export default function SubmissionDecisionDialog({
                 type="number"
                 min={1}
                 required
+                placeholder="Enter reward amount"
                 errorMessage={errors.rewardAmount?.message}
                 {...register('rewardAmount')}
               />
@@ -177,7 +178,7 @@ export default function SubmissionDecisionDialog({
               label="Feedback"
               required={decision !== 'approve'}
               rows={4}
-              placeholder="Reviewer notes shared with the contributor…"
+              placeholder="Enter feedback"
               errorMessage={errors.feedback?.message}
               {...register('feedback')}
             />

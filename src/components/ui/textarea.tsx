@@ -12,6 +12,17 @@ export interface TextareaProps extends React.ComponentProps<"textarea"> {
   errorClassName?: string
 }
 
+function getPlaceholderFromLabel(label: React.ReactNode): string | undefined {
+  if (typeof label === "string") {
+    const cleaned = label
+      .replace(/\s*\([^)]*\)/g, "")
+      .replace(/\*+$/, "")
+      .trim()
+    return cleaned ? `Enter ${cleaned.toLowerCase()}` : undefined
+  }
+  return undefined
+}
+
 function Textarea({
   className,
   containerClassName,
@@ -22,6 +33,7 @@ function Textarea({
   errorClassName,
   id,
   required,
+  placeholder: placeholderProp,
   "aria-invalid": ariaInvalidProp,
   "aria-describedby": ariaDescribedByProp,
   ...props
@@ -33,6 +45,9 @@ function Textarea({
   const isInvalid = ariaInvalidProp !== undefined ? ariaInvalidProp : Boolean(activeError)
 
   const ariaDescribedBy = [ariaDescribedByProp, errorId].filter(Boolean).join(" ") || undefined
+
+  const derivedPlaceholder = getPlaceholderFromLabel(label)
+  const placeholder = placeholderProp ?? derivedPlaceholder
 
   return (
     <div className={cn("w-full", containerClassName)}>
@@ -52,6 +67,7 @@ function Textarea({
       <textarea
         id={textareaId}
         required={required}
+        placeholder={placeholder}
         data-slot="textarea"
         aria-invalid={isInvalid ? "true" : undefined}
         aria-describedby={ariaDescribedBy}

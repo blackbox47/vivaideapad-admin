@@ -68,7 +68,7 @@ export default function CategoryFormDialog({
           <Input
             label="Name"
             required
-            placeholder="e.g. Climate Action"
+            placeholder="Enter name"
             containerClassName="mt-4"
             errorMessage={errors.name?.message}
             {...register('name')}

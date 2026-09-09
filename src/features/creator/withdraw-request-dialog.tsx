@@ -121,7 +121,7 @@ export default function WithdrawRequestDialog({
               type="number"
               min="0"
               step="any"
-              placeholder="0.00"
+              placeholder="Enter amount"
               label="Amount"
               required
               errorMessage={errors.amount?.message}
@@ -145,7 +145,7 @@ export default function WithdrawRequestDialog({
               id="withdraw-mobile"
               type="tel"
               label="Mobile number"
-              placeholder="e.g. 018XXXXXXXX"
+              placeholder="Enter mobile number"
               required
               errorMessage={errors.mobile?.message}
               {...register('mobile')}

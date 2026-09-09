@@ -114,7 +114,7 @@ export default function ForgotPasswordPanel({
                 label="Email address"
                 type="email"
                 autoComplete="email"
-                placeholder="nora@sparkory.demo"
+                placeholder="Enter email address"
                 showRequiredIndicator={false}
                 labelClassName="text-xs font-semibold text-foreground mb-1.5"
                 className="bg-white border-[#c1c8c3] rounded-lg px-4 py-3 text-sm focus-visible:border-brand-pine-deep focus-visible:ring-2 focus-visible:ring-brand-pine-deep/20 shadow-none placeholder:text-muted-foreground"

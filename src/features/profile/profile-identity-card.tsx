@@ -129,6 +129,8 @@ export default function ProfileIdentityCard({
               id="profile-name"
               label="Display name"
               required
+              placeholder="Enter display name"
+              maxLength={30}
               errorMessage={profileErrors.name?.message}
               {...registerProfile('name')}
             />
@@ -139,6 +141,7 @@ export default function ProfileIdentityCard({
               label="Email address"
               type="email"
               required
+              placeholder="Enter email address"
               errorMessage={profileErrors.email?.message}
               {...registerProfile('email')}
             />
@@ -147,6 +150,7 @@ export default function ProfileIdentityCard({
             <Input
               id="profile-phone"
               label="Phone number"
+              placeholder="Enter phone number"
               errorMessage={profileErrors.phone?.message}
               {...registerProfile('phone')}
             />
@@ -156,6 +160,7 @@ export default function ProfileIdentityCard({
               id="profile-bio"
               label="Short bio"
               rows={3}
+              placeholder="Enter short bio"
               errorMessage={profileErrors.bio?.message}
               {...registerProfile('bio')}
             />
@@ -198,7 +203,7 @@ export default function ProfileIdentityCard({
                 type="password"
                 required
                 autoComplete="current-password"
-                placeholder="••••••••"
+                placeholder="Enter current password"
                 errorMessage={passwordErrors.currentPassword?.message}
                 {...registerPassword('currentPassword')}
               />
@@ -210,7 +215,7 @@ export default function ProfileIdentityCard({
                 type="password"
                 required
                 autoComplete="new-password"
-                placeholder="••••••••"
+                placeholder="Enter new password"
                 errorMessage={passwordErrors.newPassword?.message}
                 {...registerPassword('newPassword')}
               />
@@ -222,7 +227,7 @@ export default function ProfileIdentityCard({
                 type="password"
                 required
                 autoComplete="new-password"
-                placeholder="••••••••"
+                placeholder="Enter confirm password"
                 errorMessage={passwordErrors.confirmPassword?.message}
                 {...registerPassword('confirmPassword')}
               />

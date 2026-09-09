@@ -15,6 +15,17 @@ export interface InputProps extends React.ComponentProps<"input"> {
   showRequiredIndicator?: boolean
 }
 
+function getPlaceholderFromLabel(label: React.ReactNode): string | undefined {
+  if (typeof label === "string") {
+    const cleaned = label
+      .replace(/\s*\([^)]*\)/g, "")
+      .replace(/\*+$/, "")
+      .trim()
+    return cleaned ? `Enter ${cleaned.toLowerCase()}` : undefined
+  }
+  return undefined
+}
+
 function Input({
   className,
   containerClassName,
@@ -28,6 +39,7 @@ function Input({
   id,
   type,
   required,
+  placeholder: placeholderProp,
   "aria-invalid": ariaInvalidProp,
   "aria-describedby": ariaDescribedByProp,
   ...props
@@ -43,11 +55,24 @@ function Input({
   const hasWrapper = Boolean(label || activeError || containerClassName || rightSlot)
   const isSpecialType = type === "checkbox" || type === "radio" || type === "file"
 
+  const isTextLike =
+    !type ||
+    type === "text" ||
+    type === "email" ||
+    type === "password" ||
+    type === "number" ||
+    type === "tel" ||
+    type === "url" ||
+    type === "search"
+  const derivedPlaceholder = isTextLike ? getPlaceholderFromLabel(label) : undefined
+  const placeholder = placeholderProp ?? derivedPlaceholder
+
   const inputElement = (
     <InputPrimitive
       id={inputId}
       type={type}
       required={required}
+      placeholder={placeholder}
       data-slot="input"
       aria-invalid={isInvalid ? "true" : undefined}
       aria-describedby={ariaDescribedBy}

@@ -91,7 +91,7 @@ export default function PayoutProcessPanel({
             setNote(event.target.value);
             setNoteError(null);
           }}
-          placeholder="Add a note (required when rejecting, optional when paying)"
+          placeholder="Enter admin note"
           className="min-h-17.5"
           errorMessage={noteError}
         />

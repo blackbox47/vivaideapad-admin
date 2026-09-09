@@ -47,8 +47,6 @@ export default function ReviewTable({ submissions, onReview }: ReviewTableProps)
           <ProjectTableCell className={TITLE_COL_CLASS}>
             <Tooltip>
               <TooltipTrigger
-                delay={0}
-                nativeButton={false}
                 render={
                   <span className="block min-w-0 cursor-default outline-none" />
                 }

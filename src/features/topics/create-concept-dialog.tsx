@@ -190,6 +190,7 @@ export default function CreateConceptDialog({
                 id="concept-title"
                 label="Title"
                 required
+                placeholder="Enter title"
                 errorMessage={errors.title?.message}
                 {...register('title')}
               />
@@ -264,7 +265,7 @@ export default function CreateConceptDialog({
                         setNewCategoryName(event.target.value);
                         setCategoryDraftError(null);
                       }}
-                      placeholder="New category name"
+                      placeholder="Enter category name"
                       className="h-auto flex-1 rounded-[10px] border border-border bg-card px-3 py-2.25 text-[13px] text-foreground shadow-none"
                     />
                     <Button
@@ -287,6 +288,7 @@ export default function CreateConceptDialog({
                 id="concept-description"
                 label="Description"
                 required
+                placeholder="Enter description"
                 className="min-h-17.5"
                 errorMessage={errors.description?.message}
                 {...register('description')}
@@ -345,7 +347,7 @@ export default function CreateConceptDialog({
               <Input
                 id="concept-reward"
                 label="Reward guidance"
-                placeholder="৳3,000"
+                placeholder="Enter reward guidance"
                 errorMessage={errors.reward?.message}
                 {...register('reward')}
               />

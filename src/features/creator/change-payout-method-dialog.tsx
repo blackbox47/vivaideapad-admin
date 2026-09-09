@@ -127,7 +127,7 @@ export default function ChangePayoutMethodDialog({
             inputMode="tel"
             label="Mobile number"
             required
-            placeholder="e.g. 018XXXXXXXX"
+            placeholder="Enter mobile number"
             autoComplete="tel"
             errorMessage={errors.mobile?.message}
             {...register('mobile')}
