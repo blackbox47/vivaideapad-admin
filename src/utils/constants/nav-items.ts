@@ -58,9 +58,12 @@ export const CREATOR_PAGE_TITLES: Record<string, string> = {
 };
 
 export const PAGE_TITLES: Record<string, string> = {
+  '/': 'Home',
+  [ADMIN_ROUTES.login]: 'Admin sign in',
+  [ADMIN_ROUTES.signIn]: 'Admin sign in',
   [ADMIN_ROUTES.dashboard]: 'Overview',
   [ADMIN_ROUTES.topics]: 'Topics & concepts',
-  [ADMIN_ROUTES.applicants]: 'Applicants & contributors',
+  [ADMIN_ROUTES.applicants]: 'Applicants & users',
   [ADMIN_ROUTES.categories]: 'Categories',
   [ADMIN_ROUTES.contentReview]: 'Content review',
   [ADMIN_ROUTES.rewards]: 'Rewards ledger',
@@ -70,5 +73,35 @@ export const PAGE_TITLES: Record<string, string> = {
   [ADMIN_ROUTES.auditLog]: 'Audit log',
   [ADMIN_ROUTES.admins]: 'Manage admins',
   [ADMIN_ROUTES.notifications]: 'Notifications',
+  [ADMIN_ROUTES.profile]: 'Profile',
+  [CREATOR_ROUTES.login]: 'Sign in',
+  [CREATOR_ROUTES.forgotPassword]: 'Forgot password',
   ...CREATOR_PAGE_TITLES,
 };
+
+export const APP_DOCUMENT_TITLE = 'Viva IdeaPad';
+
+/**
+ * Builds the browser tab title for a pathname.
+ * Falls back to a humanized last segment when the path is unknown.
+ */
+export function getDocumentTitle(pathname: string): string {
+  const normalized =
+    pathname.length > 1 && pathname.endsWith('/')
+      ? pathname.slice(0, -1)
+      : pathname;
+
+  const pageTitle =
+    PAGE_TITLES[normalized] ??
+    PAGE_TITLES[pathname] ??
+    (normalized === '/'
+      ? 'Home'
+      : normalized
+          .split('/')
+          .filter(Boolean)
+          .pop()
+          ?.replace(/[-_]/g, ' ')
+          .replace(/\b\w/g, (c) => c.toUpperCase()));
+
+  return pageTitle ? `${pageTitle} · ${APP_DOCUMENT_TITLE}` : APP_DOCUMENT_TITLE;
+}

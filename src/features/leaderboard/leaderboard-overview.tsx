@@ -69,7 +69,6 @@ export default function LeaderboardOverview() {
   return (
     <div>
       <PageHeader
-        eyebrow="Administration"
         title="Leaderboard"
         description="Configured scoring drives public rank and points."
         action={<RecalculateButton />}

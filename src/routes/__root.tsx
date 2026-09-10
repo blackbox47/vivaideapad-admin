@@ -3,6 +3,7 @@ import { TanStackRouterDevtools } from '@tanstack/router-devtools';
 
 import type { RootState } from '@/store';
 
+import DocumentTitle from '@/components/shared/document-title';
 import { RouteProgressBar } from '@/components/shared/route-progress-bar';
 import { ScreenLoader } from '@/components/shared/screen-loader';
 import { Toaster } from '@/components/ui/sonner';
@@ -24,6 +25,7 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 function RootComponent() {
   return (
     <>
+      <DocumentTitle />
       <RouteProgressBar />
       <Outlet />
       <Toaster position="top-right" />

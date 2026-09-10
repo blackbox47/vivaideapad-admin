@@ -1,4 +1,12 @@
-import { Check, ChevronDown, Copy, Loader2, Trash2, UserMinus, UserPlus } from 'lucide-react';
+import {
+  Check,
+  ChevronDown,
+  Copy,
+  Loader2,
+  Trash2,
+  UserMinus,
+  UserPlus,
+} from 'lucide-react';
 
 import {
   DropdownMenu,
@@ -42,26 +50,23 @@ export default function BulkActionBar({
   return (
     <div
       data-purpose="bulk-action-bar"
-      className="fixed bottom-7 left-1/2 -translate-x-1/2 md:ml-32 z-40 flex items-center gap-3 md:gap-4 rounded-2xl border border-[#1e4638] bg-[#0d221b] px-4 md:px-5 py-3 text-white shadow-2xl transition-all duration-300 ease-out animate-in fade-in slide-in-from-bottom-4"
+      className="animate-in fade-in slide-in-from-bottom-4 fixed bottom-7 left-1/2 z-40 flex -translate-x-1/2 items-center gap-3 rounded-2xl border border-border bg-card px-4 py-3 text-foreground shadow-2xl transition-all duration-300 ease-out md:ml-32 md:gap-4 md:px-5"
     >
-      {/* Selection Counter badge */}
-      <div className="flex items-center gap-2.5 border-r border-[#1b4336] pr-3 md:pr-4">
-        <span className="flex size-6 items-center justify-center rounded-full bg-[#3cd070] text-xs font-bold text-[#0d221b]">
+      <div className="flex items-center gap-2.5 border-r border-border pr-3 md:pr-4">
+        <span className="flex size-6 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
           {selectedCount}
         </span>
-        <span className="text-xs font-semibold tracking-wide text-gray-100 whitespace-nowrap">
+        <span className="whitespace-nowrap text-xs font-semibold tracking-wide text-foreground">
           {selectedCount === 1 ? 'Card Selected' : 'Cards Selected'}
         </span>
       </div>
 
-      {/* Action Buttons */}
-      <div className="flex items-center gap-2 flex-wrap">
-        {/* Set Active Button */}
+      <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
           onClick={onSetActive}
           disabled={isLoading}
-          className="flex items-center gap-1.5 rounded-lg bg-[#3cd070] px-3 py-1.5 text-xs font-semibold text-[#091b15] transition shadow-xs hover:bg-[#34b863] disabled:opacity-50 cursor-pointer"
+          className="flex cursor-pointer items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground shadow-xs transition hover:bg-brand-forest disabled:opacity-50"
         >
           {isLoading ? (
             <Loader2 className="size-3.5 animate-spin" />
@@ -71,59 +76,61 @@ export default function BulkActionBar({
           <span>Set Active</span>
         </button>
 
-        {/* Onboarding Options Dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger
             disabled={isLoading}
-            className="flex items-center gap-1.5 rounded-lg border border-[#255243] bg-[#17382d] px-3 py-1.5 text-xs font-medium text-emerald-200 transition hover:bg-[#1f493b] disabled:opacity-50 cursor-pointer outline-none"
+            className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-border bg-secondary px-3 py-1.5 text-xs font-medium text-foreground outline-none transition hover:bg-primary/10 hover:text-primary disabled:opacity-50"
           >
-            <UserPlus className="size-3.5 text-[#3cd070]" />
+            <UserPlus className="size-3.5 text-primary" />
             <span>Onboarding</span>
-            <ChevronDown className="size-3 text-emerald-300/70" />
+            <ChevronDown className="size-3 text-muted-foreground" />
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="center"
             side="top"
             sideOffset={8}
-            className="bg-[#0d221b] border border-[#1e4638] text-white p-1 min-w-44 z-50 rounded-xl shadow-xl"
+            className="z-50 min-w-44 rounded-xl border border-border bg-card p-1 text-foreground shadow-xl"
           >
             <DropdownMenuItem
-              onClick={() => (onSetOnboarding ? onSetOnboarding(true) : onToggleForNewUsers?.())}
-              className="cursor-pointer text-xs font-medium px-3 py-1.5 text-gray-200 hover:bg-[#17382d] hover:text-[#3cd070] rounded-lg transition-colors flex items-center gap-2"
+              onClick={() =>
+                onSetOnboarding ? onSetOnboarding(true) : onToggleForNewUsers?.()
+              }
+              className="flex cursor-pointer items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-primary/10 hover:text-primary"
             >
-              <UserPlus className="size-3.5 text-[#3cd070]" />
+              <UserPlus className="size-3.5 text-primary" />
               <span>Set as Onboarding (NEW)</span>
             </DropdownMenuItem>
             <DropdownMenuItem
-              onClick={() => (onSetOnboarding ? onSetOnboarding(false) : onToggleForNewUsers?.())}
-              className="cursor-pointer text-xs font-medium px-3 py-1.5 text-gray-200 hover:bg-[#17382d] hover:text-amber-400 rounded-lg transition-colors flex items-center gap-2"
+              onClick={() =>
+                onSetOnboarding ? onSetOnboarding(false) : onToggleForNewUsers?.()
+              }
+              className="flex cursor-pointer items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-warning-subtle hover:text-warning"
             >
-              <UserMinus className="size-3.5 text-amber-400" />
+              <UserMinus className="size-3.5 text-warning" />
               <span>Remove Onboarding (Not NEW)</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {/* Change Status Dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger
             disabled={isLoading}
-            className="flex items-center gap-1 rounded-lg border border-[#255243] bg-[#17382d] px-3 py-1.5 text-xs font-medium text-gray-200 transition hover:bg-[#1f493b] disabled:opacity-50 cursor-pointer outline-none"
+            className="flex cursor-pointer items-center gap-1 rounded-lg border border-border bg-secondary px-3 py-1.5 text-xs font-medium text-foreground outline-none transition hover:bg-primary/10 hover:text-primary disabled:opacity-50"
           >
             <span>Change Status</span>
-            <ChevronDown className="size-3.5 text-gray-400" />
+            <ChevronDown className="size-3.5 text-muted-foreground" />
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="center"
             side="top"
             sideOffset={8}
-            className="bg-[#0d221b] border border-[#1e4638] text-white p-1 min-w-32 z-50 rounded-xl shadow-xl"
+            className="z-50 min-w-32 rounded-xl border border-border bg-card p-1 text-foreground shadow-xl"
           >
             {STATUS_CHOICES.map((choice) => (
               <DropdownMenuItem
                 key={choice.id}
                 onClick={() => onChangeStatus(choice.id)}
-                className="cursor-pointer text-xs font-medium px-3 py-1.5 text-gray-200 hover:bg-[#17382d] hover:text-[#3cd070] rounded-lg transition-colors"
+                className="cursor-pointer rounded-lg px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-primary/10 hover:text-primary"
               >
                 {choice.label}
               </DropdownMenuItem>
@@ -131,36 +138,33 @@ export default function BulkActionBar({
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {/* Duplicate */}
         <button
           type="button"
           onClick={onDuplicate}
           disabled={isLoading}
-          className="rounded-lg p-1.5 text-gray-300 transition hover:bg-[#17382d] hover:text-white disabled:opacity-50 cursor-pointer"
+          className="cursor-pointer rounded-lg p-1.5 text-muted-foreground transition hover:bg-primary/10 hover:text-primary disabled:opacity-50"
           title="Duplicate selected"
         >
           <Copy className="size-4" />
         </button>
 
-        {/* Archive / Delete */}
         <button
           type="button"
           onClick={onDelete}
           disabled={isLoading}
-          className="rounded-lg p-1.5 text-rose-400 transition hover:bg-rose-950/40 hover:text-rose-300 disabled:opacity-50 cursor-pointer"
+          className="cursor-pointer rounded-lg p-1.5 text-destructive transition hover:bg-destructive/10 hover:text-destructive disabled:opacity-50"
           title="Delete selected"
         >
           <Trash2 className="size-4" />
         </button>
       </div>
 
-      {/* Deselect All (Dismiss) */}
-      <div className="border-l border-[#1b4336] pl-2">
+      <div className="border-l border-border pl-2">
         <button
           type="button"
           onClick={onDeselectAll}
           disabled={isLoading}
-          className="rounded px-2 py-1 text-[11px] text-gray-400 transition hover:text-white cursor-pointer disabled:opacity-50"
+          className="cursor-pointer rounded px-2 py-1 text-[11px] text-muted-foreground transition hover:text-foreground disabled:opacity-50"
         >
           Deselect
         </button>

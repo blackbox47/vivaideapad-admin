@@ -44,7 +44,6 @@ export default function MyIdeasOverview() {
   return (
     <div className="pb-4">
       <PageHeader
-        eyebrow="Your work"
         title="My submissions"
         description="Track every idea from first draft to final decision."
       />

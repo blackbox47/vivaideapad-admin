@@ -16,8 +16,3 @@ export const CREATOR_AUTH_TOKEN_STORAGE_KEY = 'ideapad.creator.token';
  */
 export const CREATOR_SIGNED_OUT_STORAGE_KEY = 'ideapad.creator.signed-out';
 
-/**
- * Local storage key for dark/light theme preference.
- */
-export const THEME_STORAGE_KEY = 'ideapad_theme_preference';
-

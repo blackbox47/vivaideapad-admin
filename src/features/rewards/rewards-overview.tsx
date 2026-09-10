@@ -106,7 +106,6 @@ export default function RewardsOverview() {
   return (
     <div>
       <PageHeader
-        eyebrow="Administration"
         title="Rewards ledger"
         description="Track every reward, balance adjustment and release."
         action={

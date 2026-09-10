@@ -75,7 +75,6 @@ export default function CreatorProfileOverview() {
   return (
     <div className="pb-4">
       <PageHeader
-        eyebrow="Account"
         title="Profile"
         description="Manage your identity, contact details and preferences."
       />

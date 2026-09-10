@@ -128,7 +128,7 @@ export default function DateField({
         aria-label="Open calendar"
         aria-expanded={open}
         aria-haspopup="dialog"
-        className="absolute top-1/2 right-3 z-10 inline-flex size-4 -translate-y-1/2 cursor-pointer items-center justify-center border-0 bg-transparent p-0 text-muted-foreground hover:text-foreground"
+        className="absolute top-1/2 right-3 z-10 inline-flex size-4 -translate-y-1/2 cursor-pointer items-center justify-center border-0 bg-transparent p-0 text-muted-foreground hover:text-primary"
         onClick={() => setOpen((current) => !current)}
       >
         <CalendarIcon className="size-4" />

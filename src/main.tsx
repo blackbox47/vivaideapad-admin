@@ -9,6 +9,11 @@ import { routeTree } from '@/routeTree.gen';
 import { ScreenLoader } from '@/components/shared/screen-loader';
 import './index.css';
 
+// Single-theme product: clear any leftover dark-mode class / preference
+// from the previous light/dark toggle.
+document.documentElement.classList.remove('dark');
+localStorage.removeItem('ideapad_theme_preference');
+
 // One-shot migration: drop the legacy localStorage token/signed-out keys
 // left over from the pre-cookie auth scheme. Idempotent and harmless once
 // the deploy has propagated.

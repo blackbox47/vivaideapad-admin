@@ -37,7 +37,6 @@ export default function CreatorLeaderboardOverview() {
   return (
     <div className="pb-4">
       <PageHeader
-        eyebrow={data?.eyebrow ?? 'Community'}
         title={data?.title ?? 'Leaderboard'}
         description={
           data?.description ??

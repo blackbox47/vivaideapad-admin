@@ -57,10 +57,10 @@ export default function LeaderboardPodium({
             </AvatarFallback>
           </Avatar>
           <p className="mt-4 text-[15px] font-semibold text-white">{entry.name}</p>
-          <p className="mt-2 font-heading text-[28px] font-extrabold leading-none tracking-[-0.02em] text-brand-lime">
+          <p className="mt-2 font-heading text-[28px] font-extrabold leading-none tracking-[-0.02em] text-primary">
             {formatPoints(entry.points)}
           </p>
-          <p className="mt-3 text-[12px] text-text-light">
+          <p className="mt-3 text-[12px] text-white/55">
             {entry.approvedIdeas} approved · {entry.visibility}
           </p>
         </article>

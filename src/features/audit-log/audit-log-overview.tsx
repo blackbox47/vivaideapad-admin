@@ -76,7 +76,6 @@ export default function AuditLogOverview() {
   return (
     <div>
       <PageHeader
-        eyebrow="Administration"
         title="Audit log"
         description="A traceable record of sensitive platform actions."
       />

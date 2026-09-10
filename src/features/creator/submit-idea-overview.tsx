@@ -67,9 +67,6 @@ export default function SubmitIdeaOverview() {
     <div className="mx-auto w-full max-w-[1200px] py-4 sm:py-8">
       {/* Section Header */}
       <section className="mb-10" data-purpose="header-section">
-        <span className="mb-2 block text-xs font-bold uppercase tracking-widest text-muted-foreground">
-          {submissionId ? 'Edit submission' : 'Contributor Space'}
-        </span>
         <h1 className="mb-3 text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight text-foreground">
           {submissionId ? 'Edit your idea' : 'Submit a new idea'}
         </h1>

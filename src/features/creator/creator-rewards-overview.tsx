@@ -121,7 +121,6 @@ export default function CreatorRewardsOverview() {
   return (
     <div className="pb-4">
       <PageHeader
-        eyebrow="Rewards"
         title="Your work has value."
         description="See every reward and manage your payout requests."
         action={

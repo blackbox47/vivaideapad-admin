@@ -106,7 +106,6 @@ export default function PayoutsOverview() {
   return (
     <div>
       <PageHeader
-        eyebrow="Administration"
         title="Payouts"
         description="Approve and record contributor withdrawal requests."
       />

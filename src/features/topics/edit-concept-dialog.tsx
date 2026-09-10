@@ -417,7 +417,7 @@ export default function EditConceptDialog({
               type="checkbox"
               id="edit-is-onboarding"
               {...register('isOnboarding')}
-              className="size-4 rounded border-border accent-[#0d221b] cursor-pointer"
+              className="size-4 rounded border-border accent-primary cursor-pointer"
             />
             <label
               htmlFor="edit-is-onboarding"

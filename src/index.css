@@ -3,47 +3,53 @@
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/manrope";
 
-@custom-variant dark (&:is(.dark *));
-
+/**
+ * Single product theme — aligned to Sparkory Webflow
+ * (https://sparkory-idea-project.webflow.io/).
+ * Light/dark mode is intentionally not supported.
+ *
+ * Legacy brand-* token names are remapped to the Webflow blue/navy
+ * palette so existing Tailwind classes keep working.
+ */
 :root {
   /* Core layout & base surfaces */
-  --background: #f5f7f5;
-  --foreground: #12231f;
+  --background: #fafbfc;
+  --foreground: #0f0f1a;
   --card: #ffffff;
-  --card-foreground: #12231f;
+  --card-foreground: #0f0f1a;
   --popover: #ffffff;
-  --popover-foreground: #12231f;
+  --popover-foreground: #0f0f1a;
 
-  /* Primary & Accents */
-  --primary: #12231f;
+  /* Primary & Accents — Webflow blue */
+  --primary: #3281ff;
   --primary-foreground: #ffffff;
-  --secondary: #e2f1ea;
-  --secondary-foreground: #12231f;
-  --muted: #f6f8f5;
-  --muted-foreground: #687773;
-  --accent: #254b40;
-  --accent-foreground: #ffffff;
+  --secondary: #f7f8ff;
+  --secondary-foreground: #0f0f1a;
+  --muted: #f3f4ff;
+  --muted-foreground: #666680;
+  --accent: #f0f4ff;
+  --accent-foreground: #3281ff;
 
   /* Borders & Inputs */
-  --border: #dfe7e3;
-  --border-subtle: #e3e9e6;
-  --border-muted: #eef1ef;
-  --input: #dfe7e3;
-  --ring: #16805e;
+  --border: #eaeaf0;
+  --border-subtle: #e0e0ec;
+  --border-muted: #f3f4ff;
+  --input: #eaeaf0;
+  --ring: #3281ff;
 
-  /* Brand Palette Variables */
-  --brand-pine: #12231f;
-  --brand-pine-deep: #173f33;
-  --brand-forest: #254b40;
-  --brand-forest-border: #2d4b43;
-  --brand-sage: #527065;
-  --brand-sage-light: #70a28d;
-  --brand-lime: #c9f36d;
-  --brand-lime-foreground: #12231f;
-  --brand-lime-subtle: #e8ffc0;
-  --brand-lime-tint: #f9fdf4;
+  /* Brand palette (aliases → Webflow) */
+  --brand-pine: #0f0f1a;
+  --brand-pine-deep: #111118;
+  --brand-forest: #1f6fe0;
+  --brand-forest-border: #256ee6;
+  --brand-sage: #666680;
+  --brand-sage-light: #aaaabc;
+  --brand-lime: #3281ff;
+  --brand-lime-foreground: #ffffff;
+  --brand-lime-subtle: #f7f8ff;
+  --brand-lime-tint: #f3f4ff;
 
-  /* Status / Feedback Variables */
+  /* Status / Feedback */
   --success: #16805e;
   --success-foreground: #ffffff;
   --success-subtle: #dff8eb;
@@ -61,174 +67,68 @@
   --danger-foreground: #ffffff;
   --danger-subtle: #ffe6d5;
 
-  --info: #5b4fc4;
-  --info-alt: #8900ff;
-  --info-alt-hover: #9135ff;
+  --info: #3281ff;
+  --info-alt: #36a4ff;
+  --info-alt-hover: #1f6fe0;
   --info-foreground: #ffffff;
-  --info-subtle: #e7e3ff;
-  --info-muted: #eee6ff;
+  --info-subtle: #eff6ff;
+  --info-muted: #f3f4ff;
 
-  --accent-cyan: #00c2ff;
-  --accent-cyan-alt: #00d8ff;
+  --accent-cyan: #36a4ff;
+  --accent-cyan-alt: #0082f3;
 
   /* Neutral Surfaces & Subdued Text */
   --surface-white: #ffffff;
-  --surface-subtle: #f6f8f5;
-  --surface-subdued: #f1f3f2;
-  --surface-muted: #eef1ef;
+  --surface-subtle: #fafbfc;
+  --surface-subdued: #f7f8ff;
+  --surface-muted: #f3f4ff;
 
-  --text-primary: #12231f;
-  --text-muted: #687773;
-  --text-tertiary: #82948e;
-  --text-subtle: #9aa8a3;
-  --text-light: #a9bbb4;
-  --text-lightest: #c6d2ce;
+  --text-primary: #0f0f1a;
+  --text-muted: #666680;
+  --text-tertiary: #888898;
+  --text-subtle: #aaaabc;
+  --text-light: #9999b0;
+  --text-lightest: #e0e0ec;
 
-  /* Sidebar Tokens */
-  --sidebar: #12231f;
-  --sidebar-foreground: #f5faf7;
-  --sidebar-primary: #c9f36d;
-  --sidebar-primary-foreground: #12231f;
-  --sidebar-accent: #254b40;
+  /* Sidebar — light (Webflow-style) with distinct hover vs selected */
+  --sidebar: #ffffff;
+  --sidebar-foreground: #0f0f1a;
+  --sidebar-primary: #3281ff;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #3281ff;
   --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: #2d4b43;
-  --sidebar-ring: #c9f36d;
-  --sidebar-muted: #82948e;
-  --sidebar-nav-muted: #c6d2ce;
+  --sidebar-border: #eaeaf0;
+  --sidebar-ring: #3281ff;
+  --sidebar-muted: #666680;
+  --sidebar-nav-muted: #666680;
 
-  /* Overlay & Dialog Styles */
-  --overlay-scrim: rgba(8, 23, 18, 0.6);
-  --dialog-border: rgba(29, 65, 54, 0.12);
+  /* Overlay & Dialog */
+  --overlay-scrim: rgba(15, 15, 26, 0.55);
+  --dialog-border: rgba(50, 129, 255, 0.12);
 
-  /* Chart Tokens */
-  --chart-1: #12231f;
-  --chart-2: #16805e;
-  --chart-3: #70a28d;
-  --chart-4: #c9f36d;
+  /* Charts */
+  --chart-1: #3281ff;
+  --chart-2: #36a4ff;
+  --chart-3: #1f6fe0;
+  --chart-4: #666680;
   --chart-5: #b3401f;
-  --chart-border: #dfe8e4;
+  --chart-border: #eaeaf0;
 
   --radius: 0.625rem;
 }
 
-.dark {
-  /* Core layout & base surfaces */
-  --background: #0d1a16;
-  --foreground: #f5faf7;
-  --card: #12231f;
-  --card-foreground: #f5faf7;
-  --popover: #12231f;
-  --popover-foreground: #f5faf7;
-
-  /* Primary & Accents */
-  --primary: #c9f36d;
-  --primary-foreground: #12231f;
-  --secondary: #1e3d33;
-  --secondary-foreground: #f5faf7;
-  --muted: #17322a;
-  --muted-foreground: #9aa8a3;
-  --accent: #254b40;
-  --accent-foreground: #ffffff;
-
-  /* Borders & Inputs */
-  --border: #254b40;
-  --border-subtle: #1f3d34;
-  --border-muted: #1a332c;
-  --input: #254b40;
-  --ring: #c9f36d;
-
-  /* Brand Palette Variables */
-  --brand-pine: #f5faf7;
-  --brand-pine-deep: #0a1613;
-  --brand-forest: #254b40;
-  --brand-forest-border: #2d4b43;
-  --brand-sage: #9aa8a3;
-  --brand-sage-light: #70a28d;
-  --brand-lime: #c9f36d;
-  --brand-lime-foreground: #12231f;
-  --brand-lime-subtle: #243a14;
-  --brand-lime-tint: #14241c;
-
-  /* Status / Feedback Variables */
-  --success: #34d399;
-  --success-foreground: #0d1a16;
-  --success-subtle: #133a2a;
-  --success-muted: #1b4d3a;
-
-  --warning: #facc15;
-  --warning-foreground: #0d1a16;
-  --warning-subtle: #3a3210;
-
-  --destructive: #f87171;
-  --destructive-foreground: #0d1a16;
-  --destructive-subtle: #3a1c14;
-  --danger: #f87171;
-  --danger-hover: #ef4444;
-  --danger-foreground: #0d1a16;
-  --danger-subtle: #3a1c14;
-
-  --info: #a78bfa;
-  --info-alt: #c084fc;
-  --info-alt-hover: #d8b4fe;
-  --info-foreground: #0d1a16;
-  --info-subtle: #2b1e4a;
-  --info-muted: #35265c;
-
-  --accent-cyan: #38bdf8;
-  --accent-cyan-alt: #7dd3fc;
-
-  /* Neutral Surfaces & Subdued Text */
-  --surface-white: #12231f;
-  --surface-subtle: #17322a;
-  --surface-subdued: #193a30;
-  --surface-muted: #1a332c;
-
-  --text-primary: #f5faf7;
-  --text-muted: #9aa8a3;
-  --text-tertiary: #82948e;
-  --text-subtle: #687773;
-  --text-light: #527065;
-  --text-lightest: #3f554e;
-
-  /* Sidebar Tokens */
-  --sidebar: #0e1c18;
-  --sidebar-foreground: #f5faf7;
-  --sidebar-primary: #c9f36d;
-  --sidebar-primary-foreground: #12231f;
-  --sidebar-accent: #1e3c33;
-  --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: #1a332c;
-  --sidebar-ring: #c9f36d;
-  --sidebar-muted: #82948e;
-  --sidebar-nav-muted: #9aa8a3;
-
-  /* Overlay & Dialog Styles */
-  --overlay-scrim: rgba(0, 0, 0, 0.75);
-  --dialog-border: rgba(201, 243, 109, 0.15);
-
-  /* Chart Tokens */
-  --chart-1: #c9f36d;
-  --chart-2: #34d399;
-  --chart-3: #70a28d;
-  --chart-4: #38bdf8;
-  --chart-5: #f87171;
-  --chart-border: #254b40;
-}
-
 @theme inline {
-  --font-heading: "Manrope Variable", sans-serif;
-  --font-sans: "DM Sans", sans-serif;
+  --font-heading: "Urbanist", sans-serif;
+  --font-sans: "Urbanist", sans-serif;
   --font-jakarta: "Plus Jakarta Sans", sans-serif;
   --font-urbanist: "Urbanist", sans-serif;
   --font-mono: "JetBrains Mono", monospace;
   --font-jetbrains: "JetBrains Mono", monospace;
   --font-bengali: "Noto Sans Bengali", sans-serif;
-  /* Fluid page-title scale shared by every route heading. */
   --text-display: clamp(28px, 3.5vw, 42px);
   --text-display--line-height: 1.1;
   --tracking-display: -0.04em;
 
-  /* Standard Theme Utilities */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -252,7 +152,6 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
-  /* Brand Colors */
   --color-brand-pine: var(--brand-pine);
   --color-brand-pine-deep: var(--brand-pine-deep);
   --color-brand-forest: var(--brand-forest);
@@ -264,7 +163,6 @@
   --color-brand-lime-subtle: var(--brand-lime-subtle);
   --color-brand-lime-tint: var(--brand-lime-tint);
 
-  /* Feedback & Status */
   --color-success: var(--success);
   --color-success-foreground: var(--success-foreground);
   --color-success-subtle: var(--success-subtle);
@@ -289,7 +187,6 @@
   --color-accent-cyan: var(--accent-cyan);
   --color-accent-cyan-alt: var(--accent-cyan-alt);
 
-  /* Surfaces & Text */
   --color-surface-white: var(--surface-white);
   --color-surface-subtle: var(--surface-subtle);
   --color-surface-subdued: var(--surface-subdued);
@@ -302,7 +199,6 @@
   --color-text-light: var(--text-light);
   --color-text-lightest: var(--text-lightest);
 
-  /* Sidebar */
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -314,7 +210,6 @@
   --color-sidebar-muted: var(--sidebar-muted);
   --color-sidebar-nav-muted: var(--sidebar-nav-muted);
 
-  /* Charts */
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
@@ -346,6 +241,12 @@
 
   #root {
     @apply min-h-svh w-full;
+  }
+
+  /* Native form controls — match Webflow primary blue */
+  input[type="checkbox"],
+  input[type="radio"] {
+    accent-color: var(--primary);
   }
 
   button:not(:disabled),
