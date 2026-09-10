@@ -45,3 +45,16 @@ export interface LoginRequest {
 export interface LoginResponse {
   user: AuthUser;
 }
+
+export interface SignUpRequest {
+  full_name?: string;
+  displayName?: string;
+  email: string;
+  password: string;
+  consent?: boolean;
+}
+
+export interface SignUpResponse {
+  id?: string;
+  email?: string;
+}

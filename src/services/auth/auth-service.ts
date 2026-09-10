@@ -1,6 +1,8 @@
 import type {
   LoginRequest,
   LoginResponse,
+  SignUpRequest,
+  SignUpResponse,
 } from '@/models/auth/auth-model';
 import type { ProfileOverview } from '@/models/profile/profile-model';
 import { baseService } from '@/services/core/base-service';
@@ -8,8 +10,10 @@ import {
   AUTH_ADMIN_SIGN_IN_URL,
   AUTH_FORGOT_PASSWORD_URL,
   AUTH_GOOGLE_SIGN_IN_URL,
+  AUTH_GOOGLE_SIGN_UP_URL,
   AUTH_SIGN_IN_URL,
   AUTH_SIGN_OUT_URL,
+  AUTH_SIGN_UP_URL,
   PROFILE_OVERVIEW_URL,
 } from '@/utils/constants/api-end-points';
 
@@ -38,6 +42,19 @@ export const authService = baseService.injectEndpoints({
     googleLogin: builder.mutation<LoginResponse, { credential: string }>({
       query: (body) => ({ url: AUTH_GOOGLE_SIGN_IN_URL, method: 'POST', body }),
       invalidatesTags: ['admin-user', 'dashboard'],
+    }),
+    /**
+     * Contributor self-registration with email and password.
+     * Does not return a JWT session — user must verify email and pass review.
+     */
+    signUp: builder.mutation<SignUpResponse, SignUpRequest>({
+      query: (body) => ({ url: AUTH_SIGN_UP_URL, method: 'POST', body }),
+    }),
+    /**
+     * Contributor self-registration via Google identity credential.
+     */
+    googleSignUp: builder.mutation<SignUpResponse, { credential: string }>({
+      query: (body) => ({ url: AUTH_GOOGLE_SIGN_UP_URL, method: 'POST', body }),
     }),
     /**
      * Admin-only sign-in. Hits `POST /auth/admin/sign-in`, which rejects
@@ -71,6 +88,8 @@ export const {
   useGetCurrentAdminQuery,
   useLoginMutation,
   useGoogleLoginMutation,
+  useSignUpMutation,
+  useGoogleSignUpMutation,
   useAdminLoginMutation,
   useSignOutMutation,
   useForgotPasswordMutation,

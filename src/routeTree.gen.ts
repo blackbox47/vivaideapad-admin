@@ -22,6 +22,7 @@ import { Route as PrivatecreatorRewardsRouteImport } from './routes/_privatecrea
 import { Route as PrivatecreatorSubmissionsRouteImport } from './routes/_privatecreator/submissions'
 import { Route as PubliccreatorForgotPasswordRouteImport } from './routes/_publiccreator/forgot-password'
 import { Route as PubliccreatorLoginRouteImport } from './routes/_publiccreator/login'
+import { Route as PubliccreatorSignUpRouteImport } from './routes/_publiccreator/sign-up'
 import { Route as AdminAdminRouteImport } from './routes/admin/_admin'
 import { Route as AdminLoginRouteImport } from './routes/admin/login'
 import { Route as AdminSignInRouteImport } from './routes/admin/sign-in'
@@ -107,6 +108,11 @@ const PubliccreatorForgotPasswordRoute =
 const PubliccreatorLoginRoute = PubliccreatorLoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => PubliccreatorRouteRoute,
+} as any)
+const PubliccreatorSignUpRoute = PubliccreatorSignUpRouteImport.update({
+  id: '/sign-up',
+  path: '/sign-up',
   getParentRoute: () => PubliccreatorRouteRoute,
 } as any)
 const AdminAdminRoute = AdminAdminRouteImport.update({
@@ -213,6 +219,7 @@ export interface FileRoutesByFullPath {
   '/submissions': typeof PrivatecreatorSubmissionsRoute
   '/forgot-password': typeof PubliccreatorForgotPasswordRoute
   '/login': typeof PubliccreatorLoginRoute
+  '/sign-up': typeof PubliccreatorSignUpRoute
   '/admin': typeof AdminAdminRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
   '/admin/sign-in': typeof AdminSignInRoute
@@ -244,6 +251,7 @@ export interface FileRoutesByTo {
   '/submissions': typeof PrivatecreatorSubmissionsRoute
   '/forgot-password': typeof PubliccreatorForgotPasswordRoute
   '/login': typeof PubliccreatorLoginRoute
+  '/sign-up': typeof PubliccreatorSignUpRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/sign-in': typeof AdminSignInRoute
   '/ideas/new': typeof PrivatecreatorIdeasNewRoute
@@ -277,6 +285,7 @@ export interface FileRoutesById {
   '/_privatecreator/submissions': typeof PrivatecreatorSubmissionsRoute
   '/_publiccreator/forgot-password': typeof PubliccreatorForgotPasswordRoute
   '/_publiccreator/login': typeof PubliccreatorLoginRoute
+  '/_publiccreator/sign-up': typeof PubliccreatorSignUpRoute
   '/admin/_admin': typeof AdminAdminRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
   '/admin/sign-in': typeof AdminSignInRoute
@@ -310,6 +319,7 @@ export interface FileRouteTypes {
     | '/submissions'
     | '/forgot-password'
     | '/login'
+    | '/sign-up'
     | '/admin'
     | '/admin/login'
     | '/admin/sign-in'
@@ -341,6 +351,7 @@ export interface FileRouteTypes {
     | '/submissions'
     | '/forgot-password'
     | '/login'
+    | '/sign-up'
     | '/admin/login'
     | '/admin/sign-in'
     | '/ideas/new'
@@ -373,6 +384,7 @@ export interface FileRouteTypes {
     | '/_privatecreator/submissions'
     | '/_publiccreator/forgot-password'
     | '/_publiccreator/login'
+    | '/_publiccreator/sign-up'
     | '/admin/_admin'
     | '/admin/login'
     | '/admin/sign-in'
@@ -494,6 +506,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof PubliccreatorLoginRouteImport
+      parentRoute: typeof PubliccreatorRouteRoute
+    }
+    '/_publiccreator/sign-up': {
+      id: '/_publiccreator/sign-up'
+      path: '/sign-up'
+      fullPath: '/sign-up'
+      preLoaderRoute: typeof PubliccreatorSignUpRouteImport
       parentRoute: typeof PubliccreatorRouteRoute
     }
     '/admin/_admin': {
@@ -655,11 +674,13 @@ const PrivatecreatorRouteRouteWithChildren =
 interface PubliccreatorRouteRouteChildren {
   PubliccreatorForgotPasswordRoute: typeof PubliccreatorForgotPasswordRoute
   PubliccreatorLoginRoute: typeof PubliccreatorLoginRoute
+  PubliccreatorSignUpRoute: typeof PubliccreatorSignUpRoute
 }
 
 const PubliccreatorRouteRouteChildren: PubliccreatorRouteRouteChildren = {
   PubliccreatorForgotPasswordRoute: PubliccreatorForgotPasswordRoute,
   PubliccreatorLoginRoute: PubliccreatorLoginRoute,
+  PubliccreatorSignUpRoute: PubliccreatorSignUpRoute,
 }
 
 const PubliccreatorRouteRouteWithChildren =

@@ -91,7 +91,7 @@ export function HomeNav({
   onActiveItemChange,
   navItems = DEFAULT_NAV_ITEMS,
   signInUrl = CREATOR_ROUTES.login,
-  joinFreeUrl = CREATOR_ROUTES.login,
+  joinFreeUrl = CREATOR_ROUTES.signUp,
   onSignInClick,
   onJoinFreeClick,
   actionsRightSlot,
