@@ -17,10 +17,10 @@ export default function CreatorLeaderboardStandings({
   isLoading,
 }: CreatorLeaderboardStandingsProps) {
   return (
-    <section className="rounded-[22px] bg-brand-forest p-6 text-white">
+    <section className="rounded-[22px] border border-border bg-card p-6 text-foreground shadow-xs">
       <div className="mb-3.5 flex flex-wrap items-center justify-between gap-2">
         <h2 className="font-heading text-lg font-semibold">Full standings</h2>
-        <span className="text-xs text-brand-sage-light">
+        <span className="text-xs text-muted-foreground">
           Points reset monthly · Visibility: {visibility}
         </span>
       </div>
@@ -30,7 +30,7 @@ export default function CreatorLeaderboardStandings({
           {Array.from({ length: 6 }).map((_, index) => (
             <Skeleton
               key={index}
-              className="h-[60px] rounded-[14px] bg-white/10"
+              className="h-[60px] rounded-[14px]"
             />
           ))}
         </div>
@@ -38,19 +38,15 @@ export default function CreatorLeaderboardStandings({
         <EmptyState
           card={false}
           size="sm"
-          title={<span className="text-white">No standings yet</span>}
-          description={
-            <span className="text-brand-sage-light">
-              Standings will appear once contributors earn points.
-            </span>
-          }
+          title="No standings yet"
+          description="Standings will appear once contributors earn points."
         />
       ) : (
         <div className="flex flex-col gap-2.5">
           {entries.map((entry) => (
             <div key={entry.id}>
               {entry.showGap ? (
-                <div className="py-1 text-center text-xs tracking-[0.1em] text-brand-sage-light">
+                <div className="py-1 text-center text-xs tracking-[0.1em] text-muted-foreground">
                   ···
                 </div>
               ) : null}
@@ -58,8 +54,8 @@ export default function CreatorLeaderboardStandings({
                 className={cn(
                   'grid grid-cols-[36px_40px_minmax(0,1fr)_auto] items-center gap-3 rounded-[14px] px-4 py-3 sm:grid-cols-[36px_40px_minmax(0,1fr)_auto_auto]',
                   entry.isYou
-                    ? 'bg-brand-lime-subtle text-brand-lime-foreground dark:text-brand-lime'
-                    : 'bg-white/10',
+                    ? 'border border-primary/20 bg-primary/5'
+                    : 'bg-surface-subtle',
                 )}
               >
                 <strong>{entry.rankLabel}</strong>
@@ -73,34 +69,14 @@ export default function CreatorLeaderboardStandings({
                 </Avatar>
                 <div className="min-w-0">
                   <strong className="block truncate">{entry.name}</strong>
-                  <div
-                    className={cn(
-                      'text-[11px]',
-                      entry.isYou
-                        ? 'text-brand-lime-foreground/70 dark:text-brand-lime/75'
-                        : 'text-brand-sage-light',
-                    )}
-                  >
+                  <div className="text-[11px] text-muted-foreground">
                     {entry.approved} approved ideas · {entry.streak} streak
                   </div>
                 </div>
-                <span
-                  className={cn(
-                    'hidden text-xs sm:inline',
-                    entry.isYou
-                      ? 'text-brand-lime-foreground/70 dark:text-brand-lime/75'
-                      : 'text-brand-sage-light',
-                  )}
-                >
+                <span className="hidden text-xs text-muted-foreground sm:inline">
                   {entry.visibility}
                 </span>
-                <strong
-                  className={
-                    entry.isYou
-                      ? 'text-brand-forest dark:text-brand-lime'
-                      : 'text-brand-lime'
-                  }
-                >
+                <strong className="text-primary">
                   {formatLeaderboardPoints(entry.points)}
                 </strong>
               </div>

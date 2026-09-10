@@ -401,7 +401,7 @@ export default function NotificationPopover({
             variant="outline"
             size="icon"
             className={cn(
-              'relative size-10 rounded-full border-border bg-card text-foreground transition-colors hover:border-foreground cursor-pointer',
+              'relative size-10 cursor-pointer rounded-full border-border bg-card text-foreground transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary',
               className,
             )}
             aria-label={
@@ -415,7 +415,7 @@ export default function NotificationPopover({
         <Bell className="size-4.5" />
         {unreadCount > 0 ? (
           <span
-            className="absolute top-1.5 right-1.5 size-2 rounded-full bg-brand-lime"
+            className="absolute top-1.5 right-1.5 size-2 rounded-full bg-primary"
             aria-hidden
           />
         ) : null}

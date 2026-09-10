@@ -42,7 +42,6 @@ export default function CreatorDashboardOverview() {
   return (
     <div className="mx-auto w-full max-w-xl pb-4 space-y-4 sm:space-y-[18px] lg:max-w-none">
       <PageHeader
-        eyebrow={data?.eyebrow ?? 'Contributor space'}
         title={`Keep the momentum, ${firstName}.`}
         description={
           data?.description ??

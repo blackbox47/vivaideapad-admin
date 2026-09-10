@@ -1,4 +1,4 @@
-import { LogOut, Menu, Moon, Sun, User } from 'lucide-react';
+import { LogOut, Menu, User } from 'lucide-react';
 import { useNavigate } from '@tanstack/react-router';
 
 import AdminSidebar from '@/components/layout/admin-sidebar';
@@ -24,7 +24,6 @@ import useAdminUser from '@/hooks/auth/use-admin-user';
 import useAuth from '@/hooks/auth/use-auth';
 import NotificationPopover from '@/components/notifications/notification-popover';
 import useMobileNav from '@/hooks/ui/use-mobile-nav';
-import useTheme from '@/hooks/ui/use-theme';
 import { ADMIN_ROUTES } from '@/utils/constants/routes';
 import { deriveInitials } from '@/utils/helpers/initials';
 import { resolveAvatarUrl } from '@/utils/helpers/resolve-avatar-url';
@@ -33,7 +32,6 @@ export default function AdminHeader() {
   const { isOpen, setOpen } = useMobileNav();
   const { user } = useAdminUser();
   const { logout } = useAuth();
-  const { isDarkMode, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
   const resolvedAvatarUrl = resolveAvatarUrl(user?.avatar_url);
@@ -65,27 +63,9 @@ export default function AdminHeader() {
             <AdminSidebar className="h-full" />
           </SheetContent>
         </Sheet>
-
-        <p className="min-w-0 text-xs font-extrabold tracking-[0.12em] text-brand-sage uppercase">
-          Administration
-        </p>
       </div>
 
       <div className="flex items-center gap-3">
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={toggleTheme}
-          className="size-10 rounded-full border-border bg-card text-foreground transition-colors hover:border-foreground"
-          aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-        >
-          {isDarkMode ? (
-            <Sun className="size-4.5 text-warning" />
-          ) : (
-            <Moon className="size-4.5 text-foreground" />
-          )}
-        </Button>
-
         <NotificationPopover role="admin" />
 
         <DropdownMenu>
@@ -93,7 +73,7 @@ export default function AdminHeader() {
             render={
               <Button
                 variant="outline"
-                className="h-auto rounded-full border-border bg-card py-1.5 pr-3.5 pl-1.5 text-[13px] font-bold text-foreground transition-colors hover:border-foreground"
+                className="h-auto gap-2 rounded-full border-border bg-card py-1.5 pr-3.5 pl-1.5 text-[13px] font-bold text-foreground transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary"
                 aria-label="Account menu"
               />
             }
@@ -105,7 +85,7 @@ export default function AdminHeader() {
                   alt={user?.display_name ?? 'Admin'}
                 />
               )}
-              <AvatarFallback className="bg-brand-lime text-[11px] font-bold text-brand-lime-foreground">
+              <AvatarFallback className="bg-primary text-[11px] font-bold text-primary-foreground">
                 {user ? deriveInitials(user.display_name, user.email) : '—'}
               </AvatarFallback>
             </Avatar>
@@ -121,19 +101,6 @@ export default function AdminHeader() {
             >
               <User className="size-4" />
               View profile
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={toggleTheme}>
-              {isDarkMode ? (
-                <>
-                  <Sun className="size-4" />
-                  Light mode
-                </>
-              ) : (
-                <>
-                  <Moon className="size-4" />
-                  Dark mode
-                </>
-              )}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem variant="destructive" onClick={logout}>

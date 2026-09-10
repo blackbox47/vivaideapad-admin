@@ -76,7 +76,6 @@ export default function AdminNotificationsOverview() {
   return (
     <div>
       <PageHeader
-        eyebrow="Updates"
         title="Notifications"
         description={`Review queue, applicants and payouts in one place. ${unreadCount} unread.`}
         action={

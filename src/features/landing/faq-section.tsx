@@ -21,7 +21,7 @@ const DEFAULT_FAQS: FaqItemData[] = [
   {
     question: 'Who can submit ideas?',
     answer:
-      'Anyone with an account on Sparkory can submit ideas to open requests posted by vendors.',
+      'Anyone with an account on Viva IdeaPad can submit ideas to open requests posted by vendors.',
   },
   {
     question: 'How are winners selected?',
@@ -105,7 +105,7 @@ export const FaqSection: FC<FaqSectionProps> = ({
   badgeText = 'FAQ',
   titleLine1 = 'Got questions?',
   titleLine2 = 'We have answers.',
-  description = 'Everything you need to know about Sparkory — for contributors, vendors, and judges alike.',
+  description = 'Everything you need to know about Viva IdeaPad — for contributors, vendors, and judges alike.',
   ctaText = 'Still have questions? Contact us →',
   faqs = DEFAULT_FAQS,
   onContactClick,

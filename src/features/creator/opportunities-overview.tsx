@@ -84,7 +84,6 @@ export default function OpportunitiesOverview() {
   return (
     <div className="pb-4">
       <PageHeader
-        eyebrow="Live concepts"
         title="Find your next spark."
         description="Choose a brief that matches your curiosity and experience."
         action={

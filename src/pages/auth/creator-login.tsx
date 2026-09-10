@@ -2,14 +2,14 @@ import LoginHero from '@/features/auth/login-hero';
 import LoginPanel from '@/features/auth/login-panel';
 
 export default function CreatorLoginPage() {
-  const brandName = 'sparkory';
+  const brandName = 'Viva IdeaPad';
   const eyebrow = 'WELCOME BACK';
   const title = 'Ideas grow when you show up.';
   const description = 'Continue creating, reviewing or shaping the next opportunity.';
-  const footer = 'Sparkory community platform';
+  const footer = 'Viva IdeaPad community platform';
 
   return (
-    <div className="flex min-h-svh w-full flex-col bg-[#f8faf9] md:h-screen md:flex-row md:overflow-hidden md:bg-surface-subtle">
+    <div className="flex min-h-svh w-full flex-col bg-background md:h-screen md:flex-row md:overflow-hidden">
       <LoginHero
         brandName={brandName}
         eyebrow={eyebrow}

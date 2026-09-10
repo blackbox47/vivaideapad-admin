@@ -6,14 +6,14 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-svh w-full flex-col overflow-hidden md:h-screen md:flex-row">
       <LoginHero
-        brandName="sparkory"
+        brandName="Viva IdeaPad"
         eyebrow="ADMIN PORTAL"
         title="Manage, review, and govern with confidence."
-        description="Secure portal for Sparkory platform owners, reviewers, and system administrators."
-        footer="Sparkory community platform"
+        description="Secure portal for Viva IdeaPad platform owners, reviewers, and system administrators."
+        footer="Viva IdeaPad community platform"
         homeLink={CREATOR_ROUTES.login}
       />
-      <AdminSignInPanel brandName="sparkory" />
+      <AdminSignInPanel brandName="Viva IdeaPad" />
     </div>
   );
 }

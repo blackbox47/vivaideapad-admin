@@ -24,9 +24,7 @@ export default function DashboardQuickLinks() {
           to={item.href}
           className="rounded-full border border-border bg-card px-4 py-2 text-[13px] font-bold text-foreground no-underline hover:bg-surface-subtle transition-colors"
         >
-          {item.title === 'Applicants & users'
-            ? 'Applicants & contributors'
-            : item.title}
+          {item.title}
         </Link>
       ))}
     </nav>

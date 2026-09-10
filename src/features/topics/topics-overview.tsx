@@ -275,7 +275,6 @@ export default function TopicsOverview() {
   return (
     <div>
       <PageHeader
-        eyebrow="Administration"
         title="Topics & concepts"
         description="Create, schedule and manage every live opportunity."
         action={

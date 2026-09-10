@@ -13,7 +13,6 @@ export default function PlaceholderPage({
   return (
     <div>
       <PageHeader
-        eyebrow="Administration"
         title={title}
         description={description}
       />

@@ -50,7 +50,6 @@ export default function ReportsOverview() {
   return (
     <div>
       <PageHeader
-        eyebrow="Administration"
         title="Reports"
         description="Participation, content quality, categories and rewards across the platform."
         action={

@@ -43,7 +43,6 @@ export default function DashboardOverview() {
   return (
     <div className="pb-4">
       <PageHeader
-        eyebrow="Platform health"
         title={`Good morning, ${firstName}.`}
         description="Here is what needs attention across IdeaPad today."
       />

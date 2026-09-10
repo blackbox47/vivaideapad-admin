@@ -114,8 +114,7 @@ export default function PeopleOverview() {
   return (
     <div>
       <PageHeader
-        eyebrow="Administration"
-        title="Applicants & contributors"
+        title="Applicants & users"
         description="Review new applicants and manage contributor access."
       />
 
