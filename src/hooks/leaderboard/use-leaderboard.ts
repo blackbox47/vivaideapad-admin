@@ -3,7 +3,6 @@ import { useMemo } from 'react';
 import type {
   LeaderboardEntry,
   LeaderboardListParams,
-  LeaderboardResponse,
 } from '@/models/leaderboard/leaderboard-model';
 import {
   useGetLeaderboardQuery,
@@ -36,7 +35,7 @@ export default function useLeaderboard(
 ): UseLeaderboardResult {
   const { search } = params;
   const { data, isLoading, isError, error, refetch } = useGetLeaderboardQuery({
-    search,
+    search: search?.trim() || undefined,
   });
 
   const [
@@ -44,16 +43,23 @@ export default function useLeaderboard(
     { isLoading: isRecalculating },
   ] = useRecalculateRankingsMutation();
 
-  const response = data as LeaderboardResponse | undefined;
+  const response = data;
+
+  const filteredEntries = useMemo(() => {
+    const list = response?.entries ?? [];
+    if (!search?.trim()) return list;
+    const term = search.trim().toLowerCase();
+    return list.filter((entry) => entry.name.toLowerCase().includes(term));
+  }, [response?.entries, search]);
 
   const podium = useMemo(
-    () => (response?.entries ?? []).slice(0, 3),
-    [response],
+    () => filteredEntries.slice(0, 3),
+    [filteredEntries],
   );
 
   const standings = useMemo(
-    () => (response?.entries ?? []).slice(3),
-    [response],
+    () => filteredEntries.slice(3),
+    [filteredEntries],
   );
 
   const topScore = response?.topScore ?? 0;

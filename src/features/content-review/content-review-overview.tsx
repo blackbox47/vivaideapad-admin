@@ -61,7 +61,12 @@ export default function ContentReviewOverview() {
     setSearchParams(nextParams, { replace: true });
   };
 
-  const reviewing = submissions.find((item) => item.id === reviewId);
+  const reviewing = submissions.find(
+    (item) =>
+      item.id === reviewId &&
+      item.status?.toLowerCase() !== 'approved' &&
+      item.status?.toLowerCase() !== 'revision requested',
+  );
   const visible = filtered.slice(0, visibleCount);
   const remainingCount = Math.max(0, filtered.length - visibleCount);
 

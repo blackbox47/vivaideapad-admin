@@ -88,7 +88,7 @@ function decodeSessionHint(raw: string): SessionHintPayload | null {
   }
 }
 
-function readSessionHint(): Pick<AuthState, 'isAuthenticated' | 'role' | 'userId'> {
+export function readSessionHint(): Pick<AuthState, 'isAuthenticated' | 'role' | 'userId'> {
   if (typeof document === 'undefined') {
     return { isAuthenticated: false, role: null, userId: null };
   }

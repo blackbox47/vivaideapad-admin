@@ -16,7 +16,9 @@ import WithdrawRequestDialog from '@/features/creator/withdraw-request-dialog';
 import useCreatorRewards from '@/hooks/creator/use-creator-rewards';
 import type { CreatorStat } from '@/models/creator/creator-dashboard-model';
 import type { CreatorRewardEntry } from '@/models/creator/creator-rewards-model';
+import { useGetCreatorProfileQuery } from '@/services/creator/creator-profile-service';
 import { toast } from '@/components/ui/sonner';
+import { toBdLocalMobile } from '@/utils/helpers/bd-mobile';
 
 function exportEntries(entries: CreatorRewardEntry[]) {
   const header = 'Date,Description,Type,Status,Amount';
@@ -53,7 +55,12 @@ export default function CreatorRewardsOverview() {
     isWithdrawing,
     withdrawError,
   } = useCreatorRewards();
+  const { data: profile } = useGetCreatorProfileQuery();
   const [isWithdrawOpen, setIsWithdrawOpen] = useState(false);
+  const savedPayoutMobile =
+    toBdLocalMobile(profile?.payoutMethod.account) ??
+    toBdLocalMobile(profile?.payoutMethod.label?.split('·')[1] ?? '') ??
+    undefined;
 
   if (isError) {
     return (
@@ -161,7 +168,7 @@ export default function CreatorRewardsOverview() {
       {isWithdrawOpen ? (
         <WithdrawRequestDialog
           available={data?.available ?? '—'}
-          defaultMethod={data?.payoutMethod ?? ''}
+          defaultMobile={savedPayoutMobile}
           isSubmitting={isWithdrawing}
           error={withdrawError}
           onClose={closeWithdraw}

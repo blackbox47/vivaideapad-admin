@@ -21,6 +21,9 @@ export default function LeaderboardTable({ entries }: LeaderboardTableProps) {
         { label: 'Points', align: 'right' },
         { label: 'Visibility' },
       ]}
+      isEmpty={entries.length === 0}
+      emptyTitle="No additional standings"
+      emptyDescription="All ranked contributors are currently displayed on the podium above."
     >
       {entries.map((entry) => (
         <ProjectTableRow key={entry.id}>

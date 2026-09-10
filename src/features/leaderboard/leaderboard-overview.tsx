@@ -94,6 +94,14 @@ export default function LeaderboardOverview() {
         <LeaderboardPodium entries={podium} isLoading={false} />
       )}
 
+      {isLoading ? null : (
+        <LeaderboardFilters
+          search={search}
+          visibleCount={totalEntries}
+          onSearchChange={setSearch}
+        />
+      )}
+
       {isLoading ? (
         <div className="overflow-hidden rounded-[18px] border border-border bg-card p-4">
           <Skeleton className="mb-3 h-4 w-40" />
@@ -101,25 +109,13 @@ export default function LeaderboardOverview() {
             <Skeleton key={index} className="mb-2 h-12 w-full" />
           ))}
         </div>
+      ) : totalEntries === 0 ? (
+        <EmptyState
+          title="No data available"
+          description="Try a different keyword."
+        />
       ) : (
-        <>
-          {totalEntries > 0 ? (
-            <LeaderboardFilters
-              search={search}
-              visibleCount={totalEntries}
-              onSearchChange={setSearch}
-            />
-          ) : null}
-
-          {totalEntries === 0 ? (
-            <EmptyState
-              title="No data available"
-              description="Try a different keyword."
-            />
-          ) : (
-            <LeaderboardTable entries={standings} />
-          )}
-        </>
+        <LeaderboardTable entries={standings} />
       )}
     </div>
   );

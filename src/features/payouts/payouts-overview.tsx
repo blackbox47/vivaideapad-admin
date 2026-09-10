@@ -26,6 +26,7 @@ import type {
 } from '@/models/payouts/payouts-model';
 import { toast } from '@/components/ui/sonner';
 import { DEFAULT_PAGE_SIZE as PAGE_SIZE } from '@/utils/constants/pagination';
+import { getApiErrorMessage } from '@/utils/helpers/api-error';
 
 export default function PayoutsOverview() {
   const [searchParams, setSearchParams] = useTanstackSearchParams();
@@ -38,6 +39,7 @@ export default function PayoutsOverview() {
   const [processId, setProcessId] = useState<string | null>(null);
 
   const {
+    payouts,
     filtered,
     totalCount,
     awaitingCount,
@@ -65,24 +67,37 @@ export default function PayoutsOverview() {
 
   const visible = filtered.slice(0, visibleCount);
   const remainingCount = Math.max(0, filtered.length - visibleCount);
-  const processing = filtered.find((item) => item.id === processId);
+  const processing =
+    payouts.find((item) => item.id === processId) ??
+    filtered.find((item) => item.id === processId);
 
   const handleDecide = (
     nextStatus: Extract<PayoutStatus, 'Paid' | 'Rejected'>,
-    note: string,
+    options?: { reference?: string; note?: string },
   ) => {
     if (!processId) {
       return;
     }
 
-    void decidePayout({ id: processId, status: nextStatus, note })
+    void decidePayout({
+      id: processId,
+      status: nextStatus,
+      reference: options?.reference,
+      note: options?.note,
+    })
       .unwrap()
       .then(() => {
         setProcessId(null);
-        toast.success(`Payout marked as ${nextStatus.toLowerCase()}`);
+        toast.success(
+          nextStatus === 'Paid'
+            ? 'Payout marked as paid'
+            : 'Payout request rejected',
+        );
       })
-      .catch(() => {
-        toast.error('Failed to update payout status');
+      .catch((err) => {
+        toast.error(
+          getApiErrorMessage(err) || 'Failed to update payout status',
+        );
       });
   };
 

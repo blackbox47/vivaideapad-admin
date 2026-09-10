@@ -76,7 +76,8 @@ export default function ReviewTable({ submissions, onReview }: ReviewTableProps)
             <StatusBadge status={submission.status} />
           </ProjectTableCell>
           <ProjectTableCell>
-            {submission.status?.toLowerCase() !== 'approved' ? (
+            {submission.status?.toLowerCase() !== 'approved' &&
+            submission.status?.toLowerCase() !== 'revision requested' ? (
               <TableActions>
                 <button
                   type="button"

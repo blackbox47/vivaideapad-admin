@@ -1,15 +1,17 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
 import type { Payout } from '@/models/payouts/payouts-model';
 
 interface PayoutProcessPanelProps {
   payout: Payout;
   isDeciding: boolean;
   onClose: () => void;
-  onDecide: (status: 'Paid' | 'Rejected', note: string) => void;
+  onDecide: (
+    status: 'Paid' | 'Rejected',
+    options?: { reference?: string; note?: string },
+  ) => void;
 }
 
 export default function PayoutProcessPanel({
@@ -18,102 +20,134 @@ export default function PayoutProcessPanel({
   onClose,
   onDecide,
 }: PayoutProcessPanelProps) {
+  const [reference, setReference] = useState('');
   const [note, setNote] = useState('');
-  const [noteError, setNoteError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
 
   const handleDecide = (status: 'Paid' | 'Rejected') => {
-    const trimmed = note.trim();
-
-    if (status === 'Rejected' && trimmed.length === 0) {
-      setNoteError('Add a note before rejecting this payout.');
-      return;
-    }
-
-    setNoteError(null);
-    onDecide(status, trimmed);
+    onDecide(status, {
+      reference: reference.trim() || undefined,
+      note: note.trim() || undefined,
+    });
   };
 
+  const amountText =
+    payout.amount.startsWith('Tk') || payout.amount.startsWith('৳')
+      ? payout.amount
+      : `Tk ${payout.amount}`;
+
+  const rawMethod = payout.methodDetail || payout.method;
+  const methodText = rawMethod.toLowerCase().startsWith('method:')
+    ? rawMethod
+    : `Method: ${rawMethod}`;
+  const requestedDate = (payout.requested || '').replace(/\./g, '-');
+  const subtitle = requestedDate
+    ? `${methodText} · Requested ${requestedDate}`
+    : methodText;
+
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-(--overlay-scrim) p-5 backdrop-blur-xs">
+    <div
+      className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4 backdrop-blur-xs"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
+    >
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="payout-process-title"
-        className="max-h-[90vh] w-full max-w-140 overflow-auto rounded-[24px] border border-(--dialog-border) bg-card p-7 shadow-2xl"
+        className="w-full max-w-[480px] rounded-[24px] border border-border bg-card p-7 shadow-2xl"
       >
-        <div className="mb-3.5 flex items-start justify-between gap-4">
+        <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-extrabold tracking-[0.12em] text-brand-sage uppercase">
+            <p className="text-xs font-extrabold tracking-[0.12em] text-[#527065] uppercase dark:text-[#8cb3a3]">
               Process payout
             </p>
             <h2
               id="payout-process-title"
-              className="mt-1.5 font-heading text-[22px] tracking-display text-foreground"
+              className="mt-1 font-heading text-[22px] font-bold tracking-tight text-foreground"
             >
-              {payout.contributor}
+              {amountText} to {payout.contributor}
             </h2>
           </div>
           <button
             type="button"
-            className="text-[22px] leading-none text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-            aria-label="Close payout panel"
+            className="text-foreground/70 transition-colors hover:text-foreground cursor-pointer p-1 -mr-1 -mt-1"
+            aria-label="Close payout modal"
             onClick={onClose}
           >
-            <X />
+            <X className="size-5" />
           </button>
         </div>
 
-        <div className="mb-3.5 flex flex-wrap gap-3.5 text-xs text-muted-foreground">
-          <span className="font-semibold text-foreground">{payout.amount}</span>
-          <span>·</span>
-          <span>{payout.methodDetail}</span>
-          <span>·</span>
-          <span>Requested {payout.requested}</span>
+        <p className="mt-2 text-[13px] text-muted-foreground">{subtitle}</p>
+
+        <div className="mt-5">
+          <label
+            htmlFor="payout-reference"
+            className="mb-1.5 block text-xs font-bold text-foreground"
+          >
+            Transaction reference
+          </label>
+          <input
+            id="payout-reference"
+            type="text"
+            value={reference}
+            onChange={(e) => setReference(e.target.value)}
+            placeholder="e.g. TX93K2"
+            disabled={isDeciding}
+            className="h-11 w-full rounded-xl border border-input bg-card px-3.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
+          />
         </div>
 
-        <div className="mb-4 flex flex-wrap gap-2.5">
-          <span className="rounded-full bg-surface-muted px-3 py-1.5 text-xs font-bold text-muted-foreground">
-            {payout.status}
-          </span>
+        <div className="mt-4">
+          <label
+            htmlFor="payout-notes"
+            className="mb-1.5 block text-xs font-bold text-foreground"
+          >
+            Admin notes
+          </label>
+          <textarea
+            id="payout-notes"
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            placeholder="Optional"
+            disabled={isDeciding}
+            rows={3}
+            className="min-h-[70px] w-full resize-y rounded-xl border border-input bg-card p-3.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
+          />
         </div>
 
-        <p className="mb-3.5 rounded-[14px] bg-surface-subtle p-4 text-sm leading-[1.7] text-foreground">
-          Marking this payout as <strong>Paid</strong> records the disbursement
-          and emits a ledger withdrawal entry. <strong>Reject</strong> returns
-          the amount to the contributor&apos;s available balance.
-        </p>
-
-        <Textarea
-          id="payout-process-note"
-          label="Admin note"
-          value={note}
-          onChange={(event) => {
-            setNote(event.target.value);
-            setNoteError(null);
-          }}
-          placeholder="Enter admin note"
-          className="min-h-17.5"
-          errorMessage={noteError}
-        />
-
-        <div className="mt-4.5 flex flex-wrap justify-end gap-2.5">
+        <div className="mt-5 flex flex-wrap justify-end gap-2.5">
           <Button
             type="button"
+            variant="outline"
             disabled={isDeciding}
             loading={isDeciding}
-            className="h-auto rounded-full border border-danger-subtle bg-card px-4.5 py-3 font-bold text-danger hover:bg-danger-subtle transition-colors disabled:opacity-60"
+            className="h-auto rounded-full border border-[#ffe0cc] bg-card px-5 py-2.5 text-sm font-bold text-[#b3401f] transition-colors hover:bg-[#fff5ee] hover:text-[#9e3314] dark:border-orange-900/60 dark:text-orange-400 dark:hover:bg-orange-950/30 cursor-pointer"
             onClick={() => handleDecide('Rejected')}
           >
-            Reject
+            Reject request
           </Button>
           <Button
             type="button"
             disabled={isDeciding}
             loading={isDeciding}
-            className="h-auto rounded-full bg-primary px-4.5 py-3 font-bold text-primary-foreground hover:bg-brand-forest transition-colors disabled:opacity-60"
+            className="h-auto rounded-full bg-[#12231f] px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-[#1b342e] dark:bg-foreground dark:text-background dark:hover:bg-foreground/90 cursor-pointer"
             onClick={() => handleDecide('Paid')}
           >
-            Mark as paid
+            Mark as Paid
           </Button>
         </div>
       </div>

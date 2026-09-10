@@ -24,6 +24,8 @@ export interface Payout {
   /** ISO timestamp used internally for sorting and aggregation. */
   requestedAt: string;
   status: PayoutStatus;
+  processingReference?: string;
+  decisionNotes?: string;
 }
 
 export interface PayoutListResponse {
@@ -40,6 +42,7 @@ export interface DecidePayoutBody {
   id: string;
   status: Extract<PayoutStatus, 'Paid' | 'Rejected'>;
   note?: string;
+  reference?: string;
 }
 
 // ── Spec-aligned additions (REST spec §5.6) ──────────────────────────────
@@ -67,7 +70,9 @@ export type PayoutProcessAction = 'mark_paid' | 'reject';
 
 export interface ProcessPayoutBody {
   action: PayoutProcessAction;
+  reference?: string;
   processing_reference?: string;
+  note?: string;
   rejection_reason?: string;
 }
 

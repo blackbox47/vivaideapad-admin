@@ -38,11 +38,16 @@ export function parseCreatorNotificationFilter(
   return isNotificationFilter(value) ? value : 'All';
 }
 
+export interface UseCreatorNotificationsOptions {
+  skip?: boolean;
+}
+
 export default function useCreatorNotifications(
   filter: CreatorNotificationFilter = 'All',
+  options?: UseCreatorNotificationsOptions,
 ): UseCreatorNotificationsResult {
   const { data, isLoading, isError, error, refetch } =
-    useGetCreatorNotificationsQuery({ filter });
+    useGetCreatorNotificationsQuery({ filter }, { skip: options?.skip });
   const [toggleNotification] = useToggleCreatorNotificationMutation();
   const [markAll, { isLoading: isMarkingAll }] =
     useMarkAllCreatorNotificationsReadMutation();
