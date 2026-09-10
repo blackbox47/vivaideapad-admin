@@ -12,6 +12,7 @@ import {
 } from '@/reducers/auth-slice';
 import {
   useAdminLoginMutation,
+  useGoogleLoginMutation,
   useLoginMutation,
   useSignOutMutation,
 } from '@/services/auth/auth-service';
@@ -31,12 +32,14 @@ interface LoginOptions {
 interface UseAuthResult {
   isAuthenticated: boolean;
   isLoggingIn: boolean;
+  isGoogleLoggingIn: boolean;
   isSigningOut: boolean;
   loginError: string | null;
   login: (
     credentials: LoginRequest,
     options?: LoginOptions,
   ) => Promise<LoginResponse>;
+  googleLogin: (credential: string) => Promise<LoginResponse>;
   logout: () => Promise<void>;
   resetLoginError: () => void;
 }
@@ -48,13 +51,37 @@ export default function useAuth(): UseAuthResult {
   const role = useAppSelector((state) => state.auth.role);
   const [requestLogin, { isLoading, error }] = useLoginMutation();
   const [requestAdminLogin] = useAdminLoginMutation();
+  const [requestGoogleLogin, { isLoading: isGoogleLoggingIn, error: googleError }] =
+    useGoogleLoginMutation();
   const [requestSignOut, { isLoading: isSigningOut }] = useSignOutMutation();
 
   // RTK Query only exposes the latest server-reported error; keep a local
   // copy so the form can clear it as soon as the user edits an input.
   const [localError, setLocalError] = useState<string | null>(null);
-  const serverError = getApiErrorMessage(error);
+  const serverError =
+    getApiErrorMessage(error) ?? getApiErrorMessage(googleError);
   const loginError = localError ?? serverError;
+
+  const googleLogin = useCallback(
+    async (credential: string) => {
+      setLocalError(null);
+      try {
+        const session = await requestGoogleLogin({ credential }).unwrap();
+        dispatch(
+          sessionEstablished({
+            role: 'creator',
+            userId: session.user.id,
+          }),
+        );
+        return session;
+      } catch (err) {
+        const message = getApiErrorMessage(err);
+        setLocalError(message);
+        throw err;
+      }
+    },
+    [dispatch, requestGoogleLogin],
+  );
 
   const login = useCallback(
     async (credentials: LoginRequest, options?: LoginOptions) => {
@@ -105,9 +132,11 @@ export default function useAuth(): UseAuthResult {
   return {
     isAuthenticated,
     isLoggingIn: isLoading,
+    isGoogleLoggingIn,
     isSigningOut,
     loginError,
     login,
+    googleLogin,
     logout,
     resetLoginError,
   };
