@@ -1,7 +1,8 @@
 export {
   HomeNav,
   HomeNav as HomePageNav,
-  SparkoryLogoMark,
+  IdeaPadLogoMark,
+  IdeaPadLogoMark as SparkoryLogoMark,
   HomeNav as default,
   type HomeNavItem,
   type HomeNavProps,

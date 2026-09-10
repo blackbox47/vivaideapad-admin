@@ -57,7 +57,6 @@ export default function ProfileOverview() {
   return (
     <div>
       <PageHeader
-        eyebrow="Account"
         title="Profile"
         description="Manage your identity, contact details and preferences."
       />

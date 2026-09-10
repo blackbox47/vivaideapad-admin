@@ -17,7 +17,7 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
-import { Link } from '@tanstack/react-router';
+import { Link, useRouterState } from '@tanstack/react-router';
 
 export interface NavLinkRenderProps {
   isActive: boolean;
@@ -26,7 +26,9 @@ export interface NavLinkRenderProps {
 }
 
 export type NavLinkClassName = string | ((props: NavLinkRenderProps) => string);
-export type NavLinkStyle = CSSProperties | ((props: NavLinkRenderProps) => CSSProperties);
+export type NavLinkStyle =
+  | CSSProperties
+  | ((props: NavLinkRenderProps) => CSSProperties);
 
 export interface NavLinkProps {
   /** React 19: `ref` is a regular prop on function components. */
@@ -46,6 +48,25 @@ export interface NavLinkProps {
   onClick?: (event: MouseEvent<HTMLAnchorElement>) => void;
 }
 
+function normalizePath(path: string): string {
+  if (!path) return '/';
+  if (path.length > 1 && path.endsWith('/')) {
+    return path.slice(0, -1);
+  }
+  return path;
+}
+
+function isPathActive(pathname: string, to: string, end?: boolean): boolean {
+  const current = normalizePath(pathname);
+  const target = normalizePath(to);
+
+  if (end || target === '/') {
+    return current === target;
+  }
+
+  return current === target || current.startsWith(`${target}/`);
+}
+
 export function NavLink({
   ref,
   to,
@@ -56,9 +77,16 @@ export function NavLink({
   onClick,
   ...rest
 }: NavLinkProps) {
+  const pathname = useRouterState({
+    select: (state) => state.location.pathname,
+  });
+  const status = useRouterState({
+    select: (state) => state.status,
+  });
+
   const renderProps: NavLinkRenderProps = {
-    isActive: false,
-    isPending: false,
+    isActive: isPathActive(pathname, to, end),
+    isPending: status === 'pending',
     isTransitioning: false,
   };
 
@@ -78,9 +106,10 @@ export function NavLink({
       ref={ref}
       onClick={onClick}
       {...rest}
-      activeOptions={end ? { exact: true } : undefined}
+      activeOptions={end ? { exact: true } : { exact: false }}
       className={resolvedClassName}
       style={resolvedStyle}
+      aria-current={renderProps.isActive ? 'page' : undefined}
     >
       {resolvedChildren}
     </Link>

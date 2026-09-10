@@ -88,7 +88,7 @@ export default function ConceptFilters({
               type="checkbox"
               readOnly
               checked={allSelected}
-              className="size-3.5 rounded border-border accent-[#0d221b] cursor-pointer"
+              className="size-3.5 rounded border-border accent-primary cursor-pointer"
               aria-label={allSelected ? 'Deselect all concepts' : 'Select all visible concepts'}
             />
             <span>{allSelected ? 'Deselect all' : 'Select all'}</span>

@@ -377,7 +377,7 @@ export default function CreateConceptDialog({
               type="checkbox"
               id="create-is-onboarding"
               {...register('isOnboarding')}
-              className="size-4 rounded border-border accent-[#0d221b] cursor-pointer"
+              className="size-4 rounded border-border accent-primary cursor-pointer"
             />
             <label
               htmlFor="create-is-onboarding"

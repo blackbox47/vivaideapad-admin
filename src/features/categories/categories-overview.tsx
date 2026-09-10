@@ -91,7 +91,6 @@ export default function CategoriesOverview() {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        eyebrow="Admin"
         title="Categories"
         description="Manage the content taxonomy that powers Concepts."
         action={

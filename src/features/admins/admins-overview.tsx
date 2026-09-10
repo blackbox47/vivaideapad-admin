@@ -96,7 +96,6 @@ export default function AdminsOverview() {
   return (
     <div>
       <PageHeader
-        eyebrow="Administration"
         title="Manage admins"
         description="Grant workspace access or remove operators who no longer need it."
         action={

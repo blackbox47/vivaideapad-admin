@@ -33,9 +33,9 @@ export interface HomeNavProps {
 }
 
 /**
- * Rotated Sparkory gradient logo mark.
+ * Rotated Viva IdeaPad gradient logo mark.
  */
-export function SparkoryLogoMark({ className }: { className?: string }) {
+export function IdeaPadLogoMark({ className }: { className?: string }) {
   return (
     <div
       className={cn(
@@ -66,12 +66,12 @@ function BrandLink({ onClick }: { onClick?: () => void }) {
     <Link
       to="/"
       onClick={onClick}
-      className="group flex items-center gap-[7px] outline-none select-none focus-visible:ring-2 focus-visible:ring-[#3281ff] focus-visible:rounded-lg"
-      aria-label="Sparkory Home"
+      className="group flex items-center gap-[7px] outline-none select-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded-lg"
+      aria-label="Viva IdeaPad Home"
     >
-      <SparkoryLogoMark className="transition-transform duration-200 group-hover:scale-105" />
-      <span className="font-urbanist text-[22px] font-semibold tracking-tight text-[#12172b] transition-colors group-hover:text-[#3281ff]">
-        sparkory
+      <IdeaPadLogoMark className="transition-transform duration-200 group-hover:scale-105" />
+      <span className="font-urbanist text-[22px] font-semibold tracking-tight text-foreground transition-colors group-hover:text-primary">
+        Viva IdeaPad
       </span>
     </Link>
   );

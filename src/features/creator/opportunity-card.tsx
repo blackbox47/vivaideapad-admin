@@ -27,12 +27,14 @@ export default function OpportunityCard({ topic }: OpportunityCardProps) {
         <span>{topic.deadline} left</span>
         <strong className="text-foreground">{topic.reward}</strong>
       </div>
-      <Button
-        render={<Link to={CREATOR_ROUTES.submitIdea} />}
-        className="mt-4 h-auto w-full rounded-full bg-primary px-5 py-3 text-sm font-bold text-primary-foreground hover:bg-brand-forest"
-      >
-        Open brief
-      </Button>
+      <div className="mt-4 flex justify-end">
+        <Button
+          render={<Link to={CREATOR_ROUTES.submitIdea} />}
+          className="h-auto cursor-pointer rounded-full bg-primary px-5 py-3 text-sm font-bold text-primary-foreground hover:bg-primary/80"
+        >
+          Open brief
+        </Button>
+      </div>
     </article>
   );
 }

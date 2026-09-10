@@ -39,14 +39,14 @@ export default function AdminSidebar({ className }: AdminSidebarProps) {
   return (
     <aside
       className={cn(
-        'flex h-full w-[245px] shrink-0 flex-col bg-sidebar px-[18px] py-[26px] text-sidebar-foreground',
+        'flex h-full w-[245px] shrink-0 flex-col border-r border-sidebar-border bg-sidebar px-[18px] py-[26px] text-sidebar-foreground',
         className,
       )}
     >
       <div className="mb-[35px] flex items-center gap-2.5 px-2.5">
         <BrandMark />
-        <span className="font-heading text-xl font-extrabold tracking-[-0.04em] lowercase">
-          ideapad
+        <span className="font-heading text-xl font-extrabold tracking-[-0.04em]">
+          Viva IdeaPad
         </span>
       </div>
 
@@ -68,8 +68,8 @@ export default function AdminSidebar({ className }: AdminSidebarProps) {
                   cn(
                     'my-0.5 flex items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-semibold no-underline transition-colors',
                     isActive
-                      ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                      : 'bg-transparent text-sidebar-nav-muted hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
+                      ? 'bg-primary text-primary-foreground shadow-sm'
+                      : 'bg-transparent text-sidebar-nav-muted hover:bg-primary/10 hover:text-primary',
                   )
                 }
               >

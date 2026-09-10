@@ -130,9 +130,10 @@ function Select({
           }
           className={cn(
             "flex h-auto w-full min-w-0 items-center justify-between gap-2 rounded-[12px] border border-border bg-card px-3.5 py-3 text-left text-sm font-normal text-foreground shadow-none outline-none transition-colors",
-            "focus-visible:border-brand-sage-light focus-visible:ring-2 focus-visible:ring-success-muted",
+            "hover:border-primary/40",
+            "focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20",
             "disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-input/50 disabled:opacity-50",
-            "aria-invalid:border-destructive aria-invalid:ring-2 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40",
+            "aria-invalid:border-destructive aria-invalid:ring-2 aria-invalid:ring-destructive/20",
             className
           )}
         >
@@ -172,7 +173,8 @@ function Select({
                   label={option.label}
                   className={cn(
                     "flex min-h-9 cursor-pointer items-center rounded-[8px] px-3 py-2 text-sm outline-none select-none",
-                    "data-highlighted:bg-muted data-selected:font-semibold",
+                    "data-highlighted:bg-accent data-highlighted:text-accent-foreground",
+                    "data-selected:bg-primary/10 data-selected:font-semibold data-selected:text-primary",
                     "data-disabled:pointer-events-none data-disabled:opacity-50",
                   )}
                 >

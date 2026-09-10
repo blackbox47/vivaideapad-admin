@@ -8,14 +8,10 @@ import {
 } from 'lucide-react';
 import { Toaster as Sonner, toast, type ToasterProps } from 'sonner';
 
-import useTheme from '@/hooks/ui/use-theme';
-
 const Toaster = ({ position = 'top-right', ...props }: ToasterProps) => {
-  const { theme = 'system' } = useTheme();
-
   return (
     <Sonner
-      theme={props.theme ?? (theme as ToasterProps['theme'])}
+      theme={props.theme ?? 'light'}
       position={position}
       className="toaster group"
       icons={{

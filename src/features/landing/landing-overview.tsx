@@ -13,7 +13,7 @@ import LeaderboardSection, {
 import FaqSection from '@/features/landing/faq-section';
 import CtaSection from '@/features/landing/cta-section';
 import ContributorApplicationDialog from '@/features/landing/contributor-application-dialog';
-import HomeNav, { SparkoryLogoMark } from '@/components/layout/home-nav';
+import HomeNav, { IdeaPadLogoMark } from '@/components/layout/home-nav';
 import { CREATOR_ROUTES } from '@/utils/constants/routes';
 import {
   useGetPublicFeaturedRequestsQuery,
@@ -163,7 +163,7 @@ export function LandingOverview() {
   };
 
   return (
-    <div className="min-h-screen bg-[#fafbfc] text-[#12172b] font-urbanist selection:bg-[#3281ff]/15 selection:text-[#3281ff]">
+    <div className="min-h-screen bg-background text-foreground font-urbanist selection:bg-primary/15 selection:text-primary">
       {/* Responsive Navbar */}
       <HomeNav onJoinFreeClick={() => handleOpenApplication()} />
 
@@ -216,7 +216,7 @@ export function LandingOverview() {
       {/* FAQ Section */}
       <FaqSection
         onContactClick={() => {
-          window.location.href = 'mailto:support@sparkory.com';
+          window.location.href = 'mailto:support@vivaideapad.com';
         }}
       />
 
@@ -230,14 +230,14 @@ export function LandingOverview() {
       <footer className="border-t border-[#eaeaf0] bg-white py-12">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-4 sm:flex-row sm:px-6 md:px-8 lg:px-12 xl:px-16">
           <div className="flex items-center gap-2.5">
-            <SparkoryLogoMark />
-            <span className="font-urbanist text-xl font-bold text-[#12172b]">
-              sparkory
+            <IdeaPadLogoMark />
+            <span className="font-urbanist text-xl font-bold text-foreground">
+              Viva IdeaPad
             </span>
           </div>
 
-          <p className="text-xs text-[#8c8ca1]">
-            Original thinking. Fair recognition. &copy; 2026 Sparkory. All
+          <p className="text-xs text-text-subtle">
+            Original thinking. Fair recognition. &copy; 2026 Viva IdeaPad. All
             rights reserved.
           </p>
 

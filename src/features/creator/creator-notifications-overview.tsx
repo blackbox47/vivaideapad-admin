@@ -76,7 +76,6 @@ export default function CreatorNotificationsOverview() {
   return (
     <div>
       <PageHeader
-        eyebrow="Updates"
         title="Notifications"
         description={`Decisions, feedback and community opportunities in one place. ${unreadCount} unread.`}
         action={

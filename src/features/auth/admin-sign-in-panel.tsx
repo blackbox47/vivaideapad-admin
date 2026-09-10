@@ -17,8 +17,11 @@ interface AdminSignInPanelProps {
   brandName?: string;
 }
 
+const fieldClassName =
+  'rounded-lg border-border bg-card px-4 py-3 text-sm shadow-none placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20';
+
 export default function AdminSignInPanel({
-  brandName = 'sparkory',
+  brandName = 'Viva IdeaPad',
 }: AdminSignInPanelProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberWorkstation, setRememberWorkstation] = useState(true);
@@ -42,7 +45,6 @@ export default function AdminSignInPanel({
     try {
       await login(values, { asRole: 'admin' });
       toast.success('Welcome to the admin workspace');
-      // Always land on the admin dashboard after sign-in.
       navigate({ to: ADMIN_ROUTES.dashboard, replace: true });
     } catch {
       // Failure surfaced via loginError.
@@ -50,31 +52,28 @@ export default function AdminSignInPanel({
   };
 
   return (
-    <section className="relative flex min-h-svh w-full flex-col items-center justify-center overflow-y-auto bg-surface-subtle p-6 font-jakarta md:min-h-0 md:w-1/2 md:p-12 lg:p-14">
+    <section className="relative flex min-h-svh w-full flex-col items-center justify-center overflow-y-auto bg-surface-subtle p-6 font-sans md:min-h-0 md:w-1/2 md:p-12 lg:p-14">
       <div className="w-full max-w-sm">
-        {/* Mobile-only brand badge (when left hero panel is hidden) */}
         <div className="mb-6 flex items-center gap-2.5 md:hidden">
-          <div className="flex size-9 items-center justify-center rounded-tr-xl rounded-bl-xl rounded-br-xs rounded-tl-xs bg-brand-lime">
-            <div className="size-2.5 rounded-full bg-brand-pine-deep" />
+          <div className="flex size-9 items-center justify-center rounded-tr-xl rounded-bl-xl rounded-br-xs rounded-tl-xs bg-primary">
+            <div className="size-2.5 rounded-full bg-white" />
           </div>
-          <span className="text-xl font-bold tracking-tight text-foreground lowercase">
+          <span className="text-xl font-bold tracking-tight text-foreground">
             {brandName}
           </span>
         </div>
 
-        {/* Back to Home */}
         <Link
-          to={CREATOR_ROUTES.login}
-          className="inline-flex items-center gap-2 rounded-full border border-[#c1c8c3] bg-white px-4 py-2 text-xs font-semibold text-foreground no-underline shadow-xs transition-colors hover:bg-neutral-100"
+          to="/"
+          className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-xs font-semibold text-foreground no-underline shadow-xs transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary"
         >
           <ArrowLeft className="size-3.5" />
           <span>Back to home</span>
         </Link>
 
-        {/* Header */}
         <div className="mt-10 mb-8">
-          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-brand-pine-deep/20 bg-brand-pine-deep/10 px-2.5 py-1 text-[11px] font-bold tracking-wider text-brand-pine-deep uppercase">
-            <span className="size-1.5 rounded-full bg-brand-lime" />
+          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-2.5 py-1 text-[11px] font-bold tracking-wider text-primary uppercase">
+            <span className="size-1.5 rounded-full bg-primary" />
             <span>SECURE ACCESS • RESTRICTED</span>
           </div>
           <h2 className="mb-2 text-3xl font-bold tracking-tight text-foreground md:text-4xl">
@@ -85,7 +84,6 @@ export default function AdminSignInPanel({
           </p>
         </div>
 
-        {/* Form */}
         <form className="space-y-5" onSubmit={handleSubmit(onSubmit)} noValidate>
           <div>
             <Input
@@ -95,8 +93,8 @@ export default function AdminSignInPanel({
               autoComplete="email"
               placeholder="Enter admin work email"
               showRequiredIndicator={false}
-              labelClassName="text-xs font-semibold text-foreground mb-1.5"
-              className="bg-white border-[#c1c8c3] rounded-lg px-4 py-3 text-sm focus-visible:border-brand-pine-deep focus-visible:ring-2 focus-visible:ring-brand-pine-deep/20 shadow-none placeholder:text-muted-foreground"
+              labelClassName="mb-1.5 text-xs font-semibold text-foreground"
+              className={fieldClassName}
               errorMessage={errors.email?.message}
               {...register('email')}
             />
@@ -110,14 +108,14 @@ export default function AdminSignInPanel({
               autoComplete="current-password"
               placeholder="Enter password"
               showRequiredIndicator={false}
-              labelClassName="text-xs font-semibold text-foreground mb-1.5"
-              className="bg-white border-[#c1c8c3] rounded-lg px-4 py-3 text-sm focus-visible:border-brand-pine-deep focus-visible:ring-2 focus-visible:ring-brand-pine-deep/20 shadow-none placeholder:text-muted-foreground"
+              labelClassName="mb-1.5 text-xs font-semibold text-foreground"
+              className={fieldClassName}
               errorMessage={errors.password?.message}
               rightSlot={
                 <button
                   type="button"
                   onClick={() => setShowPassword((prev) => !prev)}
-                  className="flex items-center justify-center text-muted-foreground transition-colors hover:text-foreground cursor-pointer"
+                  className="flex cursor-pointer items-center justify-center text-muted-foreground transition-colors hover:text-primary"
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                   tabIndex={-1}
                 >
@@ -133,12 +131,12 @@ export default function AdminSignInPanel({
           </div>
 
           <div className="flex items-center justify-between text-xs">
-            <label className="inline-flex items-center gap-2 cursor-pointer select-none">
+            <label className="inline-flex cursor-pointer items-center gap-2 select-none">
               <input
                 type="checkbox"
                 checked={rememberWorkstation}
                 onChange={(e) => setRememberWorkstation(e.target.checked)}
-                className="size-4 rounded border-[#c1c8c3] text-brand-pine focus:ring-brand-pine-deep/20"
+                className="size-4 rounded border-border accent-primary text-primary focus:ring-primary/20"
               />
               <span className="text-muted-foreground">
                 Remember workstation (30 days)
@@ -146,7 +144,7 @@ export default function AdminSignInPanel({
             </label>
             <Link
               to={CREATOR_ROUTES.forgotPassword}
-              className="text-muted-foreground transition-colors hover:text-foreground no-underline"
+              className="text-muted-foreground no-underline transition-colors hover:text-primary"
             >
               Forgot admin password?
             </Link>
@@ -164,7 +162,7 @@ export default function AdminSignInPanel({
           <button
             type="submit"
             disabled={isLoggingIn}
-            className="mt-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-brand-pine py-3.5 text-sm font-semibold text-white shadow-xs transition-colors hover:bg-brand-pine-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-pine-deep/20 disabled:cursor-not-allowed disabled:opacity-60"
+            className="mt-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-primary py-3.5 text-sm font-semibold text-primary-foreground shadow-xs transition-colors hover:bg-brand-forest focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isLoggingIn ? (
               <>
@@ -179,19 +177,19 @@ export default function AdminSignInPanel({
             )}
           </button>
 
-          <div className="mt-6 border-t border-border/60 pt-5 text-center space-y-3">
+          <div className="mt-6 space-y-3 border-t border-border/60 pt-5 text-center">
             <p className="text-xs text-muted-foreground">
               Looking for contributor login?{' '}
               <Link
                 to={CREATOR_ROUTES.login}
-                className="font-bold text-foreground hover:underline"
+                className="font-bold text-primary hover:underline"
               >
                 Switch to Contributor Portal
               </Link>
             </p>
 
-            <div className="inline-flex items-center gap-2 rounded-lg border border-border/80 bg-white px-3 py-1.5 text-left shadow-2xs">
-              <ShieldCheck className="size-4 shrink-0 text-muted-foreground" />
+            <div className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-1.5 text-left shadow-2xs">
+              <ShieldCheck className="size-4 shrink-0 text-primary" />
               <span className="text-[11px] leading-tight text-muted-foreground">
                 Secured with enterprise SSO & RBAC protection
               </span>
@@ -202,4 +200,3 @@ export default function AdminSignInPanel({
     </section>
   );
 }
-
