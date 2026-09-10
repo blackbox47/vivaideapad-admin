@@ -1,6 +1,7 @@
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatLeaderboardPoints } from '@/hooks/creator/use-creator-leaderboard';
+import { cn } from '@/lib/utils';
 import type { CreatorLeaderboardPerson } from '@/models/creator/creator-leaderboard-model';
 
 interface CreatorLeaderboardPodiumProps {
@@ -36,7 +37,14 @@ export default function CreatorLeaderboardPodium({
   }
 
   return (
-    <div className="mt-5 mb-5 grid gap-3.5 sm:grid-cols-3">
+    <div
+      className={cn(
+        'mt-5 mb-5 grid gap-3.5',
+        entries.length === 1 && 'sm:grid-cols-1 max-w-sm mx-auto',
+        entries.length === 2 && 'sm:grid-cols-2 max-w-2xl mx-auto',
+        entries.length >= 3 && 'sm:grid-cols-3',
+      )}
+    >
       {entries.map((entry) => (
         <article
           key={entry.id}

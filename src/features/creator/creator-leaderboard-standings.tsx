@@ -58,7 +58,7 @@ export default function CreatorLeaderboardStandings({
                 className={cn(
                   'grid grid-cols-[36px_40px_minmax(0,1fr)_auto] items-center gap-3 rounded-[14px] px-4 py-3 sm:grid-cols-[36px_40px_minmax(0,1fr)_auto_auto]',
                   entry.isYou
-                    ? 'bg-brand-lime-subtle'
+                    ? 'bg-brand-lime-subtle text-brand-lime-foreground dark:text-brand-lime'
                     : 'bg-white/10',
                 )}
               >
@@ -73,14 +73,34 @@ export default function CreatorLeaderboardStandings({
                 </Avatar>
                 <div className="min-w-0">
                   <strong className="block truncate">{entry.name}</strong>
-                  <div className="text-[11px] text-brand-sage-light">
+                  <div
+                    className={cn(
+                      'text-[11px]',
+                      entry.isYou
+                        ? 'text-brand-lime-foreground/70 dark:text-brand-lime/75'
+                        : 'text-brand-sage-light',
+                    )}
+                  >
                     {entry.approved} approved ideas · {entry.streak} streak
                   </div>
                 </div>
-                <span className="hidden text-xs text-brand-sage-light sm:inline">
+                <span
+                  className={cn(
+                    'hidden text-xs sm:inline',
+                    entry.isYou
+                      ? 'text-brand-lime-foreground/70 dark:text-brand-lime/75'
+                      : 'text-brand-sage-light',
+                  )}
+                >
                   {entry.visibility}
                 </span>
-                <strong className="text-brand-lime">
+                <strong
+                  className={
+                    entry.isYou
+                      ? 'text-brand-forest dark:text-brand-lime'
+                      : 'text-brand-lime'
+                  }
+                >
                   {formatLeaderboardPoints(entry.points)}
                 </strong>
               </div>

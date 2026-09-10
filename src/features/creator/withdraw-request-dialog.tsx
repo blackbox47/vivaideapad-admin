@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { X } from 'lucide-react';
@@ -6,21 +6,20 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import {
-  withdrawRequestSchema,
+  createWithdrawRequestSchema,
+  parseAvailableBalance,
   type WithdrawRequestFormValues,
 } from '@/models/creator/creator-payout-schema';
 import type { DropdownOption } from '@/utils/types/dropdown-option';
 
+const BKASH_METHOD = 'bKash';
+
 const METHOD_OPTIONS: DropdownOption[] = [
-  { id: 'bKash', label: 'bKash' },
-  { id: 'Nagad', label: 'Nagad' },
-  { id: 'Rocket', label: 'Rocket' },
-  { id: 'Bank transfer', label: 'Bank transfer' },
+  { id: BKASH_METHOD, label: 'bKash' },
 ];
 
 interface WithdrawRequestDialogProps {
   available: string;
-  defaultMethod: string;
   defaultMobile?: string;
   isSubmitting: boolean;
   error: string | null;
@@ -34,30 +33,37 @@ interface WithdrawRequestDialogProps {
 
 export default function WithdrawRequestDialog({
   available,
-  defaultMethod,
   defaultMobile,
   isSubmitting,
   error,
   onClose,
   onSubmit,
 }: WithdrawRequestDialogProps) {
-  const initialMethod =
-    METHOD_OPTIONS.find((option) => option.id === defaultMethod)?.id ??
-    METHOD_OPTIONS[0].id;
-  const initialAmount = available ? available.replace(/[^0-9.]/g, '') : '';
+  const availableAmount = parseAvailableBalance(available);
+  const schema = useMemo(
+    () => createWithdrawRequestSchema(availableAmount),
+    [availableAmount],
+  );
 
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<WithdrawRequestFormValues>({
-    resolver: zodResolver(withdrawRequestSchema),
+    resolver: zodResolver(schema),
     defaultValues: {
-      amount: initialAmount,
-      method: initialMethod,
+      amount: availableAmount > 0 ? String(availableAmount) : '',
+      method: BKASH_METHOD,
       mobile: defaultMobile ?? '',
     },
   });
+
+  useEffect(() => {
+    if (defaultMobile) {
+      setValue('mobile', defaultMobile);
+    }
+  }, [defaultMobile, setValue]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -73,7 +79,7 @@ export default function WithdrawRequestDialog({
   const onFormSubmit = async (values: WithdrawRequestFormValues) => {
     await onSubmit({
       amount: values.amount.trim(),
-      method: values.method,
+      method: BKASH_METHOD,
       mobile: values.mobile.trim(),
     });
   };
@@ -134,9 +140,11 @@ export default function WithdrawRequestDialog({
               id="withdraw-method"
               label="Payout method"
               required
+              disabled
+              hideChevron
               options={METHOD_OPTIONS}
+              value={BKASH_METHOD}
               errorMessage={errors.method?.message}
-              {...register('method')}
             />
           </div>
 

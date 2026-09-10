@@ -36,11 +36,16 @@ export function parseNotificationFilter(
   return isNotificationFilter(value) ? value : 'All';
 }
 
+export interface UseAdminNotificationsOptions {
+  skip?: boolean;
+}
+
 export default function useAdminNotifications(
   filter: AdminNotificationFilter = 'All',
+  options?: UseAdminNotificationsOptions,
 ): UseAdminNotificationsResult {
   const { data, isLoading, isError, error, refetch } =
-    useGetAdminNotificationsQuery({ filter });
+    useGetAdminNotificationsQuery({ filter }, { skip: options?.skip });
   const [toggleNotification] = useToggleAdminNotificationMutation();
   const [markAll, { isLoading: isMarkingAll }] =
     useMarkAllAdminNotificationsReadMutation();

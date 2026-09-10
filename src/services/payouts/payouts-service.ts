@@ -17,6 +17,24 @@ import {
 } from '@/utils/constants/api-end-points';
 import { formatDisplayDate } from '@/utils/helpers/format-display-date';
 
+function contributorNameFromPayout(
+  item: Record<string, unknown>,
+  details: Record<string, unknown>,
+): string {
+  const candidates = [
+    item.display_name,
+    details.user_name,
+    details.contributor,
+    item.contributor,
+  ];
+  for (const candidate of candidates) {
+    if (typeof candidate !== 'string') continue;
+    const trimmed = candidate.trim();
+    if (trimmed) return trimmed;
+  }
+  return 'Contributor';
+}
+
 export type PayoutsListParamsSpec = PayoutListParamsSpec;
 
 function normalizePayoutStatusQuery(
@@ -129,12 +147,7 @@ export const payoutsService = baseService.injectEndpoints({
 
               return {
                 id: String(item.id ?? ''),
-                contributor: String(
-                  details.user_name ??
-                    details.contributor ??
-                    item.user_id ??
-                    'Contributor',
-                ),
+                contributor: contributorNameFromPayout(item, details),
                 method,
                 methodDetail,
                 amount: `Tk ${numAmount}`,
@@ -148,6 +161,18 @@ export const payoutsService = baseService.injectEndpoints({
                     new Date().toISOString(),
                 ),
                 status,
+                processingReference:
+                  typeof item.processing_reference === 'string'
+                    ? item.processing_reference
+                    : typeof item.processingReference === 'string'
+                      ? item.processingReference
+                      : undefined,
+                decisionNotes:
+                  typeof item.decision_notes === 'string'
+                    ? item.decision_notes
+                    : typeof item.decisionNotes === 'string'
+                      ? item.decisionNotes
+                      : undefined,
               };
             },
           );
@@ -166,16 +191,38 @@ export const payoutsService = baseService.injectEndpoints({
     /** Spec §5.6 — GET /admin/payouts/:id */
     getPayout: builder.query<{ payout: PayoutDetail }, string>({
       query: (id) => ({ url: PAYOUT_DETAIL_URL(id), method: 'GET' }),
+      transformResponse: (response: unknown): { payout: PayoutDetail } => {
+        if (!response || typeof response !== 'object') {
+          return { payout: {} as PayoutDetail };
+        }
+        const res = response as Record<string, unknown>;
+        if (res.payout && typeof res.payout === 'object') {
+          return { payout: res.payout as PayoutDetail };
+        }
+        return { payout: response as PayoutDetail };
+      },
       providesTags: (_r, _e, id) => [{ type: 'payouts', id }],
     }),
-    /** Legacy mutation — kept for the live UI. */
-    decidePayout: builder.mutation<PayoutListResponse, DecidePayoutBody>({
-      query: (body) => ({
-        url: PAYOUTS_URL,
-        method: 'PATCH',
-        body,
+    /** Process payout mutation — Spec §5.6 POST /admin/payouts/:id/process */
+    decidePayout: builder.mutation<ProcessPayoutResponse, DecidePayoutBody>({
+      query: ({ id, status, note, reference }) => ({
+        url: PAYOUT_PROCESS_URL(id),
+        method: 'POST',
+        body: {
+          action: status === 'Paid' ? 'mark_paid' : 'reject',
+          reference,
+          note,
+        },
       }),
-      invalidatesTags: ['payouts', 'dashboard', 'rewards'],
+      invalidatesTags: [
+        'payouts',
+        'dashboard',
+        'rewards',
+        'ledger',
+        'audit-log',
+        'audit-events',
+        'admin-notifications',
+      ],
     }),
     /** Spec §5.6 — POST /admin/payouts/:id/process */
     processPayout: builder.mutation<

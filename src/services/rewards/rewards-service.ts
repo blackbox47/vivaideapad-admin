@@ -58,10 +58,10 @@ export const rewardsService = baseService.injectEndpoints({
             const rawStatus = String(item.status ?? '').toLowerCase();
             let status: LedgerEntryStatus = 'Available';
             if (rawStatus.includes('paid') || rawStatus === 'posted') {
-              status = 'Available';
+              status = type === 'Withdrawal' ? 'Paid' : 'Available';
             } else if (rawStatus.includes('pend')) {
               status = 'Pending';
-            } else if (rawStatus.includes('reject')) {
+            } else if (rawStatus.includes('reject') || rawStatus.includes('revers')) {
               status = 'Rejected';
             } else if (rawStatus.includes('hold')) {
               status = 'On hold';

@@ -4,7 +4,8 @@ export type CreatorRewardStatus =
   | 'Available'
   | 'Pending'
   | 'Paid'
-  | 'Recorded';
+  | 'Recorded'
+  | 'Rejected';
 
 export interface CreatorRewardEntry {
   id: string;

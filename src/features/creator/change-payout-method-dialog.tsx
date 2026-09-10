@@ -16,11 +16,10 @@ import type {
 import { toBdLocalMobile } from '@/utils/helpers/bd-mobile';
 import type { DropdownOption } from '@/utils/types/dropdown-option';
 
+const BKASH_METHOD = 'bKash';
+
 const METHOD_OPTIONS: DropdownOption[] = [
-  { id: 'bKash', label: 'bKash' },
-  { id: 'Nagad', label: 'Nagad' },
-  { id: 'Rocket', label: 'Rocket' },
-  { id: 'Bank', label: 'Bank transfer' },
+  { id: BKASH_METHOD, label: 'bKash' },
 ];
 
 function mobileFromCurrent(current: PayoutMethod): string {
@@ -53,7 +52,7 @@ export default function ChangePayoutMethodDialog({
   } = useForm<ChangePayoutMethodFormValues>({
     resolver: zodResolver(changePayoutMethodSchema),
     defaultValues: {
-      method: current.method,
+      method: BKASH_METHOD,
       mobile: mobileFromCurrent(current),
     },
   });
@@ -70,17 +69,14 @@ export default function ChangePayoutMethodDialog({
   }, [isSubmitting, onClose]);
 
   const onFormSubmit = async (values: ChangePayoutMethodFormValues) => {
-    const method = values.method as PayoutMethod['method'];
     const account = toBdLocalMobile(values.mobile);
     if (!account) {
       return;
     }
-    const methodLabel =
-      METHOD_OPTIONS.find((option) => option.id === method)?.label ?? method;
     await onSubmit({
-      method,
+      method: BKASH_METHOD,
       account,
-      label: `${methodLabel} · ${account}`,
+      label: `bKash · ${account}`,
     });
   };
 
@@ -115,9 +111,11 @@ export default function ChangePayoutMethodDialog({
               id="payout-method"
               label="Payout method"
               required
+              disabled
+              hideChevron
               options={METHOD_OPTIONS}
+              value={BKASH_METHOD}
               errorMessage={errors.method?.message}
-              {...register('method')}
             />
           </div>
 

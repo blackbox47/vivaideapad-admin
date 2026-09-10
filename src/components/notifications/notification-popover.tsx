@@ -385,8 +385,12 @@ export default function NotificationPopover({
   const [open, setOpen] = useState(false);
 
   // Get unreadCount for trigger button badge
-  const { unreadCount: adminUnreadCount } = useAdminNotifications('All');
-  const { unreadCount: creatorUnreadCount } = useCreatorNotifications('All');
+  const { unreadCount: adminUnreadCount } = useAdminNotifications('All', {
+    skip: role !== 'admin',
+  });
+  const { unreadCount: creatorUnreadCount } = useCreatorNotifications('All', {
+    skip: role !== 'creator',
+  });
   const unreadCount = role === 'admin' ? adminUnreadCount : creatorUnreadCount;
 
   return (
