@@ -10,6 +10,7 @@ type AppMode = 'local' | 'develop' | 'prod';
 
 interface Env {
   apiBaseUrl: string;
+  googleClientId: string;
   mode: AppMode;
 }
 
@@ -39,6 +40,7 @@ const mode = readMode();
 
 export const env: Env = {
   apiBaseUrl: requireEnv('VITE_API_BASE_URL'),
+  googleClientId: import.meta.env.VITE_GOOGLE_CLIENT_ID || '',
   mode,
 };
 

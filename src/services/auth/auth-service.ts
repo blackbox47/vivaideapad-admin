@@ -7,6 +7,7 @@ import { baseService } from '@/services/core/base-service';
 import {
   AUTH_ADMIN_SIGN_IN_URL,
   AUTH_FORGOT_PASSWORD_URL,
+  AUTH_GOOGLE_SIGN_IN_URL,
   AUTH_SIGN_IN_URL,
   AUTH_SIGN_OUT_URL,
   PROFILE_OVERVIEW_URL,
@@ -28,6 +29,14 @@ export const authService = baseService.injectEndpoints({
     }),
     login: builder.mutation<LoginResponse, LoginRequest>({
       query: (body) => ({ url: AUTH_SIGN_IN_URL, method: 'POST', body }),
+      invalidatesTags: ['admin-user', 'dashboard'],
+    }),
+    /**
+     * Google Sign-In for creators. POSTs Google credential to backend
+     * for verification, cookie issuance, and user session establishment.
+     */
+    googleLogin: builder.mutation<LoginResponse, { credential: string }>({
+      query: (body) => ({ url: AUTH_GOOGLE_SIGN_IN_URL, method: 'POST', body }),
       invalidatesTags: ['admin-user', 'dashboard'],
     }),
     /**
@@ -61,6 +70,7 @@ export const authService = baseService.injectEndpoints({
 export const {
   useGetCurrentAdminQuery,
   useLoginMutation,
+  useGoogleLoginMutation,
   useAdminLoginMutation,
   useSignOutMutation,
   useForgotPasswordMutation,
