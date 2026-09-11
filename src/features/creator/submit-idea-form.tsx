@@ -61,6 +61,8 @@ export default function SubmitIdeaForm({
 }: SubmitIdeaFormProps) {
   const [serverError, setServerError] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isSavingDraft, setIsSavingDraft] = useState(false);
+  const [isSubmittingFinal, setIsSubmittingFinal] = useState(false);
   const [submitIdea, { isLoading: isSubmittingNew }] = useSubmitIdea();
   const [updateSubmission, { isLoading: isUpdating }] =
     useUpdateSubmissionMutation();
@@ -69,6 +71,8 @@ export default function SubmitIdeaForm({
   const navigate = useNavigate();
 
   const isBusy =
+    isSavingDraft ||
+    isSubmittingFinal ||
     isSubmittingNew ||
     isUpdating ||
     isSubmittingExisting ||
@@ -80,6 +84,9 @@ export default function SubmitIdeaForm({
     handleSubmit,
     control,
     setValue,
+    getValues,
+    setError,
+    clearErrors,
     reset,
     formState: { errors },
   } = useForm<SubmitIdeaFormValues>({
@@ -149,8 +156,69 @@ export default function SubmitIdeaForm({
     }
   };
 
+  const handleSaveDraft = async () => {
+    setServerError(null);
+    clearErrors();
+    const values = getValues();
+
+    if (!values.topicId) {
+      setError('topicId', { message: 'Pick a topic before saving a draft.' });
+      return;
+    }
+
+    if (!values.title?.trim()) {
+      setError('title', { message: 'Title is required to save a draft.' });
+      return;
+    }
+
+    const plainBody = values.body?.replace(/<[^>]*>/g, '').trim() ?? '';
+    if (!plainBody) {
+      setError('body', {
+        message: 'Write a brief description to save your draft.',
+      });
+      return;
+    }
+
+    setIsSavingDraft(true);
+    try {
+      if (submissionId) {
+        await updateSubmission({
+          id: submissionId,
+          body: {
+            concept_id: values.topicId,
+            topicId: values.topicId,
+            title: values.title.trim(),
+            summary: values.summary?.trim(),
+            body: values.body || '',
+            attachmentUrl: values.attachmentUrl?.trim() || undefined,
+            file: selectedFile ?? undefined,
+          },
+        }).unwrap();
+      } else {
+        await submitIdea({
+          topicId: values.topicId,
+          concept_id: values.topicId,
+          title: values.title.trim(),
+          summary: values.summary?.trim(),
+          body: values.body || '',
+          attachmentUrl: values.attachmentUrl?.trim() || undefined,
+          file: selectedFile ?? undefined,
+        }).unwrap();
+      }
+
+      toast.success('Draft saved successfully');
+      navigate({ to: CREATOR_ROUTES.submissions, replace: true });
+    } catch (err) {
+      toast.error('Failed to save draft');
+      setServerError(getApiErrorMessage(err));
+    } finally {
+      setIsSavingDraft(false);
+    }
+  };
+
   const onFormSubmit = async (values: SubmitIdeaFormValues) => {
     setServerError(null);
+    setIsSubmittingFinal(true);
     try {
       if (submissionId) {
         await updateSubmission({
@@ -167,7 +235,7 @@ export default function SubmitIdeaForm({
         }).unwrap();
         await submitExisting(submissionId).unwrap();
       } else {
-        await submitIdea({
+        const res = await submitIdea({
           topicId: values.topicId,
           concept_id: values.topicId,
           title: values.title.trim(),
@@ -176,16 +244,22 @@ export default function SubmitIdeaForm({
           attachmentUrl: values.attachmentUrl?.trim() || undefined,
           file: selectedFile ?? undefined,
         }).unwrap();
+        const newId = res?.idea?.id;
+        if (newId) {
+          await submitExisting(newId).unwrap();
+        }
       }
       toast.success(
         submissionId
           ? 'Idea updated and submitted for review'
-          : 'Idea submitted successfully',
+          : 'Idea submitted for review',
       );
       navigate({ to: CREATOR_ROUTES.submissions, replace: true });
     } catch (err) {
       toast.error('Failed to submit idea');
       setServerError(getApiErrorMessage(err));
+    } finally {
+      setIsSubmittingFinal(false);
     }
   };
 
@@ -364,15 +438,25 @@ export default function SubmitIdeaForm({
         </p>
       ) : null}
 
-      {/* Submit button area */}
-      <div className="pt-6 flex justify-end">
+      {/* Action buttons */}
+      <div className="pt-6 flex flex-col-reverse sm:flex-row items-center justify-end gap-3 sm:gap-4">
+        <Button
+          type="button"
+          variant="outline"
+          disabled={isBusy}
+          loading={isSavingDraft}
+          onClick={handleSaveDraft}
+          className="w-full sm:w-auto min-w-[160px] py-3.5 px-6 h-auto rounded-full border border-border bg-card hover:bg-muted/80 text-foreground font-bold text-base tracking-wide transition-all duration-150 flex items-center justify-center text-center cursor-pointer disabled:opacity-60"
+        >
+          Save as draft
+        </Button>
         <Button
           type="submit"
           disabled={isBusy}
-          loading={isSubmittingNew || isUpdating || isSubmittingExisting}
-          className="w-full max-w-[400px] py-4 px-8 h-auto rounded-full bg-[#112520] hover:bg-[#193b33] active:bg-[#0a1613] text-white dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90 font-bold text-base tracking-wide shadow-sm hover:shadow transition-all duration-150 flex items-center justify-center text-center cursor-pointer disabled:opacity-60"
+          loading={isSubmittingFinal}
+          className="w-full sm:w-auto min-w-[200px] py-3.5 px-8 h-auto rounded-full bg-[#112520] hover:bg-[#193b33] active:bg-[#0a1613] text-white dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90 font-bold text-base tracking-wide shadow-sm hover:shadow transition-all duration-150 flex items-center justify-center text-center cursor-pointer disabled:opacity-60"
         >
-          {isSubmittingNew || isUpdating || isSubmittingExisting
+          {isSubmittingFinal
             ? submissionId
               ? 'Updating & submitting…'
               : 'Submitting…'
