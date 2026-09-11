@@ -305,7 +305,7 @@ export default function LoginPanel({
                   <div
                     ref={googleButtonContainerRef}
                     className={cn(
-                      'flex w-full justify-center min-h-[44px]',
+                      'flex w-full max-w-full justify-center overflow-hidden min-h-[44px]',
                       (!isGsiReady || !env.googleClientId) && 'hidden',
                     )}
                   />
@@ -342,7 +342,7 @@ export default function LoginPanel({
             <div className="pt-2 text-center">
               <Link
                 to={forgotPasswordPath}
-                className="cursor-pointer text-xs font-medium text-muted-foreground no-underline transition-colors hover:text-primary"
+                className="cursor-pointer text-sm font-medium text-muted-foreground no-underline transition-colors hover:text-primary"
               >
                 Forgot password?
               </Link>
@@ -350,7 +350,7 @@ export default function LoginPanel({
 
             {role === 'creator' && (
               <div className="mt-4 text-center">
-                <p className="text-xs text-muted-foreground">
+                <p className="text-sm text-muted-foreground">
                   Don&apos;t have an account?{' '}
                   <Link
                     to={CREATOR_ROUTES.signUp}
