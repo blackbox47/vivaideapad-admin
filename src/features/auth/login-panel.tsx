@@ -9,6 +9,7 @@ import { toast } from '@/components/ui/sonner';
 import { env } from '@/config/env';
 import useAuth from '@/hooks/auth/use-auth';
 import useGoogleIdentity from '@/hooks/auth/use-google-identity';
+import { useTanstackSearchParams } from '@/lib/use-tanstack-search-params';
 import { cn } from '@/lib/utils';
 import type { UserRole } from '@/models/auth/auth-model';
 import {
@@ -28,6 +29,14 @@ interface LoginPanelProps {
 
 function homeForRole(role: UserRole): string {
   return role === 'admin' ? ADMIN_ROUTES.dashboard : CREATOR_ROUTES.dashboard;
+}
+
+/** Only in-app, path-relative destinations are accepted, never absolute URLs. */
+function safeRedirectTarget(from: string | null): string | null {
+  if (!from || !from.startsWith('/') || from.startsWith('//')) {
+    return null;
+  }
+  return from;
 }
 
 function BrandMark() {
@@ -99,13 +108,19 @@ export default function LoginPanel({
     resetLoginError,
   } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useTanstackSearchParams();
+
+  // `?from=` is set by `authGuard.private` when it bounces an unauthenticated
+  // visitor here, e.g. `/ideas/new?topic=<conceptId>` from the landing page.
+  const destination =
+    safeRedirectTarget(searchParams.get('from')) ?? homeForRole(role);
 
   const handleGoogleSuccess = async (credential: string) => {
     resetLoginError();
     try {
       await googleLogin(credential);
       toast.success('Welcome back!');
-      navigate({ to: homeForRole(role), replace: true });
+      navigate({ to: destination, replace: true });
     } catch {
       // Error handled via loginError in useAuth
     }
@@ -129,7 +144,7 @@ export default function LoginPanel({
     try {
       await login(values, { asRole: role });
       toast.success('Welcome back!');
-      navigate({ to: homeForRole(role), replace: true });
+      navigate({ to: destination, replace: true });
     } catch {
       // Failure surfaced via loginError.
     }
@@ -332,6 +347,20 @@ export default function LoginPanel({
                 Forgot password?
               </Link>
             </div>
+
+            {role === 'creator' && (
+              <div className="mt-4 text-center">
+                <p className="text-xs text-muted-foreground">
+                  Don&apos;t have an account?{' '}
+                  <Link
+                    to={CREATOR_ROUTES.signUp}
+                    className="font-semibold text-primary hover:underline"
+                  >
+                    Sign up
+                  </Link>
+                </p>
+              </div>
+            )}
           </form>
         </div>
       </main>

@@ -49,7 +49,9 @@ export default function CreatorNotificationsOverview() {
       linkedRecordId: notification.linkedRecordId,
     });
 
-    toggleRead(notification.id);
+    if (!notification.read) {
+      toggleRead(notification.id);
+    }
 
     if (target) {
       void navigate({ to: target });

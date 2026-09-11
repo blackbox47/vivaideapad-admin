@@ -162,6 +162,19 @@ export function LandingOverview() {
     setIsApplicationOpen(true);
   };
 
+  /**
+   * Send the visitor to the submit-idea form with the topic preselected.
+   * Unauthenticated visitors are bounced to the creator login by the
+   * `_privatecreator` guard, which carries this destination in `?from=`.
+   */
+  const handleRequestClick = (request: FeaturedRequest) => {
+    void navigate({
+      to: request.id
+        ? `${CREATOR_ROUTES.submitIdea}?topic=${encodeURIComponent(request.id)}`
+        : CREATOR_ROUTES.submitIdea,
+    });
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground font-urbanist selection:bg-primary/15 selection:text-primary">
       {/* Responsive Navbar */}
@@ -200,7 +213,7 @@ export function LandingOverview() {
       {/* Opportunities Section */}
       <FeaturedRequests
         onViewAll={() => handleOpenApplication()}
-        onRequestClick={(req) => handleOpenApplication(req.title, req.id)}
+        onRequestClick={handleRequestClick}
         requests={requests}
       />
 

@@ -112,18 +112,18 @@ function AdminNotificationContent({
       linkedRecordId: item.linkedRecordId,
     });
 
+    if (!item.read) {
+      toggleRead(item.id);
+    }
+
     if (target) {
       onClose();
-      toggleRead(item.id);
       // `target` is a fully-qualified path built from ADMIN_ROUTES (with an
       // optional `?focus=...` query). Navigate via the string overload —
       // typing every concrete dynamic path here would couple this component
       // to the full router tree for no benefit.
       void navigate({ to: target });
-      return;
     }
-
-    toggleRead(item.id);
   };
 
   return (
@@ -260,14 +260,14 @@ function CreatorNotificationContent({
       linkedRecordId: item.linkedRecordId,
     });
 
-    if (target) {
-      onClose();
+    if (!item.read) {
       toggleRead(item.id);
-      void navigate({ to: target });
-      return;
     }
 
-    toggleRead(item.id);
+    if (target) {
+      onClose();
+      void navigate({ to: target });
+    }
   };
 
   return (

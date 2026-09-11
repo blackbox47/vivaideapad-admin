@@ -18,6 +18,7 @@ import { useGetSubmissionByIdQuery } from '@/services/creator/creator-ideas-serv
 export default function SubmitIdeaOverview() {
   const [searchParams] = useTanstackSearchParams();
   const submissionId = searchParams.get('id') ?? '';
+  const topicIdFromUrl = searchParams.get('topic') ?? '';
 
   const { data, isLoading, isError, error, refetch } = useCreatorTopics();
   const { data: submissionData, isLoading: isLoadingSubmission } =
@@ -29,7 +30,8 @@ export default function SubmitIdeaOverview() {
     undefined,
   );  
 
-  const activeTopicId = selectedTopicId ?? submissionData?.conceptId;
+  const activeTopicId =
+    selectedTopicId ?? submissionData?.conceptId ?? (topicIdFromUrl || undefined);
 
   const handleSelectTopic = (topicId: string) => {
     setSelectedTopicId(topicId);

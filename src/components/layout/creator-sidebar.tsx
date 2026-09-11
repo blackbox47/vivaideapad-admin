@@ -1,3 +1,5 @@
+import { Link } from '@tanstack/react-router';
+
 import { NavLink } from '@/lib/nav-link';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -41,12 +43,17 @@ export default function CreatorSidebar({ className }: CreatorSidebarProps) {
         className,
       )}
     >
-      <div className="mb-[35px] flex items-center gap-2.5 px-2.5">
+      <Link
+        to="/"
+        onClick={close}
+        className="mb-[35px] flex items-center gap-2.5 px-2.5 no-underline text-inherit outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded-lg"
+        aria-label="Viva IdeaPad home"
+      >
         <BrandMark />
         <span className="font-heading text-xl font-extrabold tracking-[-0.04em]">
           Viva IdeaPad
         </span>
-      </div>
+      </Link>
 
       <p className="px-3 pt-[15px] pb-[7px] text-[10px] tracking-[0.14em] text-sidebar-muted uppercase">
         Contributor space
