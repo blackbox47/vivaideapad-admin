@@ -34,7 +34,6 @@ const TABS: PeopleTab[] = [
 const PENDING_APPLICANT_STATUSES = new Set<ApplicantStatus>([
   'Submitted',
   'Under Review',
-  'Revision Requested',
 ]);
 
 function parseTab(value: string | null): PeopleTab {
@@ -199,7 +198,7 @@ export default function PeopleOverview() {
               applicants={pendingApplicants}
               onReview={setReviewId}
               emptyTitle="No applicants in review"
-              emptyDescription="Applications that are under review or need revision appear here."
+              emptyDescription="Applications that are under review appear here."
             />
           )}
         </>

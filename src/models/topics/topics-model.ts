@@ -6,19 +6,6 @@ export const CONCEPT_STATUSES = [
 
 export type ConceptStatus = (typeof CONCEPT_STATUSES)[number];
 
-export const CATEGORY_ICON_CHOICES = [
-  '✦',
-  '✎',
-  '⚑',
-  '☾',
-  '✺',
-  '⚐',
-  '◇',
-  '★',
-  '✿',
-  '⬢',
-] as const;
-
 export interface ConceptCategory {
   name: string;
   icon: string;
