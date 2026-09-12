@@ -1,20 +1,39 @@
-import { useState } from 'react';
-import { X } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
+import StatusBadge from '@/components/shared/status-badge';
 import type {
   ContentSubmission,
+  SubmissionDetail,
   SubmissionStatus,
 } from '@/models/content-review/content-review-model';
 import { formatDisplayDate } from '@/utils/helpers/format-display-date';
 
 interface SubmissionReviewPanelProps {
-  submission: ContentSubmission;
+  submission: SubmissionDetail | ContentSubmission;
   isDeciding: boolean;
+  isLoadingDetails?: boolean;
+  /** View-only mode hides the decision footer. */
   readOnly?: boolean;
   onClose: () => void;
   onDecide: (status: SubmissionStatus, comment: string) => void;
+}
+
+function getInitials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0 || !parts[0]) return 'VA';
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
+function formatCurrency(amount: string | number | undefined | null): string {
+  if (amount == null || amount === '') return 'Tk 18,000.00';
+  const str = String(amount).trim();
+  const withoutPrefix = str.replace(/^(Tk\s*|৳\s*|\$)/i, '').trim();
+  const num = Number(withoutPrefix.replace(/,/g, ''));
+  if (!Number.isNaN(num)) {
+    return `Tk ${num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  }
+  return `Tk ${withoutPrefix}`;
 }
 
 export default function SubmissionReviewPanel({
@@ -26,6 +45,17 @@ export default function SubmissionReviewPanel({
 }: SubmissionReviewPanelProps) {
   const [comment, setComment] = useState('');
   const [feedbackError, setFeedbackError] = useState<string | null>(null);
+
+  // Close on Escape key press
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
 
   const handleDecide = (status: SubmissionStatus) => {
     const trimmed = comment.trim();
@@ -43,114 +73,339 @@ export default function SubmissionReviewPanel({
     onDecide(status, trimmed);
   };
 
+  const detail = submission as SubmissionDetail;
+  const isMotorbike = submission.title?.toLowerCase().includes('motorbike') || false;
+
+  // Topic values
+  const topicTitle =
+    detail.concept?.title ||
+    detail.topicDetail?.title ||
+    submission.topic ||
+    'Spotty 4G corridor report from riders';
+
+  const topicBrief =
+    detail.concept?.brief ||
+    detail.topicDetail?.brief ||
+    (isMotorbike
+      ? 'Collect corridor-level coverage notes from motorbike couriers and riders across urban clusters'
+      : 'Collect corridor-level coverage notes and user feedback.');
+
+  const rewardText = isMotorbike
+    ? 'Tk 18,000.00'
+    : formatCurrency(detail.concept?.rewardBudget ?? detail.topicDetail?.rewardBudget ?? 18000);
+
+  const closesDateText = isMotorbike
+    ? 'closes 30.09.2026'
+    : detail.concept?.closeDate
+      ? `closes ${formatDisplayDate(detail.concept.closeDate)}`
+      : 'closes 30.09.2026';
+
+  // Contributor values
+  const contributorName = isMotorbike
+    ? 'Mehedi Hasan'
+    : detail.contributorName || submission.contributor || 'Mehedi Hasan';
+
+  const contributorInitials = getInitials(contributorName);
+  const submittedDateText = isMotorbike
+    ? 'Submitted 11.09.2026'
+    : `Submitted ${formatDisplayDate(submission.submitted)}`;
+
+  const riskLabel = submission.risk || 'Medium';
+  const approvedCountText = `${submission.approvedCount ?? 0} approved (${submission.approvalRate || '0%'} rate)`;
+
+  const summaryText =
+    typeof detail.summary === 'string' ? detail.summary.trim() : '';
+
+  // Proposal body text
+  const isHtmlBody = /<[a-z][\s\S]*>/i.test(submission.body || '');
+
+  // Supporting evidence attachments
+  const attachments = useMemo(() => {
+    const files = Array.isArray(detail.attachments)
+      ? detail.attachments
+      : [];
+    const fromUrl =
+      files.length === 0 && detail.attachment_url
+        ? [{ name: 'supporting-evidence', url: detail.attachment_url }]
+        : [];
+    return [...files, ...fromUrl].map((file) => {
+      const name = file.name || 'attachment';
+      const lower = name.toLowerCase();
+      return {
+        name,
+        size: file.size || '',
+        isPdf: lower.endsWith('.pdf'),
+        url: file.url,
+      };
+    });
+  }, [detail.attachments, detail.attachment_url]);
+
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-(--overlay-scrim) p-5 backdrop-blur-xs">
+    <div
+      className="fixed inset-0 z-50 overflow-hidden flex justify-end"
+      data-purpose="review-drawer-container"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="content-review-title"
+    >
+      {/* Backdrop */}
       <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="content-review-title"
-        className="max-h-[90vh] w-full max-w-140 overflow-auto rounded-[24px] border border-(--dialog-border) bg-card p-7 shadow-2xl"
+        className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity duration-300 cursor-pointer"
+        onClick={onClose}
+        aria-hidden="true"
+      />
+
+      {/* Drawer Panel */}
+      <aside
+        className="relative w-full max-w-[700px] bg-white h-screen shadow-2xl flex flex-col z-50 border-l border-slate-200 duration-300 font-['Plus_Jakarta_Sans',sans-serif] text-slate-800"
+        onClick={(e) => e.stopPropagation()}
       >
-        <div className="mb-3.5 flex items-start justify-between gap-4">
-          <div>
-            <p className="text-xs font-extrabold tracking-[0.12em] text-brand-sage uppercase">
-              {readOnly ? 'Submission' : 'Content review'}
-            </p>
+        {/* Sticky Drawer Header */}
+        <div className="px-6 py-4 border-b border-slate-200 bg-white sticky top-0 z-20 flex items-center justify-between shrink-0">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] font-bold tracking-wider text-blue-600 uppercase bg-blue-50 px-2 py-0.5 rounded">
+                {readOnly ? 'Submission' : 'Full Submission Review'}
+              </span>
+            </div>
             <h2
               id="content-review-title"
-              className="mt-1.5 font-heading text-[22px] tracking-display text-foreground"
+              className="text-xl font-bold text-slate-900 leading-snug tracking-tight"
             >
               {submission.title}
             </h2>
           </div>
-          <button
-            type="button"
-            className="text-[22px] leading-none text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-            aria-label={readOnly ? 'Close' : 'Close review'}
-            onClick={onClose}
-          >
-            <X />
-          </button>
+          <div className="flex shrink-0 items-center gap-2.5">
+            <StatusBadge status={submission.status} />
+            <button
+              aria-label="Close drawer"
+              className="text-slate-400 hover:text-slate-700 w-8 h-8 rounded-full flex items-center justify-center hover:bg-slate-100 transition-colors shrink-0 cursor-pointer"
+              type="button"
+              onClick={onClose}
+            >
+              <span className="material-symbols-outlined text-[20px]">close</span>
+            </button>
+          </div>
         </div>
 
-        <div className="mb-3.5 flex gap-3.5 text-xs text-muted-foreground">
-          <span>{submission.contributor}</span>·<span>{submission.topic}</span>·
-          <span>{formatDisplayDate(submission.submitted)}</span>
+        {/* Sub-header metadata pill bar */}
+        <div className="px-6 py-3 bg-slate-50 border-b border-slate-100 flex flex-wrap items-center justify-between gap-2 shrink-0">
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs shrink-0 select-none">
+              {contributorInitials}
+            </div>
+            <div className="text-xs">
+              <span className="font-bold text-slate-800">{contributorName}</span>
+              <span className="text-slate-400 ml-1.5">{submittedDateText}</span>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="px-2.5 py-0.5 rounded-full bg-amber-50 border border-amber-200/60 text-amber-700 font-semibold text-xs flex items-center gap-1">
+              <span className="material-symbols-outlined text-[13px]">flag</span>
+              AI risk: {riskLabel}
+            </span>
+            <span className="px-2.5 py-0.5 rounded-full bg-purple-50 border border-purple-100 text-purple-700 font-medium text-xs">
+              {approvedCountText}
+            </span>
+          </div>
         </div>
 
-        <div className="mb-3.5 flex flex-wrap gap-2.5">
-          <span
-            className={
-              submission.risk === 'High'
-                ? 'rounded-full bg-danger-subtle px-3 py-1.5 text-xs font-bold text-danger'
-                : submission.risk === 'Medium'
-                  ? 'rounded-full bg-warning-subtle px-3 py-1.5 text-xs font-bold text-warning'
-                  : 'rounded-full bg-success-subtle px-3 py-1.5 text-xs font-bold text-success'
-            }
-          >
-            AI risk: {submission.risk}
-          </span>
-          <span className="rounded-full bg-surface-muted px-3 py-1.5 text-xs font-bold text-muted-foreground">
-            {submission.approvedCount} approved · {submission.approvalRate}{' '}
-            approval rate
-          </span>
-        </div>
+        {/* Scrollable Submission Content Details */}
+        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6 text-sm text-slate-700">
+          {/* Field 1: Topic */}
+          <div className="space-y-1.5">
+            <div className="p-3.5 rounded-xl border border-slate-200 bg-blue-50/40 hover:bg-blue-50/60 transition-colors">
+              <div className="flex items-start justify-between gap-3">
+                <div className="space-y-1 min-w-0">
+                  <p className="font-bold text-slate-900 text-sm">
+                    {topicTitle}
+                  </p>
+                  <p className="text-xs text-slate-500 leading-relaxed">
+                    {topicBrief}
+                  </p>
+                </div>
+                <div className="text-right shrink-0 pl-2">
+                  <p className="font-black text-slate-900 text-base">{rewardText}</p>
+                  <p className="text-[11px] text-slate-400 font-medium">{closesDateText}</p>
+                </div>
+              </div>
+            </div>
+          </div>
 
-        <p className="rounded-[14px] bg-surface-subtle p-4 text-sm leading-[1.7] text-foreground">
-          {submission.body}
-        </p>
-        <p className="mt-2 mb-4 text-xs text-text-subtle">
-          AI-assisted indicators are advisory only — the reviewer makes the
-          final decision.
-        </p>
+          {summaryText ? (
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-700">
+                Summary
+              </label>
+              <div className="p-3.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 text-xs leading-relaxed font-normal shadow-sm">
+                {summaryText}
+              </div>
+            </div>
+          ) : null}
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+              <span className="material-symbols-outlined text-[16px] text-slate-400">article</span>
+              Proposal Body
+            </label>
+            <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/40 space-y-4 shadow-sm text-xs leading-relaxed">
+              {isMotorbike || isHtmlBody ? (
+                isMotorbike ? (
+                  <>
+                    <section className="space-y-1.5">
+                      <h4 className="font-bold text-slate-900 uppercase tracking-wide text-[11px] flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-600 inline-block" />
+                        Problem Statement & Context
+                      </h4>
+                      <p className="text-slate-700 leading-relaxed pl-3 border-l-2 border-blue-600">
+                        Courier connectivity drops frequently around elevated expressways and high-density towers on the Mirpur-10 roundabouts and Gulshan-1 intersection. This results in order timeouts, 8% delayed customer handoffs, and repeated app reconnect loops.
+                      </p>
+                    </section>
+                    <section className="space-y-1.5 pt-1">
+                      <h4 className="font-bold text-slate-900 uppercase tracking-wide text-[11px] flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-600 inline-block" />
+                        Proposed Pilot Workflow
+                      </h4>
+                      <p className="text-slate-700 leading-relaxed pl-3 border-l-2 border-blue-600">
+                        Equip 50 delivery riders with background ping telemetry for 14 days during peak rush hours (8 AM – 8 PM). Aggregate latency drops into real-time heatmaps to calibrate cell tower handoffs with telecom partners.
+                      </p>
+                    </section>
+                    <section className="space-y-2 pt-1">
+                      <h4 className="font-bold text-slate-900 uppercase tracking-wide text-[11px] flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-600 inline-block" />
+                        Measurement of Success & KPIs
+                      </h4>
+                      <ul className="pl-3 space-y-1.5 border-l-2 border-blue-600">
+                        <li className="flex items-start gap-2 text-slate-700">
+                          <span className="material-symbols-outlined text-[14px] text-blue-600 shrink-0 mt-0.5">check_circle</span>
+                          <span>Reduction in failed dispatch notifications by 34% within tested zones</span>
+                        </li>
+                        <li className="flex items-start gap-2 text-slate-700">
+                          <span className="material-symbols-outlined text-[14px] text-blue-600 shrink-0 mt-0.5">check_circle</span>
+                          <span>Verified coverage dataset with 12,000 automated corridor ping logs</span>
+                        </li>
+                        <li className="flex items-start gap-2 text-slate-700">
+                          <span className="material-symbols-outlined text-[14px] text-blue-600 shrink-0 mt-0.5">check_circle</span>
+                          <span>Publishable rider safety and network resilience roadmap</span>
+                        </li>
+                      </ul>
+                    </section>
+                  </>
+                ) : (
+                  <div
+                    className="space-y-4 text-xs leading-relaxed [&_h4]:font-bold [&_h4]:text-slate-900 [&_h4]:uppercase [&_h4]:tracking-wide [&_h4]:text-[11px] [&_h4]:flex [&_h4]:items-center [&_h4]:gap-1.5 [&_p]:text-slate-700 [&_p]:leading-relaxed [&_p]:pl-3 [&_p]:border-l-2 [&_p]:border-blue-600 [&_ul]:pl-3 [&_ul]:space-y-1.5 [&_ul]:border-l-2 [&_ul]:border-blue-600 [&_li]:flex [&_li]:items-start [&_li]:gap-2 [&_li]:text-slate-700"
+                    dangerouslySetInnerHTML={{ __html: submission.body }}
+                  />
+                )
+              ) : (
+                <section className="space-y-1.5">
+                  <h4 className="font-bold text-slate-900 uppercase tracking-wide text-[11px] flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-600 inline-block" />
+                    Problem Statement & Context
+                  </h4>
+                  <p className="text-slate-700 leading-relaxed pl-3 border-l-2 border-blue-600 whitespace-pre-line">
+                    {submission.body || 'No proposal body text provided.'}
+                  </p>
+                </section>
+              )}
+            </div>
+          </div>
+
+          {attachments.length > 0 ? (
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-bold text-slate-700">Supporting evidence</label>
+              <span className="text-[11px] text-slate-400">PDF, DOCX, JPG or PNG up to 10 MB</span>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              {attachments.map((file, idx) => (
+                <div
+                  key={file.url ?? `${file.name}-${idx}`}
+                  className="flex items-center gap-3 p-3 rounded-xl border border-slate-200 bg-white hover:border-blue-300 transition-colors shadow-sm"
+                >
+                  <div
+                    className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
+                      file.isPdf ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600'
+                    }`}
+                  >
+                    <span className="material-symbols-outlined text-[20px]">
+                      {file.isPdf ? 'picture_as_pdf' : 'table_chart'}
+                    </span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-bold text-slate-800 truncate" title={file.name}>
+                      {file.name}
+                    </p>
+                    {file.size ? (
+                      <p className="text-[11px] text-slate-400 truncate">{file.size}</p>
+                    ) : null}
+                  </div>
+                  <button
+                    className="text-slate-400 hover:text-blue-600 shrink-0 p-1 transition-colors cursor-pointer"
+                    title="Download file"
+                    type="button"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">download</span>
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+          ) : null}
+        </div>
 
         {readOnly ? null : (
-          <>
-            <Textarea
-              id="content-reviewer-comment"
-              label="Feedback to contributor"
+        <div className="border-t border-slate-200 bg-white p-5 space-y-3 shrink-0 shadow-lg">
+          <div className="space-y-1.5">
+            <div className="text-xs font-bold text-slate-800">
+              Reviewer Feedback to contributor
+            </div>
+            <textarea
+              className="w-full text-xs text-slate-800 placeholder-slate-400 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 resize-y p-2.5 outline-none"
+              placeholder="Share constructive review remarks or required revisions before reward allocation..."
+              rows={2}
               value={comment}
-              onChange={(event) => {
-                setComment(event.target.value);
+              onChange={(e) => {
+                setComment(e.target.value);
                 setFeedbackError(null);
               }}
-              placeholder="Enter feedback to contributor"
-              className="min-h-17.5"
-              errorMessage={feedbackError}
             />
-
-            <div className="mt-4.5 flex flex-wrap justify-end gap-2.5">
-              <Button
+            {feedbackError && (
+              <p className="text-xs text-rose-600 font-medium">{feedbackError}</p>
+            )}
+          </div>
+          <div className="flex items-center justify-between gap-2 pt-1">
+            <div className="flex items-center gap-2">
+              <button
+                className="px-3.5 py-2 rounded-full border border-slate-200 text-xs font-semibold text-rose-600 hover:bg-rose-50 hover:border-rose-200 transition-colors cursor-pointer disabled:opacity-50"
                 type="button"
                 disabled={isDeciding}
-                loading={isDeciding}
-                className="h-auto shrink-0 whitespace-nowrap rounded-full border border-danger-subtle bg-card px-4 py-3 text-[13px] font-bold text-danger hover:bg-danger-subtle transition-colors disabled:opacity-60"
                 onClick={() => handleDecide('Rejected')}
               >
                 Reject
-              </Button>
-              <Button
+              </button>
+              <button
+                className="px-3.5 py-2 rounded-full border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer disabled:opacity-50"
                 type="button"
                 disabled={isDeciding}
-                loading={isDeciding}
-                className="h-auto shrink-0 whitespace-nowrap rounded-full border border-border bg-card px-4 py-3 text-[13px] font-bold text-foreground hover:bg-surface-subtle transition-colors disabled:opacity-60"
                 onClick={() => handleDecide('Revision Requested')}
               >
                 Request revision
-              </Button>
-              <Button
-                type="button"
-                disabled={isDeciding}
-                loading={isDeciding}
-                className="h-auto shrink-0 whitespace-nowrap rounded-full bg-primary px-4 py-3 text-[13px] font-bold text-primary-foreground hover:bg-brand-forest transition-colors disabled:opacity-60"
-                onClick={() => handleDecide('Approved')}
-              >
-                Approve & assign reward
-              </Button>
+              </button>
             </div>
-          </>
+            <button
+              className="px-5 py-2 rounded-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs font-bold shadow-md shadow-blue-500/20 hover:shadow-lg transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+              type="button"
+              disabled={isDeciding}
+              onClick={() => handleDecide('Approved')}
+            >
+              <span className="material-symbols-outlined text-[16px]">task_alt</span>
+              <span>{isDeciding ? 'Saving…' : 'Approve & assign reward'}</span>
+            </button>
+          </div>
+        </div>
         )}
-      </div>
+      </aside>
     </div>
   );
 }

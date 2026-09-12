@@ -65,13 +65,45 @@ export interface RiskSignal {
   scannedAt: string;
 }
 
+export interface SubmissionTopicDetail {
+  id?: string;
+  title: string;
+  brief?: string;
+  rewardBudget?: string | number;
+  status?: string;
+  closeDate?: string | null;
+}
+
+export interface SubmissionAttachmentFile {
+  name: string;
+  url: string;
+  size?: string;
+  type?: string;
+}
+
+export interface ContributorDetail {
+  id?: string;
+  name: string;
+  email?: string;
+  avatarUrl?: string | null;
+  approvedCount?: number;
+  approvalRate?: string;
+}
+
 export interface SubmissionDetail extends ContentSubmission {
-  version: number;
+  version?: number;
+  summary?: string;
   feedback?: string;
   risk_signal?: RiskSignal;
   attachment_url?: string;
+  attachments?: SubmissionAttachmentFile[] | Record<string, unknown> | null;
   submittedDate?: string;
   decidedDate?: string;
+  concept?: SubmissionTopicDetail | null;
+  topicDetail?: SubmissionTopicDetail | null;
+  contributorDetail?: ContributorDetail | null;
+  contributorName?: string;
+  contributorAvatar?: string | null;
 }
 
 export interface RiskScanResponse {

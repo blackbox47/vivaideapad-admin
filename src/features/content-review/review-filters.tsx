@@ -72,7 +72,7 @@ export default function ReviewFilters({
   return (
     <div className="mb-5 flex flex-wrap items-center justify-between gap-4">
       <div
-        className="flex flex-wrap gap-2"
+        className="flex flex-wrap items-center gap-2"
         role="navigation"
         aria-label="Filter submissions by status"
       >
@@ -86,10 +86,10 @@ export default function ReviewFilters({
               replace
               aria-current={isActive ? 'page' : undefined}
               className={cn(
-                'rounded-full border border-border px-4 py-2 text-[13px] font-bold no-underline transition-colors',
+                'rounded-full border px-4 py-1.5 text-xs font-semibold no-underline transition-colors',
                 isActive
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-card text-foreground hover:bg-surface-subtle',
+                  ? 'border-blue-600 bg-blue-600 text-white shadow-xs'
+                  : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50',
               )}
             >
               {filter.label}
@@ -99,7 +99,7 @@ export default function ReviewFilters({
       </div>
 
       <div className="flex items-center gap-3.5">
-        <span className="whitespace-nowrap text-[13px] text-muted-foreground">
+        <span className="whitespace-nowrap text-xs text-slate-400 font-medium">
           {visibleCount} {visibleCount === 1 ? 'submission' : 'submissions'}
         </span>
         <Input
@@ -107,7 +107,7 @@ export default function ReviewFilters({
           onChange={(event) => onSearchChange(event.target.value)}
           placeholder="Search by title, contributor or topic"
           aria-label="Search submissions"
-          className="min-w-65 rounded-full px-4.5 py-2.5 text-[13px] placeholder:text-text-subtle"
+          className="min-w-65 rounded-full border-slate-200 bg-white px-4 py-2 text-xs placeholder:text-slate-400"
         />
       </div>
     </div>

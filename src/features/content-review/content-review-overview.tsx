@@ -9,6 +9,7 @@ import ReviewKpiCards from '@/features/content-review/review-kpi-cards';
 import ReviewTable from '@/features/content-review/review-table';
 import SubmissionReviewPanel from '@/features/content-review/submission-review-panel';
 import useContentReview from '@/hooks/content-review/use-content-review';
+import { useGetSubmissionQuery } from '@/services/content-review/content-review-service';
 import type { SubmissionStatus } from '@/models/content-review/content-review-model';
 import { toast } from '@/components/ui/sonner';
 import PageHeader from '@/components/layout/page-header';
@@ -28,7 +29,7 @@ export default function ContentReviewOverview() {
   const status = parseReviewStatus(searchParams.get('status'));
   const search = searchParams.get('q') ?? '';
   const [panelId, setPanelId] = useState<string | null>(null);
-  const [panelMode, setPanelMode] = useState<'view' | 'review'>('view');
+  const [panelMode, setPanelMode] = useState<'view' | 'review'>('review');
 
   const {
     submissions,
@@ -57,11 +58,18 @@ export default function ContentReviewOverview() {
   };
 
   const openSubmission = submissions.find((item) => item.id === panelId);
-  const isReviewing =
-    panelMode === 'review' &&
-    openSubmission != null &&
-    openSubmission.status !== 'Approved' &&
-    openSubmission.status !== 'Rejected';
+
+  const { data: detailData, isLoading: isLoadingDetail } =
+    useGetSubmissionQuery(panelId ?? '', {
+      skip: !panelId,
+    });
+
+  // RTK Query keeps the last `data` while a query is skipped, so the panel has
+  // to key off `panelId` or it never unmounts on close.
+  const activeSubmission = panelId
+    ? (detailData?.submission ?? openSubmission)
+    : undefined;
+
   const { paginatedItems, paginationProps } = usePagination({
     items: filtered,
     initialPageSize: 6,
@@ -101,66 +109,76 @@ export default function ContentReviewOverview() {
   }
 
   return (
-    <div>
-      <PageHeader
-        title="Content review"
-        description="Evaluate live concept submissions with context, history and originality signals."
-      />
-
-      <ReviewKpiCards
-        isLoading={isLoading}
-        items={[
-          { id: 'total', label: 'Total submissions', value: totalCount },
-          { id: 'awaiting', label: 'Awaiting review', value: awaitingCount },
-          {
-            id: 'high-risk',
-            label: 'High AI-risk flags',
-            value: highRiskCount,
-            tone: 'danger',
-          },
-        ]}
-      />
-
-      {isLoading ? null : (
-        <ReviewFilters
-          status={status}
-          search={search}
-          visibleCount={filtered.length}
-          onSearchChange={setSearch}
+    <div className="relative">
+      <div
+        className={
+          activeSubmission
+            ? 'filter blur-[2px] pointer-events-none select-none transition-all duration-300'
+            : 'transition-all duration-300'
+        }
+        aria-hidden={activeSubmission ? 'true' : undefined}
+      >
+        <PageHeader
+          title="Content review"
+          description="Evaluate live concept submissions with context, history and originality signals."
         />
-      )}
 
-      {isLoading ? (
-        <div className="overflow-hidden rounded-[18px] border border-border bg-card p-4">
-          {Array.from({ length: 6 }).map((_, index) => (
-            <Skeleton key={index} className="mb-2 h-12 w-full" />
-          ))}
-        </div>
-      ) : filtered.length === 0 ? (
-        <EmptyState
-          title="No submissions match"
-          description="Try a different keyword or status filter."
+        <ReviewKpiCards
+          isLoading={isLoading}
+          items={[
+            { id: 'total', label: 'Total submissions', value: totalCount },
+            { id: 'awaiting', label: 'Awaiting review', value: awaitingCount },
+            {
+              id: 'high-risk',
+              label: 'High AI-risk flags',
+              value: highRiskCount,
+              tone: 'danger',
+            },
+          ]}
         />
-      ) : (
-        <ReviewTable
-          submissions={paginatedItems}
-          pagination={paginationProps}
-          onView={(id) => {
-            setPanelMode('view');
-            setPanelId(id);
-          }}
-          onReview={(id) => {
-            setPanelMode('review');
-            setPanelId(id);
-          }}
-        />
-      )}
 
-      {openSubmission ? (
+        {isLoading ? null : (
+          <ReviewFilters
+            status={status}
+            search={search}
+            visibleCount={filtered.length}
+            onSearchChange={setSearch}
+          />
+        )}
+
+        {isLoading ? (
+          <div className="overflow-hidden rounded-[18px] border border-border bg-card p-4">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <Skeleton key={index} className="mb-2 h-12 w-full" />
+            ))}
+          </div>
+        ) : filtered.length === 0 ? (
+          <EmptyState
+            title="No submissions match"
+            description="Try a different keyword or status filter."
+          />
+        ) : (
+          <ReviewTable
+            submissions={paginatedItems}
+            pagination={paginationProps}
+            onView={(id) => {
+              setPanelMode('view');
+              setPanelId(id);
+            }}
+            onReview={(id) => {
+              setPanelMode('review');
+              setPanelId(id);
+            }}
+          />
+        )}
+      </div>
+
+      {activeSubmission ? (
         <SubmissionReviewPanel
-          submission={openSubmission}
+          submission={activeSubmission}
           isDeciding={isDeciding}
-          readOnly={!isReviewing}
+          isLoadingDetails={isLoadingDetail}
+          readOnly={panelMode === 'view'}
           onClose={() => setPanelId(null)}
           onDecide={handleDecide}
         />

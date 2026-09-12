@@ -23,6 +23,8 @@ interface ReviewTableProps {
 
 const TITLE_MAX_CHARS = 20;
 
+const DECIDED_STATUSES = new Set(['Approved', 'Rejected']);
+
 const TITLE_COL_CLASS =
   'w-[9.5rem] max-w-[9.5rem] whitespace-normal md:w-[14rem] md:max-w-[14rem] lg:w-[18rem] lg:max-w-[18rem] xl:w-[22rem] xl:max-w-[22rem]';
 
@@ -31,10 +33,6 @@ function truncateWithEllipsis(value: string, maxChars: number): string {
     return value;
   }
   return `${value.slice(0, maxChars)}…`;
-}
-
-function canReviewSubmission(status: ContentSubmission['status']): boolean {
-  return status !== 'Approved' && status !== 'Rejected';
 }
 
 export default function ReviewTable({
@@ -96,15 +94,15 @@ export default function ReviewTable({
                   label: 'View',
                   onClick: () => onView(submission.id),
                 },
-                ...(canReviewSubmission(submission.status)
-                  ? [
+                ...(DECIDED_STATUSES.has(submission.status)
+                  ? []
+                  : [
                       {
                         key: 'review',
                         label: 'Review',
                         onClick: () => onReview(submission.id),
                       },
-                    ]
-                  : []),
+                    ]),
               ]}
             />
           </ProjectTableCell>
