@@ -10,6 +10,7 @@ import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { Select } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/components/ui/sonner';
+import { cn } from '@/lib/utils';
 import useSubmitIdea from '@/hooks/creator/use-submit-idea';
 import {
   useSubmitExistingSubmissionMutation,
@@ -377,11 +378,19 @@ export default function SubmitIdeaForm({
               disabled={isBusy}
               aria-invalid={errors.body ? 'true' : 'false'}
               errorMessage={errors.body?.message}
+              maxLength={BODY_MAX}
             />
           )}
         />
         <div className="flex justify-end">
-          <span className="text-xs font-semibold text-muted-foreground">
+          <span
+            className={cn(
+              'text-xs font-semibold',
+              bodyPlainTextLength >= BODY_MAX
+                ? 'text-amber-600 dark:text-amber-500'
+                : 'text-muted-foreground',
+            )}
+          >
             {bodyPlainTextLength}/{BODY_MAX}
           </span>
         </div>
