@@ -18,6 +18,7 @@ import {
 } from '@/services/creator/creator-ideas-service';
 import type {
   CreatorTopic,
+  SubmissionAttachmentItem,
   SubmissionDetail,
 } from '@/models/creator/submit-idea-model';
 import {
@@ -32,16 +33,6 @@ import {
 import { CREATOR_ROUTES } from '@/utils/constants/routes';
 import { getApiErrorMessage } from '@/utils/helpers/api-error';
 import type { DropdownOption } from '@/utils/types/dropdown-option';
-
-function readFileAsDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result ?? ''));
-    reader.onerror = () =>
-      reject(new Error(reader.error?.message ?? 'Failed to read file'));
-    reader.readAsDataURL(file);
-  });
-}
 
 interface SubmitIdeaFormProps {
   topics: CreatorTopic[];
@@ -61,7 +52,10 @@ export default function SubmitIdeaForm({
   isLoadingSubmission = false,
 }: SubmitIdeaFormProps) {
   const [serverError, setServerError] = useState<string | null>(null);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [existingAttachments, setExistingAttachments] = useState<
+    SubmissionAttachmentItem[]
+  >([]);
   const [isSavingDraft, setIsSavingDraft] = useState(false);
   const [isSubmittingFinal, setIsSubmittingFinal] = useState(false);
   const [submitIdea, { isLoading: isSubmittingNew }] = useSubmitIdea();
@@ -134,6 +128,35 @@ export default function SubmitIdeaForm({
         attachmentUrl: submission.attachmentUrl || '',
         confirmedOriginal: true,
       });
+
+      if (Array.isArray(submission.attachments)) {
+        setExistingAttachments(submission.attachments as SubmissionAttachmentItem[]);
+      } else if (
+        submission.attachments &&
+        typeof submission.attachments === 'object' &&
+        (submission.attachments as { url?: string }).url
+      ) {
+        const att = submission.attachments as Record<string, unknown>;
+        setExistingAttachments([
+          {
+            name: String(att.name ?? att.original_name ?? 'document'),
+            original_name: att.original_name ? String(att.original_name) : undefined,
+            url: String(att.url),
+            size: (att.size as number | string | undefined) ?? undefined,
+            mime_type: (att.mime_type ?? att.type) as string | undefined,
+            type: att.type as string | undefined,
+          },
+        ]);
+      } else if (submission.attachmentUrl) {
+        setExistingAttachments([
+          {
+            name: submission.attachmentUrl.split('/').pop() || 'document',
+            url: submission.attachmentUrl,
+          },
+        ]);
+      } else {
+        setExistingAttachments([]);
+      }
     }
   }, [submission, reset, selectedTopicId]);
 
@@ -143,18 +166,12 @@ export default function SubmitIdeaForm({
     }
   }, [selectedTopicId, setValue]);
 
-  const handleFileChange = async (file: File | null) => {
-    setSelectedFile(file);
-    if (!file) {
-      setValue('attachmentUrl', submission?.attachmentUrl ?? '');
-      return;
-    }
-    try {
-      const dataUrl = await readFileAsDataUrl(file);
-      setValue('attachmentUrl', dataUrl);
-    } catch {
-      setValue('attachmentUrl', file.name);
-    }
+  const handleFilesChange = (files: File[]) => {
+    setSelectedFiles(files);
+  };
+
+  const handleRemoveExisting = (index: number) => {
+    setExistingAttachments((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleSaveDraft = async () => {
@@ -191,8 +208,9 @@ export default function SubmitIdeaForm({
             title: values.title.trim(),
             summary: values.summary?.trim(),
             body: values.body || '',
-            attachmentUrl: values.attachmentUrl?.trim() || undefined,
-            file: selectedFile ?? undefined,
+            attachmentUrl: existingAttachments[0]?.url || undefined,
+            attachments: existingAttachments,
+            files: selectedFiles,
           },
         }).unwrap();
       } else {
@@ -202,8 +220,9 @@ export default function SubmitIdeaForm({
           title: values.title.trim(),
           summary: values.summary?.trim(),
           body: values.body || '',
-          attachmentUrl: values.attachmentUrl?.trim() || undefined,
-          file: selectedFile ?? undefined,
+          attachmentUrl: existingAttachments[0]?.url || undefined,
+          attachments: existingAttachments,
+          files: selectedFiles,
         }).unwrap();
       }
 
@@ -230,8 +249,9 @@ export default function SubmitIdeaForm({
             title: values.title.trim(),
             summary: values.summary?.trim(),
             body: values.body,
-            attachmentUrl: values.attachmentUrl?.trim() || undefined,
-            file: selectedFile ?? undefined,
+            attachmentUrl: existingAttachments[0]?.url || undefined,
+            attachments: existingAttachments,
+            files: selectedFiles,
           },
         }).unwrap();
         await submitExisting(submissionId).unwrap();
@@ -242,8 +262,9 @@ export default function SubmitIdeaForm({
           title: values.title.trim(),
           summary: values.summary?.trim(),
           body: values.body,
-          attachmentUrl: values.attachmentUrl?.trim() || undefined,
-          file: selectedFile ?? undefined,
+          attachmentUrl: existingAttachments[0]?.url || undefined,
+          attachments: existingAttachments,
+          files: selectedFiles,
         }).unwrap();
         const newId = res?.idea?.id;
         if (newId) {
@@ -403,9 +424,14 @@ export default function SubmitIdeaForm({
         </Label>
         <FileUploader
           id="attachment"
-          acceptText="PDF, DOCX, JPG or PNG · up to 10 MB"
-          value={selectedFile}
-          onChange={handleFileChange}
+          multiple
+          maxFiles={5}
+          maxSizeBytes={10 * 1024 * 1024}
+          acceptText="PDF, DOCX, JPG or PNG · up to 10 MB per document · max 5 documents"
+          files={selectedFiles}
+          onFilesChange={handleFilesChange}
+          existingFiles={existingAttachments}
+          onRemoveExisting={handleRemoveExisting}
           disabled={isBusy}
           errorMessage={errors.attachmentUrl?.message}
         />

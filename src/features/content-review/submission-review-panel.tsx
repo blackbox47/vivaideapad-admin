@@ -126,7 +126,7 @@ export default function SubmissionReviewPanel({
       : [];
     const fromUrl =
       files.length === 0 && detail.attachment_url
-        ? [{ name: 'supporting-evidence', url: detail.attachment_url }]
+        ? [{ name: 'supporting-evidence', url: detail.attachment_url, size: '' }]
         : [];
     return [...files, ...fromUrl].map((file) => {
       const name = file.name || 'attachment';

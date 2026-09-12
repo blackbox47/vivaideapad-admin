@@ -2,6 +2,7 @@ import type {
   CreatorTopic,
   CreatorTopicsResponse,
   OpportunityCategory,
+  SubmissionAttachmentItem,
   SubmissionDetail,
   SubmitIdeaBody,
   SubmitIdeaResponse,
@@ -28,10 +29,47 @@ export const creatorIdeasService = baseService.injectEndpoints({
           res.concept && typeof res.concept === 'object'
             ? (res.concept as Record<string, unknown>)
             : null;
-        const attachmentsObj =
-          res.attachments && typeof res.attachments === 'object'
-            ? (res.attachments as Record<string, unknown>)
-            : null;
+
+        let attachmentsList: SubmissionAttachmentItem[] = [];
+        if (Array.isArray(res.attachments)) {
+          attachmentsList = (res.attachments as Array<Record<string, unknown>>).map(
+            (item) => ({
+              id: item?.id ? String(item.id) : undefined,
+              name: String(item?.name ?? item?.original_name ?? 'document'),
+              original_name: item?.original_name
+                ? String(item.original_name)
+                : undefined,
+              url: String(item?.url ?? ''),
+              size: (item?.size as number | string | undefined) ?? undefined,
+              mime_type: (item?.mime_type ?? item?.type) as string | undefined,
+              type: item?.type as string | undefined,
+            }),
+          );
+        } else if (res.attachments && typeof res.attachments === 'object') {
+          const att = res.attachments as Record<string, unknown>;
+          if (att.url) {
+            attachmentsList = [
+              {
+                name: String(att.name ?? att.original_name ?? 'document'),
+                original_name: att.original_name
+                  ? String(att.original_name)
+                  : undefined,
+                url: String(att.url),
+                size: (att.size as number | string | undefined) ?? undefined,
+                mime_type: (att.mime_type ?? att.type) as string | undefined,
+                type: att.type as string | undefined,
+              },
+            ];
+          }
+        } else if (res.attachmentUrl || res.attachment_url) {
+          const u = String(res.attachmentUrl ?? res.attachment_url);
+          attachmentsList = [
+            {
+              name: u.split('/').pop() || 'document',
+              url: u,
+            },
+          ];
+        }
 
         return {
           id: String(res.id ?? ''),
@@ -44,10 +82,10 @@ export const creatorIdeasService = baseService.injectEndpoints({
           summary: String(res.summary ?? ''),
           body: String(res.body ?? ''),
           attachmentUrl:
-            (attachmentsObj?.url as string) ||
+            attachmentsList[0]?.url ||
             (res.attachmentUrl as string) ||
             '',
-          attachments: attachmentsObj,
+          attachments: attachmentsList,
           status: String(res.status ?? 'draft'),
           rewardAmount: res.reward_amount
             ? String(res.reward_amount)
@@ -64,7 +102,8 @@ export const creatorIdeasService = baseService.injectEndpoints({
     }),
     submitIdea: builder.mutation<SubmitIdeaResponse, SubmitIdeaBody>({
       query: (body) => {
-        if (body.file) {
+        const filesToUpload = body.files ?? (body.file ? [body.file] : []);
+        if (filesToUpload.length > 0) {
           const formData = new FormData();
           formData.append(
             'concept_id',
@@ -72,7 +111,12 @@ export const creatorIdeasService = baseService.injectEndpoints({
           );
           formData.append('title', body.title);
           formData.append('body', body.body || body.summary || '');
-          formData.append('file', body.file);
+          if (body.attachments && body.attachments.length > 0) {
+            formData.append('attachments', JSON.stringify(body.attachments));
+          }
+          for (const file of filesToUpload) {
+            formData.append('files', file);
+          }
           return {
             url: CREATOR_IDEAS_SUBMIT_URL,
             method: 'POST',
@@ -87,9 +131,9 @@ export const creatorIdeasService = baseService.injectEndpoints({
             concept_id: body.concept_id || body.topicId || '',
             title: body.title,
             body: body.body || body.summary || '',
-            attachments: body.attachmentUrl
-              ? { url: body.attachmentUrl }
-              : undefined,
+            attachments:
+              body.attachments ??
+              (body.attachmentUrl ? [{ url: body.attachmentUrl }] : undefined),
           },
         };
       },
@@ -122,7 +166,8 @@ export const creatorIdeasService = baseService.injectEndpoints({
       { id: string; body: SubmitIdeaBody }
     >({
       query: ({ id, body }) => {
-        if (body.file) {
+        const filesToUpload = body.files ?? (body.file ? [body.file] : []);
+        if (filesToUpload.length > 0) {
           const formData = new FormData();
           formData.append(
             'concept_id',
@@ -130,7 +175,12 @@ export const creatorIdeasService = baseService.injectEndpoints({
           );
           formData.append('title', body.title);
           formData.append('body', body.body || body.summary || '');
-          formData.append('file', body.file);
+          if (body.attachments !== undefined) {
+            formData.append('attachments', JSON.stringify(body.attachments));
+          }
+          for (const file of filesToUpload) {
+            formData.append('files', file);
+          }
           return {
             url: CREATOR_IDEA_DETAIL_URL(id),
             method: 'PATCH',
@@ -145,9 +195,9 @@ export const creatorIdeasService = baseService.injectEndpoints({
             concept_id: body.concept_id || body.topicId || '',
             title: body.title,
             body: body.body || body.summary || '',
-            attachments: body.attachmentUrl
-              ? { url: body.attachmentUrl }
-              : undefined,
+            attachments:
+              body.attachments ??
+              (body.attachmentUrl ? [{ url: body.attachmentUrl }] : undefined),
           },
         };
       },

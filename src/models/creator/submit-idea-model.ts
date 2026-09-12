@@ -29,6 +29,16 @@ export interface CreatorTopicsResponse {
   topics: CreatorTopic[];
 }
 
+export interface SubmissionAttachmentItem {
+  id?: string;
+  name: string;
+  url: string;
+  size?: number | string;
+  mime_type?: string;
+  type?: string;
+  original_name?: string;
+}
+
 export interface SubmitIdeaBody {
   title: string;
   concept_id?: string;
@@ -36,7 +46,9 @@ export interface SubmitIdeaBody {
   summary?: string;
   body: string;
   attachmentUrl?: string;
+  attachments?: SubmissionAttachmentItem[];
   file?: File;
+  files?: File[];
 }
 
 export interface SubmitIdeaResponse {
@@ -53,7 +65,7 @@ export interface SubmissionDetail {
   summary?: string;
   body: string;
   attachmentUrl?: string;
-  attachments?: Record<string, unknown> | null;
+  attachments?: SubmissionAttachmentItem[] | Record<string, unknown> | null;
   status: string;
   rewardAmount?: string;
   decisionNotes?: string;
