@@ -3,11 +3,13 @@ import { useEffect, useMemo, useState } from 'react';
 import StatusBadge from '@/components/shared/status-badge';
 import type {
   ContentSubmission,
+  SubmissionAttachmentFile,
   SubmissionDetail,
   SubmissionStatus,
 } from '@/models/content-review/content-review-model';
 import { formatDisplayDate } from '@/utils/helpers/format-display-date';
 import { resolveAvatarUrl } from '@/utils/helpers/resolve-avatar-url';
+import { sanitizeHtml } from '@/utils/helpers/sanitize-html';
 
 interface SubmissionReviewPanelProps {
   submission: SubmissionDetail | ContentSubmission;
@@ -39,7 +41,13 @@ function formatFileSize(size: string | number | undefined): string {
 }
 
 function isOpenableUrl(url: string | undefined): url is string {
-  return Boolean(url && url !== '#' && url !== 'undefined');
+  if (!url || url === '#' || url === 'undefined') return false;
+  const trimmed = url.trim().toLowerCase();
+  return (
+    !trimmed.startsWith('javascript:') &&
+    !trimmed.startsWith('data:') &&
+    !trimmed.startsWith('vbscript:')
+  );
 }
 
 function toDownloadUrl(url: string, filename: string): string {
@@ -152,14 +160,14 @@ export default function SubmissionReviewPanel({
     const files = Array.isArray(detail.attachments)
       ? detail.attachments
       : [];
-    const fromUrl =
+    const fromUrl: SubmissionAttachmentFile[] =
       files.length === 0 && detail.attachment_url
         ? [{ name: 'supporting-evidence', url: detail.attachment_url, size: '' }]
         : [];
     return [...files, ...fromUrl].map((file) => {
-      const name = file.name || 'attachment';
+      const name = file.name || file.original_name || 'attachment';
       const lower = name.toLowerCase();
-      const mime = (file.type || '').toLowerCase();
+      const mime = (file.mime_type || file.type || '').toLowerCase();
       const resolvedUrl = resolveAvatarUrl(file.url) ?? file.url;
       const canOpen = isOpenableUrl(resolvedUrl);
       const isImage =
@@ -329,7 +337,7 @@ export default function SubmissionReviewPanel({
                 ) : (
                   <div
                     className="space-y-4 text-xs leading-relaxed [&_h4]:font-bold [&_h4]:text-slate-900 [&_h4]:uppercase [&_h4]:tracking-wide [&_h4]:text-[11px] [&_h4]:flex [&_h4]:items-center [&_h4]:gap-1.5 [&_p]:text-slate-700 [&_p]:leading-relaxed [&_p]:pl-3 [&_p]:border-l-2 [&_p]:border-blue-600 [&_ul]:pl-3 [&_ul]:space-y-1.5 [&_ul]:border-l-2 [&_ul]:border-blue-600 [&_li]:flex [&_li]:items-start [&_li]:gap-2 [&_li]:text-slate-700"
-                    dangerouslySetInnerHTML={{ __html: submission.body }}
+                    dangerouslySetInnerHTML={{ __html: sanitizeHtml(submission.body) }}
                   />
                 )
               ) : (

@@ -5,6 +5,7 @@ import {
   SUMMARY_MAX,
   TITLE_MAX,
 } from '@/models/creator/submit-idea-model';
+import { htmlToPlainText } from '@/utils/helpers/sanitize-html';
 
 export const URL_PATTERN = /^https?:\/\/\S+$/i;
 
@@ -21,8 +22,8 @@ export const submitIdeaSchema = z.object({
     .max(SUMMARY_MAX, `Summary must be at most ${SUMMARY_MAX} characters.`)
     .optional(),
   body: z.string().superRefine((html, ctx) => {
-    // Strip HTML tags to compute the visible plain-text length.
-    const plain = html.replace(/<[^>]*>/g, '').trim();
+    // Use the sanitize-aware helper to get visible plain-text length.
+    const plain = htmlToPlainText(html);
     if (plain.length === 0) {
       ctx.addIssue({ code: 'custom', message: 'Body is required.' });
     }

@@ -79,6 +79,8 @@ export interface SubmissionAttachmentFile {
   url: string;
   size?: string;
   type?: string;
+  mime_type?: string;
+  original_name?: string;
 }
 
 export interface ContributorDetail {

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate } from '@tanstack/react-router';
@@ -32,6 +32,7 @@ import {
 } from '@/models/creator/submit-idea-schema';
 import { CREATOR_ROUTES } from '@/utils/constants/routes';
 import { getApiErrorMessage } from '@/utils/helpers/api-error';
+import { sanitizeHtml, htmlToPlainText } from '@/utils/helpers/sanitize-html';
 import type { DropdownOption } from '@/utils/types/dropdown-option';
 
 interface SubmitIdeaFormProps {
@@ -101,12 +102,16 @@ export default function SubmitIdeaForm({
   const bodyValue = useWatch({ control, name: 'body' }) ?? '';
 
   // Plain-text length of the body's HTML for the counter (matches zod).
-  const bodyPlainTextLength = useMemo(() => {
-    if (typeof document === 'undefined') return 0;
-    const tmp = document.createElement('div');
-    tmp.innerHTML = bodyValue;
-    return (tmp.textContent ?? '').length;
-  }, [bodyValue]);
+  const bodyPlainTextLength = useMemo(
+    () => htmlToPlainText(bodyValue).length,
+    [bodyValue],
+  );
+
+  // Sanitise rich-text body before sending to the API.
+  const sanitizedBody = useCallback(
+    () => sanitizeHtml(getValues('body') || ''),
+    [getValues],
+  );
 
   const topicOptions = useMemo<DropdownOption[]>(
     () =>
@@ -207,7 +212,7 @@ export default function SubmitIdeaForm({
             topicId: values.topicId,
             title: values.title.trim(),
             summary: values.summary?.trim(),
-            body: values.body || '',
+            body: sanitizedBody(),
             attachmentUrl: existingAttachments[0]?.url || undefined,
             attachments: existingAttachments,
             files: selectedFiles,
@@ -219,7 +224,7 @@ export default function SubmitIdeaForm({
           concept_id: values.topicId,
           title: values.title.trim(),
           summary: values.summary?.trim(),
-          body: values.body || '',
+          body: sanitizedBody(),
           attachmentUrl: existingAttachments[0]?.url || undefined,
           attachments: existingAttachments,
           files: selectedFiles,
@@ -248,7 +253,7 @@ export default function SubmitIdeaForm({
             topicId: values.topicId,
             title: values.title.trim(),
             summary: values.summary?.trim(),
-            body: values.body,
+            body: sanitizeHtml(values.body),
             attachmentUrl: existingAttachments[0]?.url || undefined,
             attachments: existingAttachments,
             files: selectedFiles,
@@ -261,7 +266,7 @@ export default function SubmitIdeaForm({
           concept_id: values.topicId,
           title: values.title.trim(),
           summary: values.summary?.trim(),
-          body: values.body,
+          body: sanitizeHtml(values.body),
           attachmentUrl: existingAttachments[0]?.url || undefined,
           attachments: existingAttachments,
           files: selectedFiles,
