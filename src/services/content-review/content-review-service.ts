@@ -31,6 +31,30 @@ export interface SubmissionsListParams {
   limit?: number;
 }
 
+function mapSubmissionAttachment(
+  item: Record<string, unknown>,
+): SubmissionAttachmentFile | null {
+  const url = String(item.url ?? item.file_url ?? '').trim();
+  if (!url) {
+    return null;
+  }
+
+  const name = String(
+    item.original_name ?? item.name ?? url.split('/').pop() ?? 'attachment',
+  );
+
+  return {
+    name,
+    url,
+    size: item.size != null && item.size !== '' ? String(item.size) : undefined,
+    type: item.mime_type
+      ? String(item.mime_type)
+      : item.type
+        ? String(item.type)
+        : undefined,
+  };
+}
+
 export const contentReviewService = baseService.injectEndpoints({
   endpoints: (builder) => ({
     /** Legacy endpoint — kept for the live UI. */
@@ -82,19 +106,18 @@ export const contentReviewService = baseService.injectEndpoints({
 
         let attachments: SubmissionAttachmentFile[] = [];
         if (Array.isArray(raw.attachments)) {
-          attachments = raw.attachments as SubmissionAttachmentFile[];
+          attachments = raw.attachments
+            .filter(
+              (item): item is Record<string, unknown> =>
+                Boolean(item && typeof item === 'object'),
+            )
+            .map(mapSubmissionAttachment)
+            .filter((item): item is SubmissionAttachmentFile => item !== null);
         } else if (raw.attachments && typeof raw.attachments === 'object') {
-          const att = raw.attachments as Record<string, unknown>;
-          if (att.url) {
-            attachments = [
-              {
-                name: String(att.original_name ?? att.name ?? 'attachment'),
-                url: String(att.url),
-                size: att.size ? String(att.size) : undefined,
-                type: att.mime_type ? String(att.mime_type) : undefined,
-              },
-            ];
-          }
+          const mapped = mapSubmissionAttachment(
+            raw.attachments as Record<string, unknown>,
+          );
+          attachments = mapped ? [mapped] : [];
         } else if (raw.attachment_url) {
           attachments = [
             {

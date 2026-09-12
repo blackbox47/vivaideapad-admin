@@ -10,7 +10,6 @@ const STATUS_FILTERS: Array<{ id: ReviewStatusFilter; label: string }> = [
   { id: 'Under Review', label: 'Under Review' },
   { id: 'Revision Requested', label: 'Revision Requested' },
   { id: 'Approved', label: 'Approved' },
-  { id: 'Published', label: 'Published' },
   { id: 'Rejected', label: 'Rejected' },
 ];
 

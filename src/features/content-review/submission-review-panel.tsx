@@ -7,6 +7,7 @@ import type {
   SubmissionStatus,
 } from '@/models/content-review/content-review-model';
 import { formatDisplayDate } from '@/utils/helpers/format-display-date';
+import { resolveAvatarUrl } from '@/utils/helpers/resolve-avatar-url';
 
 interface SubmissionReviewPanelProps {
   submission: SubmissionDetail | ContentSubmission;
@@ -23,6 +24,33 @@ function getInitials(name: string): string {
   if (parts.length === 0 || !parts[0]) return 'VA';
   if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
+function formatFileSize(size: string | number | undefined): string {
+  if (size == null || size === '') return '';
+  if (typeof size === 'string' && /[kmg]b/i.test(size)) return size;
+  const num = typeof size === 'string' ? Number(size.replace(/,/g, '')) : size;
+  if (!Number.isFinite(num) || num <= 0) {
+    return typeof size === 'string' ? size : '';
+  }
+  if (num < 1024) return `${Math.round(num)} B`;
+  if (num < 1024 * 1024) return `${(num / 1024).toFixed(1)} KB`;
+  return `${(num / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function isOpenableUrl(url: string | undefined): url is string {
+  return Boolean(url && url !== '#' && url !== 'undefined');
+}
+
+function toDownloadUrl(url: string, filename: string): string {
+  try {
+    const parsed = new URL(url);
+    parsed.searchParams.set('download', '1');
+    parsed.searchParams.set('filename', filename);
+    return parsed.toString();
+  } catch {
+    return url;
+  }
 }
 
 function formatCurrency(amount: string | number | undefined | null): string {
@@ -131,11 +159,19 @@ export default function SubmissionReviewPanel({
     return [...files, ...fromUrl].map((file) => {
       const name = file.name || 'attachment';
       const lower = name.toLowerCase();
+      const mime = (file.type || '').toLowerCase();
+      const resolvedUrl = resolveAvatarUrl(file.url) ?? file.url;
+      const canOpen = isOpenableUrl(resolvedUrl);
+      const isImage =
+        mime.startsWith('image/') ||
+        /\.(jpe?g|png|webp|gif)$/i.test(name);
       return {
         name,
-        size: file.size || '',
-        isPdf: lower.endsWith('.pdf'),
-        url: file.url,
+        size: formatFileSize(file.size),
+        isPdf: lower.endsWith('.pdf') || mime.includes('pdf'),
+        isImage,
+        url: canOpen ? resolvedUrl : undefined,
+        downloadUrl: canOpen ? toDownloadUrl(resolvedUrl, name) : undefined,
       };
     });
   }, [detail.attachments, detail.attachment_url]);
@@ -150,8 +186,7 @@ export default function SubmissionReviewPanel({
     >
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity duration-300 cursor-pointer"
-        onClick={onClose}
+        className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity duration-300"
         aria-hidden="true"
       />
 
@@ -323,30 +358,99 @@ export default function SubmissionReviewPanel({
                   key={file.url ?? `${file.name}-${idx}`}
                   className="flex items-center gap-3 p-3 rounded-xl border border-slate-200 bg-white hover:border-blue-300 transition-colors shadow-sm"
                 >
-                  <div
-                    className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
-                      file.isPdf ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600'
-                    }`}
-                  >
-                    <span className="material-symbols-outlined text-[20px]">
-                      {file.isPdf ? 'picture_as_pdf' : 'table_chart'}
+                  {file.url ? (
+                    <a
+                      href={file.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex min-w-0 flex-1 cursor-pointer items-center gap-3"
+                      title={`View ${file.name}`}
+                    >
+                      {file.isImage ? (
+                        <img
+                          src={file.url}
+                          alt=""
+                          className="h-9 w-9 shrink-0 rounded-lg object-cover border border-slate-200"
+                        />
+                      ) : (
+                        <div
+                          className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
+                            file.isPdf
+                              ? 'bg-rose-50 text-rose-600'
+                              : 'bg-emerald-50 text-emerald-600'
+                          }`}
+                        >
+                          <span className="material-symbols-outlined text-[20px]">
+                            {file.isPdf ? 'picture_as_pdf' : 'description'}
+                          </span>
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0 text-left">
+                        <p
+                          className="text-xs font-bold text-slate-800 truncate hover:text-blue-700"
+                          title={file.name}
+                        >
+                          {file.name}
+                        </p>
+                        {file.size ? (
+                          <p className="text-[11px] text-slate-400 truncate">
+                            {file.size}
+                          </p>
+                        ) : null}
+                      </div>
+                    </a>
+                  ) : (
+                    <>
+                      <div
+                        className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
+                          file.isPdf
+                            ? 'bg-rose-50 text-rose-600'
+                            : 'bg-emerald-50 text-emerald-600'
+                        }`}
+                      >
+                        <span className="material-symbols-outlined text-[20px]">
+                          {file.isPdf ? 'picture_as_pdf' : 'description'}
+                        </span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p
+                          className="text-xs font-bold text-slate-800 truncate"
+                          title={file.name}
+                        >
+                          {file.name}
+                        </p>
+                        {file.size ? (
+                          <p className="text-[11px] text-slate-400 truncate">
+                            {file.size}
+                          </p>
+                        ) : null}
+                      </div>
+                    </>
+                  )}
+                  {file.downloadUrl ? (
+                    <a
+                      href={file.downloadUrl}
+                      download={file.name}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-slate-400 hover:text-blue-600 shrink-0 p-1 transition-colors cursor-pointer"
+                      title={`Download ${file.name}`}
+                      aria-label={`Download ${file.name}`}
+                    >
+                      <span className="material-symbols-outlined text-[18px]">
+                        download
+                      </span>
+                    </a>
+                  ) : (
+                    <span
+                      className="text-slate-300 shrink-0 p-1"
+                      title="File is not available to download"
+                    >
+                      <span className="material-symbols-outlined text-[18px]">
+                        download
+                      </span>
                     </span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-bold text-slate-800 truncate" title={file.name}>
-                      {file.name}
-                    </p>
-                    {file.size ? (
-                      <p className="text-[11px] text-slate-400 truncate">{file.size}</p>
-                    ) : null}
-                  </div>
-                  <button
-                    className="text-slate-400 hover:text-blue-600 shrink-0 p-1 transition-colors cursor-pointer"
-                    title="Download file"
-                    type="button"
-                  >
-                    <span className="material-symbols-outlined text-[18px]">download</span>
-                  </button>
+                  )}
                 </div>
               ))}
             </div>
