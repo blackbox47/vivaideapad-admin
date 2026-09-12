@@ -5,6 +5,7 @@ import {
   ProjectTableCell,
   ProjectTableRow,
 } from '@/components/ui/project-table';
+import usePagination from '@/hooks/ui/use-pagination';
 import type { WorkspaceAdmin } from '@/models/admins/admins-model';
 
 interface AdminsTableProps {
@@ -18,8 +19,14 @@ export default function AdminsTable({
   canManage,
   onRemove,
 }: AdminsTableProps) {
+  const { paginatedItems, paginationProps } = usePagination({
+    items: admins,
+    initialPageSize: 6,
+  });
+
   return (
     <ProjectTable
+      pagination={paginationProps}
       columns={[
         { label: 'Admin' },
         { label: 'Role' },
@@ -27,7 +34,7 @@ export default function AdminsTable({
         { label: '', isAction: true },
       ]}
     >
-      {admins.map((admin) => (
+      {paginatedItems.map((admin) => (
         <ProjectTableRow key={admin.id}>
           <ProjectTableCell>
             <strong className="font-semibold text-foreground">

@@ -5,6 +5,7 @@ import {
 } from '@/components/ui/project-table';
 import StatusBadge from '@/components/shared/status-badge';
 import { formatPoints } from '@/hooks/leaderboard/use-leaderboard';
+import usePagination from '@/hooks/ui/use-pagination';
 import type { LeaderboardEntry } from '@/models/leaderboard/leaderboard-model';
 
 interface LeaderboardTableProps {
@@ -12,8 +13,14 @@ interface LeaderboardTableProps {
 }
 
 export default function LeaderboardTable({ entries }: LeaderboardTableProps) {
+  const { paginatedItems, paginationProps } = usePagination({
+    items: entries,
+    initialPageSize: 6,
+  });
+
   return (
     <ProjectTable
+      pagination={paginationProps}
       columns={[
         { label: 'Rank' },
         { label: 'Contributor' },
@@ -25,7 +32,7 @@ export default function LeaderboardTable({ entries }: LeaderboardTableProps) {
       emptyTitle="No additional standings"
       emptyDescription="All ranked contributors are currently displayed on the podium above."
     >
-      {entries.map((entry) => (
+      {paginatedItems.map((entry) => (
         <ProjectTableRow key={entry.id}>
           <ProjectTableCell className="font-semibold text-foreground">
             #{entry.rank}

@@ -1,8 +1,16 @@
 import { useState } from 'react';
 import { AlertCircle } from 'lucide-react';
 import { useTanstackSearchParams } from '@/lib/use-tanstack-search-params';
-import useResetStateOnChange from '@/hooks/ui/use-reset-state-on-change';
-
+import usePagination from '@/hooks/ui/use-pagination';
+import ReviewFilters, {
+  parseReviewStatus,
+} from '@/features/content-review/review-filters';
+import ReviewKpiCards from '@/features/content-review/review-kpi-cards';
+import ReviewTable from '@/features/content-review/review-table';
+import SubmissionReviewPanel from '@/features/content-review/submission-review-panel';
+import useContentReview from '@/hooks/content-review/use-content-review';
+import type { SubmissionStatus } from '@/models/content-review/content-review-model';
+import { toast } from '@/components/ui/sonner';
 import PageHeader from '@/components/layout/page-header';
 import { Button } from '@/components/ui/button';
 import {
@@ -14,26 +22,13 @@ import {
 } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import EmptyState from '@/components/shared/empty-state';
-import ReviewFilters, {
-  parseReviewStatus,
-} from '@/features/content-review/review-filters';
-import ReviewKpiCards from '@/features/content-review/review-kpi-cards';
-import ReviewTable from '@/features/content-review/review-table';
-import SubmissionReviewPanel from '@/features/content-review/submission-review-panel';
-import useContentReview from '@/hooks/content-review/use-content-review';
-import type { SubmissionStatus } from '@/models/content-review/content-review-model';
-import { toast } from '@/components/ui/sonner';
-import { DEFAULT_PAGE_SIZE as PAGE_SIZE } from '@/utils/constants/pagination';
 
 export default function ContentReviewOverview() {
   const [searchParams, setSearchParams] = useTanstackSearchParams();
   const status = parseReviewStatus(searchParams.get('status'));
   const search = searchParams.get('q') ?? '';
-  const [visibleCount, setVisibleCount] = useResetStateOnChange(PAGE_SIZE, [
-    status,
-    search,
-  ]);
-  const [reviewId, setReviewId] = useState<string | null>(null);
+  const [panelId, setPanelId] = useState<string | null>(null);
+  const [panelMode, setPanelMode] = useState<'view' | 'review'>('view');
 
   const {
     submissions,
@@ -61,24 +56,26 @@ export default function ContentReviewOverview() {
     setSearchParams(nextParams, { replace: true });
   };
 
-  const reviewing = submissions.find(
-    (item) =>
-      item.id === reviewId &&
-      item.status?.toLowerCase() !== 'approved' &&
-      item.status?.toLowerCase() !== 'revision requested',
-  );
-  const visible = filtered.slice(0, visibleCount);
-  const remainingCount = Math.max(0, filtered.length - visibleCount);
+  const openSubmission = submissions.find((item) => item.id === panelId);
+  const isReviewing =
+    panelMode === 'review' &&
+    openSubmission != null &&
+    openSubmission.status !== 'Approved' &&
+    openSubmission.status !== 'Rejected';
+  const { paginatedItems, paginationProps } = usePagination({
+    items: filtered,
+    initialPageSize: 6,
+  });
 
   const handleDecide = (nextStatus: SubmissionStatus, comment: string) => {
-    if (!reviewId) {
+    if (!panelId) {
       return;
     }
 
-    void decideSubmission({ id: reviewId, status: nextStatus, comment })
+    void decideSubmission({ id: panelId, status: nextStatus, comment })
       .unwrap()
       .then(() => {
-        setReviewId(null);
+        setPanelId(null);
         toast.success(`Submission marked as ${nextStatus.toLowerCase()}`);
       })
       .catch(() => {
@@ -145,28 +142,26 @@ export default function ContentReviewOverview() {
           description="Try a different keyword or status filter."
         />
       ) : (
-        <>
-          <ReviewTable submissions={visible} onReview={setReviewId} />
-          {remainingCount > 0 ? (
-            <div className="mt-6 flex justify-center">
-              <Button
-                type="button"
-                variant="outline"
-                className="h-auto rounded-full border-border bg-card px-6.5 py-3 text-[13px] font-bold text-foreground hover:bg-surface-subtle"
-                onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
-              >
-                Show more submissions · {remainingCount} remaining
-              </Button>
-            </div>
-          ) : null}
-        </>
+        <ReviewTable
+          submissions={paginatedItems}
+          pagination={paginationProps}
+          onView={(id) => {
+            setPanelMode('view');
+            setPanelId(id);
+          }}
+          onReview={(id) => {
+            setPanelMode('review');
+            setPanelId(id);
+          }}
+        />
       )}
 
-      {reviewing ? (
+      {openSubmission ? (
         <SubmissionReviewPanel
-          submission={reviewing}
+          submission={openSubmission}
           isDeciding={isDeciding}
-          onClose={() => setReviewId(null)}
+          readOnly={!isReviewing}
+          onClose={() => setPanelId(null)}
           onDecide={handleDecide}
         />
       ) : null}

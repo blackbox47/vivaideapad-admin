@@ -19,14 +19,18 @@ function Table({
     <div
       ref={containerRef}
       data-slot="table-container"
-      className={cn("relative w-full overflow-x-auto", containerClassName)}
+      className={cn(
+        "relative w-full overflow-x-auto table-scrollbar",
+        containerClassName
+      )}
     >
       <table
         data-slot="table"
         className={cn(
           "w-full caption-bottom text-sm",
+          "max-md:[&_th:first-child]:static max-md:[&_th:first-child]:shadow-none max-md:[&_th:last-child]:static max-md:[&_th:last-child]:shadow-none max-md:[&_td:first-child:not([colspan])]:static max-md:[&_td:first-child:not([colspan])]:shadow-none max-md:[&_td:last-child:not([colspan])]:static max-md:[&_td:last-child:not([colspan])]:shadow-none",
           pinColumns &&
-            "[&_th:first-child]:sticky [&_th:first-child]:left-0 [&_th:first-child]:z-20 [&_th:last-child]:sticky [&_th:last-child]:right-0 [&_th:last-child]:z-20 [&_td:first-child:not([colspan])]:sticky [&_td:first-child:not([colspan])]:left-0 [&_td:first-child:not([colspan])]:z-10 [&_td:first-child:not([colspan])]:bg-card [&_td:last-child:not([colspan])]:sticky [&_td:last-child:not([colspan])]:right-0 [&_td:last-child:not([colspan])]:z-10 [&_td:last-child:not([colspan])]:bg-card",
+            "md:[&_th:first-child]:sticky md:[&_th:first-child]:left-0 md:[&_th:first-child]:z-20 md:[&_th:last-child]:sticky md:[&_th:last-child]:right-0 md:[&_th:last-child]:z-20 md:[&_td:first-child:not([colspan])]:sticky md:[&_td:first-child:not([colspan])]:left-0 md:[&_td:first-child:not([colspan])]:z-10 md:[&_td:first-child:not([colspan])]:bg-card md:[&_td:last-child:not([colspan])]:sticky md:[&_td:last-child:not([colspan])]:right-0 md:[&_td:last-child:not([colspan])]:z-10 md:[&_td:last-child:not([colspan])]:bg-card",
           className
         )}
         {...props}

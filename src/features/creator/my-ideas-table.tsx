@@ -6,6 +6,7 @@ import {
   ProjectTableCell,
   ProjectTableRow,
 } from '@/components/ui/project-table';
+import usePagination from '@/hooks/ui/use-pagination';
 import type { MyIdea } from '@/models/creator/my-ideas-model';
 import { formatDisplayDate } from '@/utils/helpers/format-display-date';
 
@@ -29,6 +30,11 @@ export default function MyIdeasTable({
   isLoading,
   onView,
 }: MyIdeasTableProps) {
+  const { paginatedItems, paginationProps } = usePagination({
+    items,
+    initialPageSize: 6,
+  });
+
   return (
     <ProjectTable
       columns={columns}
@@ -37,8 +43,9 @@ export default function MyIdeasTable({
       isEmpty={items.length === 0}
       emptyTitle="No submissions yet"
       emptyDescription="Submit your first idea from the available briefs."
+      pagination={paginationProps}
     >
-      {items.map((idea) => (
+      {paginatedItems.map((idea) => (
         <ProjectTableRow key={idea.id}>
           <ProjectTableCell>
             <strong className="font-semibold text-foreground">{idea.title}</strong>

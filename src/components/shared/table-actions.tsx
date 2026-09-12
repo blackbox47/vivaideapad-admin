@@ -50,26 +50,8 @@ export function TableActions({
   align = 'end',
   triggerLabel = 'Row actions',
 }: TableActionsProps) {
-  // If structured items are provided:
+  // If structured items are provided, always collapse them into a 3-dots menu.
   if (items && items.length > 0) {
-    if (items.length === 1) {
-      const item = items[0];
-      return (
-        <div className={cn('flex items-center justify-end', className)}>
-          <Button
-            size="sm"
-            variant={item.variant === 'destructive' ? 'destructive' : 'outline'}
-            disabled={item.disabled}
-            onClick={item.onClick}
-            className="h-auto rounded-full px-3.5 py-1.5 text-xs font-bold"
-          >
-            {item.icon}
-            {item.label}
-          </Button>
-        </div>
-      );
-    }
-
     return (
       <div className={cn('flex items-center justify-end', className)}>
         <DropdownMenu>

@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 import type {
   LedgerEntry,
   LedgerListParams,
-  LedgerListResponse,
+  LedgerTypeFilter,
 } from '@/models/rewards/rewards-model';
 import { useGetLedgerQuery } from '@/services/rewards/rewards-service';
 import { getApiErrorMessage } from '@/utils/helpers/api-error';
@@ -29,7 +29,10 @@ function formatTaka(value: number): string {
   return `Tk ${TAKA.format(Math.round(value))}`;
 }
 
-function sumAmount(entries: LedgerEntry[] | undefined, predicate: (entry: LedgerEntry) => boolean): number {
+function sumAmount(
+  entries: LedgerEntry[] | undefined,
+  predicate: (entry: LedgerEntry) => boolean,
+): number {
   if (!Array.isArray(entries)) {
     return 0;
   }
@@ -38,41 +41,53 @@ function sumAmount(entries: LedgerEntry[] | undefined, predicate: (entry: Ledger
     .reduce((total, entry) => total + entry.amountValue, 0);
 }
 
-export default function useRewards(params: LedgerListParams): UseRewardsResult {
+function matchesFilter(
+  entry: LedgerEntry,
+  type: LedgerTypeFilter | undefined,
+  search: string | undefined,
+): boolean {
+  const matchesType = !type || type === 'all' || entry.type === type;
+  const query = (search ?? '').trim().toLowerCase();
+  const matchesSearch =
+    query.length === 0 ||
+    (entry.contributor ?? '').toLowerCase().includes(query) ||
+    (entry.description ?? '').toLowerCase().includes(query);
+
+  return matchesType && matchesSearch;
+}
+
+export default function useRewards({
+  type,
+  search,
+}: LedgerListParams): UseRewardsResult {
   const { data, isLoading, isError, error, refetch } = useGetLedgerQuery();
 
-  const filtered = useMemo((): LedgerListResponse | null => {
-    if (!data) {
-      return null;
-    }
-
-    return {
-      entries: Array.isArray(data.entries) ? data.entries : [],
-      total: data.total ?? (Array.isArray(data.entries) ? data.entries.length : 0),
-    };
+  const allEntries = useMemo(() => {
+    return Array.isArray(data?.entries) ? data.entries : [];
   }, [data]);
 
-  const entries = Array.isArray(filtered?.entries) ? filtered.entries : [];
-  const totalCount = filtered?.total ?? 0;
+  const filteredEntries = useMemo(() => {
+    return allEntries.filter((entry) => matchesFilter(entry, type, search));
+  }, [allEntries, type, search]);
 
   const totalRewarded = useMemo(
-    () => formatTaka(sumAmount(entries, (entry) => entry.type === 'Reward')),
-    [entries],
+    () => formatTaka(sumAmount(allEntries, (entry) => entry.type === 'Reward')),
+    [allEntries],
   );
 
   const pendingTotal = useMemo(
     () =>
       formatTaka(
         sumAmount(
-          entries,
+          allEntries,
           (entry) => entry.status === 'Pending' && entry.type === 'Reward',
         ),
       ),
-    [entries],
+    [allEntries],
   );
 
   const averageReward = useMemo(() => {
-    const rewardEntries = entries.filter((entry) => entry.type === 'Reward');
+    const rewardEntries = allEntries.filter((entry) => entry.type === 'Reward');
     if (rewardEntries.length === 0) {
       return 'Tk 0';
     }
@@ -82,14 +97,11 @@ export default function useRewards(params: LedgerListParams): UseRewardsResult {
       0,
     );
     return formatTaka(total / rewardEntries.length);
-  }, [entries]);
-
-  // Reference params so the hook signature mirrors siblings (filtering is server-side).
-  void params;
+  }, [allEntries]);
 
   return {
-    entries,
-    totalCount,
+    entries: filteredEntries,
+    totalCount: filteredEntries.length,
     totalRewarded,
     pendingTotal,
     averageReward,

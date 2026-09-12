@@ -5,6 +5,7 @@ import {
   ProjectTableRow,
 } from '@/components/ui/project-table';
 import PeopleTable from '@/features/people/people-table';
+import usePagination from '@/hooks/ui/use-pagination';
 import type { Applicant } from '@/models/people/people-model';
 import { formatDisplayDate } from '@/utils/helpers/format-display-date';
 
@@ -25,6 +26,11 @@ export default function ApplicantsTable({
   applicants,
   onReview,
 }: ApplicantsTableProps) {
+  const { paginatedItems, paginationProps } = usePagination({
+    items: applicants,
+    initialPageSize: 6,
+  });
+
   if (applicants.length === 0) {
     return (
       <EmptyState
@@ -35,8 +41,8 @@ export default function ApplicantsTable({
   }
 
   return (
-    <PeopleTable columns={COLUMNS}>
-      {applicants.map((applicant) => (
+    <PeopleTable columns={COLUMNS} pagination={paginationProps}>
+      {paginatedItems.map((applicant) => (
         <ProjectTableRow key={applicant.id}>
           <ProjectTableCell>
             <div className="font-bold text-foreground text-sm">

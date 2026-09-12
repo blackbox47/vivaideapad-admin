@@ -14,6 +14,19 @@ import {
 } from '@/utils/constants/api-end-points';
 import { formatDisplayDate } from '@/utils/helpers/format-display-date';
 
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function firstDisplayName(...candidates: unknown[]): string {
+  for (const candidate of candidates) {
+    if (typeof candidate !== 'string') continue;
+    const trimmed = candidate.trim();
+    if (!trimmed || UUID_RE.test(trimmed)) continue;
+    return trimmed;
+  }
+  return 'Contributor';
+}
+
 export const rewardsService = baseService.injectEndpoints({
   endpoints: (builder) => ({
     getLedger: builder.query<LedgerListResponse, LedgerListParams | void>({
@@ -74,8 +87,11 @@ export const rewardsService = baseService.injectEndpoints({
 
             return {
               id: String(item.id ?? ''),
-              contributor: String(
-                metadata.user_name ?? metadata.contributor ?? item.user_id ?? 'Contributor',
+              contributor: firstDisplayName(
+                item.display_name,
+                metadata.user_name,
+                metadata.contributor,
+                metadata.display_name,
               ),
               description: String(
                 metadata.description ?? item.reference ?? `${type} entry`,

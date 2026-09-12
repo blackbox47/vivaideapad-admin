@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { AlertCircle } from 'lucide-react';
 import { useTanstackSearchParams } from '@/lib/use-tanstack-search-params';
-import useResetStateOnChange from '@/hooks/ui/use-reset-state-on-change';
-
+import usePagination from '@/hooks/ui/use-pagination';
 import PageHeader from '@/components/layout/page-header';
 import { Button } from '@/components/ui/button';
 import {
@@ -25,17 +24,12 @@ import type {
   PayoutStatus,
 } from '@/models/payouts/payouts-model';
 import { toast } from '@/components/ui/sonner';
-import { DEFAULT_PAGE_SIZE as PAGE_SIZE } from '@/utils/constants/pagination';
 import { getApiErrorMessage } from '@/utils/helpers/api-error';
 
 export default function PayoutsOverview() {
   const [searchParams, setSearchParams] = useTanstackSearchParams();
   const status = parsePayoutStatus(searchParams.get('status'));
   const search = searchParams.get('q') ?? '';
-  const [visibleCount, setVisibleCount] = useResetStateOnChange(PAGE_SIZE, [
-    status,
-    search,
-  ]);
   const [processId, setProcessId] = useState<string | null>(null);
 
   const {
@@ -65,8 +59,10 @@ export default function PayoutsOverview() {
     setSearchParams(nextParams, { replace: true });
   };
 
-  const visible = filtered.slice(0, visibleCount);
-  const remainingCount = Math.max(0, filtered.length - visibleCount);
+  const { paginatedItems, paginationProps } = usePagination({
+    items: filtered,
+    initialPageSize: 6,
+  });
   const processing =
     payouts.find((item) => item.id === processId) ??
     filtered.find((item) => item.id === processId);
@@ -165,21 +161,11 @@ export default function PayoutsOverview() {
           description="Try a different keyword or status filter."
         />
       ) : (
-        <>
-          <PayoutTable payouts={visible} onProcess={setProcessId} />
-          {remainingCount > 0 ? (
-            <div className="mt-6 flex justify-center">
-              <Button
-                type="button"
-                variant="outline"
-                className="h-auto rounded-full border-border bg-card px-6.5 py-3 text-[13px] font-bold text-foreground hover:bg-surface-subtle"
-                onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
-              >
-                Show more requests · {remainingCount} remaining
-              </Button>
-            </div>
-          ) : null}
-        </>
+        <PayoutTable
+          payouts={paginatedItems}
+          pagination={paginationProps}
+          onProcess={setProcessId}
+        />
       )}
 
       {processing ? (

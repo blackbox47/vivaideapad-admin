@@ -12,6 +12,7 @@ import { formatDisplayDate } from '@/utils/helpers/format-display-date';
 interface SubmissionReviewPanelProps {
   submission: ContentSubmission;
   isDeciding: boolean;
+  readOnly?: boolean;
   onClose: () => void;
   onDecide: (status: SubmissionStatus, comment: string) => void;
 }
@@ -19,6 +20,7 @@ interface SubmissionReviewPanelProps {
 export default function SubmissionReviewPanel({
   submission,
   isDeciding,
+  readOnly = false,
   onClose,
   onDecide,
 }: SubmissionReviewPanelProps) {
@@ -52,7 +54,7 @@ export default function SubmissionReviewPanel({
         <div className="mb-3.5 flex items-start justify-between gap-4">
           <div>
             <p className="text-xs font-extrabold tracking-[0.12em] text-brand-sage uppercase">
-              Content review
+              {readOnly ? 'Submission' : 'Content review'}
             </p>
             <h2
               id="content-review-title"
@@ -64,7 +66,7 @@ export default function SubmissionReviewPanel({
           <button
             type="button"
             className="text-[22px] leading-none text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-            aria-label="Close review"
+            aria-label={readOnly ? 'Close' : 'Close review'}
             onClick={onClose}
           >
             <X />
@@ -102,48 +104,52 @@ export default function SubmissionReviewPanel({
           final decision.
         </p>
 
-        <Textarea
-          id="content-reviewer-comment"
-          label="Feedback to contributor"
-          value={comment}
-          onChange={(event) => {
-            setComment(event.target.value);
-            setFeedbackError(null);
-          }}
-          placeholder="Enter feedback to contributor"
-          className="min-h-17.5"
-          errorMessage={feedbackError}
-        />
+        {readOnly ? null : (
+          <>
+            <Textarea
+              id="content-reviewer-comment"
+              label="Feedback to contributor"
+              value={comment}
+              onChange={(event) => {
+                setComment(event.target.value);
+                setFeedbackError(null);
+              }}
+              placeholder="Enter feedback to contributor"
+              className="min-h-17.5"
+              errorMessage={feedbackError}
+            />
 
-        <div className="mt-4.5 flex flex-wrap justify-end gap-2.5">
-          <Button
-            type="button"
-            disabled={isDeciding}
-            loading={isDeciding}
-            className="h-auto shrink-0 whitespace-nowrap rounded-full border border-danger-subtle bg-card px-4 py-3 text-[13px] font-bold text-danger hover:bg-danger-subtle transition-colors disabled:opacity-60"
-            onClick={() => handleDecide('Rejected')}
-          >
-            Reject
-          </Button>
-          <Button
-            type="button"
-            disabled={isDeciding}
-            loading={isDeciding}
-            className="h-auto shrink-0 whitespace-nowrap rounded-full border border-border bg-card px-4 py-3 text-[13px] font-bold text-foreground hover:bg-surface-subtle transition-colors disabled:opacity-60"
-            onClick={() => handleDecide('Revision Requested')}
-          >
-            Request revision
-          </Button>
-          <Button
-            type="button"
-            disabled={isDeciding}
-            loading={isDeciding}
-            className="h-auto shrink-0 whitespace-nowrap rounded-full bg-primary px-4 py-3 text-[13px] font-bold text-primary-foreground hover:bg-brand-forest transition-colors disabled:opacity-60"
-            onClick={() => handleDecide('Approved')}
-          >
-            Approve & assign reward
-          </Button>
-        </div>
+            <div className="mt-4.5 flex flex-wrap justify-end gap-2.5">
+              <Button
+                type="button"
+                disabled={isDeciding}
+                loading={isDeciding}
+                className="h-auto shrink-0 whitespace-nowrap rounded-full border border-danger-subtle bg-card px-4 py-3 text-[13px] font-bold text-danger hover:bg-danger-subtle transition-colors disabled:opacity-60"
+                onClick={() => handleDecide('Rejected')}
+              >
+                Reject
+              </Button>
+              <Button
+                type="button"
+                disabled={isDeciding}
+                loading={isDeciding}
+                className="h-auto shrink-0 whitespace-nowrap rounded-full border border-border bg-card px-4 py-3 text-[13px] font-bold text-foreground hover:bg-surface-subtle transition-colors disabled:opacity-60"
+                onClick={() => handleDecide('Revision Requested')}
+              >
+                Request revision
+              </Button>
+              <Button
+                type="button"
+                disabled={isDeciding}
+                loading={isDeciding}
+                className="h-auto shrink-0 whitespace-nowrap rounded-full bg-primary px-4 py-3 text-[13px] font-bold text-primary-foreground hover:bg-brand-forest transition-colors disabled:opacity-60"
+                onClick={() => handleDecide('Approved')}
+              >
+                Approve & assign reward
+              </Button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
