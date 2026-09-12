@@ -31,7 +31,8 @@ export default function OpportunityCard({ topic }: OpportunityCardProps) {
         <Button
           render={
             <Link
-              to={`${CREATOR_ROUTES.submitIdea}?topic=${encodeURIComponent(topic.id)}`}
+              to={CREATOR_ROUTES.submitIdea}
+              search={{ topic: topic.id }}
             />
           }
           className="h-auto cursor-pointer rounded-full bg-primary px-5 py-3 text-sm font-bold text-primary-foreground hover:bg-primary/80"

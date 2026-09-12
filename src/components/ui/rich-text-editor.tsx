@@ -493,6 +493,24 @@ function RichTextToolbar({
   );
 }
 
+const FLOATING_MENU_MIN_LINES = 3;
+
+/**
+ * The bubble menu sits above the selection, so it collides with the static
+ * toolbar when the selection is near the top of the editor.
+ */
+function hasRoomAboveSelection(editor: Editor, from: number) {
+  const toolbar = editor.view.dom
+    .closest('[data-rich-text-shell]')
+    ?.querySelector<HTMLElement>('[data-rich-text-toolbar]');
+  if (!toolbar) return true;
+
+  const selectionCoords = editor.view.coordsAtPos(from);
+  const lineHeight = Math.max(selectionCoords.bottom - selectionCoords.top, 16);
+  const gap = selectionCoords.top - toolbar.getBoundingClientRect().bottom;
+  return gap >= lineHeight * FLOATING_MENU_MIN_LINES;
+}
+
 function RichTextFloatingMenu({ editor }: { editor: Editor | null }) {
   const [, setTick] = React.useState(0);
 
@@ -501,6 +519,12 @@ function RichTextFloatingMenu({ editor }: { editor: Editor | null }) {
     const el = document.createElement('div');
     el.className = 'tiptap-floating-menu-container';
     el.style.zIndex = '9999';
+    // The bubble menu plugin measures the element before applying its own
+    // sizing, so a full-width block would be clamped to the viewport edge.
+    el.style.position = 'fixed';
+    el.style.top = '0';
+    el.style.left = '0';
+    el.style.width = 'max-content';
     return el;
   }, []);
 
@@ -537,7 +561,8 @@ function RichTextFloatingMenu({ editor }: { editor: Editor | null }) {
         const { selection } = state;
         if (selection.empty || from === to) return false;
         const text = state.doc.textBetween(from, to, ' ').trim();
-        return text.length > 0;
+        if (text.length === 0) return false;
+        return hasRoomAboveSelection(ed, from);
       },
     });
 
@@ -813,6 +838,7 @@ export function RichTextEditor({
     <div className="w-full">
       <div
         aria-disabled={disabled || undefined}
+        data-rich-text-shell=""
         style={{ minHeight: `${minHeight}px` }}
         className={cn(
           'flex flex-col rounded-xl border border-border bg-card transition-colors resize-y overflow-hidden',
