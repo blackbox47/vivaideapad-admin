@@ -11,6 +11,7 @@ import { formatDisplayDate } from '@/utils/helpers/format-display-date';
 interface ApplicantReviewPanelProps {
   applicant: Applicant;
   isDeciding: boolean;
+  readOnly?: boolean;
   onClose: () => void;
   onDecide: (status: ApplicantStatus, comment: string) => void;
 }
@@ -18,6 +19,7 @@ interface ApplicantReviewPanelProps {
 export default function ApplicantReviewPanel({
   applicant,
   isDeciding,
+  readOnly = false,
   onClose,
   onDecide,
 }: ApplicantReviewPanelProps) {
@@ -34,7 +36,7 @@ export default function ApplicantReviewPanel({
         <div className="mb-3.5 flex items-start justify-between gap-4">
           <div>
             <p className="text-xs font-extrabold tracking-[0.12em] text-brand-sage uppercase">
-              Applicant review
+              {readOnly ? 'Applicant' : 'Applicant review'}
             </p>
             <h2
               id="applicant-review-title"
@@ -98,48 +100,43 @@ export default function ApplicantReviewPanel({
           Applicant confirmed originality and accepted content guidelines.
         </label>
 
-        <Textarea
-          id="reviewer-comment"
-          label="Reviewer comment"
-          value={comment}
-          onChange={(event) => setComment(event.target.value)}
-          placeholder="Enter reviewer comment"
-          className="min-h-15"
-        />
-        <p className="mt-2.5 text-xs text-muted-foreground">
-          Approving grants this applicant contributor portal access. They will
-          appear under Invited until they sign in and submit against a live task.
-        </p>
+        {readOnly ? null : (
+          <>
+            <Textarea
+              id="reviewer-comment"
+              label="Reviewer comment"
+              value={comment}
+              onChange={(event) => setComment(event.target.value)}
+              placeholder="Enter reviewer comment"
+              className="min-h-15"
+            />
+            <p className="mt-2.5 text-xs text-muted-foreground">
+              Approving grants this applicant contributor portal access. They will
+              appear under Invited until they become an active contributor.
+            </p>
 
-        <div className="mt-4.5 flex flex-wrap justify-end gap-2.5">
-          <Button
-            type="button"
-            disabled={isDeciding}
-            loading={isDeciding}
-            className="h-auto rounded-full border border-danger-subtle bg-card px-4.5 py-3 font-bold text-danger hover:bg-danger-subtle transition-colors disabled:opacity-60"
-            onClick={() => onDecide('Rejected', comment)}
-          >
-            Reject
-          </Button>
-          <Button
-            type="button"
-            disabled={isDeciding}
-            loading={isDeciding}
-            className="h-auto rounded-full border border-border bg-card px-4.5 py-3 font-bold text-foreground hover:bg-surface-subtle transition-colors disabled:opacity-60"
-            onClick={() => onDecide('Revision Requested', comment)}
-          >
-            Request revision
-          </Button>
-          <Button
-            type="button"
-            disabled={isDeciding}
-            loading={isDeciding}
-            className="h-auto rounded-full bg-primary px-4.5 py-3 font-bold text-primary-foreground hover:bg-brand-forest transition-colors disabled:opacity-60"
-            onClick={() => onDecide('Approved', comment)}
-          >
-            Approve applicant
-          </Button>
-        </div>
+            <div className="mt-4.5 flex flex-wrap justify-end gap-2.5">
+              <Button
+                type="button"
+                disabled={isDeciding}
+                loading={isDeciding}
+                className="h-auto rounded-full border border-danger-subtle bg-card px-4.5 py-3 font-bold text-danger hover:bg-danger-subtle transition-colors disabled:opacity-60"
+                onClick={() => onDecide('Rejected', comment)}
+              >
+                Reject
+              </Button>
+              <Button
+                type="button"
+                disabled={isDeciding}
+                loading={isDeciding}
+                className="h-auto rounded-full bg-primary px-4.5 py-3 font-bold text-primary-foreground hover:bg-brand-forest transition-colors disabled:opacity-60"
+                onClick={() => onDecide('Approved', comment)}
+              >
+                Approve applicant
+              </Button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

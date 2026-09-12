@@ -13,7 +13,7 @@ export type ApplicantStatus =
 
 export type PlatformUserStatus = 'Active' | 'Invited' | 'Suspended';
 
-export type PeopleTab = 'applicants' | 'invited' | 'contributors';
+export type PeopleTab = 'applicants' | 'invited' | 'rejected' | 'contributors';
 
 export interface Applicant {
   id: string;
