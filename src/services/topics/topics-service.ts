@@ -24,6 +24,7 @@ import {
   CONCEPT_DETAIL_URL,
   CONCEPT_STATUS_URL,
 } from '@/utils/constants/api-end-points';
+import { CURRENCY_SYMBOL } from '@/utils/constants';
 
 export const topicsService = baseService.injectEndpoints({
   endpoints: (builder) => ({
@@ -79,10 +80,10 @@ export const topicsService = baseService.injectEndpoints({
               opensOn: item.open_date ? String(item.open_date).slice(0, 10) : String(item.opensOn ?? ''),
               closesOn: item.close_date ? String(item.close_date).slice(0, 10) : String(item.closesOn ?? ''),
               reward: item.reward_budget
-                ? (String(item.reward_budget).startsWith('৳') || String(item.reward_budget).startsWith('$')
+                ? (String(item.reward_budget).startsWith(CURRENCY_SYMBOL)
                     ? String(item.reward_budget)
-                    : `৳${Number(item.reward_budget).toLocaleString('en-US')}`)
-                : String(item.reward ?? '৳0'),
+                    : `${CURRENCY_SYMBOL}${Number(String(item.reward_budget).replace(/^[৳$Tk\s]*/, '')).toLocaleString('en-US')}`)
+                : String(item.reward ?? `${CURRENCY_SYMBOL}0`).replace(/^[$৳Tk\s]*/, CURRENCY_SYMBOL),
               categoryId: item.category_id ? String(item.category_id) : undefined,
               openDate: item.open_date ? String(item.open_date) : undefined,
               closeDate: item.close_date ? String(item.close_date) : undefined,
@@ -135,11 +136,20 @@ export const topicsService = baseService.injectEndpoints({
           icon: String(metadata.icon ?? res.icon ?? '✦'),
           opensOn: res.open_date ? String(res.open_date).slice(0, 10) : String(res.opensOn ?? ''),
           closesOn: res.close_date ? String(res.close_date).slice(0, 10) : String(res.closesOn ?? ''),
-          reward: res.reward_budget ? `$${res.reward_budget}` : String(res.reward ?? '$0'),
+          reward: res.reward_budget
+            ? (String(res.reward_budget).startsWith(CURRENCY_SYMBOL)
+                ? String(res.reward_budget)
+                : `${CURRENCY_SYMBOL}${String(res.reward_budget).replace(/^[৳$Tk\s]*/, '')}`)
+            : String(res.reward ?? `${CURRENCY_SYMBOL}0`).replace(/^[$৳Tk\s]*/, CURRENCY_SYMBOL),
           openDate: res.open_date ? String(res.open_date) : undefined,
           closeDate: res.close_date ? String(res.close_date) : undefined,
           categoryId: res.category_id ? String(res.category_id) : undefined,
-          rewardGuidance: typeof res.reward_budget === 'string' ? `$${res.reward_budget}` : undefined,
+          rewardGuidance:
+            typeof res.reward_budget === 'string'
+              ? (res.reward_budget.startsWith(CURRENCY_SYMBOL)
+                  ? res.reward_budget
+                  : `${CURRENCY_SYMBOL}${res.reward_budget.replace(/^[৳$Tk\s]*/, '')}`)
+              : undefined,
           forNewUsers: isOnboarding,
           isOnboarding,
         };
@@ -270,7 +280,7 @@ export function parseConceptDate(input: string | undefined): string | undefined 
 
 /**
  * Strip currency glyphs / commas and parse to a number. Returns 0 for
- * blank / NaN. Handles `"$3000"`, `"৳3,000"`, `"33333"`, `" 33 333.50 "`.
+ * blank / NaN. Handles `"৳3,000"`, `"33333"`, `" 33 333.50 "`.
  */
 export function parseReward(input: string | undefined): number {
   if (!input) return 0;

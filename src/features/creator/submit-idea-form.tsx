@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate } from '@tanstack/react-router';
@@ -10,6 +10,7 @@ import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { Select } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/components/ui/sonner';
+import { cn } from '@/lib/utils';
 import useSubmitIdea from '@/hooks/creator/use-submit-idea';
 import {
   useSubmitExistingSubmissionMutation,
@@ -17,6 +18,7 @@ import {
 } from '@/services/creator/creator-ideas-service';
 import type {
   CreatorTopic,
+  SubmissionAttachmentItem,
   SubmissionDetail,
 } from '@/models/creator/submit-idea-model';
 import {
@@ -30,17 +32,8 @@ import {
 } from '@/models/creator/submit-idea-schema';
 import { CREATOR_ROUTES } from '@/utils/constants/routes';
 import { getApiErrorMessage } from '@/utils/helpers/api-error';
+import { sanitizeHtml, htmlToPlainText } from '@/utils/helpers/sanitize-html';
 import type { DropdownOption } from '@/utils/types/dropdown-option';
-
-function readFileAsDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result ?? ''));
-    reader.onerror = () =>
-      reject(new Error(reader.error?.message ?? 'Failed to read file'));
-    reader.readAsDataURL(file);
-  });
-}
 
 interface SubmitIdeaFormProps {
   topics: CreatorTopic[];
@@ -60,7 +53,12 @@ export default function SubmitIdeaForm({
   isLoadingSubmission = false,
 }: SubmitIdeaFormProps) {
   const [serverError, setServerError] = useState<string | null>(null);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [existingAttachments, setExistingAttachments] = useState<
+    SubmissionAttachmentItem[]
+  >([]);
+  const [isSavingDraft, setIsSavingDraft] = useState(false);
+  const [isSubmittingFinal, setIsSubmittingFinal] = useState(false);
   const [submitIdea, { isLoading: isSubmittingNew }] = useSubmitIdea();
   const [updateSubmission, { isLoading: isUpdating }] =
     useUpdateSubmissionMutation();
@@ -69,6 +67,8 @@ export default function SubmitIdeaForm({
   const navigate = useNavigate();
 
   const isBusy =
+    isSavingDraft ||
+    isSubmittingFinal ||
     isSubmittingNew ||
     isUpdating ||
     isSubmittingExisting ||
@@ -80,6 +80,9 @@ export default function SubmitIdeaForm({
     handleSubmit,
     control,
     setValue,
+    getValues,
+    setError,
+    clearErrors,
     reset,
     formState: { errors },
   } = useForm<SubmitIdeaFormValues>({
@@ -99,12 +102,16 @@ export default function SubmitIdeaForm({
   const bodyValue = useWatch({ control, name: 'body' }) ?? '';
 
   // Plain-text length of the body's HTML for the counter (matches zod).
-  const bodyPlainTextLength = useMemo(() => {
-    if (typeof document === 'undefined') return 0;
-    const tmp = document.createElement('div');
-    tmp.innerHTML = bodyValue;
-    return (tmp.textContent ?? '').length;
-  }, [bodyValue]);
+  const bodyPlainTextLength = useMemo(
+    () => htmlToPlainText(bodyValue).length,
+    [bodyValue],
+  );
+
+  // Sanitise rich-text body before sending to the API.
+  const sanitizedBody = useCallback(
+    () => sanitizeHtml(getValues('body') || ''),
+    [getValues],
+  );
 
   const topicOptions = useMemo<DropdownOption[]>(
     () =>
@@ -126,6 +133,35 @@ export default function SubmitIdeaForm({
         attachmentUrl: submission.attachmentUrl || '',
         confirmedOriginal: true,
       });
+
+      if (Array.isArray(submission.attachments)) {
+        setExistingAttachments(submission.attachments as SubmissionAttachmentItem[]);
+      } else if (
+        submission.attachments &&
+        typeof submission.attachments === 'object' &&
+        (submission.attachments as { url?: string }).url
+      ) {
+        const att = submission.attachments as Record<string, unknown>;
+        setExistingAttachments([
+          {
+            name: String(att.name ?? att.original_name ?? 'document'),
+            original_name: att.original_name ? String(att.original_name) : undefined,
+            url: String(att.url),
+            size: (att.size as number | string | undefined) ?? undefined,
+            mime_type: (att.mime_type ?? att.type) as string | undefined,
+            type: att.type as string | undefined,
+          },
+        ]);
+      } else if (submission.attachmentUrl) {
+        setExistingAttachments([
+          {
+            name: submission.attachmentUrl.split('/').pop() || 'document',
+            url: submission.attachmentUrl,
+          },
+        ]);
+      } else {
+        setExistingAttachments([]);
+      }
     }
   }, [submission, reset, selectedTopicId]);
 
@@ -135,22 +171,38 @@ export default function SubmitIdeaForm({
     }
   }, [selectedTopicId, setValue]);
 
-  const handleFileChange = async (file: File | null) => {
-    setSelectedFile(file);
-    if (!file) {
-      setValue('attachmentUrl', submission?.attachmentUrl ?? '');
-      return;
-    }
-    try {
-      const dataUrl = await readFileAsDataUrl(file);
-      setValue('attachmentUrl', dataUrl);
-    } catch {
-      setValue('attachmentUrl', file.name);
-    }
+  const handleFilesChange = (files: File[]) => {
+    setSelectedFiles(files);
   };
 
-  const onFormSubmit = async (values: SubmitIdeaFormValues) => {
+  const handleRemoveExisting = (index: number) => {
+    setExistingAttachments((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleSaveDraft = async () => {
     setServerError(null);
+    clearErrors();
+    const values = getValues();
+
+    if (!values.topicId) {
+      setError('topicId', { message: 'Pick a topic before saving a draft.' });
+      return;
+    }
+
+    if (!values.title?.trim()) {
+      setError('title', { message: 'Title is required to save a draft.' });
+      return;
+    }
+
+    const plainBody = values.body?.replace(/<[^>]*>/g, '').trim() ?? '';
+    if (!plainBody) {
+      setError('body', {
+        message: 'Write a brief description to save your draft.',
+      });
+      return;
+    }
+
+    setIsSavingDraft(true);
     try {
       if (submissionId) {
         await updateSubmission({
@@ -160,32 +212,81 @@ export default function SubmitIdeaForm({
             topicId: values.topicId,
             title: values.title.trim(),
             summary: values.summary?.trim(),
-            body: values.body,
-            attachmentUrl: values.attachmentUrl?.trim() || undefined,
-            file: selectedFile ?? undefined,
+            body: sanitizedBody(),
+            attachmentUrl: existingAttachments[0]?.url || undefined,
+            attachments: existingAttachments,
+            files: selectedFiles,
           },
         }).unwrap();
-        await submitExisting(submissionId).unwrap();
       } else {
         await submitIdea({
           topicId: values.topicId,
           concept_id: values.topicId,
           title: values.title.trim(),
           summary: values.summary?.trim(),
-          body: values.body,
-          attachmentUrl: values.attachmentUrl?.trim() || undefined,
-          file: selectedFile ?? undefined,
+          body: sanitizedBody(),
+          attachmentUrl: existingAttachments[0]?.url || undefined,
+          attachments: existingAttachments,
+          files: selectedFiles,
         }).unwrap();
+      }
+
+      toast.success('Draft saved successfully');
+      navigate({ to: CREATOR_ROUTES.submissions, replace: true });
+    } catch (err) {
+      toast.error('Failed to save draft');
+      setServerError(getApiErrorMessage(err));
+    } finally {
+      setIsSavingDraft(false);
+    }
+  };
+
+  const onFormSubmit = async (values: SubmitIdeaFormValues) => {
+    setServerError(null);
+    setIsSubmittingFinal(true);
+    try {
+      if (submissionId) {
+        await updateSubmission({
+          id: submissionId,
+          body: {
+            concept_id: values.topicId,
+            topicId: values.topicId,
+            title: values.title.trim(),
+            summary: values.summary?.trim(),
+            body: sanitizeHtml(values.body),
+            attachmentUrl: existingAttachments[0]?.url || undefined,
+            attachments: existingAttachments,
+            files: selectedFiles,
+          },
+        }).unwrap();
+        await submitExisting(submissionId).unwrap();
+      } else {
+        const res = await submitIdea({
+          topicId: values.topicId,
+          concept_id: values.topicId,
+          title: values.title.trim(),
+          summary: values.summary?.trim(),
+          body: sanitizeHtml(values.body),
+          attachmentUrl: existingAttachments[0]?.url || undefined,
+          attachments: existingAttachments,
+          files: selectedFiles,
+        }).unwrap();
+        const newId = res?.idea?.id;
+        if (newId) {
+          await submitExisting(newId).unwrap();
+        }
       }
       toast.success(
         submissionId
           ? 'Idea updated and submitted for review'
-          : 'Idea submitted successfully',
+          : 'Idea submitted for review',
       );
       navigate({ to: CREATOR_ROUTES.submissions, replace: true });
     } catch (err) {
       toast.error('Failed to submit idea');
       setServerError(getApiErrorMessage(err));
+    } finally {
+      setIsSubmittingFinal(false);
     }
   };
 
@@ -303,11 +404,19 @@ export default function SubmitIdeaForm({
               disabled={isBusy}
               aria-invalid={errors.body ? 'true' : 'false'}
               errorMessage={errors.body?.message}
+              maxLength={BODY_MAX}
             />
           )}
         />
         <div className="flex justify-end">
-          <span className="text-xs font-semibold text-muted-foreground">
+          <span
+            className={cn(
+              'text-xs font-semibold',
+              bodyPlainTextLength >= BODY_MAX
+                ? 'text-amber-600 dark:text-amber-500'
+                : 'text-muted-foreground',
+            )}
+          >
             {bodyPlainTextLength}/{BODY_MAX}
           </span>
         </div>
@@ -320,9 +429,14 @@ export default function SubmitIdeaForm({
         </Label>
         <FileUploader
           id="attachment"
-          acceptText="PDF, DOCX, JPG or PNG · up to 10 MB"
-          value={selectedFile}
-          onChange={handleFileChange}
+          multiple
+          maxFiles={5}
+          maxSizeBytes={10 * 1024 * 1024}
+          acceptText="PDF, DOCX, JPG or PNG · up to 10 MB per document · max 5 documents"
+          files={selectedFiles}
+          onFilesChange={handleFilesChange}
+          existingFiles={existingAttachments}
+          onRemoveExisting={handleRemoveExisting}
           disabled={isBusy}
           errorMessage={errors.attachmentUrl?.message}
         />
@@ -364,15 +478,25 @@ export default function SubmitIdeaForm({
         </p>
       ) : null}
 
-      {/* Submit button area */}
-      <div className="pt-6 flex justify-end">
+      {/* Action buttons */}
+      <div className="pt-6 flex flex-col-reverse sm:flex-row items-center justify-end gap-3 sm:gap-4">
+        <Button
+          type="button"
+          variant="outline"
+          disabled={isBusy}
+          loading={isSavingDraft}
+          onClick={handleSaveDraft}
+          className="w-full sm:w-auto min-w-[160px] py-3.5 px-6 h-auto rounded-full border border-border bg-card hover:bg-muted/80 text-foreground font-bold text-base tracking-wide transition-all duration-150 flex items-center justify-center text-center cursor-pointer disabled:opacity-60"
+        >
+          Save as draft
+        </Button>
         <Button
           type="submit"
           disabled={isBusy}
-          loading={isSubmittingNew || isUpdating || isSubmittingExisting}
-          className="w-full max-w-[400px] py-4 px-8 h-auto rounded-full bg-[#112520] hover:bg-[#193b33] active:bg-[#0a1613] text-white dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90 font-bold text-base tracking-wide shadow-sm hover:shadow transition-all duration-150 flex items-center justify-center text-center cursor-pointer disabled:opacity-60"
+          loading={isSubmittingFinal}
+          className="w-full sm:w-auto min-w-[200px] py-3.5 px-8 h-auto rounded-full bg-[#112520] hover:bg-[#193b33] active:bg-[#0a1613] text-white dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90 font-bold text-base tracking-wide shadow-sm hover:shadow transition-all duration-150 flex items-center justify-center text-center cursor-pointer disabled:opacity-60"
         >
-          {isSubmittingNew || isUpdating || isSubmittingExisting
+          {isSubmittingFinal
             ? submissionId
               ? 'Updating & submitting…'
               : 'Submitting…'

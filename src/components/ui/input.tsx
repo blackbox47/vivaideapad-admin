@@ -88,7 +88,11 @@ function Input({
               "aria-invalid:border-destructive aria-invalid:ring-2 aria-invalid:ring-destructive/20",
               rightSlot && "pr-10",
               className
-            )
+            ),
+        // Password discs scale with font-size; auth fields otherwise use
+        // `md:text-sm`, which makes the hidden dots look undersized.
+        type === "password" &&
+          "text-[1.5rem] leading-none tracking-normal md:text-[1.5rem] placeholder:text-sm placeholder:leading-normal",
       )}
       {...props}
     />

@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { AlertCircle } from 'lucide-react';
 import { useTanstackSearchParams } from '@/lib/use-tanstack-search-params';
 
@@ -13,11 +12,11 @@ import {
 } from '@/components/ui/card';
 import AuditLogEmptyState from '@/features/audit-log/audit-log-empty-state';
 import AuditLogFilters from '@/features/audit-log/audit-log-filters';
-import AuditLogLoadMore from '@/features/audit-log/audit-log-load-more';
 import AuditLogTable from '@/features/audit-log/audit-log-table';
 import useAuditLog, {
   parseAuditCategory,
 } from '@/hooks/audit-log/use-audit-log';
+import usePagination from '@/hooks/ui/use-pagination';
 
 export default function AuditLogOverview() {
   const [searchParams, setSearchParams] = useTanstackSearchParams();
@@ -26,21 +25,17 @@ export default function AuditLogOverview() {
 
   const {
     events,
-    visibleEvents,
     categoryCounts,
-    hasMore,
-    remainingCount,
-    loadMore,
-    resetVisibleCount,
     isLoading,
     isError,
     error,
     refetch,
   } = useAuditLog({ category, search });
 
-  useEffect(() => {
-    resetVisibleCount();
-  }, [category, search, resetVisibleCount]);
+  const { paginatedItems, paginationProps } = usePagination({
+    items: events,
+    initialPageSize: 6,
+  });
 
   const setSearch = (next: string) => {
     const nextParams = new URLSearchParams(searchParams);
@@ -90,15 +85,11 @@ export default function AuditLogOverview() {
       {isEmpty ? (
         <AuditLogEmptyState />
       ) : (
-        <>
-          <AuditLogTable events={visibleEvents} isLoading={isLoading} />
-          {hasMore ? (
-            <AuditLogLoadMore
-              remainingCount={remainingCount}
-              onLoadMore={loadMore}
-            />
-          ) : null}
-        </>
+        <AuditLogTable
+          events={paginatedItems}
+          isLoading={isLoading}
+          pagination={paginationProps}
+        />
       )}
     </div>
   );

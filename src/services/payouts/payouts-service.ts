@@ -16,11 +16,14 @@ import {
   PAYOUT_PROCESS_URL,
 } from '@/utils/constants/api-end-points';
 import { formatDisplayDate } from '@/utils/helpers/format-display-date';
+import { CURRENCY_SYMBOL } from '@/utils/constants';
 
 function contributorNameFromPayout(
   item: Record<string, unknown>,
   details: Record<string, unknown>,
 ): string {
+  const uuidRe =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
   const candidates = [
     item.display_name,
     details.user_name,
@@ -30,7 +33,7 @@ function contributorNameFromPayout(
   for (const candidate of candidates) {
     if (typeof candidate !== 'string') continue;
     const trimmed = candidate.trim();
-    if (trimmed) return trimmed;
+    if (trimmed && !uuidRe.test(trimmed)) return trimmed;
   }
   return 'Contributor';
 }
@@ -150,7 +153,7 @@ export const payoutsService = baseService.injectEndpoints({
                 contributor: contributorNameFromPayout(item, details),
                 method,
                 methodDetail,
-                amount: `Tk ${numAmount}`,
+                amount: `${CURRENCY_SYMBOL} ${numAmount}`,
                 amountValue: numAmount,
                 requested: dateStr,
                 requestedAt: String(

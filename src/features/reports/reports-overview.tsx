@@ -18,6 +18,7 @@ import ReportsQualityBreakdown from '@/features/reports/reports-quality-breakdow
 import ReportsRiskSummary from '@/features/reports/reports-risk-summary';
 import ReportsTrend from '@/features/reports/reports-trend';
 import useReports from '@/hooks/reports/use-reports';
+import { CURRENCY_SYMBOL } from '@/utils/constants';
 
 export default function ReportsOverview() {
   const {
@@ -95,7 +96,7 @@ export default function ReportsOverview() {
         <ReportsPayoutActivity
           summary={
             data?.payoutSummary ?? {
-              paidThisMonth: 'Tk 0',
+              paidThisMonth: `${CURRENCY_SYMBOL} 0`,
               pendingRequests: 0,
               averageProcessingDays: 0,
               totalPaidContributors: 0,

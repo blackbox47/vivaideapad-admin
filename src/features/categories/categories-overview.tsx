@@ -1,32 +1,22 @@
 import { useEffect, useState } from 'react';
-import { AlertCircle, Plus } from 'lucide-react';
+import { AlertCircle, X } from 'lucide-react';
 
 import PageHeader from '@/components/layout/page-header';
+import StatusBadge from '@/components/shared/status-badge';
+import TableActions from '@/components/shared/table-actions';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Skeleton } from '@/components/ui/skeleton';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+  ProjectTable,
+  ProjectTableCell,
+  ProjectTableRow,
+} from '@/components/ui/project-table';
+import { toast } from '@/components/ui/sonner';
+import CategoryFormDialog from '@/features/categories/category-form-dialog';
 import useCategories from '@/hooks/categories/use-categories';
+import usePagination from '@/hooks/ui/use-pagination';
 import type { Category } from '@/models/categories/categories-model';
 import { getApiErrorMessage } from '@/utils/helpers/api-error';
-import CategoryFormDialog from '@/features/categories/category-form-dialog';
-import EmptyState from '@/components/shared/empty-state';
-import TableActions from '@/components/shared/table-actions';
-import { toast } from '@/components/ui/sonner';
 
 export default function CategoriesOverview() {
   const [search, setSearch] = useState('');
@@ -46,7 +36,6 @@ export default function CategoriesOverview() {
     isLoading,
     isError,
     error,
-    refetch,
     createCategory,
     updateCategory,
     deleteCategory,
@@ -54,6 +43,11 @@ export default function CategoriesOverview() {
     isUpdating,
     isDeleting,
   } = useCategories({ search: debouncedSearch });
+
+  const { paginatedItems, paginationProps } = usePagination({
+    items: categories,
+    initialPageSize: 6,
+  });
 
   const handleSubmit = async (
     body: { name: string; icon: string; isActive: boolean },
@@ -89,128 +83,96 @@ export default function CategoriesOverview() {
   };
 
   return (
-    <div className="flex flex-col gap-6">
+    <div>
       <PageHeader
         title="Categories"
-        description="Manage the content taxonomy that powers Concepts."
+        description="Manage the content taxonomy that powers Concepts and submissions."
         action={
-          <Button onClick={() => setIsCreateOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" />
-            New category
+          <Button
+            type="button"
+            onClick={() => setIsCreateOpen(true)}
+            className="h-auto rounded-full bg-primary px-5 py-3 font-bold text-primary-foreground hover:bg-brand-forest"
+          >
+            + New category
           </Button>
         }
       />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Taxonomy</CardTitle>
-          <CardDescription>
-            Categories group Concepts on the public site and inside the admin
-            workspace. Inactive categories stay hidden from new concepts but
-            keep their history.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="mb-4 flex items-center justify-between gap-3">
-            <Input
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder="Search by name…"
-              className="h-9 w-72 rounded-md"
-            />
-            <span className="text-sm text-muted-foreground">{total} total</span>
+      <div className="mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <span className="whitespace-nowrap text-[13px] text-muted-foreground">
+          {total} {total === 1 ? 'category' : 'categories'}
+        </span>
+        <div className="relative w-full sm:w-72">
+          <Input
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Search categories…"
+            aria-label="Search categories"
+            className="rounded-full px-4.5 py-2.5 text-[13px] placeholder:text-muted-foreground"
+          />
+        </div>
+      </div>
+
+      {isError && (
+        <div className="mb-4 flex items-start gap-2 rounded-xl border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          <AlertCircle className="mt-0.5 size-4 shrink-0" />
+          <div>
+            <div className="font-semibold">Could not load categories</div>
+            <div className="text-xs">{getApiErrorMessage(error)}</div>
           </div>
+        </div>
+      )}
 
-          {isError && (
-            <div className="mb-4 flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
-              <AlertCircle className="mt-0.5 h-4 w-4" />
-              <div>
-                <div className="font-medium">Could not load categories</div>
-                <div className="text-xs">{getApiErrorMessage(error)}</div>
-              </div>
-            </div>
-          )}
-
-          {isLoading && !categories.length ? (
-            <div className="space-y-2">
-              <Skeleton className="h-8 w-full" />
-              <Skeleton className="h-8 w-full" />
-              <Skeleton className="h-8 w-full" />
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-12">Icon</TableHead>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="w-32 text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {categories.map((category) => (
-                  <TableRow key={category.id}>
-                    <TableCell className="text-lg">{category.icon}</TableCell>
-                    <TableCell className="font-medium">
-                      {category.name}
-                    </TableCell>
-                    <TableCell>
-                      <span
-                        className={
-                          category.isActive
-                            ? 'rounded-full bg-emerald-50 px-2 py-0.5 text-xs text-emerald-700'
-                            : 'rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600'
-                        }
-                      >
-                        {category.isActive ? 'Active' : 'Inactive'}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <TableActions>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => setEditing(category)}
-                        >
-                          Edit
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => setConfirmDelete(category)}
-                        >
-                          Delete
-                        </Button>
-                      </TableActions>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {!categories.length && (
-                  <TableRow className="hover:bg-transparent">
-                    <TableCell
-                      colSpan={4}
-                      className="p-0 border-0"
-                    >
-                      <EmptyState
-                        card={false}
-                        size="sm"
-                        title="No categories match"
-                        description="Try a different search keyword."
-                      />
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          )}
-
-          <div className="mt-3 text-right">
-            <Button size="sm" variant="ghost" onClick={() => refetch()} loading={isLoading}>
-              Refresh
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      <ProjectTable
+        columns={[
+          { label: 'Icon', headerClassName: 'w-16 text-center' },
+          { label: 'Category' },
+          { label: 'Status' },
+          { label: '', isAction: true },
+        ]}
+        isLoading={isLoading}
+        loadingRows={4}
+        isEmpty={categories.length === 0}
+        emptyTitle="No categories match"
+        emptyDescription="Try a different search keyword or create a new category."
+        pagination={paginationProps}
+      >
+        {paginatedItems.map((category) => (
+          <ProjectTableRow key={category.id}>
+            <ProjectTableCell className="text-center text-xl">
+              {category.icon}
+            </ProjectTableCell>
+            <ProjectTableCell>
+              <strong className="font-semibold text-foreground">
+                {category.name}
+              </strong>
+            </ProjectTableCell>
+            <ProjectTableCell>
+              <StatusBadge status={category.isActive ? 'Active' : 'Inactive'} />
+            </ProjectTableCell>
+            <ProjectTableCell align="right">
+              <TableActions>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="h-auto rounded-full border-border bg-card px-3.5 py-1.5 text-xs font-bold text-foreground hover:bg-surface-subtle"
+                  onClick={() => setEditing(category)}
+                >
+                  Edit
+                </Button>
+                <button
+                  type="button"
+                  className="rounded-full border border-danger-subtle bg-card px-[13px] py-[7px] text-xs font-bold text-danger hover:bg-danger-subtle transition-colors cursor-pointer"
+                  onClick={() => setConfirmDelete(category)}
+                >
+                  Delete
+                </button>
+              </TableActions>
+            </ProjectTableCell>
+          </ProjectTableRow>
+        ))}
+      </ProjectTable>
 
       {isCreateOpen && (
         <CategoryFormDialog
@@ -232,22 +194,53 @@ export default function CategoriesOverview() {
       )}
 
       {confirmDelete && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40">
-          <div className="w-96 rounded-lg border bg-background p-5 shadow-xl">
-            <h3 className="text-lg font-semibold">Delete category?</h3>
-            <p className="mt-2 text-sm text-muted-foreground">
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-5 backdrop-blur-xs">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-category-title"
+            className="w-full max-w-110 rounded-[24px] border border-border bg-card p-7 shadow-2xl"
+          >
+            <div className="mb-4 flex items-start justify-between gap-4">
+              <div>
+                <p className="text-[12px] font-extrabold tracking-[0.12em] text-muted-foreground uppercase">
+                  Delete taxonomy
+                </p>
+                <h2
+                  id="delete-category-title"
+                  className="mt-1 font-heading text-[20px] font-semibold text-foreground"
+                >
+                  Delete {confirmDelete.name}?
+                </h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => setConfirmDelete(null)}
+                className="text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                aria-label="Close"
+              >
+                <X className="size-5" />
+              </button>
+            </div>
+
+            <p className="text-sm text-muted-foreground">
               {confirmDelete.name} will be removed from the taxonomy. Concepts
-              already using this category stay untouched.
+              already using this category will stay untouched.
             </p>
-            <div className="mt-4 flex justify-end gap-2">
+
+            <div className="mt-6 flex justify-end gap-2.5">
               <Button
-                variant="ghost"
+                type="button"
+                variant="outline"
+                className="h-auto rounded-full border-border bg-card px-5 py-2.5 text-xs font-bold text-foreground hover:bg-surface-subtle"
                 onClick={() => setConfirmDelete(null)}
                 disabled={isDeleting}
               >
                 Cancel
               </Button>
               <Button
+                type="button"
+                className="h-auto rounded-full bg-destructive px-5 py-2.5 text-xs font-bold text-destructive-foreground hover:bg-destructive/90"
                 onClick={() => handleDelete(confirmDelete.id)}
                 disabled={isDeleting}
                 loading={isDeleting}

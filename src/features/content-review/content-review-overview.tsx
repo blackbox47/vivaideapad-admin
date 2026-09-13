@@ -1,8 +1,20 @@
 import { useState } from 'react';
 import { AlertCircle } from 'lucide-react';
 import { useTanstackSearchParams } from '@/lib/use-tanstack-search-params';
-import useResetStateOnChange from '@/hooks/ui/use-reset-state-on-change';
-
+import usePagination from '@/hooks/ui/use-pagination';
+import ReviewFilters, {
+  parseReviewStatus,
+} from '@/features/content-review/review-filters';
+import ReviewKpiCards from '@/features/content-review/review-kpi-cards';
+import ReviewTable from '@/features/content-review/review-table';
+import SubmissionReviewPanel from '@/features/content-review/submission-review-panel';
+import useContentReview from '@/hooks/content-review/use-content-review';
+import { useGetSubmissionQuery } from '@/services/content-review/content-review-service';
+import type {
+  RevisionWindowDays,
+  SubmissionStatus,
+} from '@/models/content-review/content-review-model';
+import { toast } from '@/components/ui/sonner';
 import PageHeader from '@/components/layout/page-header';
 import { Button } from '@/components/ui/button';
 import {
@@ -14,26 +26,13 @@ import {
 } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import EmptyState from '@/components/shared/empty-state';
-import ReviewFilters, {
-  parseReviewStatus,
-} from '@/features/content-review/review-filters';
-import ReviewKpiCards from '@/features/content-review/review-kpi-cards';
-import ReviewTable from '@/features/content-review/review-table';
-import SubmissionReviewPanel from '@/features/content-review/submission-review-panel';
-import useContentReview from '@/hooks/content-review/use-content-review';
-import type { SubmissionStatus } from '@/models/content-review/content-review-model';
-import { toast } from '@/components/ui/sonner';
-import { DEFAULT_PAGE_SIZE as PAGE_SIZE } from '@/utils/constants/pagination';
 
 export default function ContentReviewOverview() {
   const [searchParams, setSearchParams] = useTanstackSearchParams();
   const status = parseReviewStatus(searchParams.get('status'));
   const search = searchParams.get('q') ?? '';
-  const [visibleCount, setVisibleCount] = useResetStateOnChange(PAGE_SIZE, [
-    status,
-    search,
-  ]);
-  const [reviewId, setReviewId] = useState<string | null>(null);
+  const [panelId, setPanelId] = useState<string | null>(null);
+  const [panelMode, setPanelMode] = useState<'view' | 'review'>('review');
 
   const {
     submissions,
@@ -61,24 +60,46 @@ export default function ContentReviewOverview() {
     setSearchParams(nextParams, { replace: true });
   };
 
-  const reviewing = submissions.find(
-    (item) =>
-      item.id === reviewId &&
-      item.status?.toLowerCase() !== 'approved' &&
-      item.status?.toLowerCase() !== 'revision requested',
-  );
-  const visible = filtered.slice(0, visibleCount);
-  const remainingCount = Math.max(0, filtered.length - visibleCount);
+  const openSubmission = submissions.find((item) => item.id === panelId);
 
-  const handleDecide = (nextStatus: SubmissionStatus, comment: string) => {
-    if (!reviewId) {
+  const { data: detailData, isLoading: isLoadingDetail } =
+    useGetSubmissionQuery(panelId ?? '', {
+      skip: !panelId,
+    });
+
+  // RTK Query keeps the last `data` while a query is skipped, so the panel has
+  // to key off `panelId` or it never unmounts on close.
+  const activeSubmission = panelId
+    ? (detailData?.submission ?? openSubmission)
+    : undefined;
+
+  const { paginatedItems, paginationProps } = usePagination({
+    items: filtered,
+    initialPageSize: 6,
+  });
+
+  const handleDecide = (
+    nextStatus: SubmissionStatus,
+    comment: string,
+    options?: { revisionWindowDays?: RevisionWindowDays },
+  ) => {
+    if (!panelId) {
       return;
     }
 
-    void decideSubmission({ id: reviewId, status: nextStatus, comment })
+    void decideSubmission({
+      id: panelId,
+      status: nextStatus,
+      comment,
+      ...(nextStatus === 'Revision Requested'
+        ? {
+            revision_window_days: options?.revisionWindowDays ?? 7,
+          }
+        : {}),
+    })
       .unwrap()
       .then(() => {
-        setReviewId(null);
+        setPanelId(null);
         toast.success(`Submission marked as ${nextStatus.toLowerCase()}`);
       })
       .catch(() => {
@@ -104,69 +125,77 @@ export default function ContentReviewOverview() {
   }
 
   return (
-    <div>
-      <PageHeader
-        title="Content review"
-        description="Evaluate live concept submissions with context, history and originality signals."
-      />
-
-      <ReviewKpiCards
-        isLoading={isLoading}
-        items={[
-          { id: 'total', label: 'Total submissions', value: totalCount },
-          { id: 'awaiting', label: 'Awaiting review', value: awaitingCount },
-          {
-            id: 'high-risk',
-            label: 'High AI-risk flags',
-            value: highRiskCount,
-            tone: 'danger',
-          },
-        ]}
-      />
-
-      {isLoading ? null : (
-        <ReviewFilters
-          status={status}
-          search={search}
-          visibleCount={filtered.length}
-          onSearchChange={setSearch}
+    <div className="relative">
+      <div
+        className={
+          activeSubmission
+            ? 'filter blur-[2px] pointer-events-none select-none transition-all duration-300'
+            : 'transition-all duration-300'
+        }
+        aria-hidden={activeSubmission ? 'true' : undefined}
+      >
+        <PageHeader
+          title="Content review"
+          description="Evaluate live concept submissions with context, history and originality signals."
         />
-      )}
 
-      {isLoading ? (
-        <div className="overflow-hidden rounded-[18px] border border-border bg-card p-4">
-          {Array.from({ length: 6 }).map((_, index) => (
-            <Skeleton key={index} className="mb-2 h-12 w-full" />
-          ))}
-        </div>
-      ) : filtered.length === 0 ? (
-        <EmptyState
-          title="No submissions match"
-          description="Try a different keyword or status filter."
+        <ReviewKpiCards
+          isLoading={isLoading}
+          items={[
+            { id: 'total', label: 'Total submissions', value: totalCount },
+            { id: 'awaiting', label: 'Awaiting review', value: awaitingCount },
+            {
+              id: 'high-risk',
+              label: 'High AI-risk flags',
+              value: highRiskCount,
+              tone: 'danger',
+            },
+          ]}
         />
-      ) : (
-        <>
-          <ReviewTable submissions={visible} onReview={setReviewId} />
-          {remainingCount > 0 ? (
-            <div className="mt-6 flex justify-center">
-              <Button
-                type="button"
-                variant="outline"
-                className="h-auto rounded-full border-border bg-card px-6.5 py-3 text-[13px] font-bold text-foreground hover:bg-surface-subtle"
-                onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
-              >
-                Show more submissions · {remainingCount} remaining
-              </Button>
-            </div>
-          ) : null}
-        </>
-      )}
 
-      {reviewing ? (
+        {isLoading ? null : (
+          <ReviewFilters
+            status={status}
+            search={search}
+            visibleCount={filtered.length}
+            onSearchChange={setSearch}
+          />
+        )}
+
+        {isLoading ? (
+          <div className="overflow-hidden rounded-[18px] border border-border bg-card p-4">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <Skeleton key={index} className="mb-2 h-12 w-full" />
+            ))}
+          </div>
+        ) : filtered.length === 0 ? (
+          <EmptyState
+            title="No submissions match"
+            description="Try a different keyword or status filter."
+          />
+        ) : (
+          <ReviewTable
+            submissions={paginatedItems}
+            pagination={paginationProps}
+            onView={(id) => {
+              setPanelMode('view');
+              setPanelId(id);
+            }}
+            onReview={(id) => {
+              setPanelMode('review');
+              setPanelId(id);
+            }}
+          />
+        )}
+      </div>
+
+      {activeSubmission ? (
         <SubmissionReviewPanel
-          submission={reviewing}
+          submission={activeSubmission}
           isDeciding={isDeciding}
-          onClose={() => setReviewId(null)}
+          isLoadingDetails={isLoadingDetail}
+          readOnly={panelMode === 'view'}
+          onClose={() => setPanelId(null)}
           onDecide={handleDecide}
         />
       ) : null}

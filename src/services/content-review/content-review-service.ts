@@ -1,12 +1,17 @@
 import type {
+  AiRisk,
   ContentSubmission,
   DecideSubmissionBody,
   PublishResponse,
   RiskScanResponse,
+  RiskSignal,
   ReviewQueueResponse,
+  RevisionWindowDays,
+  SubmissionAttachmentFile,
   SubmissionDecisionBody,
   SubmissionDecisionResponse,
   SubmissionDetail,
+  SubmissionStatus,
 } from '@/models/content-review/content-review-model';
 import { baseService } from '@/services/core/base-service';
 import {
@@ -25,6 +30,36 @@ export interface SubmissionsListParams {
   search?: string;
   page?: number;
   limit?: number;
+}
+
+function mapRevisionWindowDays(value: unknown): RevisionWindowDays | null {
+  const n = typeof value === 'string' ? Number(value) : value;
+  if (n === 3 || n === 7 || n === 14) return n;
+  return null;
+}
+
+function mapSubmissionAttachment(
+  item: Record<string, unknown>,
+): SubmissionAttachmentFile | null {
+  const url = String(item.url ?? item.file_url ?? '').trim();
+  if (!url) {
+    return null;
+  }
+
+  const name = String(
+    item.original_name ?? item.name ?? url.split('/').pop() ?? 'attachment',
+  );
+
+  return {
+    name,
+    url,
+    size: item.size != null && item.size !== '' ? String(item.size) : undefined,
+    type: item.mime_type
+      ? String(item.mime_type)
+      : item.type
+        ? String(item.type)
+        : undefined,
+  };
 }
 
 export const contentReviewService = baseService.injectEndpoints({
@@ -59,6 +94,191 @@ export const contentReviewService = baseService.injectEndpoints({
     /** Spec §5.5 — GET /admin/submissions/:id */
     getSubmission: builder.query<{ submission: SubmissionDetail }, string>({
       query: (id) => ({ url: SUBMISSION_DETAIL_URL(id), method: 'GET' }),
+      transformResponse: (response: unknown): { submission: SubmissionDetail } => {
+        if (!response || typeof response !== 'object') {
+          throw new Error('Invalid submission response');
+        }
+        const res = response as Record<string, unknown>;
+        const raw = ((res.submission ?? res.data ?? res) || {}) as Record<string, unknown>;
+
+        const conceptObj = (raw.concept && typeof raw.concept === 'object'
+          ? raw.concept
+          : null) as Record<string, unknown> | null;
+        const contributorObj = (raw.contributor && typeof raw.contributor === 'object'
+          ? raw.contributor
+          : null) as Record<string, unknown> | null;
+        const riskSignalObj = (raw.risk_signal && typeof raw.risk_signal === 'object'
+          ? raw.risk_signal
+          : null) as Record<string, unknown> | null;
+
+        let attachments: SubmissionAttachmentFile[] = [];
+        if (Array.isArray(raw.attachments)) {
+          attachments = raw.attachments
+            .filter(
+              (item): item is Record<string, unknown> =>
+                Boolean(item && typeof item === 'object'),
+            )
+            .map(mapSubmissionAttachment)
+            .filter((item): item is SubmissionAttachmentFile => item !== null);
+        } else if (raw.attachments && typeof raw.attachments === 'object') {
+          const mapped = mapSubmissionAttachment(
+            raw.attachments as Record<string, unknown>,
+          );
+          attachments = mapped ? [mapped] : [];
+        } else if (raw.attachment_url) {
+          attachments = [
+            {
+              name: 'supporting-evidence',
+              url: String(raw.attachment_url),
+            },
+          ];
+        }
+
+        const mapRisk = (r: unknown): AiRisk => {
+          if (r === 'High' || r === 'Medium' || r === 'Low') return r;
+          if (r === 'high') return 'High';
+          if (r === 'medium') return 'Medium';
+          if (r === 'low') return 'Low';
+          return 'Medium';
+        };
+
+        const mapStatus = (s: unknown): SubmissionStatus => {
+          if (
+            s === 'Under Review' ||
+            s === 'Revision Requested' ||
+            s === 'Approved' ||
+            s === 'Published' ||
+            s === 'Rejected'
+          ) {
+            return s;
+          }
+          if (s === 'pending_review') return 'Under Review';
+          if (s === 'changes_requested') return 'Revision Requested';
+          if (s === 'approved') return 'Approved';
+          if (s === 'rejected') return 'Rejected';
+          if (s === 'published') return 'Published';
+          return 'Under Review';
+        };
+
+        const submission: SubmissionDetail = {
+          id: String(raw.id ?? ''),
+          title: String(raw.title ?? ''),
+          contributor: String(
+            contributorObj?.name ??
+              raw.contributor_name ??
+              raw.contributor ??
+              'Anonymous',
+          ),
+          topic: String(
+            conceptObj?.title ??
+              raw.topic_title ??
+              raw.topic ??
+              'Untitled Concept',
+          ),
+          submitted: String(
+            raw.created_at ??
+              raw.submittedDate ??
+              raw.submitted ??
+              new Date().toISOString(),
+          ),
+          risk: mapRisk(raw.risk ?? riskSignalObj?.risk ?? riskSignalObj?.level),
+          status: mapStatus(raw.status),
+          body: String(raw.body ?? ''),
+          approvedCount: Number(
+            contributorObj?.approved_count ??
+              raw.approved_count ??
+              raw.approvedCount ??
+              0,
+          ),
+          approvalRate: String(
+            contributorObj?.approval_rate ??
+              raw.approval_rate ??
+              raw.approvalRate ??
+              '0%',
+          ),
+          summary: String(raw.summary ?? ''),
+          version: typeof raw.version === 'number' ? raw.version : 1,
+          feedback: raw.decision_notes
+            ? String(raw.decision_notes)
+            : raw.feedback
+              ? String(raw.feedback)
+              : undefined,
+          risk_signal: (riskSignalObj as unknown as RiskSignal) || undefined,
+          attachment_url: raw.attachment_url
+            ? String(raw.attachment_url)
+            : (attachments[0]?.url ?? undefined),
+          attachments,
+          concept: conceptObj
+            ? {
+                id: String(conceptObj.id ?? ''),
+                title: String(conceptObj.title ?? ''),
+                brief: String(conceptObj.brief ?? ''),
+                rewardBudget:
+                  conceptObj.reward_budget != null
+                    ? String(conceptObj.reward_budget)
+                    : conceptObj.rewardBudget != null
+                      ? String(conceptObj.rewardBudget)
+                      : undefined,
+                status: String(conceptObj.status ?? 'active'),
+                closeDate: conceptObj.close_date
+                  ? String(conceptObj.close_date)
+                  : conceptObj.closeDate
+                    ? String(conceptObj.closeDate)
+                    : null,
+              }
+            : null,
+          topicDetail: conceptObj
+            ? {
+                id: String(conceptObj.id ?? ''),
+                title: String(conceptObj.title ?? ''),
+                brief: String(conceptObj.brief ?? ''),
+                rewardBudget:
+                  conceptObj.reward_budget != null
+                    ? String(conceptObj.reward_budget)
+                    : conceptObj.rewardBudget != null
+                      ? String(conceptObj.rewardBudget)
+                      : undefined,
+                status: String(conceptObj.status ?? 'active'),
+                closeDate: conceptObj.close_date
+                  ? String(conceptObj.close_date)
+                  : conceptObj.closeDate
+                    ? String(conceptObj.closeDate)
+                    : null,
+              }
+            : null,
+          contributorDetail: contributorObj
+            ? {
+                id: String(contributorObj.id ?? ''),
+                name: String(contributorObj.name ?? ''),
+                email: String(contributorObj.email ?? ''),
+                avatarUrl: contributorObj.avatar_url
+                  ? String(contributorObj.avatar_url)
+                  : null,
+                approvedCount: Number(contributorObj.approved_count ?? 0),
+                approvalRate: String(contributorObj.approval_rate ?? '0%'),
+              }
+            : null,
+          contributorName: String(
+            contributorObj?.name ??
+              raw.contributor_name ??
+              raw.contributor ??
+              '',
+          ),
+          contributorAvatar: contributorObj?.avatar_url
+            ? String(contributorObj.avatar_url)
+            : null,
+          revisionWindowDays: mapRevisionWindowDays(
+            raw.revision_window_days ?? raw.revisionWindowDays,
+          ),
+          revisionDueAt: raw.revision_due_at
+            ? String(raw.revision_due_at)
+            : raw.revisionDueAt
+              ? String(raw.revisionDueAt)
+              : null,
+        };
+
+        return { submission };
+      },
       providesTags: (_r, _e, id) => [{ type: 'submissions', id }],
     }),
     /** Legacy mutation — kept for the live UI. */

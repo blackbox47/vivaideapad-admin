@@ -6,6 +6,7 @@ import {
   ProjectTableRow,
 } from '@/components/ui/project-table';
 import PeopleTable from '@/features/people/people-table';
+import usePagination from '@/hooks/ui/use-pagination';
 import type { PlatformUser } from '@/models/people/people-model';
 import { formatDisplayDate } from '@/utils/helpers/format-display-date';
 
@@ -20,6 +21,11 @@ export default function InvitedTable({
   onToggle,
   isToggling,
 }: InvitedTableProps) {
+  const { paginatedItems, paginationProps } = usePagination({
+    items: users,
+    initialPageSize: 6,
+  });
+
   if (users.length === 0) {
     return (
       <EmptyState
@@ -31,6 +37,7 @@ export default function InvitedTable({
 
   return (
     <PeopleTable
+      pagination={paginationProps}
       columns={[
         'Invited applicant',
         'Approved on',
@@ -39,7 +46,7 @@ export default function InvitedTable({
         { label: 'Action', align: 'right' },
       ]}
     >
-      {users.map((user) => (
+      {paginatedItems.map((user) => (
         <ProjectTableRow key={user.id}>
           <ProjectTableCell>
             <strong className="font-semibold text-foreground">{user.name}</strong>

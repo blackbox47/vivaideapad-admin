@@ -4,6 +4,7 @@ import {
   ProjectTable,
   ProjectTableCell,
   ProjectTableRow,
+  type TablePaginationProps,
 } from '@/components/ui/project-table';
 import {
   Tooltip,
@@ -15,10 +16,14 @@ import { formatDisplayDate } from '@/utils/helpers/format-display-date';
 
 interface ReviewTableProps {
   submissions: ContentSubmission[];
+  pagination?: TablePaginationProps;
+  onView: (id: string) => void;
   onReview: (id: string) => void;
 }
 
 const TITLE_MAX_CHARS = 20;
+
+const DECIDED_STATUSES = new Set(['Approved', 'Rejected']);
 
 const TITLE_COL_CLASS =
   'w-[9.5rem] max-w-[9.5rem] whitespace-normal md:w-[14rem] md:max-w-[14rem] lg:w-[18rem] lg:max-w-[18rem] xl:w-[22rem] xl:max-w-[22rem]';
@@ -30,9 +35,15 @@ function truncateWithEllipsis(value: string, maxChars: number): string {
   return `${value.slice(0, maxChars)}…`;
 }
 
-export default function ReviewTable({ submissions, onReview }: ReviewTableProps) {
+export default function ReviewTable({
+  submissions,
+  pagination,
+  onView,
+  onReview,
+}: ReviewTableProps) {
   return (
     <ProjectTable
+      pagination={pagination}
       columns={[
         { label: 'Title', headerClassName: TITLE_COL_CLASS },
         { label: 'Topic' },
@@ -76,18 +87,24 @@ export default function ReviewTable({ submissions, onReview }: ReviewTableProps)
             <StatusBadge status={submission.status} />
           </ProjectTableCell>
           <ProjectTableCell>
-            {submission.status?.toLowerCase() !== 'approved' &&
-            submission.status?.toLowerCase() !== 'revision requested' ? (
-              <TableActions>
-                <button
-                  type="button"
-                  className="rounded-full bg-primary px-3.5 py-2 text-xs font-bold whitespace-nowrap text-primary-foreground hover:bg-brand-forest transition-colors cursor-pointer"
-                  onClick={() => onReview(submission.id)}
-                >
-                  Review
-                </button>
-              </TableActions>
-            ) : null}
+            <TableActions
+              items={[
+                {
+                  key: 'view',
+                  label: 'View',
+                  onClick: () => onView(submission.id),
+                },
+                ...(DECIDED_STATUSES.has(submission.status)
+                  ? []
+                  : [
+                      {
+                        key: 'review',
+                        label: 'Review',
+                        onClick: () => onReview(submission.id),
+                      },
+                    ]),
+              ]}
+            />
           </ProjectTableCell>
         </ProjectTableRow>
       ))}

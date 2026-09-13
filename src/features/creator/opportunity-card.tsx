@@ -29,7 +29,12 @@ export default function OpportunityCard({ topic }: OpportunityCardProps) {
       </div>
       <div className="mt-4 flex justify-end">
         <Button
-          render={<Link to={CREATOR_ROUTES.submitIdea} />}
+          render={
+            <Link
+              to={CREATOR_ROUTES.submitIdea}
+              search={{ topic: topic.id }}
+            />
+          }
           className="h-auto cursor-pointer rounded-full bg-primary px-5 py-3 text-sm font-bold text-primary-foreground hover:bg-primary/80"
         >
           Open brief

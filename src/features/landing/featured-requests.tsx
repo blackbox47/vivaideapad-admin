@@ -1,4 +1,5 @@
 import { ArrowRight, Clock } from 'lucide-react';
+import { CURRENCY_SYMBOL } from '@/utils/constants';
 
 export interface FeaturedRequest {
   id?: string;
@@ -32,7 +33,7 @@ const DEFAULT_REQUESTS: FeaturedRequest[] = [
       'We need a compelling social media campaign concept for Father\'s Day that resonates emotionally with urban Bangladeshi families. Fresh outside-the-box thinking required.',
     tags: ['#Father\'s Day', '#Emotional', '#Social Media'],
     postedBy: 'Cloudomnium',
-    amount: '৳ 25,000',
+    amount: `${CURRENCY_SYMBOL} 25,000`,
     ideas: '34',
   },
   {
@@ -44,7 +45,7 @@ const DEFAULT_REQUESTS: FeaturedRequest[] = [
       'Share a heartfelt story or campaign idea celebrating mothers for the client\'s Mother\'s Day seminar content.',
     tags: ['#Mother\'s Day', '#Family', '#Emotional'],
     postedBy: 'Vivasoft Limited',
-    amount: '৳ 40,000',
+    amount: `${CURRENCY_SYMBOL} 40,000`,
     ideas: '19',
   },
   {
@@ -56,7 +57,7 @@ const DEFAULT_REQUESTS: FeaturedRequest[] = [
       'Craft a launch moment that turns our sustainable water bottle into a cultural talking point on TikTok and Instagram Reels.',
     tags: ['#Viral', '#Eco', '#Launch'],
     postedBy: 'Green Feather Technologies',
-    amount: '৳ 15,000',
+    amount: `${CURRENCY_SYMBOL} 15,000`,
     ideas: '51',
   },
 ];

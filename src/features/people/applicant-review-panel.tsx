@@ -1,146 +1,325 @@
-import { useState } from 'react';
-import { X } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 
 import StatusBadge from '@/components/shared/status-badge';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import type { Applicant, ApplicantStatus } from '@/models/people/people-model';
+import type {
+  Applicant,
+  ApplicantAiRisk,
+  ApplicantStatus,
+  ApplicantTopicDetail,
+} from '@/models/people/people-model';
+import type { Concept } from '@/models/topics/topics-model';
+import { useGetConceptsQuery } from '@/services/topics/topics-service';
 import { formatDisplayDate } from '@/utils/helpers/format-display-date';
+import { sanitizeHtml } from '@/utils/helpers/sanitize-html';
+import ApprovalConfirmationModal from '@/features/people/approval-confirmation-modal';
+import RejectConfirmationModal from '@/features/people/reject-confirmation-modal';
 
 interface ApplicantReviewPanelProps {
   applicant: Applicant;
   isDeciding: boolean;
+  isLoadingDetails?: boolean;
+  readOnly?: boolean;
   onClose: () => void;
   onDecide: (status: ApplicantStatus, comment: string) => void;
+}
+
+function getInitials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0 || !parts[0]) return 'AP';
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
+function deriveApplicationRisk(text: string): ApplicantAiRisk {
+  const length = text.trim().length;
+  if (length < 80) return 'High';
+  if (length < 220) return 'Medium';
+  return 'Low';
+}
+
+function resolveTopicDetail(
+  applicant: Applicant,
+  concepts: Concept[],
+): ApplicantTopicDetail {
+  const fromApi = applicant.topicDetail;
+  if (fromApi?.brief) {
+    return fromApi;
+  }
+
+  const topicKey = (applicant.topic || '').toLowerCase();
+  const match =
+    concepts.find((concept) => concept.title.toLowerCase() === topicKey) ||
+    concepts.find((concept) => concept.category.toLowerCase() === topicKey) ||
+    (topicKey.includes('onboard')
+      ? concepts.find((concept) => concept.isOnboarding)
+      : undefined);
+
+  if (!match) {
+    return fromApi ?? { title: applicant.topic };
+  }
+
+  return {
+    title: match.title,
+    brief: match.description,
+  };
 }
 
 export default function ApplicantReviewPanel({
   applicant,
   isDeciding,
+  isLoadingDetails = false,
+  readOnly = false,
   onClose,
   onDecide,
 }: ApplicantReviewPanelProps) {
-  const [comment, setComment] = useState('');
+  const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
+  const [isApproveModalOpen, setIsApproveModalOpen] = useState(false);
+
+  // Close on Escape key press (modals take priority if open)
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        if (isApproveModalOpen) {
+          setIsApproveModalOpen(false);
+        } else if (isRejectModalOpen) {
+          setIsRejectModalOpen(false);
+        } else {
+          onClose();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose, isApproveModalOpen, isRejectModalOpen]);
+
+  // Lock body scroll while drawer is open
+  useEffect(() => {
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, []);
+
+  const { data: conceptsData } = useGetConceptsQuery({ limit: 100 });
+  const topicDetail = useMemo(
+    () => resolveTopicDetail(applicant, conceptsData?.concepts ?? []),
+    [applicant, conceptsData?.concepts],
+  );
+
+  const isHtmlBody = /<[a-z][\s\S]*>/i.test(applicant.body || '');
+  const initials = getInitials(applicant.name);
+  const topicTitle = topicDetail.title || applicant.topic;
+  const topicBrief = topicDetail.brief;
+  const riskLabel =
+    applicant.risk ||
+    deriveApplicationRisk(`${applicant.title} ${applicant.body}`);
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-(--overlay-scrim) p-5 backdrop-blur-xs">
+    <div
+      className="fixed inset-0 z-50 overflow-hidden flex justify-end"
+      data-purpose="applicant-review-drawer-container"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="applicant-review-title"
+    >
+      {/* Backdrop */}
       <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="applicant-review-title"
-        className="max-h-[90vh] w-full max-w-140 overflow-auto rounded-[24px] border border-(--dialog-border) bg-card p-7 shadow-2xl"
+        className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity duration-300"
+        aria-hidden="true"
+      />
+
+      {/* Drawer Panel */}
+      <aside
+        className="relative w-full max-w-[640px] md:max-w-[700px] bg-white h-screen shadow-2xl flex flex-col z-50 border-l border-slate-200 duration-300 font-['Plus_Jakarta_Sans',sans-serif] text-slate-800 animate-in slide-in-from-right"
+        onClick={(e) => e.stopPropagation()}
       >
-        <div className="mb-3.5 flex items-start justify-between gap-4">
-          <div>
-            <p className="text-xs font-extrabold tracking-[0.12em] text-brand-sage uppercase">
-              Applicant review
-            </p>
+        {/* Sticky Drawer Header */}
+        <div className="px-6 py-4 border-b border-slate-200 bg-white sticky top-0 z-20 flex items-center justify-between shrink-0">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] font-bold tracking-wider text-blue-600 uppercase bg-blue-50 px-2 py-0.5 rounded">
+                {readOnly ? 'Applicant' : 'Applicant Review'}
+              </span>
+            </div>
             <h2
               id="applicant-review-title"
-              className="mt-1.5 font-heading text-[22px] tracking-display text-foreground"
+              className="text-xl font-bold text-slate-900 leading-snug tracking-tight"
             >
               {applicant.title}
             </h2>
           </div>
-          <button
-            type="button"
-            className="text-[22px] leading-none text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-            aria-label="Close review"
-            onClick={onClose}
-          >
-            <X />
-          </button>
-        </div>
-
-        <div className="mb-3.5 grid grid-cols-2 gap-2.5 rounded-[14px] bg-surface-subtle p-4 text-[13px]">
-          <div>
-            <span className="mb-0.5 block text-[11px] text-muted-foreground">
-              Applicant
-            </span>
-            <strong className="text-foreground">{applicant.name}</strong>
-          </div>
-          <div>
-            <span className="mb-0.5 block text-[11px] text-muted-foreground">Email</span>
-            <strong className="text-foreground">{applicant.email}</strong>
-          </div>
-          <div>
-            <span className="mb-0.5 block text-[11px] text-muted-foreground">
-              Applied for
-            </span>
-            <strong className="text-foreground">{applicant.topic}</strong>
-          </div>
-          <div>
-            <span className="mb-0.5 block text-[11px] text-muted-foreground">
-              Submitted
-            </span>
-            <strong className="text-foreground">
-              {formatDisplayDate(applicant.submitted)}
-            </strong>
-          </div>
-          <div>
-            <span className="mb-0.5 block text-[11px] text-muted-foreground">Source</span>
-            <strong className="text-foreground">Website signup</strong>
-          </div>
-          <div>
-            <span className="mb-0.5 block text-[11px] text-muted-foreground">Status</span>
+          <div className="flex shrink-0 items-center gap-2.5">
             <StatusBadge status={applicant.status} />
+            <button
+              aria-label="Close drawer"
+              className="text-slate-400 hover:text-slate-700 w-8 h-8 rounded-full flex items-center justify-center hover:bg-slate-100 transition-colors shrink-0 cursor-pointer"
+              type="button"
+              onClick={onClose}
+            >
+              <span className="material-symbols-outlined text-[20px]">close</span>
+            </button>
           </div>
         </div>
 
-        <span className="mb-1.5 block text-xs font-bold text-foreground">Submitted concept</span>
-        <p className="rounded-[14px] bg-surface-subtle p-4 text-sm leading-[1.7] text-foreground">
-          {applicant.body}
-        </p>
-
-        <label className="my-3.5 flex items-start gap-2 text-xs text-muted-foreground">
-          <Input type="checkbox" defaultChecked disabled className="accent-primary" />
-          Applicant confirmed originality and accepted content guidelines.
-        </label>
-
-        <Textarea
-          id="reviewer-comment"
-          label="Reviewer comment"
-          value={comment}
-          onChange={(event) => setComment(event.target.value)}
-          placeholder="Enter reviewer comment"
-          className="min-h-15"
-        />
-        <p className="mt-2.5 text-xs text-muted-foreground">
-          Approving grants this applicant contributor portal access. They will
-          appear under Invited until they sign in and submit against a live task.
-        </p>
-
-        <div className="mt-4.5 flex flex-wrap justify-end gap-2.5">
-          <Button
-            type="button"
-            disabled={isDeciding}
-            loading={isDeciding}
-            className="h-auto rounded-full border border-danger-subtle bg-card px-4.5 py-3 font-bold text-danger hover:bg-danger-subtle transition-colors disabled:opacity-60"
-            onClick={() => onDecide('Rejected', comment)}
-          >
-            Reject
-          </Button>
-          <Button
-            type="button"
-            disabled={isDeciding}
-            loading={isDeciding}
-            className="h-auto rounded-full border border-border bg-card px-4.5 py-3 font-bold text-foreground hover:bg-surface-subtle transition-colors disabled:opacity-60"
-            onClick={() => onDecide('Revision Requested', comment)}
-          >
-            Request revision
-          </Button>
-          <Button
-            type="button"
-            disabled={isDeciding}
-            loading={isDeciding}
-            className="h-auto rounded-full bg-primary px-4.5 py-3 font-bold text-primary-foreground hover:bg-brand-forest transition-colors disabled:opacity-60"
-            onClick={() => onDecide('Approved', comment)}
-          >
-            Approve applicant
-          </Button>
+        {/* Sub-header metadata pill bar */}
+        <div className="px-6 py-3 bg-slate-50 border-b border-slate-100 flex flex-wrap items-center justify-between gap-2 shrink-0">
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs shrink-0 select-none">
+              {initials}
+            </div>
+            <div className="text-xs">
+              <span className="font-bold text-slate-800">{applicant.name}</span>
+              <span className="text-slate-400 ml-1.5">
+                Submitted {formatDisplayDate(applicant.submitted)}
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="px-2.5 py-0.5 rounded-full bg-amber-50 border border-amber-200/60 text-amber-700 font-semibold text-xs flex items-center gap-1">
+              <span className="material-symbols-outlined text-[13px]">flag</span>
+              AI risk: {riskLabel}
+            </span>
+          </div>
         </div>
-      </div>
+
+        {/* Scrollable Content Details */}
+        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6 text-sm text-slate-700">
+          {isLoadingDetails ? (
+            <div className="h-1 rounded-full bg-slate-100 overflow-hidden">
+              <div className="h-full w-1/3 animate-pulse rounded-full bg-blue-500" />
+            </div>
+          ) : null}
+          {/* Field 1: Topic */}
+          <div className="space-y-1.5">
+            <div className="p-3.5 rounded-xl border border-slate-200 bg-blue-50/40 hover:bg-blue-50/60 transition-colors">
+              <div className="space-y-1 min-w-0">
+                <p className="font-bold text-slate-900 text-sm">{topicTitle}</p>
+                {topicBrief ? (
+                  <p className="text-xs text-slate-500 leading-relaxed">
+                    {topicBrief}
+                  </p>
+                ) : null}
+              </div>
+            </div>
+          </div>
+
+          {/* Field 2: Submitted Concept / Proposal */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+              <span className="material-symbols-outlined text-[16px] text-slate-400">article</span>
+              Submitted Concept
+            </label>
+            <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/40 space-y-3 shadow-sm text-xs leading-relaxed">
+              <section className="space-y-1.5">
+                <h4 className="font-bold text-slate-900 uppercase tracking-wide text-[11px] flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-600 inline-block" />
+                  Concept Pitch & Proposal Details
+                </h4>
+                {isHtmlBody ? (
+                  <div
+                    className="text-slate-700 leading-relaxed pl-3 border-l-2 border-blue-600 [&_p]:mb-2 [&_p:last-child]:mb-0"
+                    dangerouslySetInnerHTML={{ __html: sanitizeHtml(applicant.body) }}
+                  />
+                ) : (
+                  <p className="text-slate-700 leading-relaxed pl-3 border-l-2 border-blue-600 whitespace-pre-line">
+                    {applicant.body || 'No concept description provided.'}
+                  </p>
+                )}
+              </section>
+            </div>
+          </div>
+
+          {/* Field 3: Guidelines check */}
+          {applicant.consent === false ? (
+            <div className="flex items-center gap-2.5 p-3 rounded-xl border border-amber-200/80 bg-amber-50/60 text-xs text-amber-800">
+              <span className="material-symbols-outlined text-[18px] text-amber-600 shrink-0">warning</span>
+              <span className="font-medium">Applicant has not confirmed originality or content guidelines.</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2.5 p-3 rounded-xl border border-emerald-200/80 bg-emerald-50/60 text-xs text-emerald-800">
+              <span className="material-symbols-outlined text-[18px] text-emerald-600 shrink-0">check_circle</span>
+              <span className="font-medium">Applicant confirmed originality and accepted content guidelines.</span>
+            </div>
+          )}
+
+          {readOnly && applicant.decisionNotes ? (
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-700">Reviewer notes</label>
+              <p className="p-3 rounded-xl border border-slate-200 bg-slate-50/60 text-xs text-slate-700 whitespace-pre-line">
+                {applicant.decisionNotes}
+              </p>
+            </div>
+          ) : null}
+
+          {/* Field 4: Info callout */}
+          {!readOnly && (
+            <div className="flex items-start gap-2.5 p-3.5 rounded-xl border border-blue-100 bg-blue-50/50 text-xs text-blue-800">
+              <span className="material-symbols-outlined text-[18px] text-blue-600 shrink-0 mt-0.5">info</span>
+              <p className="leading-relaxed">
+                Approving grants this applicant contributor portal access. They will appear under <strong>Invited</strong> until they become an active contributor.
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Sticky Decision Footer */}
+        {readOnly ? null : (
+          <div className="border-t border-slate-200 bg-white p-5 shrink-0 shadow-lg">
+            <div className="flex items-center justify-between gap-2">
+              <button
+                className="px-4 py-2 rounded-full border border-slate-200 text-xs font-semibold text-rose-600 hover:bg-rose-50 hover:border-rose-200 transition-colors cursor-pointer disabled:opacity-50"
+                type="button"
+                disabled={isDeciding}
+                onClick={() => setIsRejectModalOpen(true)}
+              >
+                Reject
+              </button>
+              <button
+                className="px-5 py-2 rounded-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs font-bold shadow-md shadow-blue-500/20 hover:shadow-lg transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                type="button"
+                disabled={isDeciding}
+                onClick={() => setIsApproveModalOpen(true)}
+              >
+                <span className="material-symbols-outlined text-[16px]">task_alt</span>
+                <span>{isDeciding ? 'Saving…' : 'Approve applicant'}</span>
+              </button>
+            </div>
+          </div>
+        )}
+      </aside>
+
+      {readOnly ? null : (
+        <>
+          <ApprovalConfirmationModal
+            isOpen={isApproveModalOpen}
+            isDeciding={isDeciding}
+            applicantName={applicant.name}
+            applicantInitials={initials}
+            applicantEmail={applicant.email}
+            topicTitle={topicTitle}
+            applicationTitle={applicant.title}
+            onClose={() => setIsApproveModalOpen(false)}
+            onConfirm={() => {
+              onDecide('Approved', '');
+            }}
+          />
+
+          <RejectConfirmationModal
+            isOpen={isRejectModalOpen}
+            isDeciding={isDeciding}
+            applicantName={applicant.name}
+            applicantInitials={initials}
+            applicantEmail={applicant.email}
+            topicTitle={topicTitle}
+            applicationTitle={applicant.title}
+            onClose={() => setIsRejectModalOpen(false)}
+            onConfirm={(feedback) => {
+              onDecide('Rejected', feedback);
+            }}
+          />
+        </>
+      )}
     </div>
   );
 }

@@ -1,9 +1,14 @@
+import {
+  TablePagination,
+  type TablePaginationProps,
+} from '@/components/ui/pagination';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { AuditEvent } from '@/models/audit-log/audit-log-model';
 
 interface AuditLogTableProps {
   events: AuditEvent[];
   isLoading: boolean;
+  pagination?: TablePaginationProps;
 }
 
 const ROW_SKELETON_COUNT = 6;
@@ -11,6 +16,7 @@ const ROW_SKELETON_COUNT = 6;
 export default function AuditLogTable({
   events,
   isLoading,
+  pagination,
 }: AuditLogTableProps) {
   if (isLoading) {
     return (
@@ -54,6 +60,9 @@ export default function AuditLogTable({
           </div>
         </div>
       ))}
+      {pagination && pagination.totalItems > 0 ? (
+        <TablePagination {...pagination} />
+      ) : null}
     </section>
   );
 }

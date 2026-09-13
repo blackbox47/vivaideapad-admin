@@ -20,6 +20,19 @@ interface UseGoogleIdentityResult {
   prompt: () => void;
 }
 
+/**
+ * GIS renders an iframe at a fixed pixel width, so the width has to be
+ * recomputed whenever the available space changes — otherwise a button sized
+ * for a wide layout keeps that width and overflows its card on a 320px screen.
+ * The host element is a shrink-to-fit flex item, so measure its parent, whose
+ * width is driven by the layout rather than by the button itself.
+ */
+function measureAvailableWidth(el: HTMLElement): number {
+  const available = el.parentElement?.clientWidth || el.offsetWidth || 384;
+  // GIS clamps the rendered button between 200px and 400px.
+  return Math.min(Math.max(available, 200), 400);
+}
+
 export default function useGoogleIdentity({
   onSuccess,
   onError,
@@ -28,6 +41,9 @@ export default function useGoogleIdentity({
   const [ready, setReady] = useState(false);
   const onSuccessRef = useRef(onSuccess);
   const onErrorRef = useRef(onError);
+  const containerRef = useRef<HTMLElement | null>(null);
+  const renderedWidthRef = useRef<number | null>(null);
+  const resizeObserverRef = useRef<ResizeObserver | null>(null);
 
   useEffect(() => {
     onSuccessRef.current = onSuccess;
@@ -110,30 +126,68 @@ export default function useGoogleIdentity({
 
   const renderButton = useCallback(
     (el: HTMLElement) => {
-      if (!ready || typeof window === 'undefined' || !window.google?.accounts?.id) {
-        return;
-      }
+      const paint = (target: HTMLElement) => {
+        if (
+          !ready ||
+          typeof window === 'undefined' ||
+          !window.google?.accounts?.id
+        ) {
+          return;
+        }
 
-      // Avoid re-mounting if button iframe is already rendered
-      if (el.children.length > 0) {
-        return;
-      }
+        containerRef.current = target;
+        const targetWidth = measureAvailableWidth(target);
 
-      // Calculate width to match container (GIS width is clamped between 200 and 400)
-      const containerWidth = el.offsetWidth || 384;
-      const targetWidth = Math.min(Math.max(containerWidth, 200), 400);
+        // Already mounted at the right width — leave the existing iframe alone.
+        if (target.children.length > 0 && renderedWidthRef.current === targetWidth) {
+          return;
+        }
 
-      window.google.accounts.id.renderButton(el, {
-        type: 'standard',
-        theme: 'outline',
-        size: 'large',
-        text: 'continue_with',
-        shape: 'pill',
-        width: targetWidth,
-        logo_alignment: 'left',
-      });
+        target.replaceChildren();
+        renderedWidthRef.current = targetWidth;
+
+        window.google.accounts.id.renderButton(target, {
+          type: 'standard',
+          theme: 'outline',
+          size: 'large',
+          text: 'continue_with',
+          shape: 'pill',
+          width: targetWidth,
+          logo_alignment: 'left',
+        });
+
+        // Re-render on layout changes so the fixed-width iframe keeps matching
+        // the card. The observed parent is sized by the layout, not by the
+        // button, so re-rendering can't feed back into another resize.
+        const observed = target.parentElement;
+        if (
+          !resizeObserverRef.current &&
+          observed &&
+          typeof ResizeObserver !== 'undefined'
+        ) {
+          resizeObserverRef.current = new ResizeObserver(() => {
+            window.requestAnimationFrame(() => {
+              const current = containerRef.current;
+              if (current?.isConnected) {
+                paint(current);
+              }
+            });
+          });
+          resizeObserverRef.current.observe(observed);
+        }
+      };
+
+      paint(el);
     },
     [ready],
+  );
+
+  useEffect(
+    () => () => {
+      resizeObserverRef.current?.disconnect();
+      resizeObserverRef.current = null;
+    },
+    [],
   );
 
   const prompt = useCallback(() => {

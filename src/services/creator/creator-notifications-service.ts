@@ -1,11 +1,12 @@
-import type {
-  CreatorNotification,
-  CreatorNotificationType,
-  CreatorNotificationsParams,
-  CreatorNotificationsResponse,
-  MarkAllCreatorNotificationsReadResponse,
-  ToggleCreatorNotificationBody,
-  ToggleCreatorNotificationResponse,
+import {
+  CREATOR_NOTIFICATION_FILTERS,
+  type CreatorNotification,
+  type CreatorNotificationType,
+  type CreatorNotificationsParams,
+  type CreatorNotificationsResponse,
+  type MarkAllCreatorNotificationsReadResponse,
+  type ToggleCreatorNotificationBody,
+  type ToggleCreatorNotificationResponse,
 } from '@/models/creator/creator-notifications-model';
 import { baseService } from '@/services/core/base-service';
 import {
@@ -113,6 +114,33 @@ export const creatorNotificationsService = baseService.injectEndpoints({
         method: 'PATCH',
         body,
       }),
+      async onQueryStarted({ id }, { dispatch, queryFulfilled }) {
+        const patchResults: Array<{ undo: () => void }> = [];
+        for (const filter of CREATOR_NOTIFICATION_FILTERS) {
+          patchResults.push(
+            dispatch(
+              creatorNotificationsService.util.updateQueryData(
+                'getCreatorNotifications',
+                { filter },
+                (draft) => {
+                  const item = draft.notifications.find((n) => n.id === id);
+                  if (item && !item.read) {
+                    item.read = true;
+                    if (draft.unreadCount > 0) {
+                      draft.unreadCount -= 1;
+                    }
+                  }
+                },
+              ),
+            ),
+          );
+        }
+        try {
+          await queryFulfilled;
+        } catch {
+          patchResults.forEach((p) => p.undo());
+        }
+      },
       invalidatesTags: ['creator-notifications'],
     }),
     markAllCreatorNotificationsRead: builder.mutation<
@@ -123,6 +151,30 @@ export const creatorNotificationsService = baseService.injectEndpoints({
         url: CREATOR_NOTIFICATIONS_READ_ALL_URL,
         method: 'POST',
       }),
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        const patchResults: Array<{ undo: () => void }> = [];
+        for (const filter of CREATOR_NOTIFICATION_FILTERS) {
+          patchResults.push(
+            dispatch(
+              creatorNotificationsService.util.updateQueryData(
+                'getCreatorNotifications',
+                { filter },
+                (draft) => {
+                  draft.notifications.forEach((n) => {
+                    n.read = true;
+                  });
+                  draft.unreadCount = 0;
+                },
+              ),
+            ),
+          );
+        }
+        try {
+          await queryFulfilled;
+        } catch {
+          patchResults.forEach((p) => p.undo());
+        }
+      },
       invalidatesTags: ['creator-notifications'],
     }),
   }),

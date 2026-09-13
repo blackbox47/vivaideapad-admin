@@ -8,12 +8,14 @@ interface PeopleTabsProps {
   tab: PeopleTab;
   applicantCount: number;
   invitedCount: number;
+  rejectedCount: number;
   contributorCount: number;
 }
 
 const TABS: Array<{ id: PeopleTab; label: string }> = [
   { id: 'applicants', label: 'Applicants' },
   { id: 'invited', label: 'Invited' },
+  { id: 'rejected', label: 'Rejected' },
   { id: 'contributors', label: 'Contributors' },
 ];
 
@@ -21,11 +23,13 @@ export default function PeopleTabs({
   tab,
   applicantCount,
   invitedCount,
+  rejectedCount,
   contributorCount,
 }: PeopleTabsProps) {
   const counts: Record<PeopleTab, number> = {
     applicants: applicantCount,
     invited: invitedCount,
+    rejected: rejectedCount,
     contributors: contributorCount,
   };
 

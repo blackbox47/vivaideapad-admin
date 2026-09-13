@@ -1,7 +1,8 @@
 import { env } from '@/config/env';
-import type {
-  AdminNotification,
-  AdminNotificationsResponse,
+import {
+  ADMIN_NOTIFICATION_FILTERS,
+  type AdminNotification,
+  type AdminNotificationsResponse,
 } from '@/models/notifications/admin-notifications-model';
 import { baseService } from '@/services/core/base-service';
 import { adminNotificationsService } from '@/services/notifications/admin-notifications-service';
@@ -102,20 +103,28 @@ export function startAdminNotificationsStream(store: {
 
     if (envelope.type === 'updated') {
       const incoming = wireToAdminNotification(envelope.notification);
-      store.dispatch(
-        adminNotificationsService.util.updateQueryData(
-          'getAdminNotifications',
-          undefined,
-          (draft: AdminNotificationsResponse) => {
-            const target = draft.notifications.find(
-              (n) => n.id === incoming.id,
-            );
-            if (target) {
-              target.read = incoming.read;
-            }
-          },
-        ),
-      );
+      for (const filter of ADMIN_NOTIFICATION_FILTERS) {
+        store.dispatch(
+          adminNotificationsService.util.updateQueryData(
+            'getAdminNotifications',
+            { filter },
+            (draft: AdminNotificationsResponse) => {
+              const target = draft.notifications.find(
+                (n) => n.id === incoming.id,
+              );
+              if (target) {
+                const wasUnread = !target.read;
+                target.read = incoming.read;
+                if (wasUnread && incoming.read && draft.unreadCount > 0) {
+                  draft.unreadCount -= 1;
+                } else if (!wasUnread && !incoming.read) {
+                  draft.unreadCount += 1;
+                }
+              }
+            },
+          ),
+        );
+      }
       return;
     }
 

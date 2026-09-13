@@ -19,7 +19,7 @@ export interface LedgerEntry {
   /** ISO timestamp used internally for sorting and aggregation. */
   occurredAt: string;
   type: LedgerEntryType;
-  /** Signed amount string e.g. "+Tk 180" / "−Tk 240". */
+  /** Signed amount string e.g. "+৳ 180" / "−৳ 240". */
   amount: string;
   /** Numeric amount (always positive); sign comes from the `type`. */
   amountValue: number;

@@ -6,6 +6,7 @@ import type {
 import { baseService } from '@/services/core/base-service';
 import { CREATOR_IDEAS_URL } from '@/utils/constants/api-end-points';
 import { formatDisplayDate } from '@/utils/helpers/format-display-date';
+import { CURRENCY_SYMBOL } from '@/utils/constants';
 
 export const myIdeasService = baseService.injectEndpoints({
   endpoints: (builder) => ({
@@ -74,7 +75,9 @@ export const myIdeasService = baseService.injectEndpoints({
               topic: conceptTitle,
               submitted: formatDisplayDate(String(item.created_at ?? '')),
               status: mapStatus(String(item.status ?? 'draft')),
-              reward: item.reward_amount ? `$${item.reward_amount}` : '$0',
+              reward: item.reward_amount
+                ? `${CURRENCY_SYMBOL}${String(item.reward_amount).replace(/^[৳$Tk\s]*/, '')}`
+                : `${CURRENCY_SYMBOL}0`,
               comments: 0,
               body: String(item.body ?? ''),
               feedback: (item.decision_notes as string) ?? undefined,

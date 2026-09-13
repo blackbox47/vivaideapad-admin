@@ -15,7 +15,7 @@ export interface Payout {
   method: PayoutMethod;
   /** Display string e.g. "bKash · 018•••42". */
   methodDetail: string;
-  /** Display string e.g. "Tk 240". */
+  /** Display string e.g. "৳ 240". */
   amount: string;
   /** Numeric amount (always positive). */
   amountValue: number;
