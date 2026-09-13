@@ -5,6 +5,7 @@ export interface Category {
   name: string;
   icon: string;
   isActive: boolean;
+  slug?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -21,12 +22,14 @@ export interface CreateCategoryBody {
   name: string;
   icon: string;
   isActive?: boolean;
+  slug?: string;
 }
 
 export interface UpdateCategoryBody {
   name?: string;
   icon?: string;
   isActive?: boolean;
+  slug?: string;
 }
 
 export interface CategoryMutationResponse {

@@ -1,5 +1,7 @@
 export type AiRisk = 'Low' | 'Medium' | 'High';
 
+export type RevisionWindowDays = 3 | 7 | 14;
+
 export type SubmissionStatus =
   | 'Under Review'
   | 'Revision Requested'
@@ -20,6 +22,8 @@ export interface ContentSubmission {
   body: string;
   approvedCount: number;
   approvalRate: string;
+  revisionWindowDays?: RevisionWindowDays | null;
+  revisionDueAt?: string | null;
 }
 
 export interface ReviewQueueResponse {
@@ -30,6 +34,7 @@ export interface DecideSubmissionBody {
   id: string;
   status: SubmissionStatus;
   comment?: string;
+  revision_window_days?: RevisionWindowDays;
 }
 
 // ── Spec-aligned additions (REST spec §5.5) ──────────────────────────────
@@ -44,6 +49,8 @@ export interface SubmissionDecisionBody {
   feedback?: string;
   /** Required when `decision === 'approve'`. */
   reward_amount?: number;
+  /** Days the contributor has to resubmit. Used when requesting a revision. */
+  revision_window_days?: RevisionWindowDays;
 }
 
 export interface SubmissionDecisionResponse {
@@ -65,13 +72,47 @@ export interface RiskSignal {
   scannedAt: string;
 }
 
+export interface SubmissionTopicDetail {
+  id?: string;
+  title: string;
+  brief?: string;
+  rewardBudget?: string | number;
+  status?: string;
+  closeDate?: string | null;
+}
+
+export interface SubmissionAttachmentFile {
+  name: string;
+  url: string;
+  size?: string;
+  type?: string;
+  mime_type?: string;
+  original_name?: string;
+}
+
+export interface ContributorDetail {
+  id?: string;
+  name: string;
+  email?: string;
+  avatarUrl?: string | null;
+  approvedCount?: number;
+  approvalRate?: string;
+}
+
 export interface SubmissionDetail extends ContentSubmission {
-  version: number;
+  version?: number;
+  summary?: string;
   feedback?: string;
   risk_signal?: RiskSignal;
   attachment_url?: string;
+  attachments?: SubmissionAttachmentFile[] | Record<string, unknown> | null;
   submittedDate?: string;
   decidedDate?: string;
+  concept?: SubmissionTopicDetail | null;
+  topicDetail?: SubmissionTopicDetail | null;
+  contributorDetail?: ContributorDetail | null;
+  contributorName?: string;
+  contributorAvatar?: string | null;
 }
 
 export interface RiskScanResponse {

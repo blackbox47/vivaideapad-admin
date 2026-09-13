@@ -1,5 +1,7 @@
 import EmptyState from '@/components/shared/empty-state';
+import { TablePagination } from '@/components/ui/pagination';
 import { Skeleton } from '@/components/ui/skeleton';
+import usePagination from '@/hooks/ui/use-pagination';
 import type { ReportsCategoryPerformance } from '@/models/reports/reports-model';
 
 interface ReportsCategoryPerformanceProps {
@@ -11,6 +13,10 @@ export default function ReportsCategoryPerformanceTable({
   rows,
   isLoading,
 }: ReportsCategoryPerformanceProps) {
+  const { paginatedItems, paginationProps, totalPages } = usePagination({
+    items: rows,
+    initialPageSize: 6,
+  });
   return (
     <section className="rounded-[20px] border border-border bg-card p-[22px]">
       <h2 className="mb-3.5 font-heading text-lg font-semibold text-foreground">
@@ -56,7 +62,7 @@ export default function ReportsCategoryPerformanceTable({
                       />
                     </td>
                   </tr>
-                ) : rows.map((row) => (
+                ) : paginatedItems.map((row) => (
                   <tr
                     key={row.id}
                     className="border-t border-border-muted"
@@ -78,6 +84,13 @@ export default function ReportsCategoryPerformanceTable({
           </tbody>
         </table>
       </div>
+
+      {paginationProps.totalItems > 0 && totalPages > 1 ? (
+        <TablePagination
+          {...paginationProps}
+          className="mt-4 -mx-[22px] -mb-[22px] rounded-b-[20px]"
+        />
+      ) : null}
     </section>
   );
 }

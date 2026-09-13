@@ -74,8 +74,9 @@ export default function DateField({
     };
   }, [open]);
 
+  const minDate = disabledBefore ? startOfDay(disabledBefore) : undefined;
   const isBlocked = (date: Date) =>
-    Boolean(disabledBefore && date < startOfDay(disabledBefore));
+    Boolean(minDate && startOfDay(date) < minDate);
 
   const commitText = (raw: string, formatOnSuccess: boolean): boolean => {
     const trimmed = raw.trim();
@@ -144,14 +145,18 @@ export default function DateField({
             mode="single"
             className="w-full"
             selected={value}
+            defaultMonth={value ?? minDate}
             onSelect={(date) => {
+              if (date && isBlocked(date)) {
+                return;
+              }
               onChange(date);
               setText(date ? formatConceptDate(date) : '');
               if (date) {
                 setOpen(false);
               }
             }}
-            disabled={disabledBefore ? { before: disabledBefore } : undefined}
+            disabled={minDate ? (date) => startOfDay(date) < minDate : undefined}
           />
         </PopoverContent>
       </Popover>

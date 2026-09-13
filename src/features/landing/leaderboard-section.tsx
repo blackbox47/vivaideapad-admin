@@ -1,4 +1,5 @@
 import type { FC } from 'react';
+import { CURRENCY_SYMBOL } from '@/utils/constants';
 
 export interface LeaderboardRowData {
   rank: string;
@@ -26,7 +27,7 @@ const DEFAULT_LEADERBOARD_ROWS: LeaderboardRowData[] = [
     initials: 'NR',
     name: 'Nadia Rahman',
     stats: '9 wins · 47 ideas',
-    amount: '৳ 2,40,000',
+    amount: `${CURRENCY_SYMBOL} 2,40,000`,
     highlighted: true,
   },
   {
@@ -34,7 +35,7 @@ const DEFAULT_LEADERBOARD_ROWS: LeaderboardRowData[] = [
     initials: 'TA',
     name: 'Tanvir Ahmed',
     stats: '7 wins · 38 ideas',
-    amount: '৳ 1,85,000',
+    amount: `${CURRENCY_SYMBOL} 1,85,000`,
     highlighted: false,
   },
   {
@@ -42,7 +43,7 @@ const DEFAULT_LEADERBOARD_ROWS: LeaderboardRowData[] = [
     initials: 'SI',
     name: 'Sadia Islam',
     stats: '6 wins · 35 ideas',
-    amount: '৳ 1,60,000',
+    amount: `${CURRENCY_SYMBOL} 1,60,000`,
     highlighted: false,
   },
   {
@@ -50,7 +51,7 @@ const DEFAULT_LEADERBOARD_ROWS: LeaderboardRowData[] = [
     initials: 'FH',
     name: 'Farhan Hossain',
     stats: '5 wins · 29 ideas',
-    amount: '৳ 1,20,000',
+    amount: `${CURRENCY_SYMBOL} 1,20,000`,
     highlighted: false,
   },
   {
@@ -58,7 +59,7 @@ const DEFAULT_LEADERBOARD_ROWS: LeaderboardRowData[] = [
     initials: 'MN',
     name: 'Meherun Nessa',
     stats: '4 wins · 24 ideas',
-    amount: '৳ 95,000',
+    amount: `${CURRENCY_SYMBOL} 95,000`,
     highlighted: false,
   },
 ];

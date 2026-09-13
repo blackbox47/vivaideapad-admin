@@ -3,17 +3,20 @@ import {
   ProjectTable,
   ProjectTableCell,
   ProjectTableRow,
+  type TablePaginationProps,
 } from '@/components/ui/project-table';
 import { cn } from '@/lib/utils';
 import type { LedgerEntry } from '@/models/rewards/rewards-model';
 
 interface RewardTableProps {
   entries: LedgerEntry[];
+  pagination?: TablePaginationProps;
 }
 
-export default function RewardTable({ entries }: RewardTableProps) {
+export default function RewardTable({ entries, pagination }: RewardTableProps) {
   return (
     <ProjectTable
+      pagination={pagination}
       columns={[
         { label: 'Contributor' },
         { label: 'Date' },

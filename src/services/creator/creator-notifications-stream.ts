@@ -1,7 +1,8 @@
 import { env } from '@/config/env';
-import type {
-  CreatorNotification,
-  CreatorNotificationsResponse,
+import {
+  CREATOR_NOTIFICATION_FILTERS,
+  type CreatorNotification,
+  type CreatorNotificationsResponse,
 } from '@/models/creator/creator-notifications-model';
 import { baseService } from '@/services/core/base-service';
 import { creatorNotificationsService } from '@/services/creator/creator-notifications-service';
@@ -88,20 +89,28 @@ export function startCreatorNotificationsStream(store: {
 
     if (envelope.type === 'updated') {
       const incoming = wireToCreatorNotification(envelope.notification);
-      store.dispatch(
-        creatorNotificationsService.util.updateQueryData(
-          'getCreatorNotifications',
-          undefined,
-          (draft: CreatorNotificationsResponse) => {
-            const target = draft.notifications.find(
-              (n) => n.id === incoming.id,
-            );
-            if (target) {
-              target.read = incoming.read;
-            }
-          },
-        ),
-      );
+      for (const filter of CREATOR_NOTIFICATION_FILTERS) {
+        store.dispatch(
+          creatorNotificationsService.util.updateQueryData(
+            'getCreatorNotifications',
+            { filter },
+            (draft: CreatorNotificationsResponse) => {
+              const target = draft.notifications.find(
+                (n) => n.id === incoming.id,
+              );
+              if (target) {
+                const wasUnread = !target.read;
+                target.read = incoming.read;
+                if (wasUnread && incoming.read && draft.unreadCount > 0) {
+                  draft.unreadCount -= 1;
+                } else if (!wasUnread && !incoming.read) {
+                  draft.unreadCount += 1;
+                }
+              }
+            },
+          ),
+        );
+      }
       return;
     }
 

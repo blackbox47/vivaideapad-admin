@@ -1,6 +1,8 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Eye, EyeOff } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -12,6 +14,32 @@ import {
   type PasswordChangeFormValues,
   type ProfileDetailsFormValues,
 } from '@/models/profile/profile-schema';
+
+function PasswordVisibilityToggle({
+  visible,
+  onToggle,
+  label,
+}: {
+  visible: boolean;
+  onToggle: () => void;
+  label: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      className="flex cursor-pointer items-center justify-center text-muted-foreground transition-colors hover:text-primary"
+      aria-label={visible ? `Hide ${label}` : `Show ${label}`}
+      tabIndex={-1}
+    >
+      {visible ? (
+        <EyeOff className="size-4 stroke-[1.8]" />
+      ) : (
+        <Eye className="size-4 stroke-[1.8]" />
+      )}
+    </button>
+  );
+}
 
 interface ProfileIdentityCardProps {
   profile: ProfileDetails;
@@ -111,6 +139,10 @@ export default function ProfileIdentityCard({
     name: ['currentPassword', 'newPassword'],
   });
 
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   return (
     <section className="rounded-[20px] border border-border bg-card p-6.5">
       <div className="mb-6 flex items-center gap-4">
@@ -200,11 +232,18 @@ export default function ProfileIdentityCard({
               <Input
                 id="profile-password-current"
                 label="Current password"
-                type="password"
+                type={showCurrentPassword ? 'text' : 'password'}
                 required
                 autoComplete="current-password"
                 placeholder="Enter current password"
                 errorMessage={passwordErrors.currentPassword?.message}
+                rightSlot={
+                  <PasswordVisibilityToggle
+                    visible={showCurrentPassword}
+                    onToggle={() => setShowCurrentPassword((prev) => !prev)}
+                    label="current password"
+                  />
+                }
                 {...registerPassword('currentPassword')}
               />
             </div>
@@ -212,11 +251,18 @@ export default function ProfileIdentityCard({
               <Input
                 id="profile-password"
                 label="New password"
-                type="password"
+                type={showNewPassword ? 'text' : 'password'}
                 required
                 autoComplete="new-password"
                 placeholder="Enter new password"
                 errorMessage={passwordErrors.newPassword?.message}
+                rightSlot={
+                  <PasswordVisibilityToggle
+                    visible={showNewPassword}
+                    onToggle={() => setShowNewPassword((prev) => !prev)}
+                    label="new password"
+                  />
+                }
                 {...registerPassword('newPassword')}
               />
             </div>
@@ -224,11 +270,18 @@ export default function ProfileIdentityCard({
               <Input
                 id="profile-password-confirm"
                 label="Confirm password"
-                type="password"
+                type={showConfirmPassword ? 'text' : 'password'}
                 required
                 autoComplete="new-password"
                 placeholder="Enter confirm password"
                 errorMessage={passwordErrors.confirmPassword?.message}
+                rightSlot={
+                  <PasswordVisibilityToggle
+                    visible={showConfirmPassword}
+                    onToggle={() => setShowConfirmPassword((prev) => !prev)}
+                    label="confirm password"
+                  />
+                }
                 {...registerPassword('confirmPassword')}
               />
             </div>

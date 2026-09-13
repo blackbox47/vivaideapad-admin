@@ -21,13 +21,13 @@ export default function LeaderboardPodium({
         {Array.from({ length: 3 }).map((_, index) => (
           <div
             key={index}
-            className="flex flex-col items-center rounded-[24px] bg-brand-pine-deep p-7 text-white"
+            className="flex flex-col items-center rounded-[24px] border border-border-subtle bg-card p-7"
           >
-            <Skeleton className="mb-4 size-9 rounded-full bg-white/20" />
-            <Skeleton className="size-16 rounded-full bg-white/20" />
-            <Skeleton className="mt-4 h-4 w-28 bg-white/20" />
-            <Skeleton className="mt-3 h-7 w-16 bg-white/20" />
-            <Skeleton className="mt-2 h-3 w-24 bg-white/10" />
+            <Skeleton className="mb-4 size-9 rounded-full" />
+            <Skeleton className="size-16 rounded-full" />
+            <Skeleton className="mt-4 h-4 w-28" />
+            <Skeleton className="mt-3 h-7 w-16" />
+            <Skeleton className="mt-2 h-3 w-24" />
           </div>
         ))}
       </div>
@@ -43,7 +43,7 @@ export default function LeaderboardPodium({
       {entries.map((entry, index) => (
         <article
           key={entry.id}
-          className="flex flex-col items-center rounded-[24px] bg-brand-pine-deep p-7 text-white"
+          className="flex flex-col items-center rounded-[24px] border border-border-subtle bg-card p-7 text-foreground"
         >
           <span className="mb-3 text-3xl leading-none" aria-hidden>
             {PODIUM_MEDAL[index] ?? '🏅'}
@@ -56,11 +56,11 @@ export default function LeaderboardPodium({
               {entry.initials}
             </AvatarFallback>
           </Avatar>
-          <p className="mt-4 text-[15px] font-semibold text-white">{entry.name}</p>
+          <p className="mt-4 text-[15px] font-semibold text-foreground">{entry.name}</p>
           <p className="mt-2 font-heading text-[28px] font-extrabold leading-none tracking-[-0.02em] text-primary">
             {formatPoints(entry.points)}
           </p>
-          <p className="mt-3 text-[12px] text-white/55">
+          <p className="mt-3 text-[12px] text-muted-foreground">
             {entry.approvedIdeas} approved · {entry.visibility}
           </p>
         </article>

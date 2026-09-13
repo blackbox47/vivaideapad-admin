@@ -4,17 +4,24 @@ import {
   ProjectTable,
   ProjectTableCell,
   ProjectTableRow,
+  type TablePaginationProps,
 } from '@/components/ui/project-table';
 import type { Payout } from '@/models/payouts/payouts-model';
 
 interface PayoutTableProps {
   payouts: Payout[];
+  pagination?: TablePaginationProps;
   onProcess: (id: string) => void;
 }
 
-export default function PayoutTable({ payouts, onProcess }: PayoutTableProps) {
+export default function PayoutTable({
+  payouts,
+  pagination,
+  onProcess,
+}: PayoutTableProps) {
   return (
     <ProjectTable
+      pagination={pagination}
       columns={[
         { label: 'Contributor' },
         { label: 'Method' },

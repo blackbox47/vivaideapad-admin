@@ -1,6 +1,13 @@
-import type { PeopleResponse } from '@/models/people/people-model';
+import { useCallback } from 'react';
+
+import type {
+  ApplicantStatus,
+  DecideApplicantBody,
+  PeopleResponse,
+} from '@/models/people/people-model';
+import type { ApplicationDecisionBody } from '@/models/users/users-model';
+import { useDecideApplicationMutation } from '@/services/applications/applications-service';
 import {
-  useDecideApplicantMutation,
   useGetPeopleQuery,
   useToggleUserStatusMutation,
 } from '@/services/people/people-service';
@@ -12,18 +19,42 @@ interface UsePeopleResult {
   isError: boolean;
   error: string | null;
   refetch: () => void;
-  decideApplicant: ReturnType<typeof useDecideApplicantMutation>[0];
+  decideApplicant: (body: DecideApplicantBody) => {
+    unwrap: () => Promise<unknown>;
+  };
   toggleUserStatus: ReturnType<typeof useToggleUserStatusMutation>[0];
   isDeciding: boolean;
   isToggling: boolean;
 }
 
+function decisionFromStatus(
+  status: ApplicantStatus,
+): ApplicationDecisionBody['decision'] {
+  if (status === 'Approved') return 'approve_invite';
+  if (status === 'Rejected') return 'reject';
+  return 'request_more_info';
+}
+
 export default function usePeople(): UsePeopleResult {
   const { data, isLoading, isError, error, refetch } = useGetPeopleQuery();
-  const [decideApplicant, { isLoading: isDeciding }] =
-    useDecideApplicantMutation();
+  const [decideApplication, { isLoading: isDeciding }] =
+    useDecideApplicationMutation();
   const [toggleUserStatus, { isLoading: isToggling }] =
     useToggleUserStatusMutation();
+
+  const decideApplicant = useCallback(
+    (body: DecideApplicantBody) => {
+      const decision = decisionFromStatus(body.status);
+      return decideApplication({
+        id: body.id,
+        body:
+          decision === 'approve_invite'
+            ? { decision }
+            : { decision, notes: body.comment },
+      });
+    },
+    [decideApplication],
+  );
 
   return {
     data: data ?? null,

@@ -1,8 +1,8 @@
 import {
   useEffect,
   useMemo,
-  useState,
 } from 'react';
+import { startOfDay } from 'date-fns';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { X } from 'lucide-react';
@@ -13,7 +13,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { cn } from '@/lib/utils';
 import {
   formatConceptDate,
   parseInitialDate,
@@ -23,10 +22,8 @@ import type {
   ConceptStatus,
   UpdateConceptBody,
 } from '@/models/topics/topics-model';
-import { CATEGORY_ICON_CHOICES } from '@/models/topics/topics-model';
 import {
   editConceptSchema,
-  LOCAL_CATEGORY_PREFIX,
   type EditConceptFormValues,
 } from '@/models/topics/topics-schema';
 import type { DropdownOption } from '@/utils/types/dropdown-option';
@@ -54,36 +51,16 @@ export default function EditConceptDialog({
   onClose,
   onSubmit,
 }: EditConceptDialogProps) {
-  const [extraCategories, setExtraCategories] = useState<DropdownOption[]>([]);
-  const [isNewCategoryOpen, setIsNewCategoryOpen] = useState(false);
-  const [newCategoryName, setNewCategoryName] = useState('');
-  const [newCategoryIcon, setNewCategoryIcon] = useState<string>(
-    CATEGORY_ICON_CHOICES[0],
-  );
-  const [categoryDraftError, setCategoryDraftError] = useState<string | null>(null);
-
-  const categoryOptions = useMemo<DropdownOption[]>(() => {
-    const seen = new Set<string>();
-    const out: DropdownOption[] = [];
-    for (const c of [...categories, ...extraCategories]) {
-      if (!seen.has(c.id)) {
-        seen.add(c.id);
-        out.push(c);
-      }
-    }
-    return out;
-  }, [categories, extraCategories]);
-
   const resolveCategoryId = useMemo(() => {
     if (concept.categoryId) {
-      const match = categoryOptions.find((c) => c.id === concept.categoryId);
+      const match = categories.find((c) => c.id === concept.categoryId);
       if (match) return match.id;
     }
     const cleanConceptCategory = concept.category
       .replace(/^[^\w\s\u0980-\u09FF]+\s*/, '')
       .trim()
       .toLowerCase();
-    const foundByName = categoryOptions.find((c) => {
+    const foundByName = categories.find((c) => {
       const optName = c.label
         .replace(/^[^\w\s\u0980-\u09FF]+\s*/, '')
         .trim()
@@ -91,8 +68,8 @@ export default function EditConceptDialog({
       return optName === cleanConceptCategory || c.label.toLowerCase().includes(cleanConceptCategory);
     });
     if (foundByName) return foundByName.id;
-    return categoryOptions[0]?.id ?? '';
-  }, [concept, categoryOptions]);
+    return categories[0]?.id ?? '';
+  }, [concept, categories]);
 
   const {
     register,
@@ -146,39 +123,8 @@ export default function EditConceptDialog({
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [isSubmitting, onClose]);
 
-  const handleAddCategory = () => {
-    const name = newCategoryName.trim();
-    if (!name) {
-      setCategoryDraftError('Enter a category name.');
-      return;
-    }
-
-    const alreadyExists = categoryOptions.some(
-      (option) => option.label.trim() === name,
-    );
-    if (alreadyExists) {
-      const match = categoryOptions.find((option) => option.label.trim() === name);
-      if (match) setValue('categoryId', match.id);
-      setIsNewCategoryOpen(false);
-      setNewCategoryName('');
-      setCategoryDraftError(null);
-      return;
-    }
-
-    const newId = `${LOCAL_CATEGORY_PREFIX}${name}`;
-    setExtraCategories((prev) => [
-      ...prev,
-      { id: newId, label: `${newCategoryIcon} ${name}` },
-    ]);
-    setValue('categoryId', newId);
-    setIsNewCategoryOpen(false);
-    setNewCategoryName('');
-    setNewCategoryIcon(CATEGORY_ICON_CHOICES[0]);
-    setCategoryDraftError(null);
-  };
-
   const onFormSubmit = async (values: EditConceptFormValues) => {
-    const selected = categoryOptions.find((c) => c.id === values.categoryId);
+    const selected = categories.find((c) => c.id === values.categoryId);
     await onSubmit(concept.id, {
       title: values.title.trim(),
       category: selected?.label ?? '',
@@ -243,84 +189,17 @@ export default function EditConceptDialog({
                 render={({ field }) => (
                   <Select
                     id="edit-concept-category"
-                    label={
-                      <div className="flex items-center justify-between gap-2">
-                        <span>
-                          Category
-                          <span className="ml-0.5 text-destructive" aria-hidden="true">
-                            *
-                          </span>
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setIsNewCategoryOpen((open) => !open);
-                            setNewCategoryName('');
-                            setCategoryDraftError(null);
-                            setNewCategoryIcon(CATEGORY_ICON_CHOICES[0]);
-                          }}
-                          className="text-[12px] font-bold text-brand-sage hover:underline cursor-pointer"
-                        >
-                          + New category
-                        </button>
-                      </div>
-                    }
+                    label="Category"
                     required
-                    showRequiredIndicator={false}
                     value={field.value}
                     onChange={field.onChange}
-                    options={categoryOptions}
+                    options={categories}
                     placeholder="Choose a category"
                     aria-label="Concept category"
                     errorMessage={errors.categoryId?.message}
                   />
                 )}
               />
-              {isNewCategoryOpen ? (
-                <div className="mt-2.5 flex flex-col gap-2 rounded-[12px] bg-surface-subtle p-3">
-                  <div className="flex flex-wrap gap-1.5">
-                    {CATEGORY_ICON_CHOICES.map((icon) => {
-                      const isSelected = icon === newCategoryIcon;
-                      return (
-                        <button
-                          key={icon}
-                          type="button"
-                          onClick={() => setNewCategoryIcon(icon)}
-                          className={cn(
-                            'size-8 rounded-[9px] border text-[15px] cursor-pointer transition-colors',
-                            isSelected
-                              ? 'border-primary bg-primary text-primary-foreground'
-                              : 'border-border bg-card text-foreground hover:bg-surface-subtle',
-                          )}
-                        >
-                          {icon}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  <div className="flex gap-2">
-                    <Input
-                      value={newCategoryName}
-                      onChange={(event) => {
-                        setNewCategoryName(event.target.value);
-                        setCategoryDraftError(null);
-                      }}
-                      placeholder="Enter category name"
-                      className="h-auto flex-1 rounded-[10px] border border-border bg-card px-3 py-2.25 text-[13px] text-foreground shadow-none"
-                    />
-                    <Button
-                      type="button"
-                      onClick={handleAddCategory}
-                      className="h-auto rounded-[10px] bg-primary px-4 py-2.25 text-[13px] font-bold text-primary-foreground hover:bg-brand-forest cursor-pointer"
-                    >
-                      Add
-                    </Button>
-                  </div>
-                  {categoryDraftError ? (
-                    <p className="text-xs text-destructive">{categoryDraftError}</p>
-                  ) : null}
-                </div>
-              ) : null}
             </div>
 
             <div className="sm:col-span-2">
@@ -351,7 +230,7 @@ export default function EditConceptDialog({
                     value={field.value}
                     onChange={(date) => {
                       field.onChange(date);
-                      if (date && closesOn && closesOn < date) {
+                      if (date && closesOn && startOfDay(closesOn) < startOfDay(date)) {
                         setValue('closesOn', undefined);
                       }
                     }}
@@ -381,6 +260,11 @@ export default function EditConceptDialog({
                   />
                 )}
               />
+              {errors.closesOn?.message ? (
+                <p className="mt-1 text-[11px] font-medium text-destructive">
+                  {errors.closesOn.message}
+                </p>
+              ) : null}
             </div>
 
             <div>

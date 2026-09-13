@@ -70,8 +70,8 @@ export default function ConceptCard({
 
           <div className="flex flex-wrap items-center justify-end gap-1.5">
             {concept.isOnboarding ? (
-              <span className="inline-flex items-center rounded-md border border-primary/25 bg-primary/10 px-2 py-0.5 text-[10px] font-bold tracking-wider text-primary uppercase">
-                NEW
+              <span className="inline-flex items-center rounded-md border border-primary/25 bg-primary/10 px-2 py-0.5 text-[10px] font-bold tracking-wider text-primary">
+                New
               </span>
             ) : null}
             <span

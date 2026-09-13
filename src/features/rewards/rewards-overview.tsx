@@ -1,7 +1,6 @@
-import { useMemo, useState } from 'react';
 import { AlertCircle } from 'lucide-react';
 import { useTanstackSearchParams } from '@/lib/use-tanstack-search-params';
-import useResetStateOnChange from '@/hooks/ui/use-reset-state-on-change';
+import usePagination from '@/hooks/ui/use-pagination';
 
 import PageHeader from '@/components/layout/page-header';
 import { Button } from '@/components/ui/button';
@@ -14,27 +13,17 @@ import {
 } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import EmptyState from '@/components/shared/empty-state';
-import BalanceAdjustmentDialog from '@/features/rewards/balance-adjustment-dialog';
 import RewardFilters, {
   parseRewardType,
 } from '@/features/rewards/reward-filters';
 import RewardKpiCards from '@/features/rewards/reward-kpi-cards';
 import RewardTable from '@/features/rewards/reward-table';
-import useCreateAdjustment from '@/hooks/rewards/use-create-adjustment';
 import useRewards from '@/hooks/rewards/use-rewards';
-import type { CreateAdjustmentBody } from '@/models/rewards/rewards-model';
-import { toast } from '@/components/ui/sonner';
-import { DEFAULT_PAGE_SIZE as PAGE_SIZE } from '@/utils/constants/pagination';
-import { getApiErrorMessage } from '@/utils/helpers/api-error';
 
 export default function RewardsOverview() {
   const [searchParams, setSearchParams] = useTanstackSearchParams();
   const type = parseRewardType(searchParams.get('type'));
   const search = searchParams.get('q') ?? '';
-  const [visibleCount, setVisibleCount] = useResetStateOnChange(PAGE_SIZE, [
-    type,
-    search,
-  ]);
 
   const {
     entries,
@@ -47,29 +36,6 @@ export default function RewardsOverview() {
     error,
     refetch,
   } = useRewards({ type, search });
-  const [createAdjustment, createState] = useCreateAdjustment();
-  const [isAdjustOpen, setIsAdjustOpen] = useState(false);
-
-  const contributors = useMemo(() => {
-    return [...new Set(entries.map((entry) => entry.contributor))].sort((a, b) =>
-      a.localeCompare(b),
-    );
-  }, [entries]);
-
-  const closeAdjustment = () => {
-    createState.reset();
-    setIsAdjustOpen(false);
-  };
-
-  const handleCreateAdjustment = async (body: CreateAdjustmentBody) => {
-    try {
-      await createAdjustment(body).unwrap();
-      closeAdjustment();
-      toast.success('Adjustment recorded');
-    } catch {
-      // Error is surfaced via createState.error.
-    }
-  };
 
   const setSearch = (next: string) => {
     const nextParams = new URLSearchParams(searchParams);
@@ -82,6 +48,11 @@ export default function RewardsOverview() {
 
     setSearchParams(nextParams, { replace: true });
   };
+
+  const { paginatedItems, paginationProps } = usePagination({
+    items: entries,
+    initialPageSize: 6,
+  });
 
   if (isError) {
     return (
@@ -100,23 +71,11 @@ export default function RewardsOverview() {
     );
   }
 
-  const visibleEntries = entries.slice(0, visibleCount);
-  const remainingCount = Math.max(0, entries.length - visibleCount);
-
   return (
     <div>
       <PageHeader
         title="Rewards ledger"
         description="Track every reward, balance adjustment and release."
-        action={
-          <Button
-            type="button"
-            onClick={() => setIsAdjustOpen(true)}
-            className="h-auto rounded-full bg-primary px-5 py-3 font-bold text-primary-foreground hover:bg-brand-forest"
-          >
-            + Add adjustment
-          </Button>
-        }
       />
 
       <RewardKpiCards
@@ -154,32 +113,11 @@ export default function RewardsOverview() {
           description="Try a different keyword or type filter."
         />
       ) : (
-        <>
-          <RewardTable entries={visibleEntries} />
-          {remainingCount > 0 ? (
-            <div className="mt-6 flex justify-center">
-              <Button
-                type="button"
-                variant="outline"
-                className="h-auto rounded-full border-border bg-card px-6.5 py-3 text-[13px] font-bold text-foreground hover:bg-surface-subtle"
-                onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
-              >
-                Show more entries · {remainingCount} remaining
-              </Button>
-            </div>
-          ) : null}
-        </>
-      )}
-
-      {isAdjustOpen ? (
-        <BalanceAdjustmentDialog
-          contributors={contributors}
-          isSubmitting={createState.isLoading}
-          error={getApiErrorMessage(createState.error)}
-          onClose={closeAdjustment}
-          onSubmit={handleCreateAdjustment}
+        <RewardTable
+          entries={paginatedItems}
+          pagination={paginationProps}
         />
-      ) : null}
+      )}
     </div>
   );
 }

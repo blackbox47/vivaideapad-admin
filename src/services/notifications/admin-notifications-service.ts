@@ -1,11 +1,12 @@
-import type {
-  AdminNotification,
-  AdminNotificationType,
-  AdminNotificationsParams,
-  AdminNotificationsResponse,
-  MarkAllNotificationsReadResponse,
-  ToggleNotificationBody,
-  ToggleNotificationResponse,
+import {
+  ADMIN_NOTIFICATION_FILTERS,
+  type AdminNotification,
+  type AdminNotificationType,
+  type AdminNotificationsParams,
+  type AdminNotificationsResponse,
+  type MarkAllNotificationsReadResponse,
+  type ToggleNotificationBody,
+  type ToggleNotificationResponse,
 } from '@/models/notifications/admin-notifications-model';
 import { baseService } from '@/services/core/base-service';
 import {
@@ -93,6 +94,33 @@ export const adminNotificationsService = baseService.injectEndpoints({
         method: 'PATCH',
         body,
       }),
+      async onQueryStarted({ id }, { dispatch, queryFulfilled }) {
+        const patchResults: Array<{ undo: () => void }> = [];
+        for (const filter of ADMIN_NOTIFICATION_FILTERS) {
+          patchResults.push(
+            dispatch(
+              adminNotificationsService.util.updateQueryData(
+                'getAdminNotifications',
+                { filter },
+                (draft) => {
+                  const item = draft.notifications.find((n) => n.id === id);
+                  if (item && !item.read) {
+                    item.read = true;
+                    if (draft.unreadCount > 0) {
+                      draft.unreadCount -= 1;
+                    }
+                  }
+                },
+              ),
+            ),
+          );
+        }
+        try {
+          await queryFulfilled;
+        } catch {
+          patchResults.forEach((p) => p.undo());
+        }
+      },
       invalidatesTags: ['admin-notifications'],
     }),
     markAllAdminNotificationsRead: builder.mutation<
@@ -103,6 +131,30 @@ export const adminNotificationsService = baseService.injectEndpoints({
         url: ADMIN_NOTIFICATIONS_READ_ALL_URL,
         method: 'POST',
       }),
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        const patchResults: Array<{ undo: () => void }> = [];
+        for (const filter of ADMIN_NOTIFICATION_FILTERS) {
+          patchResults.push(
+            dispatch(
+              adminNotificationsService.util.updateQueryData(
+                'getAdminNotifications',
+                { filter },
+                (draft) => {
+                  draft.notifications.forEach((n) => {
+                    n.read = true;
+                  });
+                  draft.unreadCount = 0;
+                },
+              ),
+            ),
+          );
+        }
+        try {
+          await queryFulfilled;
+        } catch {
+          patchResults.forEach((p) => p.undo());
+        }
+      },
       invalidatesTags: ['admin-notifications'],
     }),
   }),

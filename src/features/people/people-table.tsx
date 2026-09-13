@@ -3,12 +3,14 @@ import type { ReactNode } from 'react';
 import {
   ProjectTable,
   type ProjectTableColumn,
+  type TablePaginationProps,
 } from '@/components/ui/project-table';
 
 export interface PeopleTableProps {
   columns: Array<string | ProjectTableColumn>;
   minWidth?: string;
   pinColumns?: boolean;
+  pagination?: TablePaginationProps;
   className?: string;
   children: ReactNode;
 }
@@ -21,6 +23,7 @@ export default function PeopleTable({
   columns,
   minWidth = 'min-w-[640px]',
   pinColumns = false,
+  pagination,
   className,
   children,
 }: PeopleTableProps) {
@@ -36,6 +39,7 @@ export default function PeopleTable({
       columns={projectColumns}
       minWidth={minWidth}
       pinColumns={pinColumns}
+      pagination={pagination}
       className={className}
     >
       {children}

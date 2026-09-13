@@ -5,6 +5,7 @@ import {
   ProjectTableCell,
   ProjectTableRow,
 } from '@/components/ui/project-table';
+import usePagination from '@/hooks/ui/use-pagination';
 import type { WorkspaceAdmin } from '@/models/admins/admins-model';
 
 interface AdminsTableProps {
@@ -18,16 +19,22 @@ export default function AdminsTable({
   canManage,
   onRemove,
 }: AdminsTableProps) {
+  const { paginatedItems, paginationProps } = usePagination({
+    items: admins,
+    initialPageSize: 6,
+  });
+
   return (
     <ProjectTable
+      pagination={paginationProps}
       columns={[
         { label: 'Admin' },
         { label: 'Role' },
         { label: 'Added' },
-        { label: '', isAction: true },
+        { label: '', align: 'right', isAction: true },
       ]}
     >
-      {admins.map((admin) => (
+      {paginatedItems.map((admin) => (
         <ProjectTableRow key={admin.id}>
           <ProjectTableCell>
             <strong className="font-semibold text-foreground">
@@ -41,7 +48,7 @@ export default function AdminsTable({
           <ProjectTableCell className="whitespace-nowrap text-muted-foreground">
             {admin.addedOn}
           </ProjectTableCell>
-          <ProjectTableCell>
+          <ProjectTableCell align="right">
             {canManage && admin.access !== 'owner' ? (
               <TableActions>
                 <button

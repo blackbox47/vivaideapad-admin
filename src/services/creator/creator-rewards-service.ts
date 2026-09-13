@@ -9,6 +9,7 @@ import {
   CREATOR_REWARDS_WITHDRAW_URL,
 } from '@/utils/constants/api-end-points';
 import { formatDisplayDate } from '@/utils/helpers/format-display-date';
+import { CURRENCY_SYMBOL } from '@/utils/constants';
 
 export const creatorRewardsService = baseService.injectEndpoints({
   endpoints: (builder) => ({
@@ -17,9 +18,9 @@ export const creatorRewardsService = baseService.injectEndpoints({
       transformResponse: (response: unknown): CreatorRewardsOverview => {
         if (!response || typeof response !== 'object') {
           return {
-            available: 'Tk 0',
-            pending: 'Tk 0',
-            paidToDate: 'Tk 0',
+            available: `${CURRENCY_SYMBOL} 0`,
+            pending: `${CURRENCY_SYMBOL} 0`,
+            paidToDate: `${CURRENCY_SYMBOL} 0`,
             payoutMethod: 'bKash',
             entries: [],
           };
@@ -31,10 +32,19 @@ export const creatorRewardsService = baseService.injectEndpoints({
               date: formatDisplayDate(entry.date),
             }))
           : [];
+
+        const normalizeAmount = (val: unknown, fallback: string) => {
+          if (val === undefined || val === null || val === '') return fallback;
+          const s = String(val).trim();
+          if (s.startsWith(CURRENCY_SYMBOL)) return s;
+          const stripped = s.replace(/^(Tk|৳|\$)\s*/, '');
+          return `${CURRENCY_SYMBOL} ${stripped}`;
+        };
+
         return {
-          available: String(res.available ?? (res.balance ? `Tk ${res.balance}` : 'Tk 0')),
-          pending: String(res.pending ? (String(res.pending).startsWith('Tk') ? res.pending : `Tk ${res.pending}`) : 'Tk 0'),
-          paidToDate: String(res.paidToDate ?? (res.lifetime_debits ? `Tk ${res.lifetime_debits}` : 'Tk 0')),
+          available: normalizeAmount(res.available ?? (res.balance ? `${CURRENCY_SYMBOL} ${res.balance}` : undefined), `${CURRENCY_SYMBOL} 0`),
+          pending: normalizeAmount(res.pending, `${CURRENCY_SYMBOL} 0`),
+          paidToDate: normalizeAmount(res.paidToDate ?? (res.lifetime_debits ? `${CURRENCY_SYMBOL} ${res.lifetime_debits}` : undefined), `${CURRENCY_SYMBOL} 0`),
           payoutMethod: String(res.payoutMethod ?? 'bKash'),
           entries,
         };

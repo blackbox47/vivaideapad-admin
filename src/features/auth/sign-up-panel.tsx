@@ -139,7 +139,7 @@ export default function SignUpPanel({
       <header className="flex w-full items-center justify-between px-5 pt-5 pb-3 md:hidden">
         <Link
           to="/"
-          className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-xs font-semibold text-foreground no-underline shadow-xs transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary"
+          className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground no-underline shadow-xs transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary"
           aria-label="Back to home"
         >
           <ArrowLeft className="size-3.5" />
@@ -167,7 +167,7 @@ export default function SignUpPanel({
                 aria-hidden
                 className="size-2 animate-pulse rounded-full bg-primary"
               />
-              <span className="text-[11px] font-bold tracking-widest text-primary uppercase">
+              <span className="text-sm font-bold tracking-widest text-primary uppercase">
                 {eyebrow}
               </span>
             </div>
@@ -184,7 +184,7 @@ export default function SignUpPanel({
         <div className="mb-8 hidden md:block">
           <Link
             to="/"
-            className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-xs font-semibold text-foreground no-underline shadow-xs transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary"
+            className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground no-underline shadow-xs transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary"
           >
             <ArrowLeft className="size-3.5" />
             <span>Back to home</span>
@@ -202,7 +202,7 @@ export default function SignUpPanel({
                   <h2 className="text-sm font-semibold text-foreground">
                     Check your inbox
                   </h2>
-                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                  <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
                     We&apos;ve sent a verification link to{' '}
                     <span className="font-semibold text-foreground">
                       {submittedEmail}
@@ -226,7 +226,7 @@ export default function SignUpPanel({
                     setSubmittedEmail(null);
                     reset();
                   }}
-                  className="w-full cursor-pointer rounded-xl border border-border bg-card py-3 text-xs font-semibold text-foreground transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary"
+                  className="w-full cursor-pointer rounded-xl border border-border bg-card py-3 text-sm font-semibold text-foreground transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary"
                 >
                   Sign up with a different email
                 </button>
@@ -237,13 +237,13 @@ export default function SignUpPanel({
             <div>
               {/* Header Kicker & Title */}
               <div className="mb-6">
-                <p className="mb-2 text-xs font-semibold tracking-wider text-primary uppercase">
+                <p className="mb-2 text-sm font-semibold tracking-wider text-primary uppercase">
                   START CONTRIBUTING
                 </p>
                 <h2 className="text-2xl font-extrabold tracking-tight text-foreground md:text-3xl md:font-bold">
                   Create contributor account
                 </h2>
-                <p className="mt-1 text-xs text-muted-foreground md:text-sm">
+                <p className="mt-1 text-sm text-muted-foreground">
                   Choose how you&apos;d like to sign up to start drafting and
                   submitting ideas.
                 </p>
@@ -280,7 +280,7 @@ export default function SignUpPanel({
                   {isGoogleSigningUp && (
                     <div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-[1px]">
                       <Loader2 className="size-4 animate-spin text-primary" />
-                      <span className="ml-2 text-xs font-medium text-foreground">
+                      <span className="ml-2 text-sm font-medium text-foreground">
                         Connecting to Google...
                       </span>
                     </div>
@@ -291,7 +291,7 @@ export default function SignUpPanel({
               {/* Divider */}
               <div className="relative my-4 flex items-center">
                 <div className="flex-grow border-t border-border" />
-                <span className="px-3 text-xs font-medium tracking-wider text-muted-foreground uppercase">
+                <span className="px-3 text-sm font-medium tracking-wider text-muted-foreground uppercase">
                   or continue with email
                 </span>
                 <div className="flex-grow border-t border-border" />
@@ -311,8 +311,9 @@ export default function SignUpPanel({
                     label="Full name"
                     placeholder="e.g. Maya Rahman"
                     showRequiredIndicator={false}
-                    labelClassName="mb-1.5 text-xs font-semibold tracking-wide text-foreground"
+                    labelClassName="mb-1.5 text-sm font-semibold tracking-wide text-foreground"
                     className={fieldClassName}
+                    errorClassName="mt-1.5 text-sm font-semibold text-destructive"
                     errorMessage={errors.fullName?.message}
                     {...register('fullName')}
                   />
@@ -327,8 +328,9 @@ export default function SignUpPanel({
                     autoComplete="email"
                     placeholder="name@domain.com"
                     showRequiredIndicator={false}
-                    labelClassName="mb-1.5 text-xs font-semibold tracking-wide text-foreground"
+                    labelClassName="mb-1.5 text-sm font-semibold tracking-wide text-foreground"
                     className={fieldClassName}
+                    errorClassName="mt-1.5 text-sm font-semibold text-destructive"
                     errorMessage={errors.email?.message}
                     {...register('email')}
                   />
@@ -343,8 +345,9 @@ export default function SignUpPanel({
                     autoComplete="new-password"
                     placeholder="Create a secure password (min. 8 characters)"
                     showRequiredIndicator={false}
-                    labelClassName="mb-1.5 text-xs font-semibold tracking-wide text-foreground"
+                    labelClassName="mb-1.5 text-sm font-semibold tracking-wide text-foreground"
                     className={`${fieldClassName} pr-11`}
+                    errorClassName="mt-1.5 text-sm font-semibold text-destructive"
                     errorMessage={errors.password?.message}
                     rightSlot={
                       <button
@@ -376,7 +379,7 @@ export default function SignUpPanel({
                       className="mt-0.5 size-4 rounded border-border text-primary accent-primary focus:ring-primary/20 focus:ring-offset-0"
                       {...register('consent')}
                     />
-                    <span className="text-xs leading-relaxed text-muted-foreground">
+                    <span className="text-sm leading-relaxed text-muted-foreground">
                       I agree to the{' '}
                       <span className="font-medium text-foreground underline hover:text-primary">
                         Terms of Service
@@ -389,7 +392,7 @@ export default function SignUpPanel({
                     </span>
                   </label>
                   {errors.consent?.message && (
-                    <p className="mt-1 text-xs text-destructive">
+                    <p className="mt-1 text-sm text-destructive">
                       {errors.consent.message}
                     </p>
                   )}
@@ -398,7 +401,7 @@ export default function SignUpPanel({
                 {/* Submit Error banner */}
                 {submitError && (
                   <div
-                    className="rounded-lg bg-destructive/10 p-3 text-xs font-semibold text-destructive"
+                    className="rounded-lg bg-destructive/10 p-3 text-sm font-semibold text-destructive"
                     role="alert"
                   >
                     {submitError}
@@ -426,7 +429,7 @@ export default function SignUpPanel({
 
               {/* Existing Account Helper */}
               <div className="mt-6 text-center">
-                <p className="text-xs text-muted-foreground">
+                <p className="text-sm text-muted-foreground">
                   Already have an account?{' '}
                   <Link
                     to={CREATOR_ROUTES.login}
@@ -443,12 +446,12 @@ export default function SignUpPanel({
 
       {/* Bottom Trust Note */}
       <footer className="w-full px-4 py-4 text-center">
-        <p className="text-[11px] leading-normal text-muted-foreground">
+        <p className="text-sm leading-normal text-muted-foreground">
           Approved contributors receive a secure onboarding packet and dashboard
           access upon verification.
         </p>
         {footer ? (
-          <p className="mt-1 text-[10px] text-muted-foreground md:hidden">
+          <p className="mt-1 text-sm text-muted-foreground md:hidden">
             {footer}
           </p>
         ) : null}

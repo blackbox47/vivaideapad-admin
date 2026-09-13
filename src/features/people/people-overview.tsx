@@ -12,20 +12,32 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { toast } from '@/components/ui/sonner';
 import ApplicantReviewPanel from '@/features/people/applicant-review-panel';
 import ApplicantsTable from '@/features/people/applicants-table';
 import ContributorsTable from '@/features/people/contributors-table';
-import InvitedTable from '@/features/people/invited-table';
 import PeopleTabs from '@/features/people/people-tabs';
 import usePeople from '@/hooks/people/use-people';
 import type {
+  Applicant,
   ApplicantStatus,
   PeopleTab,
   PlatformUser,
 } from '@/models/people/people-model';
-import { toast } from '@/components/ui/sonner';
+import { useGetApplicationQuery } from '@/services/applications/applications-service';
+import { getApiErrorMessage } from '@/utils/helpers/api-error';
 
-const TABS: PeopleTab[] = ['applicants', 'invited', 'contributors'];
+const TABS: PeopleTab[] = [
+  'applicants',
+  'invited',
+  'rejected',
+  'contributors',
+];
+
+const PENDING_APPLICANT_STATUSES = new Set<ApplicantStatus>([
+  'Submitted',
+  'Under Review',
+]);
 
 function parseTab(value: string | null): PeopleTab {
   if (value && TABS.includes(value as PeopleTab)) {
@@ -33,6 +45,34 @@ function parseTab(value: string | null): PeopleTab {
   }
 
   return 'applicants';
+}
+
+function mergeApplicant(
+  listRow: Applicant | undefined,
+  detail: Applicant,
+): Applicant {
+  if (!listRow) {
+    return detail;
+  }
+
+  return {
+    ...listRow,
+    ...detail,
+    name: detail.name.trim() || listRow.name,
+    email: detail.email.trim() || listRow.email,
+    topic:
+      detail.topic && detail.topic !== 'Uncategorized'
+        ? detail.topic
+        : listRow.topic,
+    title: detail.title.trim() || listRow.title,
+    body: detail.body.trim() || listRow.body,
+    source: detail.source || listRow.source,
+    consent: detail.consent ?? listRow.consent,
+    decisionNotes: detail.decisionNotes ?? listRow.decisionNotes,
+    referenceNumber: detail.referenceNumber || listRow.referenceNumber,
+    risk: detail.risk ?? listRow.risk,
+    topicDetail: detail.topicDetail ?? listRow.topicDetail,
+  };
 }
 
 export default function PeopleOverview() {
@@ -53,15 +93,54 @@ export default function PeopleOverview() {
 
   const applicants = data?.applicants ?? [];
   const users = data?.users ?? [];
-  const invitedUsers = useMemo(
-    () => users.filter((user) => !user.hasLiveSubmission),
-    [users],
+  const pendingApplicants = useMemo(
+    () =>
+      applicants.filter((applicant) =>
+        PENDING_APPLICANT_STATUSES.has(applicant.status),
+      ),
+    [applicants],
+  );
+  const rejectedApplicants = useMemo(
+    () => applicants.filter((applicant) => applicant.status === 'Rejected'),
+    [applicants],
   );
   const contributorUsers = useMemo(
-    () => users.filter((user) => user.hasLiveSubmission),
+    () =>
+      users.filter(
+        (user) => user.status === 'Active' || user.status === 'Suspended',
+      ),
     [users],
   );
-  const reviewing = applicants.find((applicant) => applicant.id === reviewId);
+  const contributorEmails = useMemo(
+    () =>
+      new Set(
+        contributorUsers.map((user) => user.email.trim().toLowerCase()),
+      ),
+    [contributorUsers],
+  );
+  const invitedApplicants = useMemo(
+    () =>
+      applicants.filter(
+        (applicant) =>
+          applicant.status === 'Approved' &&
+          !contributorEmails.has(applicant.email.trim().toLowerCase()),
+      ),
+    [applicants, contributorEmails],
+  );
+  const reviewingListRow = applicants.find(
+    (applicant) => applicant.id === reviewId,
+  );
+  const { data: detailData, isLoading: isLoadingDetail } =
+    useGetApplicationQuery(reviewId ?? '', {
+      skip: !reviewId,
+    });
+  const reviewing: Applicant | undefined = reviewId
+    ? detailData?.application?.id === reviewId
+      ? mergeApplicant(reviewingListRow, detailData.application)
+      : reviewingListRow
+    : undefined;
+  const isPendingReview =
+    reviewing != null && PENDING_APPLICANT_STATUSES.has(reviewing.status);
 
   const handleToggle = (user: PlatformUser) => {
     const nextStatus = user.status === 'Suspended' ? 'Active' : 'Suspended';
@@ -83,14 +162,20 @@ export default function PeopleOverview() {
       return;
     }
 
-    void decideApplicant({ id: reviewId, status, comment })
+    void decideApplicant({
+      id: reviewId,
+      status,
+      ...(status === 'Approved' ? {} : { comment }),
+    })
       .unwrap()
       .then(() => {
         setReviewId(null);
         toast.success(`Application marked as ${status.toLowerCase()}`);
       })
-      .catch(() => {
-        toast.error('Failed to record application decision');
+      .catch((err: unknown) => {
+        toast.error(
+          getApiErrorMessage(err) ?? 'Failed to record application decision',
+        );
       });
   };
 
@@ -128,16 +213,27 @@ export default function PeopleOverview() {
         <>
           <PeopleTabs
             tab={tab}
-            applicantCount={applicants.length}
-            invitedCount={invitedUsers.length}
+            applicantCount={pendingApplicants.length}
+            invitedCount={invitedApplicants.length}
+            rejectedCount={rejectedApplicants.length}
             contributorCount={contributorUsers.length}
           />
 
           {tab === 'invited' ? (
-            <InvitedTable
-              users={invitedUsers}
-              onToggle={handleToggle}
-              isToggling={isToggling}
+            <ApplicantsTable
+              applicants={invitedApplicants}
+              onReview={setReviewId}
+              actionLabel="View"
+              emptyTitle="No invited applicants"
+              emptyDescription="Approved applicants appear here until they become active contributors."
+            />
+          ) : tab === 'rejected' ? (
+            <ApplicantsTable
+              applicants={rejectedApplicants}
+              onReview={setReviewId}
+              actionLabel="View"
+              emptyTitle="No rejected applicants"
+              emptyDescription="Rejected applications will appear here."
             />
           ) : tab === 'contributors' ? (
             <ContributorsTable
@@ -146,15 +242,23 @@ export default function PeopleOverview() {
               isToggling={isToggling}
             />
           ) : (
-            <ApplicantsTable applicants={applicants} onReview={setReviewId} />
+            <ApplicantsTable
+              applicants={pendingApplicants}
+              onReview={setReviewId}
+              emptyTitle="No applicants in review"
+              emptyDescription="Applications that are under review appear here."
+            />
           )}
         </>
       )}
 
       {reviewing ? (
         <ApplicantReviewPanel
+          key={reviewing.id}
           applicant={reviewing}
           isDeciding={isDeciding}
+          isLoadingDetails={Boolean(reviewId) && isLoadingDetail}
+          readOnly={!isPendingReview}
           onClose={() => setReviewId(null)}
           onDecide={handleDecide}
         />

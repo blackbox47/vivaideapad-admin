@@ -1,7 +1,21 @@
+import { startOfDay } from 'date-fns';
 import { z } from 'zod';
 
-/** Synthetic id prefix for `+ New category` additions — not a real UUID. */
-export const LOCAL_CATEGORY_PREFIX = 'local:';
+function refineClosingDate(
+  data: { opensOn?: Date; closesOn?: Date },
+  ctx: z.RefinementCtx,
+): void {
+  if (!data.opensOn || !data.closesOn) {
+    return;
+  }
+  if (startOfDay(data.closesOn) < startOfDay(data.opensOn)) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['closesOn'],
+      message: 'Closing date cannot be before the opening date.',
+    });
+  }
+}
 
 export const createConceptSchema = z.object({
   title: z
@@ -9,13 +23,7 @@ export const createConceptSchema = z.object({
     .trim()
     .min(1, 'Title is required.')
     .max(255, 'Title must be at most 255 characters.'),
-  categoryId: z
-    .string()
-    .min(1, 'Pick a category before saving.')
-    .refine(
-      (id) => !id.startsWith(LOCAL_CATEGORY_PREFIX),
-      'Draft category must be saved from the Categories page first.',
-    ),
+  categoryId: z.string().min(1, 'Pick a category before saving.'),
   description: z
     .string()
     .trim()
@@ -26,7 +34,7 @@ export const createConceptSchema = z.object({
   reward: z.string(),
   isOnboarding: z.boolean().optional(),
   status: z.enum(['draft', 'active', 'archived']),
-});
+}).superRefine(refineClosingDate);
 
 export type CreateConceptFormValues = z.infer<typeof createConceptSchema>;
 
@@ -36,13 +44,7 @@ export const editConceptSchema = z.object({
     .trim()
     .min(1, 'Title is required.')
     .max(255, 'Title must be at most 255 characters.'),
-  categoryId: z
-    .string()
-    .min(1, 'Pick a category before saving.')
-    .refine(
-      (id) => !id.startsWith(LOCAL_CATEGORY_PREFIX),
-      'Draft category must be saved from the Categories page first.',
-    ),
+  categoryId: z.string().min(1, 'Pick a category before saving.'),
   description: z
     .string()
     .trim()
@@ -53,6 +55,6 @@ export const editConceptSchema = z.object({
   reward: z.string(),
   isOnboarding: z.boolean().optional(),
   status: z.enum(['draft', 'active', 'archived']),
-});
+}).superRefine(refineClosingDate);
 
 export type EditConceptFormValues = z.infer<typeof editConceptSchema>;

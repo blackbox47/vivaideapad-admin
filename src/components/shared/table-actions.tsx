@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { MoreHorizontal } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -50,43 +49,18 @@ export function TableActions({
   align = 'end',
   triggerLabel = 'Row actions',
 }: TableActionsProps) {
-  // If structured items are provided:
+  // If structured items are provided, always collapse them into a 3-dots menu.
   if (items && items.length > 0) {
-    if (items.length === 1) {
-      const item = items[0];
-      return (
-        <div className={cn('flex items-center justify-end', className)}>
-          <Button
-            size="sm"
-            variant={item.variant === 'destructive' ? 'destructive' : 'outline'}
-            disabled={item.disabled}
-            onClick={item.onClick}
-            className="h-auto rounded-full px-3.5 py-1.5 text-xs font-bold"
-          >
-            {item.icon}
-            {item.label}
-          </Button>
-        </div>
-      );
-    }
-
     return (
       <div className={cn('flex items-center justify-end', className)}>
         <DropdownMenu>
           <DropdownMenuTrigger
-            render={
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="size-8 rounded-full text-muted-foreground hover:bg-surface-subtle hover:text-foreground cursor-pointer"
-                aria-label={triggerLabel}
-              />
-            }
+            className="inline-flex size-8 cursor-pointer items-center justify-center rounded-full text-muted-foreground outline-none hover:bg-surface-subtle hover:text-foreground"
+            aria-label={triggerLabel}
           >
             <MoreHorizontal className="size-4" />
           </DropdownMenuTrigger>
-          <DropdownMenuContent align={align} className="min-w-32">
+          <DropdownMenuContent align={align} className="z-50 min-w-32">
             {items.map((item, index) => (
               <DropdownMenuItem
                 key={item.key ?? index}
@@ -122,22 +96,15 @@ export function TableActions({
   // More than 1 action: replace with 3-dots trigger and popup
   return (
     <div className={cn('flex items-center justify-end', className)}>
-      <DropdownMenu>
-        <DropdownMenuTrigger
-          render={
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="size-8 rounded-full text-muted-foreground hover:bg-surface-subtle hover:text-foreground cursor-pointer"
-              aria-label={triggerLabel}
-            />
-          }
-        >
-          <MoreHorizontal className="size-4" />
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align={align} className="min-w-32">
-          {validChildren.map((child, index) => {
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            className="inline-flex size-8 cursor-pointer items-center justify-center rounded-full text-muted-foreground outline-none hover:bg-surface-subtle hover:text-foreground"
+            aria-label={triggerLabel}
+          >
+            <MoreHorizontal className="size-4" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align={align} className="z-50 min-w-32">
+            {validChildren.map((child, index) => {
             if (React.isValidElement(child)) {
               const childProps = child.props as Record<string, unknown>;
               const onClick = typeof childProps.onClick === 'function'

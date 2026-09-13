@@ -13,7 +13,16 @@ export type ApplicantStatus =
 
 export type PlatformUserStatus = 'Active' | 'Invited' | 'Suspended';
 
-export type PeopleTab = 'applicants' | 'invited' | 'contributors';
+export type PeopleTab = 'applicants' | 'invited' | 'rejected' | 'contributors';
+
+export type ApplicantAiRisk = 'Low' | 'Medium' | 'High';
+
+export interface ApplicantTopicDetail {
+  title: string;
+  brief?: string;
+  rewardBudget?: string | number;
+  closeDate?: string | null;
+}
 
 export interface Applicant {
   id: string;
@@ -24,6 +33,12 @@ export interface Applicant {
   body: string;
   submitted: string;
   status: ApplicantStatus;
+  source?: string;
+  consent?: boolean;
+  decisionNotes?: string | null;
+  referenceNumber?: string;
+  risk?: ApplicantAiRisk;
+  topicDetail?: ApplicantTopicDetail | null;
 }
 
 export interface PlatformUser {

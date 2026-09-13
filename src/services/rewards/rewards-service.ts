@@ -13,6 +13,20 @@ import {
   REWARDS_LEDGER_URL,
 } from '@/utils/constants/api-end-points';
 import { formatDisplayDate } from '@/utils/helpers/format-display-date';
+import { CURRENCY_SYMBOL } from '@/utils/constants';
+
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function firstDisplayName(...candidates: unknown[]): string {
+  for (const candidate of candidates) {
+    if (typeof candidate !== 'string') continue;
+    const trimmed = candidate.trim();
+    if (!trimmed || UUID_RE.test(trimmed)) continue;
+    return trimmed;
+  }
+  return 'Contributor';
+}
 
 export const rewardsService = baseService.injectEndpoints({
   endpoints: (builder) => ({
@@ -74,8 +88,11 @@ export const rewardsService = baseService.injectEndpoints({
 
             return {
               id: String(item.id ?? ''),
-              contributor: String(
-                metadata.user_name ?? metadata.contributor ?? item.user_id ?? 'Contributor',
+              contributor: firstDisplayName(
+                item.display_name,
+                metadata.user_name,
+                metadata.contributor,
+                metadata.display_name,
               ),
               description: String(
                 metadata.description ?? item.reference ?? `${type} entry`,
@@ -83,7 +100,10 @@ export const rewardsService = baseService.injectEndpoints({
               date: dateStr,
               occurredAt: String(item.created_at || item.posted_at || new Date().toISOString()),
               type,
-              amount: type === 'Withdrawal' ? `−Tk ${numAmount}` : `+Tk ${numAmount}`,
+              amount:
+                type === 'Withdrawal'
+                  ? `−${CURRENCY_SYMBOL} ${numAmount}`
+                  : `+${CURRENCY_SYMBOL} ${numAmount}`,
               amountValue: numAmount,
               status,
             };

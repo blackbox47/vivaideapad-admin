@@ -16,6 +16,7 @@ import {
   REPORTS_PARTICIPATION_URL,
   REPORTS_QUALITY_URL,
 } from '@/utils/constants/api-end-points';
+import { CURRENCY_SYMBOL } from '@/utils/constants';
 
 export interface ReportRangeParams {
   dateFrom?: string;
@@ -39,7 +40,7 @@ export const reportsService = baseService.injectEndpoints({
             qualityBreakdown: [],
             riskCounts: { Low: 0, Medium: 0, High: 0 },
             payoutSummary: {
-              paidThisMonth: 'Tk 0',
+              paidThisMonth: `${CURRENCY_SYMBOL} 0`,
               pendingRequests: 0,
               averageProcessingDays: 0,
               totalPaidContributors: 0,
@@ -59,7 +60,7 @@ export const reportsService = baseService.injectEndpoints({
           qualityBreakdown: Array.isArray(res.qualityBreakdown) ? res.qualityBreakdown : [],
           riskCounts: (res.riskCounts as ReportsOverview['riskCounts']) ?? { Low: 0, Medium: 0, High: 0 },
           payoutSummary: (res.payoutSummary as ReportsOverview['payoutSummary']) ?? {
-            paidThisMonth: 'Tk 0',
+            paidThisMonth: `${CURRENCY_SYMBOL} 0`,
             pendingRequests: 0,
             averageProcessingDays: 0,
             totalPaidContributors: 0,

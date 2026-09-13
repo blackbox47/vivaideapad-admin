@@ -5,6 +5,7 @@ import {
   ProjectTableRow,
   type ProjectTableColumn,
 } from '@/components/ui/project-table';
+import usePagination from '@/hooks/ui/use-pagination';
 import type { CreatorRewardEntry } from '@/models/creator/creator-rewards-model';
 import { formatDisplayDate } from '@/utils/helpers/format-display-date';
 
@@ -25,6 +26,11 @@ export default function CreatorRewardsTable({
   entries,
   isLoading,
 }: CreatorRewardsTableProps) {
+  const { paginatedItems, paginationProps } = usePagination({
+    items: entries,
+    initialPageSize: 6,
+  });
+
   return (
     <ProjectTable
       columns={columns}
@@ -35,8 +41,9 @@ export default function CreatorRewardsTable({
       emptyDescription="Your reward earnings and payouts will appear here."
       className="border-0 rounded-[14px]"
       minWidth="min-w-[700px]"
+      pagination={paginationProps}
     >
-      {entries.map((entry) => (
+      {paginatedItems.map((entry) => (
         <ProjectTableRow key={entry.id}>
           <ProjectTableCell className="whitespace-nowrap text-muted-foreground">
             {formatDisplayDate(entry.date)}

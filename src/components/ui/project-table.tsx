@@ -11,6 +11,10 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
+import {
+  TablePagination,
+  type TablePaginationProps,
+} from '@/components/ui/pagination';
 
 /**
  * Reusable table shell matching the project design language:
@@ -67,6 +71,10 @@ export interface ProjectTableProps {
   minWidth?: string;
   /** Whether to pin 1st and last columns (defaults to true when >= 3 columns). */
   pinColumns?: boolean;
+  /** Optional pagination props rendering production-grade pagination footer. */
+  pagination?: TablePaginationProps | null;
+  /** Optional custom footer inside the table card shell. */
+  footer?: React.ReactNode;
   children?: React.ReactNode;
 }
 
@@ -91,6 +99,8 @@ function ProjectTable({
   className,
   minWidth = 'min-w-[800px]',
   pinColumns = true,
+  pagination,
+  footer,
   children,
 }: ProjectTableProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -136,23 +146,23 @@ function ProjectTable({
 
   const pinnedContainerClasses = shouldPin
     ? cn(
-        // Pinned first column (left: 0)
-        '[&_th:first-child]:sticky [&_th:first-child]:left-0 [&_th:first-child]:z-20 [&_th:first-child]:bg-surface-subtle',
-        '[&_td:first-child:not([colspan])]:sticky [&_td:first-child:not([colspan])]:left-0 [&_td:first-child:not([colspan])]:z-10 [&_td:first-child:not([colspan])]:bg-card',
+        // Pinned first column (left: 0) - desktop only (>= 768px)
+        'md:[&_th:first-child]:sticky md:[&_th:first-child]:left-0 md:[&_th:first-child]:z-20 md:[&_th:first-child]:bg-surface-subtle',
+        'md:[&_td:first-child:not([colspan])]:sticky md:[&_td:first-child:not([colspan])]:left-0 md:[&_td:first-child:not([colspan])]:z-10 md:[&_td:first-child:not([colspan])]:bg-card',
         canScrollLeft
-          ? '[&_th:first-child]:shadow-[1px_0_0_0_var(--border-muted),4px_0_12px_-2px_rgba(0,0,0,0.08)] dark:[&_th:first-child]:shadow-[1px_0_0_0_var(--border-muted),4px_0_12px_-2px_rgba(0,0,0,0.4)] [&_td:first-child:not([colspan])]:shadow-[1px_0_0_0_var(--border-muted),4px_0_12px_-2px_rgba(0,0,0,0.08)] dark:[&_td:first-child:not([colspan])]:shadow-[1px_0_0_0_var(--border-muted),4px_0_12px_-2px_rgba(0,0,0,0.4)]'
-          : '[&_th:first-child]:shadow-[1px_0_0_0_var(--border-muted)] [&_td:first-child:not([colspan])]:shadow-[1px_0_0_0_var(--border-muted)]',
+          ? 'md:[&_th:first-child]:shadow-[1px_0_0_0_var(--border-muted),4px_0_12px_-2px_rgba(0,0,0,0.08)] dark:md:[&_th:first-child]:shadow-[1px_0_0_0_var(--border-muted),4px_0_12px_-2px_rgba(0,0,0,0.4)] md:[&_td:first-child:not([colspan])]:shadow-[1px_0_0_0_var(--border-muted),4px_0_12px_-2px_rgba(0,0,0,0.08)] dark:md:[&_td:first-child:not([colspan])]:shadow-[1px_0_0_0_var(--border-muted),4px_0_12px_-2px_rgba(0,0,0,0.4)]'
+          : 'md:[&_th:first-child]:shadow-[1px_0_0_0_var(--border-muted)] md:[&_td:first-child:not([colspan])]:shadow-[1px_0_0_0_var(--border-muted)]',
 
-        // Pinned last column (right: 0)
-        '[&_th:last-child]:sticky [&_th:last-child]:right-0 [&_th:last-child]:z-20 [&_th:last-child]:bg-surface-subtle',
-        '[&_td:last-child:not([colspan])]:sticky [&_td:last-child:not([colspan])]:right-0 [&_td:last-child:not([colspan])]:z-10 [&_td:last-child:not([colspan])]:bg-card',
+        // Pinned last column (right: 0) - desktop only (>= 768px)
+        'md:[&_th:last-child]:sticky md:[&_th:last-child]:right-0 md:[&_th:last-child]:z-20 md:[&_th:last-child]:bg-surface-subtle',
+        'md:[&_td:last-child:not([colspan])]:sticky md:[&_td:last-child:not([colspan])]:right-0 md:[&_td:last-child:not([colspan])]:z-10 md:[&_td:last-child:not([colspan])]:bg-card',
         canScrollRight
-          ? '[&_th:last-child]:shadow-[-1px_0_0_0_var(--border-muted),-4px_0_12px_-2px_rgba(0,0,0,0.08)] dark:[&_th:last-child]:shadow-[-1px_0_0_0_var(--border-muted),-4px_0_12px_-2px_rgba(0,0,0,0.4)] [&_td:last-child:not([colspan])]:shadow-[-1px_0_0_0_var(--border-muted),-4px_0_12px_-2px_rgba(0,0,0,0.08)] dark:[&_td:last-child:not([colspan])]:shadow-[-1px_0_0_0_var(--border-muted),-4px_0_12px_-2px_rgba(0,0,0,0.4)]'
-          : '[&_th:last-child]:shadow-[-1px_0_0_0_var(--border-muted)] [&_td:last-child:not([colspan])]:shadow-[-1px_0_0_0_var(--border-muted)]',
+          ? 'md:[&_th:last-child]:shadow-[-1px_0_0_0_var(--border-muted),-4px_0_12px_-2px_rgba(0,0,0,0.08)] dark:md:[&_th:last-child]:shadow-[-1px_0_0_0_var(--border-muted),-4px_0_12px_-2px_rgba(0,0,0,0.4)] md:[&_td:last-child:not([colspan])]:shadow-[-1px_0_0_0_var(--border-muted),-4px_0_12px_-2px_rgba(0,0,0,0.08)] dark:md:[&_td:last-child:not([colspan])]:shadow-[-1px_0_0_0_var(--border-muted),-4px_0_12px_-2px_rgba(0,0,0,0.4)]'
+          : 'md:[&_th:last-child]:shadow-[-1px_0_0_0_var(--border-muted)] md:[&_td:last-child:not([colspan])]:shadow-[-1px_0_0_0_var(--border-muted)]',
 
         // Row hover synchronization for pinned cells
-        '[&_tr:hover_td:first-child:not([colspan])]:bg-surface-subtle/60',
-        '[&_tr:hover_td:last-child:not([colspan])]:bg-surface-subtle/60',
+        'md:[&_tr:hover_td:first-child:not([colspan])]:bg-surface-subtle/60',
+        'md:[&_tr:hover_td:last-child:not([colspan])]:bg-surface-subtle/60',
       )
     : '';
 
@@ -160,7 +170,7 @@ function ProjectTable({
     <div className={cn(SHELL_CLASS, className)}>
       <Table
         containerRef={scrollContainerRef}
-        containerClassName="no-scrollbar"
+        containerClassName="md:no-scrollbar"
         className={cn(INNER_BASE, minWidth, pinnedContainerClasses)}
       >
         <TableHeader>
@@ -195,18 +205,18 @@ function ProjectTable({
                       className={cn(
                         CELL_BASE,
                         'h-12',
-                        shouldPin && isFirst && 'sticky left-0 z-10',
+                        shouldPin && isFirst && 'md:sticky md:left-0 md:z-10',
                         shouldPin &&
                           isFirst &&
                           (canScrollLeft
-                            ? 'shadow-[1px_0_0_0_var(--border-muted),4px_0_12px_-2px_rgba(0,0,0,0.08)] dark:shadow-[1px_0_0_0_var(--border-muted),4px_0_12px_-2px_rgba(0,0,0,0.4)]'
-                            : 'shadow-[1px_0_0_0_var(--border-muted)]'),
-                        shouldPin && isLast && 'sticky right-0 z-10',
+                            ? 'md:shadow-[1px_0_0_0_var(--border-muted),4px_0_12px_-2px_rgba(0,0,0,0.08)] dark:md:shadow-[1px_0_0_0_var(--border-muted),4px_0_12px_-2px_rgba(0,0,0,0.4)]'
+                            : 'md:shadow-[1px_0_0_0_var(--border-muted)]'),
+                        shouldPin && isLast && 'md:sticky md:right-0 md:z-10',
                         shouldPin &&
                           isLast &&
                           (canScrollRight
-                            ? 'shadow-[-1px_0_0_0_var(--border-muted),-4px_0_12px_-2px_rgba(0,0,0,0.08)] dark:shadow-[-1px_0_0_0_var(--border-muted),-4px_0_12px_-2px_rgba(0,0,0,0.4)]'
-                            : 'shadow-[-1px_0_0_0_var(--border-muted)]'),
+                            ? 'md:shadow-[-1px_0_0_0_var(--border-muted),-4px_0_12px_-2px_rgba(0,0,0,0.08)] dark:md:shadow-[-1px_0_0_0_var(--border-muted),-4px_0_12px_-2px_rgba(0,0,0,0.4)]'
+                            : 'md:shadow-[-1px_0_0_0_var(--border-muted)]'),
                       )}
                     >
                       <Skeleton className="h-4 w-4/5" />
@@ -235,6 +245,11 @@ function ProjectTable({
           )}
         </TableBody>
       </Table>
+      {pagination && !isLoading && !isEmpty && pagination.totalItems > 0 ? (
+        <TablePagination {...pagination} />
+      ) : footer ? (
+        footer
+      ) : null}
     </div>
   );
 }
@@ -272,4 +287,6 @@ export {
   ProjectTable,
   ProjectTableRow,
   ProjectTableCell,
+  TablePagination,
+  type TablePaginationProps,
 };

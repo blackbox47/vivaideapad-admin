@@ -3,6 +3,7 @@ import { X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import type { Payout } from '@/models/payouts/payouts-model';
+import { CURRENCY_SYMBOL } from '@/utils/constants';
 
 interface PayoutProcessPanelProps {
   payout: Payout;
@@ -41,9 +42,11 @@ export default function PayoutProcessPanel({
   };
 
   const amountText =
-    payout.amount.startsWith('Tk') || payout.amount.startsWith('৳')
+    payout.amount.startsWith(CURRENCY_SYMBOL)
       ? payout.amount
-      : `Tk ${payout.amount}`;
+      : payout.amount.startsWith('Tk') || payout.amount.startsWith('৳') || payout.amount.startsWith('$')
+        ? `${CURRENCY_SYMBOL} ${payout.amount.replace(/^(Tk|৳|\$)\s*/, '')}`
+        : `${CURRENCY_SYMBOL} ${payout.amount}`;
 
   const rawMethod = payout.methodDetail || payout.method;
   const methodText = rawMethod.toLowerCase().startsWith('method:')

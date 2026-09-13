@@ -55,7 +55,7 @@ export default function useCategories(
     async (body: CreateCategoryBody) => {
       try {
         const result = await createTrigger(body).unwrap();
-        return result.category;
+        return (result && 'category' in result ? result.category : (result as unknown as Category)) ?? null;
       } catch {
         return null;
       }
@@ -67,7 +67,7 @@ export default function useCategories(
     async (id: string, body: UpdateCategoryBody) => {
       try {
         const result = await updateTrigger({ id, body }).unwrap();
-        return result.category;
+        return (result && 'category' in result ? result.category : (result as unknown as Category)) ?? null;
       } catch {
         return null;
       }

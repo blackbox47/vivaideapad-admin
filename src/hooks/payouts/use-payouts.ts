@@ -10,6 +10,7 @@ import {
   useGetPayoutsQuery,
 } from '@/services/payouts/payouts-service';
 import { getApiErrorMessage } from '@/utils/helpers/api-error';
+import { CURRENCY_SYMBOL } from '@/utils/constants';
 
 interface UsePayoutsParams {
   status: PayoutListParams['status'];
@@ -22,7 +23,7 @@ interface UsePayoutsResult {
   totalCount: number;
   /** Count of payouts with status in {Requested, Under Review, Approved}. */
   awaitingCount: number;
-  /** Sum of amountValue for awaiting payouts, formatted as "Tk 1,234". */
+  /** Sum of amountValue for awaiting payouts, formatted as "৳ 1,234". */
   awaitingTotal: string;
   /** Count of paid payouts. */
   paidCount: number;
@@ -37,7 +38,7 @@ interface UsePayoutsResult {
 const TAKA = new Intl.NumberFormat('en-US');
 
 function formatTaka(value: number): string {
-  return `Tk ${TAKA.format(Math.round(value))}`;
+  return `${CURRENCY_SYMBOL} ${TAKA.format(Math.round(value))}`;
 }
 
 function matchesFilter(
