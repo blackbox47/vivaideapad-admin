@@ -70,7 +70,6 @@ export default function ReviewTable({
         { label: 'Title', headerClassName: titleColClass },
         { label: 'Topic' },
         { label: 'Submitted' },
-        { label: 'AI risk' },
         { label: 'Status' },
         { isAction: true },
       ]}
@@ -101,9 +100,6 @@ export default function ReviewTable({
           </ProjectTableCell>
           <ProjectTableCell className="whitespace-nowrap text-muted-foreground">
             {formatDisplayDate(submission.submitted)}
-          </ProjectTableCell>
-          <ProjectTableCell className="whitespace-nowrap">
-            <StatusBadge status={submission.risk} />
           </ProjectTableCell>
           <ProjectTableCell className="whitespace-nowrap">
             <StatusBadge status={submission.status} />

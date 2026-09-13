@@ -1,4 +1,4 @@
-export type LedgerEntryType = 'Reward' | 'Withdrawal' | 'Adjustment';
+export type LedgerEntryType = 'Reward' | 'Withdrawal';
 
 export type LedgerEntryStatus =
   | 'Available'

@@ -12,7 +12,7 @@ import {
 import { getApiErrorMessage } from '@/utils/helpers/api-error';
 
 interface UseLedgerParams {
-  type?: 'all' | 'Reward' | 'Withdrawal' | 'Adjustment';
+  type?: 'all' | 'Reward' | 'Withdrawal';
   userId?: string;
   status?: string;
   dateFrom?: string;

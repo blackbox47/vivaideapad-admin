@@ -83,17 +83,16 @@ export default function SubmitIdeaForm({
     getValues,
     setError,
     clearErrors,
-    reset,
     formState: { errors },
   } = useForm<SubmitIdeaFormValues>({
     resolver: zodResolver(submitIdeaSchema),
     defaultValues: {
-      topicId: selectedTopicId,
-      title: '',
-      summary: '',
-      body: '',
-      attachmentUrl: '',
-      confirmedOriginal: false,
+      topicId: submission?.conceptId || selectedTopicId || '',
+      title: submission?.title || '',
+      summary: submission?.summary || '',
+      body: submission?.body || '',
+      attachmentUrl: submission?.attachmentUrl || '',
+      confirmedOriginal: Boolean(submission),
     },
   });
 
@@ -122,48 +121,49 @@ export default function SubmitIdeaForm({
     [topics],
   );
 
-  // Populate form with existing submission data
+  // Seed existing attachments once on mount (form remounts when submission changes).
   useEffect(() => {
-    if (submission) {
-      reset({
-        topicId: submission.conceptId || selectedTopicId || '',
-        title: submission.title || '',
-        summary: submission.summary || '',
-        body: submission.body || '',
-        attachmentUrl: submission.attachmentUrl || '',
-        confirmedOriginal: true,
-      });
-
-      if (Array.isArray(submission.attachments)) {
-        setExistingAttachments(submission.attachments as SubmissionAttachmentItem[]);
-      } else if (
-        submission.attachments &&
-        typeof submission.attachments === 'object' &&
-        (submission.attachments as { url?: string }).url
-      ) {
-        const att = submission.attachments as Record<string, unknown>;
-        setExistingAttachments([
-          {
-            name: String(att.name ?? att.original_name ?? 'document'),
-            original_name: att.original_name ? String(att.original_name) : undefined,
-            url: String(att.url),
-            size: (att.size as number | string | undefined) ?? undefined,
-            mime_type: (att.mime_type ?? att.type) as string | undefined,
-            type: att.type as string | undefined,
-          },
-        ]);
-      } else if (submission.attachmentUrl) {
-        setExistingAttachments([
-          {
-            name: submission.attachmentUrl.split('/').pop() || 'document',
-            url: submission.attachmentUrl,
-          },
-        ]);
-      } else {
-        setExistingAttachments([]);
-      }
+    if (!submission) {
+      setExistingAttachments([]);
+      return;
     }
-  }, [submission, reset, selectedTopicId]);
+
+    if (Array.isArray(submission.attachments)) {
+      setExistingAttachments(submission.attachments as SubmissionAttachmentItem[]);
+      return;
+    }
+
+    if (
+      submission.attachments &&
+      typeof submission.attachments === 'object' &&
+      (submission.attachments as { url?: string }).url
+    ) {
+      const att = submission.attachments as Record<string, unknown>;
+      setExistingAttachments([
+        {
+          name: String(att.name ?? att.original_name ?? 'document'),
+          original_name: att.original_name ? String(att.original_name) : undefined,
+          url: String(att.url),
+          size: (att.size as number | string | undefined) ?? undefined,
+          mime_type: (att.mime_type ?? att.type) as string | undefined,
+          type: att.type as string | undefined,
+        },
+      ]);
+      return;
+    }
+
+    if (submission.attachmentUrl) {
+      setExistingAttachments([
+        {
+          name: submission.attachmentUrl.split('/').pop() || 'document',
+          url: submission.attachmentUrl,
+        },
+      ]);
+      return;
+    }
+
+    setExistingAttachments([]);
+  }, [submission]);
 
   useEffect(() => {
     if (selectedTopicId) {

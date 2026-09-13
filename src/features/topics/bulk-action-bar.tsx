@@ -1,8 +1,5 @@
 import {
-  Check,
   ChevronDown,
-  Copy,
-  Loader2,
   Trash2,
   UserMinus,
   UserPlus,
@@ -19,11 +16,9 @@ import type { ConceptStatus } from '@/models/topics/topics-model';
 interface BulkActionBarProps {
   selectedCount: number;
   isLoading?: boolean;
-  onSetActive: () => void;
   onToggleForNewUsers?: () => void;
   onSetOnboarding?: (flag: boolean) => void;
   onChangeStatus: (status: ConceptStatus) => void;
-  onDuplicate: () => void;
   onDelete: () => void;
   onDeselectAll: () => void;
 }
@@ -37,11 +32,9 @@ const STATUS_CHOICES: Array<{ id: ConceptStatus; label: string }> = [
 export default function BulkActionBar({
   selectedCount,
   isLoading = false,
-  onSetActive,
   onToggleForNewUsers,
   onSetOnboarding,
   onChangeStatus,
-  onDuplicate,
   onDelete,
   onDeselectAll,
 }: BulkActionBarProps) {
@@ -50,9 +43,9 @@ export default function BulkActionBar({
   return (
     <div
       data-purpose="bulk-action-bar"
-      className="animate-in fade-in slide-in-from-bottom-4 fixed bottom-7 left-1/2 z-40 flex -translate-x-1/2 items-center gap-3 rounded-2xl border border-border bg-card px-4 py-3 text-foreground shadow-2xl transition-all duration-300 ease-out md:ml-32 md:gap-4 md:px-5"
+      className="animate-in fade-in slide-in-from-bottom-4 fixed bottom-7 left-1/2 z-40 flex max-w-[calc(100vw-1.5rem)] -translate-x-1/2 flex-nowrap items-center gap-2 overflow-x-auto rounded-2xl border border-border bg-card px-3 py-2.5 text-foreground shadow-2xl transition-all duration-300 ease-out md:ml-32 md:gap-3 md:px-4"
     >
-      <div className="flex items-center gap-2.5 border-r border-border pr-3 md:pr-4">
+      <div className="flex shrink-0 items-center gap-2 border-r border-border pr-2.5 md:pr-3">
         <span className="flex size-6 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
           {selectedCount}
         </span>
@@ -61,29 +54,15 @@ export default function BulkActionBar({
         </span>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2">
-        <button
-          type="button"
-          onClick={onSetActive}
-          disabled={isLoading}
-          className="flex cursor-pointer items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground shadow-xs transition hover:bg-brand-forest disabled:opacity-50"
-        >
-          {isLoading ? (
-            <Loader2 className="size-3.5 animate-spin" />
-          ) : (
-            <Check className="size-3.5 stroke-[2.5]" />
-          )}
-          <span>Set Active</span>
-        </button>
-
+      <div className="flex shrink-0 flex-nowrap items-center gap-1.5">
         <DropdownMenu>
           <DropdownMenuTrigger
             disabled={isLoading}
-            className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-border bg-secondary px-3 py-1.5 text-xs font-medium text-foreground outline-none transition hover:bg-primary/10 hover:text-primary disabled:opacity-50"
+            className="flex cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-lg border border-border bg-secondary px-2.5 py-1.5 text-xs font-medium text-foreground outline-none transition hover:bg-primary/10 hover:text-primary disabled:opacity-50"
           >
-            <UserPlus className="size-3.5 text-primary" />
+            <UserPlus className="size-3.5 shrink-0 text-primary" />
             <span>Onboarding</span>
-            <ChevronDown className="size-3 text-muted-foreground" />
+            <ChevronDown className="size-3 shrink-0 text-muted-foreground" />
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="center"
@@ -115,10 +94,10 @@ export default function BulkActionBar({
         <DropdownMenu>
           <DropdownMenuTrigger
             disabled={isLoading}
-            className="flex cursor-pointer items-center gap-1 rounded-lg border border-border bg-secondary px-3 py-1.5 text-xs font-medium text-foreground outline-none transition hover:bg-primary/10 hover:text-primary disabled:opacity-50"
+            className="flex cursor-pointer items-center gap-1 whitespace-nowrap rounded-lg border border-border bg-secondary px-2.5 py-1.5 text-xs font-medium text-foreground outline-none transition hover:bg-primary/10 hover:text-primary disabled:opacity-50"
           >
             <span>Change Status</span>
-            <ChevronDown className="size-3.5 text-muted-foreground" />
+            <ChevronDown className="size-3.5 shrink-0 text-muted-foreground" />
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="center"
@@ -140,16 +119,6 @@ export default function BulkActionBar({
 
         <button
           type="button"
-          onClick={onDuplicate}
-          disabled={isLoading}
-          className="cursor-pointer rounded-lg p-1.5 text-muted-foreground transition hover:bg-primary/10 hover:text-primary disabled:opacity-50"
-          title="Duplicate selected"
-        >
-          <Copy className="size-4" />
-        </button>
-
-        <button
-          type="button"
           onClick={onDelete}
           disabled={isLoading}
           className="cursor-pointer rounded-lg p-1.5 text-destructive transition hover:bg-destructive/10 hover:text-destructive disabled:opacity-50"
@@ -159,12 +128,12 @@ export default function BulkActionBar({
         </button>
       </div>
 
-      <div className="border-l border-border pl-2">
+      <div className="shrink-0 border-l border-border pl-2">
         <button
           type="button"
           onClick={onDeselectAll}
           disabled={isLoading}
-          className="cursor-pointer rounded px-2 py-1 text-[11px] text-muted-foreground transition hover:text-foreground disabled:opacity-50"
+          className="cursor-pointer whitespace-nowrap rounded px-2 py-1 text-[11px] text-muted-foreground transition hover:text-foreground disabled:opacity-50"
         >
           Deselect
         </button>

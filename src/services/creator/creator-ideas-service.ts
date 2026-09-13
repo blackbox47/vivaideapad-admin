@@ -215,14 +215,22 @@ export const creatorIdeasService = baseService.injectEndpoints({
           },
         };
       },
-      invalidatesTags: ['my-ideas', 'creator-dashboard'],
+      invalidatesTags: (_result, _error, { id }) => [
+        { type: 'submissions', id },
+        'my-ideas',
+        'creator-dashboard',
+      ],
     }),
     submitExistingSubmission: builder.mutation<void, string>({
       query: (id) => ({
         url: CREATOR_IDEA_SUBMIT_FOR_REVIEW_URL(id),
         method: 'POST',
       }),
-      invalidatesTags: ['my-ideas', 'creator-dashboard'],
+      invalidatesTags: (_result, _error, id) => [
+        { type: 'submissions', id },
+        'my-ideas',
+        'creator-dashboard',
+      ],
     }),
     getCreatorTopics: builder.query<
       CreatorTopicsResponse,
@@ -297,7 +305,7 @@ export const creatorIdeasService = baseService.injectEndpoints({
         currentCache.meta = newItems.meta;
       },
       forceRefetch({ currentArg, previousArg }) {
-        return currentArg.page !== previousArg?.page;
+        return currentArg?.page !== previousArg?.page;
       },
       providesTags: ['creator-topics'],
     }),

@@ -75,7 +75,7 @@ export default function RewardsOverview() {
     <div>
       <PageHeader
         title="Rewards ledger"
-        description="Track every reward, balance adjustment and release."
+        description="Track every reward and payout release."
       />
 
       <RewardKpiCards

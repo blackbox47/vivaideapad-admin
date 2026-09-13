@@ -1,5 +1,4 @@
 import { Link } from '@tanstack/react-router';
-import { Search } from 'lucide-react';
 
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
@@ -88,16 +87,13 @@ export default function AuditLogFilters({
           {categoryCounts[category]}{' '}
           {categoryCounts[category] === 1 ? 'event' : 'events'}
         </span>
-        <div className="relative">
-          <Input
-            value={search}
-            onChange={(event) => onSearchChange(event.target.value)}
-            placeholder="Search actor, action or target"
-            aria-label="Search audit events"
-            className="min-w-65 rounded-full pl-4.5 pr-9 py-2.5 text-[13px] placeholder:text-text-subtle"
-          />
-          <Search className="pointer-events-none absolute right-3 top-1/2 size-3.5 -translate-y-1/2 text-slate-400" />
-        </div>
+        <Input
+          value={search}
+          onChange={(event) => onSearchChange(event.target.value)}
+          placeholder="Search by actor, email, or target"
+          aria-label="Search audit events by actor, email, or target"
+          className="min-w-65 rounded-full px-4.5 py-2.5 text-[13px] placeholder:text-text-subtle"
+        />
       </div>
     </div>
   );

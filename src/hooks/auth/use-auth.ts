@@ -16,6 +16,7 @@ import {
   useLoginMutation,
   useSignOutMutation,
 } from '@/services/auth/auth-service';
+import { baseService } from '@/services/core/base-service';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { ADMIN_ROUTES, CREATOR_ROUTES } from '@/utils/constants/routes';
 import { getApiErrorMessage } from '@/utils/helpers/api-error';
@@ -44,6 +45,16 @@ interface UseAuthResult {
   resetLoginError: () => void;
 }
 
+function beginAuthenticatedSession(
+  dispatch: ReturnType<typeof useAppDispatch>,
+  payload: { role: UserRole; userId: string },
+) {
+  // Drop any cached queries from a prior account (in-flight responses after
+  // logout can otherwise repopulate the store and show the previous user).
+  dispatch(baseService.util.resetApiState());
+  dispatch(sessionEstablished(payload));
+}
+
 export default function useAuth(): UseAuthResult {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -67,12 +78,10 @@ export default function useAuth(): UseAuthResult {
       setLocalError(null);
       try {
         const session = await requestGoogleLogin({ credential }).unwrap();
-        dispatch(
-          sessionEstablished({
-            role: 'creator',
-            userId: session.user.id,
-          }),
-        );
+        beginAuthenticatedSession(dispatch, {
+          role: 'creator',
+          userId: session.user.id,
+        });
         return session;
       } catch (err) {
         const message = getApiErrorMessage(err);
@@ -95,12 +104,10 @@ export default function useAuth(): UseAuthResult {
         const request = intendedRole === 'admin' ? requestAdminLogin : requestLogin;
         const session = await request(credentials).unwrap();
 
-        dispatch(
-          sessionEstablished({
-            role: intendedRole,
-            userId: session.user.id,
-          }),
-        );
+        beginAuthenticatedSession(dispatch, {
+          role: intendedRole,
+          userId: session.user.id,
+        });
 
         return session;
       } catch (err) {
@@ -121,6 +128,7 @@ export default function useAuth(): UseAuthResult {
       // SPA cannot read them to clear them itself.
     }
     dispatch(sessionCleared());
+    dispatch(baseService.util.resetApiState());
     const dest = role === 'creator' ? CREATOR_ROUTES.login : ADMIN_ROUTES.login;
     navigate({ to: dest, replace: true });
   }, [dispatch, navigate, requestSignOut, role]);

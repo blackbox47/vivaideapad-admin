@@ -1,5 +1,6 @@
 import type { CreatorUser } from '@/models/creator/creator-user-model';
 import { useGetCurrentCreatorQuery } from '@/services/creator/creator-auth-service';
+import { useAppSelector } from '@/store/hooks';
 import { deriveInitials } from '@/utils/helpers/initials';
 
 interface UseCreatorUserResult {
@@ -49,8 +50,19 @@ function normalizeCreatorUser(data: unknown): CreatorUser | null {
 }
 
 export default function useCreatorUser(): UseCreatorUserResult {
-  const { data, isLoading } = useGetCurrentCreatorQuery();
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
+  const userId = useAppSelector((state) => state.auth.userId);
+  const { data, isLoading } = useGetCurrentCreatorQuery(undefined, {
+    skip: !isAuthenticated,
+    refetchOnMountOrArgChange: true,
+  });
 
-  return { user: normalizeCreatorUser(data), isLoading };
+  const user = normalizeCreatorUser(data);
+  const matchesSession = !user || !userId || user.id === userId;
+
+  return {
+    user: matchesSession ? user : null,
+    isLoading: isAuthenticated && isLoading,
+  };
 }
 

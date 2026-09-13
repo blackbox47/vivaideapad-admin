@@ -20,7 +20,6 @@ interface UseContentReviewResult {
   filtered: ContentSubmission[];
   totalCount: number;
   awaitingCount: number;
-  highRiskCount: number;
   isLoading: boolean;
   isError: boolean;
   error: string | null;
@@ -45,6 +44,11 @@ function matchesFilter(
   return matchesStatus && matchesSearch;
 }
 
+function submittedTimestamp(submission: ContentSubmission): number {
+  const value = Date.parse(submission.submitted);
+  return Number.isFinite(value) ? value : 0;
+}
+
 export default function useContentReview({
   status,
   search,
@@ -55,13 +59,11 @@ export default function useContentReview({
 
   const submissions = data?.submissions ?? [];
 
-  const filtered = useMemo(
-    () =>
-      submissions.filter((submission) =>
-        matchesFilter(submission, status, search),
-      ),
-    [submissions, status, search],
-  );
+  const filtered = useMemo(() => {
+    return submissions
+      .filter((submission) => matchesFilter(submission, status, search))
+      .sort((a, b) => submittedTimestamp(b) - submittedTimestamp(a));
+  }, [submissions, status, search]);
 
   return {
     submissions,
@@ -69,7 +71,6 @@ export default function useContentReview({
     totalCount: submissions.length,
     awaitingCount: submissions.filter((item) => item.status === 'Under Review')
       .length,
-    highRiskCount: submissions.filter((item) => item.risk === 'High').length,
     isLoading: isLoading && !data,
     isError,
     error: getApiErrorMessage(error),

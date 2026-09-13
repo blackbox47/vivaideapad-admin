@@ -19,9 +19,30 @@ export type ChangePayoutMethodFormValues = z.infer<
 >;
 
 export function parseAvailableBalance(available: string): number {
-  const cleaned = available.replace(/[^0-9.]/g, '');
-  const parsed = Number(cleaned);
-  return Number.isFinite(parsed) ? parsed : 0;
+  const trimmed = available.trim();
+  if (!trimmed || trimmed === '—') {
+    return 0;
+  }
+
+  // Formats we see: "৳ -3000", "Tk -3,000", "-৳ 3000", "−3000", "3000".
+  const normalized = trimmed.replace(/,/g, '').replace(/[−–—]/g, '-');
+  const firstDigitIndex = normalized.search(/\d/);
+  if (firstDigitIndex < 0) {
+    return 0;
+  }
+
+  const isNegative = normalized.slice(0, firstDigitIndex).includes('-');
+  const match = normalized.slice(firstDigitIndex).match(/^\d+(?:\.\d+)?/);
+  if (!match) {
+    return 0;
+  }
+
+  const parsed = Number(match[0]);
+  if (!Number.isFinite(parsed)) {
+    return 0;
+  }
+
+  return isNegative ? -parsed : parsed;
 }
 
 export function createWithdrawRequestSchema(availableAmount: number) {

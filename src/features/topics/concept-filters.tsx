@@ -2,18 +2,21 @@ import { Link } from '@tanstack/react-router';
 
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import type { ConceptStatus } from '@/models/topics/topics-model';
+import type { ConceptListParams } from '@/models/topics/topics-model';
 import { ADMIN_ROUTES } from '@/utils/constants/routes';
 
-const STATUS_FILTERS: Array<{ id: 'all' | ConceptStatus; label: string }> = [
+export type ConceptStatusFilter = NonNullable<ConceptListParams['status']>;
+
+const STATUS_FILTERS: Array<{ id: ConceptStatusFilter; label: string }> = [
   { id: 'all', label: 'All' },
   { id: 'active', label: 'Active' },
   { id: 'draft', label: 'Draft' },
   { id: 'archived', label: 'Archived' },
+  { id: 'new', label: 'New' },
 ];
 
 interface ConceptFiltersProps {
-  status: 'all' | ConceptStatus;
+  status: ConceptStatusFilter;
   search: string;
   visibleCount: number;
   selectedCount?: number;
@@ -22,7 +25,7 @@ interface ConceptFiltersProps {
   onSearchChange: (search: string) => void;
 }
 
-function topicsHref(status: 'all' | ConceptStatus, search: string): string {
+function topicsHref(status: ConceptStatusFilter, search: string): string {
   const params = new URLSearchParams();
 
   if (status !== 'all') {
@@ -36,6 +39,21 @@ function topicsHref(status: 'all' | ConceptStatus, search: string): string {
 
   const query = params.toString();
   return query ? `${ADMIN_ROUTES.topics}?${query}` : ADMIN_ROUTES.topics;
+}
+
+export function parseConceptStatus(
+  value: string | null,
+): ConceptStatusFilter {
+  if (
+    value === 'active' ||
+    value === 'draft' ||
+    value === 'archived' ||
+    value === 'new'
+  ) {
+    return value;
+  }
+
+  return 'all';
 }
 
 export default function ConceptFilters({

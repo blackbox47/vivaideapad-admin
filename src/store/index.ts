@@ -20,17 +20,31 @@ const appReducer = combineReducers({
 
 export type RootState = ReturnType<typeof appReducer>;
 
+const LOGGED_OUT_AUTH: RootState['auth'] = {
+  isAuthenticated: false,
+  role: null,
+  userId: null,
+};
+
 /**
  * Sign-out and session expiry discard the whole store, including every RTK
  * Query cache, so the previous user's profile/dashboard data cannot leak into
- * the next session (until a hard reload).
+ * the next session.
+ *
+ * Auth must be forced to a logged-out shape: the slice module `initialState`
+ * is captured once at boot from the session cookie, so resetting with
+ * `appReducer(undefined, …)` alone can briefly rehydrate the previous user.
  */
 function rootReducer(state: RootState | undefined, action: Action): RootState {
   if (
     action.type === sessionExpired.type ||
     action.type === sessionCleared.type
   ) {
-    return appReducer(undefined, action);
+    const resetState = appReducer(undefined, { type: '@@INIT' });
+    return {
+      ...resetState,
+      auth: LOGGED_OUT_AUTH,
+    };
   }
   return appReducer(state, action);
 }

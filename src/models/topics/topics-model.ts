@@ -29,7 +29,7 @@ export interface Concept {
 }
 
 export interface ConceptListParams {
-  status?: ConceptStatus | 'all';
+  status?: ConceptStatus | 'all' | 'new';
   search?: string;
   category_id?: string;
   page?: number;

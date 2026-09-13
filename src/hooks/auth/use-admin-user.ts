@@ -1,5 +1,6 @@
 import type { AuthUser, UserAccessStatus } from '@/models/auth/auth-model';
 import { useGetCurrentAdminQuery } from '@/services/auth/auth-service';
+import { useAppSelector } from '@/store/hooks';
 import { parsePlatformRole } from '@/utils/helpers/platform-role';
 
 interface UseAdminUserResult {
@@ -78,7 +79,17 @@ function normalizeAuthUser(data: unknown): AuthUser | null {
 }
 
 export default function useAdminUser(): UseAdminUserResult {
-  const { data, isLoading } = useGetCurrentAdminQuery();
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
+  const userId = useAppSelector((state) => state.auth.userId);
+  const { data, isLoading } = useGetCurrentAdminQuery(undefined, {
+    skip: !isAuthenticated,
+    refetchOnMountOrArgChange: true,
+  });
   const user = normalizeAuthUser(data);
-  return { user, isLoading };
+  const matchesSession = !user || !userId || user.id === userId;
+
+  return {
+    user: matchesSession ? user : null,
+    isLoading: isAuthenticated && isLoading,
+  };
 }

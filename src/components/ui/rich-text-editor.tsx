@@ -807,15 +807,14 @@ export function RichTextEditor({
     },
   });
 
-  // External-value sync.
-  const lastEmittedRef = React.useRef(value);
+  // External-value sync (prefill / reset). emitUpdate:false avoids feedback loops.
   React.useEffect(() => {
     if (!editor) return;
     const currentHtml = editor.getHTML();
-    if (value !== currentHtml && value !== lastEmittedRef.current) {
-      editor.commands.setContent(value || '', { emitUpdate: false });
+    const nextValue = value || '';
+    if (nextValue !== currentHtml) {
+      editor.commands.setContent(nextValue, { emitUpdate: false });
     }
-    lastEmittedRef.current = value;
   }, [value, editor]);
 
   React.useEffect(() => {

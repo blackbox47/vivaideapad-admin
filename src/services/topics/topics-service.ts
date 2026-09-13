@@ -34,7 +34,11 @@ export const topicsService = baseService.injectEndpoints({
         method: 'GET',
         params: params
           ? {
-              status: params.status,
+              status:
+                params.status && params.status !== 'all' && params.status !== 'new'
+                  ? params.status
+                  : undefined,
+              is_onboarding: params.status === 'new' ? true : undefined,
               search: params.search,
               category_id: params.category_id,
               page: params.page,
