@@ -52,10 +52,7 @@ export default function DashboardOverview() {
       <DashboardQuickLinks />
 
       <div className="mt-[18px] grid gap-[18px] lg:grid-cols-[minmax(0,1.35fr)_minmax(250px,0.65fr)]">
-        <ReviewQueue
-          items={data?.reviewQueue ?? []}
-          isLoading={isLoading}
-        />
+        <ReviewQueue />
         <ApprovalTrend
           items={data?.approvalTrend ?? []}
           total={data?.approvalTotal ?? 0}

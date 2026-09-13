@@ -305,7 +305,7 @@ export const creatorIdeasService = baseService.injectEndpoints({
         currentCache.meta = newItems.meta;
       },
       forceRefetch({ currentArg, previousArg }) {
-        return currentArg.page !== previousArg?.page;
+        return currentArg?.page !== previousArg?.page;
       },
       providesTags: ['creator-topics'],
     }),

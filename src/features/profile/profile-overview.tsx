@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/card';
 import ProfileAvatarUploader from '@/features/profile/profile-avatar-uploader';
 import ProfileIdentityCard from '@/features/profile/profile-identity-card';
-import ProfileNotificationsCard from '@/features/profile/profile-notifications-card';
+// import ProfileNotificationsCard from '@/features/profile/profile-notifications-card';
 import useProfile from '@/hooks/profile/use-profile';
 
 export default function ProfileOverview() {
@@ -29,8 +29,8 @@ export default function ProfileOverview() {
     isChangingPassword,
     passwordFeedback,
     passwordError,
-    toggleNotification,
-    isUpdatingNotifications,
+    // toggleNotification,
+    // isUpdatingNotifications,
     uploadAvatar,
     isUploadingAvatar,
   } = useProfile();
@@ -52,7 +52,7 @@ export default function ProfileOverview() {
     );
   }
 
-  const { profile, notifications } = overview;
+  const { profile } = overview;
 
   return (
     <div>
@@ -86,7 +86,7 @@ export default function ProfileOverview() {
           }
         />
 
-        <div className="flex flex-col gap-[18px]">
+        {/* <div className="flex flex-col gap-[18px]">
           <ProfileNotificationsCard
             preferences={notifications}
             isUpdating={isUpdatingNotifications || isLoading}
@@ -94,7 +94,7 @@ export default function ProfileOverview() {
               void toggleNotification(key, value);
             }}
           />
-        </div>
+        </div> */}
       </div>
     </div>
   );

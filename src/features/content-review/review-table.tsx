@@ -19,6 +19,11 @@ interface ReviewTableProps {
   pagination?: TablePaginationProps;
   onView: (id: string) => void;
   onReview: (id: string) => void;
+  className?: string;
+  pinColumns?: boolean;
+  minWidth?: string;
+  isLoading?: boolean;
+  compact?: boolean;
 }
 
 const TITLE_MAX_CHARS = 20;
@@ -44,12 +49,25 @@ export default function ReviewTable({
   pagination,
   onView,
   onReview,
+  className,
+  pinColumns,
+  minWidth,
+  isLoading,
+  compact = false,
 }: ReviewTableProps) {
+  const titleColClass = compact
+    ? 'max-w-[10rem] whitespace-nowrap'
+    : TITLE_COL_CLASS;
+
   return (
     <ProjectTable
       pagination={pagination}
+      className={className}
+      pinColumns={pinColumns}
+      minWidth={minWidth}
+      isLoading={isLoading}
       columns={[
-        { label: 'Title', headerClassName: TITLE_COL_CLASS },
+        { label: 'Title', headerClassName: titleColClass },
         { label: 'Topic' },
         { label: 'Submitted' },
         { label: 'Status' },
@@ -58,14 +76,14 @@ export default function ReviewTable({
     >
       {submissions.map((submission) => (
         <ProjectTableRow key={submission.id}>
-          <ProjectTableCell className={TITLE_COL_CLASS}>
+          <ProjectTableCell className={titleColClass}>
             <Tooltip>
               <TooltipTrigger
                 render={
                   <span className="block min-w-0 cursor-default outline-none" />
                 }
               >
-                <strong className="block font-semibold text-foreground">
+                <strong className="block truncate font-semibold text-foreground">
                   {truncateWithEllipsis(submission.title, TITLE_MAX_CHARS)}
                 </strong>
                 <div className="truncate text-[11px] text-muted-foreground">
