@@ -5,8 +5,8 @@ import type {
 import type { PlatformRole } from '@/utils/helpers/platform-role';
 
 export interface ApplicationDecisionBody {
-  decision: 'approve_invite' | 'request_revision' | 'reject';
-  message?: string;
+  decision: 'approve_invite' | 'request_more_info' | 'reject';
+  notes?: string;
 }
 
 export interface ApplicationDecisionResponse {

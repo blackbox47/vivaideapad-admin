@@ -1,6 +1,7 @@
 import takaCoinImg from '@/assets/hero/taka-coin.png';
 import notebookPenImg from '@/assets/hero/notebook-pen.png';
 import paperBgImg from '@/assets/hero/paper-bg.jpg';
+import { CURRENCY_SYMBOL } from '@/utils/constants';
 
 export interface HeroStat {
   value: string;
@@ -21,7 +22,7 @@ export interface HeroProps {
 const DEFAULT_STATS: HeroStat[] = [
   { value: '6', label: 'Active Requests' },
   { value: '151', label: 'Ideas Submitted' },
-  { value: '৳ 1.65L', label: 'Total Prizes' },
+  { value: `${CURRENCY_SYMBOL} 1.65L`, label: 'Total Prizes' },
 ];
 
 export function Hero({

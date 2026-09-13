@@ -1,4 +1,7 @@
-import type { Applicant } from '@/models/people/people-model';
+import type {
+  Applicant,
+  ApplicantStatus,
+} from '@/models/people/people-model';
 import type { ApplicationDecisionBody } from '@/models/users/users-model';
 import { baseService } from '@/services/core/base-service';
 import {
@@ -30,6 +33,72 @@ export interface ApplicationDetailResponse {
   }>;
 }
 
+function mapApplicantStatus(status: unknown): ApplicantStatus {
+  if (
+    status === 'Submitted' ||
+    status === 'Under Review' ||
+    status === 'Revision Requested' ||
+    status === 'Approved' ||
+    status === 'Rejected'
+  ) {
+    return status;
+  }
+  if (status === 'submitted') return 'Under Review';
+  if (status === 'approved_invited') return 'Approved';
+  if (status === 'rejected' || status === 'withdrawn') return 'Rejected';
+  if (status === 'needs_info') return 'Revision Requested';
+  return 'Under Review';
+}
+
+function asRecord(value: unknown): Record<string, unknown> | null {
+  return value && typeof value === 'object'
+    ? (value as Record<string, unknown>)
+    : null;
+}
+
+function mapApplicationDetail(response: unknown): ApplicationDetailResponse {
+  const envelope = asRecord(response) ?? {};
+  const raw = asRecord(envelope.application) ?? asRecord(envelope.data) ?? envelope;
+  const user = asRecord(raw.user);
+  const category = asRecord(raw.category);
+
+  const name = String(
+    raw.name ?? user?.display_name ?? user?.name ?? raw.email ?? '',
+  );
+  const email = String(raw.email ?? user?.email ?? '');
+  const consentValue = raw.consent;
+
+  return {
+    application: {
+      id: String(raw.id ?? ''),
+      name,
+      email,
+      topic: String(raw.topic ?? category?.name ?? 'Uncategorized'),
+      title: String(raw.title ?? raw.idea_title ?? ''),
+      body: String(raw.body ?? raw.idea_description ?? ''),
+      submitted: String(raw.submitted ?? raw.created_at ?? ''),
+      status: mapApplicantStatus(raw.status),
+      source: raw.source ? String(raw.source) : undefined,
+      consent:
+        typeof consentValue === 'boolean'
+          ? consentValue
+          : consentValue != null
+            ? Number(consentValue) === 1
+            : undefined,
+      decisionNotes: raw.decision_notes
+        ? String(raw.decision_notes)
+        : raw.decisionNotes
+          ? String(raw.decisionNotes)
+          : null,
+      referenceNumber: raw.reference_number
+        ? String(raw.reference_number)
+        : raw.referenceNumber
+          ? String(raw.referenceNumber)
+          : undefined,
+    },
+  };
+}
+
 export const applicationsService = baseService.injectEndpoints({
   endpoints: (builder) => ({
     getApplications: builder.query<
@@ -51,6 +120,7 @@ export const applicationsService = baseService.injectEndpoints({
     }),
     getApplication: builder.query<ApplicationDetailResponse, string>({
       query: (id) => ({ url: APPLICATION_DETAIL_URL(id), method: 'GET' }),
+      transformResponse: mapApplicationDetail,
       providesTags: (_r, _e, id) => [{ type: 'applications', id }],
     }),
     decideApplication: builder.mutation<
@@ -60,12 +130,17 @@ export const applicationsService = baseService.injectEndpoints({
       query: ({ id, body }) => ({
         url: APPLICATION_DECISION_URL(id),
         method: 'POST',
-        body,
+        body: {
+          decision: body.decision,
+          notes: body.notes,
+        },
       }),
-      invalidatesTags: [
+      invalidatesTags: (_r, _e, { id }) => [
+        { type: 'applications', id },
         'applications',
         'people',
         'users',
+        'dashboard',
         'audit-log',
         'audit-events',
         'admin-notifications',

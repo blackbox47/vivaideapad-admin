@@ -10,6 +10,10 @@ import type {
 import { formatDisplayDate } from '@/utils/helpers/format-display-date';
 import { resolveAvatarUrl } from '@/utils/helpers/resolve-avatar-url';
 import { sanitizeHtml } from '@/utils/helpers/sanitize-html';
+import ApprovalConfirmationModal from '@/features/content-review/approval-confirmation-modal';
+import RejectConfirmationModal from '@/features/content-review/reject-confirmation-modal';
+import RequestRevisionModal from '@/features/content-review/request-revision-modal';
+import { CURRENCY_SYMBOL } from '@/utils/constants';
 
 interface SubmissionReviewPanelProps {
   submission: SubmissionDetail | ContentSubmission;
@@ -62,14 +66,19 @@ function toDownloadUrl(url: string, filename: string): string {
 }
 
 function formatCurrency(amount: string | number | undefined | null): string {
-  if (amount == null || amount === '') return 'Tk 18,000.00';
+  if (amount == null || amount === '') return `${CURRENCY_SYMBOL}18,000.00`;
   const str = String(amount).trim();
+  const prefix = CURRENCY_SYMBOL;
   const withoutPrefix = str.replace(/^(Tk\s*|৳\s*|\$)/i, '').trim();
   const num = Number(withoutPrefix.replace(/,/g, ''));
   if (!Number.isNaN(num)) {
-    return `Tk ${num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    return `${prefix}${num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   }
-  return `Tk ${withoutPrefix}`;
+  return `${prefix}${withoutPrefix}`;
+}
+
+function formatShortReward(rewardText: string): string {
+  return rewardText.replace(/\.00$/, '');
 }
 
 export default function SubmissionReviewPanel({
@@ -79,35 +88,28 @@ export default function SubmissionReviewPanel({
   onClose,
   onDecide,
 }: SubmissionReviewPanelProps) {
-  const [comment, setComment] = useState('');
-  const [feedbackError, setFeedbackError] = useState<string | null>(null);
+  const [isApproveModalOpen, setIsApproveModalOpen] = useState(false);
+  const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
+  const [isRevisionModalOpen, setIsRevisionModalOpen] = useState(false);
 
-  // Close on Escape key press
+  // Close on Escape key press (modals take priority if open)
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        onClose();
+        if (isApproveModalOpen) {
+          setIsApproveModalOpen(false);
+        } else if (isRejectModalOpen) {
+          setIsRejectModalOpen(false);
+        } else if (isRevisionModalOpen) {
+          setIsRevisionModalOpen(false);
+        } else {
+          onClose();
+        }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onClose]);
-
-  const handleDecide = (status: SubmissionStatus) => {
-    const trimmed = comment.trim();
-    const needsComment =
-      status === 'Rejected' || status === 'Revision Requested';
-
-    if (needsComment && trimmed.length === 0) {
-      setFeedbackError(
-        'Add reviewer notes before requesting a revision or rejecting.',
-      );
-      return;
-    }
-
-    setFeedbackError(null);
-    onDecide(status, trimmed);
-  };
+  }, [onClose, isApproveModalOpen, isRejectModalOpen, isRevisionModalOpen]);
 
   const detail = submission as SubmissionDetail;
   const isMotorbike = submission.title?.toLowerCase().includes('motorbike') || false;
@@ -127,7 +129,7 @@ export default function SubmissionReviewPanel({
       : 'Collect corridor-level coverage notes and user feedback.');
 
   const rewardText = isMotorbike
-    ? 'Tk 18,000.00'
+    ? `${CURRENCY_SYMBOL}18,000.00`
     : formatCurrency(detail.concept?.rewardBudget ?? detail.topicDetail?.rewardBudget ?? 18000);
 
   const closesDateText = isMotorbike
@@ -142,6 +144,14 @@ export default function SubmissionReviewPanel({
     : detail.contributorName || submission.contributor || 'Mehedi Hasan';
 
   const contributorInitials = getInitials(contributorName);
+  const contributorAvatar =
+    detail.contributorAvatar ||
+    resolveAvatarUrl(detail.contributorDetail?.avatarUrl);
+  const contributorId = detail.contributorDetail?.id
+    ? (detail.contributorDetail.id.startsWith('CT-')
+        ? detail.contributorDetail.id
+        : `CT-${detail.contributorDetail.id.slice(0, 4).toUpperCase()}`)
+    : (isMotorbike ? 'CT-8291' : `CT-${submission.id.slice(0, 4).toUpperCase()}`);
   const submittedDateText = isMotorbike
     ? 'Submitted 11.09.2026'
     : `Submitted ${formatDisplayDate(submission.submitted)}`;
@@ -467,32 +477,14 @@ export default function SubmissionReviewPanel({
         </div>
 
         {readOnly ? null : (
-        <div className="border-t border-slate-200 bg-white p-5 space-y-3 shrink-0 shadow-lg">
-          <div className="space-y-1.5">
-            <div className="text-xs font-bold text-slate-800">
-              Reviewer Feedback to contributor
-            </div>
-            <textarea
-              className="w-full text-xs text-slate-800 placeholder-slate-400 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 resize-y p-2.5 outline-none"
-              placeholder="Share constructive review remarks or required revisions before reward allocation..."
-              rows={2}
-              value={comment}
-              onChange={(e) => {
-                setComment(e.target.value);
-                setFeedbackError(null);
-              }}
-            />
-            {feedbackError && (
-              <p className="text-xs text-rose-600 font-medium">{feedbackError}</p>
-            )}
-          </div>
-          <div className="flex items-center justify-between gap-2 pt-1">
+        <div className="border-t border-slate-200 bg-white p-5 shrink-0 shadow-lg">
+          <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <button
                 className="px-3.5 py-2 rounded-full border border-slate-200 text-xs font-semibold text-rose-600 hover:bg-rose-50 hover:border-rose-200 transition-colors cursor-pointer disabled:opacity-50"
                 type="button"
                 disabled={isDeciding}
-                onClick={() => handleDecide('Rejected')}
+                onClick={() => setIsRejectModalOpen(true)}
               >
                 Reject
               </button>
@@ -500,7 +492,7 @@ export default function SubmissionReviewPanel({
                 className="px-3.5 py-2 rounded-full border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer disabled:opacity-50"
                 type="button"
                 disabled={isDeciding}
-                onClick={() => handleDecide('Revision Requested')}
+                onClick={() => setIsRevisionModalOpen(true)}
               >
                 Request revision
               </button>
@@ -509,7 +501,7 @@ export default function SubmissionReviewPanel({
               className="px-5 py-2 rounded-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs font-bold shadow-md shadow-blue-500/20 hover:shadow-lg transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
               type="button"
               disabled={isDeciding}
-              onClick={() => handleDecide('Approved')}
+              onClick={() => setIsApproveModalOpen(true)}
             >
               <span className="material-symbols-outlined text-[16px]">task_alt</span>
               <span>{isDeciding ? 'Saving…' : 'Approve & assign reward'}</span>
@@ -518,6 +510,58 @@ export default function SubmissionReviewPanel({
         </div>
         )}
       </aside>
+
+      {readOnly ? null : (
+        <>
+          <ApprovalConfirmationModal
+            isOpen={isApproveModalOpen}
+            isDeciding={isDeciding}
+            contributorName={contributorName}
+            contributorInitials={contributorInitials}
+            contributorAvatar={contributorAvatar}
+            contributorId={contributorId}
+            topicTitle={topicTitle}
+            submissionTitle={submission.title || 'Motorbike courier coverage notes'}
+            rewardAmount={rewardText}
+            rewardButtonText={formatShortReward(rewardText)}
+            onClose={() => setIsApproveModalOpen(false)}
+            onConfirm={() => {
+              onDecide('Approved', '');
+            }}
+          />
+
+          <RejectConfirmationModal
+            isOpen={isRejectModalOpen}
+            isDeciding={isDeciding}
+            contributorName={contributorName}
+            contributorInitials={contributorInitials}
+            contributorAvatar={contributorAvatar}
+            contributorId={contributorId}
+            topicTitle={topicTitle}
+            submissionTitle={submission.title || 'Motorbike courier coverage notes'}
+            onClose={() => setIsRejectModalOpen(false)}
+            onConfirm={(rejectionReason) => {
+              onDecide('Rejected', rejectionReason);
+            }}
+          />
+
+          <RequestRevisionModal
+            isOpen={isRevisionModalOpen}
+            isDeciding={isDeciding}
+            contributorName={contributorName}
+            contributorInitials={contributorInitials}
+            contributorAvatar={contributorAvatar}
+            contributorId={contributorId}
+            topicTitle={topicTitle}
+            submissionTitle={submission.title || 'Motorbike courier coverage notes'}
+            rewardAmount={rewardText}
+            onClose={() => setIsRevisionModalOpen(false)}
+            onConfirm={(revisionFeedback) => {
+              onDecide('Revision Requested', revisionFeedback);
+            }}
+          />
+        </>
+      )}
     </div>
   );
 }

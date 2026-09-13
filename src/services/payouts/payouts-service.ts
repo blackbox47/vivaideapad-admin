@@ -16,6 +16,7 @@ import {
   PAYOUT_PROCESS_URL,
 } from '@/utils/constants/api-end-points';
 import { formatDisplayDate } from '@/utils/helpers/format-display-date';
+import { CURRENCY_SYMBOL } from '@/utils/constants';
 
 function contributorNameFromPayout(
   item: Record<string, unknown>,
@@ -152,7 +153,7 @@ export const payoutsService = baseService.injectEndpoints({
                 contributor: contributorNameFromPayout(item, details),
                 method,
                 methodDetail,
-                amount: `Tk ${numAmount}`,
+                amount: `${CURRENCY_SYMBOL} ${numAmount}`,
                 amountValue: numAmount,
                 requested: dateStr,
                 requestedAt: String(

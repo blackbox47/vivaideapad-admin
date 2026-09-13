@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
 import StatusBadge from '@/components/shared/status-badge';
 import type { Applicant, ApplicantStatus } from '@/models/people/people-model';
@@ -8,6 +8,7 @@ import { sanitizeHtml } from '@/utils/helpers/sanitize-html';
 interface ApplicantReviewPanelProps {
   applicant: Applicant;
   isDeciding: boolean;
+  isLoadingDetails?: boolean;
   readOnly?: boolean;
   onClose: () => void;
   onDecide: (status: ApplicantStatus, comment: string) => void;
@@ -23,13 +24,11 @@ function getInitials(name: string): string {
 export default function ApplicantReviewPanel({
   applicant,
   isDeciding,
+  isLoadingDetails = false,
   readOnly = false,
   onClose,
   onDecide,
 }: ApplicantReviewPanelProps) {
-  const [comment, setComment] = useState('');
-  const [feedbackError, setFeedbackError] = useState<string | null>(null);
-
   // Close on Escape key press
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -51,16 +50,7 @@ export default function ApplicantReviewPanel({
   }, []);
 
   const handleDecide = (status: ApplicantStatus) => {
-    const trimmed = comment.trim();
-    const needsComment = status === 'Rejected';
-
-    if (needsComment && trimmed.length === 0) {
-      setFeedbackError('Add reviewer notes before rejecting.');
-      return;
-    }
-
-    setFeedbackError(null);
-    onDecide(status, trimmed);
+    onDecide(status, '');
   };
 
   const isHtmlBody = /<[a-z][\s\S]*>/i.test(applicant.body || '');
@@ -139,6 +129,11 @@ export default function ApplicantReviewPanel({
 
         {/* Scrollable Content Details */}
         <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6 text-sm text-slate-700">
+          {isLoadingDetails ? (
+            <div className="h-1 rounded-full bg-slate-100 overflow-hidden">
+              <div className="h-full w-1/3 animate-pulse rounded-full bg-blue-500" />
+            </div>
+          ) : null}
           {/* Field 1: Application Details Card */}
           <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/60 space-y-3">
             <div className="flex items-center justify-between">
@@ -168,7 +163,9 @@ export default function ApplicantReviewPanel({
               </div>
               <div>
                 <span className="text-[11px] text-slate-400 block mb-0.5">Source</span>
-                <span className="text-slate-800 font-medium">Website signup</span>
+                <span className="text-slate-800 font-medium">
+                  {applicant.source || '—'}
+                </span>
               </div>
             </div>
           </div>
@@ -200,10 +197,26 @@ export default function ApplicantReviewPanel({
           </div>
 
           {/* Field 3: Guidelines check */}
-          <div className="flex items-center gap-2.5 p-3 rounded-xl border border-emerald-200/80 bg-emerald-50/60 text-xs text-emerald-800">
-            <span className="material-symbols-outlined text-[18px] text-emerald-600 shrink-0">check_circle</span>
-            <span className="font-medium">Applicant confirmed originality and accepted content guidelines.</span>
-          </div>
+          {applicant.consent === false ? (
+            <div className="flex items-center gap-2.5 p-3 rounded-xl border border-amber-200/80 bg-amber-50/60 text-xs text-amber-800">
+              <span className="material-symbols-outlined text-[18px] text-amber-600 shrink-0">warning</span>
+              <span className="font-medium">Applicant has not confirmed originality or content guidelines.</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2.5 p-3 rounded-xl border border-emerald-200/80 bg-emerald-50/60 text-xs text-emerald-800">
+              <span className="material-symbols-outlined text-[18px] text-emerald-600 shrink-0">check_circle</span>
+              <span className="font-medium">Applicant confirmed originality and accepted content guidelines.</span>
+            </div>
+          )}
+
+          {readOnly && applicant.decisionNotes ? (
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-700">Reviewer notes</label>
+              <p className="p-3 rounded-xl border border-slate-200 bg-slate-50/60 text-xs text-slate-700 whitespace-pre-line">
+                {applicant.decisionNotes}
+              </p>
+            </div>
+          ) : null}
 
           {/* Field 4: Info callout */}
           {!readOnly && (
@@ -218,26 +231,8 @@ export default function ApplicantReviewPanel({
 
         {/* Sticky Decision Footer */}
         {readOnly ? null : (
-          <div className="border-t border-slate-200 bg-white p-5 space-y-3 shrink-0 shadow-lg">
-            <div className="space-y-1.5">
-              <div className="text-xs font-bold text-slate-800">
-                Reviewer Feedback to applicant
-              </div>
-              <textarea
-                className="w-full text-xs text-slate-800 placeholder-slate-400 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 resize-y p-2.5 outline-none"
-                placeholder="Share reviewer remarks, onboarding notes, or reason for rejection..."
-                rows={2}
-                value={comment}
-                onChange={(e) => {
-                  setComment(e.target.value);
-                  setFeedbackError(null);
-                }}
-              />
-              {feedbackError && (
-                <p className="text-xs text-rose-600 font-medium">{feedbackError}</p>
-              )}
-            </div>
-            <div className="flex items-center justify-between gap-2 pt-1">
+          <div className="border-t border-slate-200 bg-white p-5 shrink-0 shadow-lg">
+            <div className="flex items-center justify-between gap-2">
               <button
                 className="px-4 py-2 rounded-full border border-slate-200 text-xs font-semibold text-rose-600 hover:bg-rose-50 hover:border-rose-200 transition-colors cursor-pointer disabled:opacity-50"
                 type="button"

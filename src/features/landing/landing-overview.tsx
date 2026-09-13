@@ -15,6 +15,7 @@ import CtaSection from '@/features/landing/cta-section';
 import ContributorApplicationDialog from '@/features/landing/contributor-application-dialog';
 import HomeNav, { IdeaPadLogoMark } from '@/components/layout/home-nav';
 import { CREATOR_ROUTES } from '@/utils/constants/routes';
+import { CURRENCY_SYMBOL } from '@/utils/constants';
 import {
   useGetPublicFeaturedRequestsQuery,
   useGetPublicLandingStatsQuery,
@@ -24,17 +25,17 @@ import {
 function formatBdt(amount: number): string {
   if (amount >= 100000) {
     const lakhs = (amount / 100000).toFixed(2).replace(/\.00$/, '');
-    return `৳ ${lakhs}L`;
+    return `${CURRENCY_SYMBOL} ${lakhs}L`;
   }
-  return `৳ ${new Intl.NumberFormat('en-IN').format(amount)}`;
+  return `${CURRENCY_SYMBOL} ${new Intl.NumberFormat('en-IN').format(amount)}`;
 }
 
 function formatUsd(amount: number): string {
-  return `$${new Intl.NumberFormat('en-US').format(amount)}+`;
+  return `${CURRENCY_SYMBOL}${new Intl.NumberFormat('en-IN').format(amount)}+`;
 }
 
 const STATS = [
-  { value: '$24,000+', label: 'Rewarded to creators', icon: Award },
+  { value: `${CURRENCY_SYMBOL}24,000+`, label: 'Rewarded to creators', icon: Award },
   { value: '4,800+', label: 'Ideas submitted', icon: Users },
   { value: '78%', label: 'Approval rate', icon: CheckCircle2 },
   { value: '24h', label: 'Average review turnaround', icon: TrendingUp },
@@ -127,7 +128,7 @@ export function LandingOverview() {
       description: item.description,
       tags: item.tags,
       postedBy: item.postedBy,
-      amount: `৳ ${new Intl.NumberFormat('en-IN').format(item.amount)}`,
+      amount: `${CURRENCY_SYMBOL} ${new Intl.NumberFormat('en-IN').format(item.amount)}`,
       ideas: String(item.ideas),
     }));
   }, [featuredQuery.data]);
@@ -150,7 +151,7 @@ export function LandingOverview() {
         initials: item.initials,
         name: item.name,
         stats: `${item.wins} wins · ${item.ideas} ideas`,
-        amount: `৳ ${new Intl.NumberFormat('en-IN').format(item.amount)}`,
+        amount: `${CURRENCY_SYMBOL} ${new Intl.NumberFormat('en-IN').format(item.amount)}`,
         highlighted: rankNum === 1,
       };
     });

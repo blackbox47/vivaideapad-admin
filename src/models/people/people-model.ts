@@ -24,6 +24,10 @@ export interface Applicant {
   body: string;
   submitted: string;
   status: ApplicantStatus;
+  source?: string;
+  consent?: boolean;
+  decisionNotes?: string | null;
+  referenceNumber?: string;
 }
 
 export interface PlatformUser {

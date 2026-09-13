@@ -25,8 +25,8 @@ export default function LeaderboardTable({ entries }: LeaderboardTableProps) {
         { label: 'Rank' },
         { label: 'Contributor' },
         { label: 'Approved ideas', align: 'right' },
-        { label: 'Points', align: 'right' },
-        { label: 'Visibility' },
+        { label: 'Amount', align: 'right' },
+        { label: 'Visibility', align: 'right' },
       ]}
       isEmpty={entries.length === 0}
       emptyTitle="No additional standings"
@@ -48,7 +48,7 @@ export default function LeaderboardTable({ entries }: LeaderboardTableProps) {
           <ProjectTableCell align="right" className="font-semibold text-foreground">
             {formatPoints(entry.points)}
           </ProjectTableCell>
-          <ProjectTableCell>
+          <ProjectTableCell align="right">
             <StatusBadge status={entry.visibility} />
           </ProjectTableCell>
         </ProjectTableRow>

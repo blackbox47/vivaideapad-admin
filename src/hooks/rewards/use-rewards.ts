@@ -7,15 +7,16 @@ import type {
 } from '@/models/rewards/rewards-model';
 import { useGetLedgerQuery } from '@/services/rewards/rewards-service';
 import { getApiErrorMessage } from '@/utils/helpers/api-error';
+import { CURRENCY_SYMBOL } from '@/utils/constants';
 
 interface UseRewardsResult {
   entries: LedgerEntry[];
   totalCount: number;
-  /** Sum of credit (positive) entries, formatted as "Tk 1,234". */
+  /** Sum of credit (positive) entries, formatted as "৳ 1,234". */
   totalRewarded: string;
-  /** Sum of pending entries (positive), formatted as "Tk 1,234". */
+  /** Sum of pending entries (positive), formatted as "৳ 1,234". */
   pendingTotal: string;
-  /** Average reward amount across Reward-typed entries, formatted as "Tk 212". */
+  /** Average reward amount across Reward-typed entries, formatted as "৳ 212". */
   averageReward: string;
   isLoading: boolean;
   isError: boolean;
@@ -26,7 +27,7 @@ interface UseRewardsResult {
 const TAKA = new Intl.NumberFormat('en-US');
 
 function formatTaka(value: number): string {
-  return `Tk ${TAKA.format(Math.round(value))}`;
+  return `${CURRENCY_SYMBOL} ${TAKA.format(Math.round(value))}`;
 }
 
 function sumAmount(
@@ -89,7 +90,7 @@ export default function useRewards({
   const averageReward = useMemo(() => {
     const rewardEntries = allEntries.filter((entry) => entry.type === 'Reward');
     if (rewardEntries.length === 0) {
-      return 'Tk 0';
+      return `${CURRENCY_SYMBOL} 0`;
     }
 
     const total = rewardEntries.reduce(

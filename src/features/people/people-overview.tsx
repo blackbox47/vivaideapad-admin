@@ -12,17 +12,20 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { toast } from '@/components/ui/sonner';
 import ApplicantReviewPanel from '@/features/people/applicant-review-panel';
 import ApplicantsTable from '@/features/people/applicants-table';
 import ContributorsTable from '@/features/people/contributors-table';
 import PeopleTabs from '@/features/people/people-tabs';
 import usePeople from '@/hooks/people/use-people';
 import type {
+  Applicant,
   ApplicantStatus,
   PeopleTab,
   PlatformUser,
 } from '@/models/people/people-model';
-import { toast } from '@/components/ui/sonner';
+import { useGetApplicationQuery } from '@/services/applications/applications-service';
+import { getApiErrorMessage } from '@/utils/helpers/api-error';
 
 const TABS: PeopleTab[] = [
   'applicants',
@@ -42,6 +45,32 @@ function parseTab(value: string | null): PeopleTab {
   }
 
   return 'applicants';
+}
+
+function mergeApplicant(
+  listRow: Applicant | undefined,
+  detail: Applicant,
+): Applicant {
+  if (!listRow) {
+    return detail;
+  }
+
+  return {
+    ...listRow,
+    ...detail,
+    name: detail.name.trim() || listRow.name,
+    email: detail.email.trim() || listRow.email,
+    topic:
+      detail.topic && detail.topic !== 'Uncategorized'
+        ? detail.topic
+        : listRow.topic,
+    title: detail.title.trim() || listRow.title,
+    body: detail.body.trim() || listRow.body,
+    source: detail.source || listRow.source,
+    consent: detail.consent ?? listRow.consent,
+    decisionNotes: detail.decisionNotes ?? listRow.decisionNotes,
+    referenceNumber: detail.referenceNumber || listRow.referenceNumber,
+  };
 }
 
 export default function PeopleOverview() {
@@ -96,7 +125,18 @@ export default function PeopleOverview() {
       ),
     [applicants, contributorEmails],
   );
-  const reviewing = applicants.find((applicant) => applicant.id === reviewId);
+  const reviewingListRow = applicants.find(
+    (applicant) => applicant.id === reviewId,
+  );
+  const { data: detailData, isLoading: isLoadingDetail } =
+    useGetApplicationQuery(reviewId ?? '', {
+      skip: !reviewId,
+    });
+  const reviewing: Applicant | undefined = reviewId
+    ? detailData?.application?.id === reviewId
+      ? mergeApplicant(reviewingListRow, detailData.application)
+      : reviewingListRow
+    : undefined;
   const isPendingReview =
     reviewing != null && PENDING_APPLICANT_STATUSES.has(reviewing.status);
 
@@ -126,8 +166,10 @@ export default function PeopleOverview() {
         setReviewId(null);
         toast.success(`Application marked as ${status.toLowerCase()}`);
       })
-      .catch(() => {
-        toast.error('Failed to record application decision');
+      .catch((err: unknown) => {
+        toast.error(
+          getApiErrorMessage(err) ?? 'Failed to record application decision',
+        );
       });
   };
 
@@ -206,8 +248,10 @@ export default function PeopleOverview() {
 
       {reviewing ? (
         <ApplicantReviewPanel
+          key={reviewing.id}
           applicant={reviewing}
           isDeciding={isDeciding}
+          isLoadingDetails={Boolean(reviewId) && isLoadingDetail}
           readOnly={!isPendingReview}
           onClose={() => setReviewId(null)}
           onDecide={handleDecide}

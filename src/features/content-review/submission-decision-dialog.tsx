@@ -13,6 +13,7 @@ import {
   type SubmissionDecisionFormValues,
 } from '@/models/content-review/content-review-schema';
 import { getApiErrorMessage } from '@/utils/helpers/api-error';
+import { CURRENCY_SYMBOL } from '@/utils/constants';
 
 interface SubmissionDecisionDialogProps {
   submissionId: string;
@@ -158,7 +159,7 @@ export default function SubmissionDecisionDialog({
           {decision === 'approve' && (
             <div>
               <Input
-                label="Reward amount (৳)"
+                label={`Reward amount (${CURRENCY_SYMBOL})`}
                 type="number"
                 min={1}
                 required

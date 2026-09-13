@@ -31,7 +31,7 @@ export default function AdminsTable({
         { label: 'Admin' },
         { label: 'Role' },
         { label: 'Added' },
-        { label: '', isAction: true },
+        { label: '', align: 'right', isAction: true },
       ]}
     >
       {paginatedItems.map((admin) => (
@@ -48,7 +48,7 @@ export default function AdminsTable({
           <ProjectTableCell className="whitespace-nowrap text-muted-foreground">
             {admin.addedOn}
           </ProjectTableCell>
-          <ProjectTableCell>
+          <ProjectTableCell align="right">
             {canManage && admin.access !== 'owner' ? (
               <TableActions>
                 <button

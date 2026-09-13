@@ -4,6 +4,7 @@ import type {
   AuditLogResponse,
 } from '@/models/audit-log/audit-log-model';
 import { formatDisplayDate } from '@/utils/helpers/format-display-date';
+import { CURRENCY_SYMBOL } from '@/utils/constants';
 
 const ACTION_LABELS: Record<string, string> = {
   'admin.created': 'Created admin',
@@ -120,12 +121,12 @@ function targetLabel(item: Record<string, unknown>): string {
     if (typeof context.description === 'string' && context.description.trim()) {
       const amount = context.amount;
       if (amount !== undefined && amount !== null) {
-        return `Tk ${String(amount)} · ${context.description}`;
+        return `${CURRENCY_SYMBOL} ${String(amount)} · ${context.description}`;
       }
       return context.description;
     }
     if (context.amount !== undefined && context.amount !== null) {
-      return `Tk ${String(context.amount)}`;
+      return `${CURRENCY_SYMBOL} ${String(context.amount)}`;
     }
     if (typeof context.new_status === 'string' && context.new_status.trim()) {
       return `${asString(item.target_type, 'record')} → ${context.new_status}`;
@@ -154,7 +155,7 @@ function iconFor(category: AuditCategory, action: string): string {
     normalized.includes('ledger') ||
     normalized.includes('adjustment')
   ) {
-    return '৳';
+    return CURRENCY_SYMBOL;
   }
   if (normalized.includes('risk')) {
     return '⚑';

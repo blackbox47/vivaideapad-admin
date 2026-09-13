@@ -15,6 +15,7 @@ import {
   CREATOR_TOPICS_URL,
 } from '@/utils/constants/api-end-points';
 import { formatDisplayDate } from '@/utils/helpers/format-display-date';
+import { CURRENCY_SYMBOL } from '@/utils/constants';
 
 export const creatorIdeasService = baseService.injectEndpoints({
   endpoints: (builder) => ({
@@ -151,7 +152,7 @@ export const creatorIdeasService = baseService.injectEndpoints({
               String(res.created_at ?? new Date().toISOString()),
             ),
             status: 'Draft',
-            reward: res.reward_amount ? `$${res.reward_amount}` : '$0',
+            reward: res.reward_amount ? `${CURRENCY_SYMBOL}${res.reward_amount}` : `${CURRENCY_SYMBOL}0`,
             comments: 0,
             body: String(res.body ?? ''),
             feedback: (res.decision_notes as string) ?? undefined,
@@ -232,7 +233,9 @@ export const creatorIdeasService = baseService.injectEndpoints({
               id: String(item.id ?? ''),
               title: String(item.title ?? ''),
               description: String(item.brief ?? item.description ?? ''),
-              reward: item.reward_budget ? `$${item.reward_budget}` : String(item.reward ?? '$0'),
+              reward: item.reward_budget
+                ? `${CURRENCY_SYMBOL}${String(item.reward_budget).replace(/^[৳$Tk\s]*/, '')}`
+                : String(item.reward ?? `${CURRENCY_SYMBOL}0`).replace(/^\$/, CURRENCY_SYMBOL),
               closesOn: item.close_date ? String(item.close_date).slice(0, 10) : String(item.closesOn ?? ''),
               category: String(
                 metadata.category_name ?? item.category_name ?? item.category ?? 'Family occasions',
