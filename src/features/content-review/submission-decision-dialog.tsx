@@ -22,7 +22,6 @@ interface SubmissionDecisionDialogProps {
   error?: string | null;
   onClose: () => void;
   onDecide: (id: string, body: SubmissionDecisionBody) => Promise<unknown>;
-  onScanRisk?: (id: string) => Promise<unknown>;
   onPublish?: (id: string) => Promise<unknown>;
 }
 
@@ -47,11 +46,9 @@ export default function SubmissionDecisionDialog({
   error,
   onClose,
   onDecide,
-  onScanRisk,
   onPublish,
 }: SubmissionDecisionDialogProps) {
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [scanning, setScanning] = useState(false);
   const [publishing, setPublishing] = useState(false);
 
   const {
@@ -85,16 +82,6 @@ export default function SubmissionDecisionDialog({
       onClose();
     } catch (err) {
       setSubmitError(getApiErrorMessage(err));
-    }
-  };
-
-  const handleScan = async () => {
-    if (!onScanRisk) return;
-    setScanning(true);
-    try {
-      await onScanRisk(submissionId);
-    } finally {
-      setScanning(false);
     }
   };
 
@@ -196,17 +183,6 @@ export default function SubmissionDecisionDialog({
 
           <div className="mt-6 flex flex-wrap items-center justify-between gap-2">
             <div className="flex gap-2">
-              {onScanRisk && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={handleScan}
-                  disabled={scanning || isDeciding}
-                  loading={scanning}
-                >
-                  {scanning ? 'Scanning…' : 'Risk scan'}
-                </Button>
-              )}
               {onPublish && (
                 <Button
                   type="button"

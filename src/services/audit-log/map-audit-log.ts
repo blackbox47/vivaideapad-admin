@@ -105,9 +105,26 @@ function occurredAtOf(item: Record<string, unknown>): string {
   return new Date().toISOString();
 }
 
+function targetUserEmail(item: Record<string, unknown>): string | null {
+  if (typeof item.target_email === 'string' && item.target_email.trim()) {
+    return item.target_email.trim();
+  }
+  const context = isRecord(item.context) ? item.context : null;
+  if (context && typeof context.email === 'string' && context.email.trim()) {
+    return context.email.trim();
+  }
+  return null;
+}
+
 function targetLabel(item: Record<string, unknown>): string {
   if (typeof item.target === 'string' && item.target.trim()) {
     return item.target;
+  }
+
+  const type = asString(item.target_type, 'record');
+  const userEmail = targetUserEmail(item);
+  if (type === 'user' && userEmail) {
+    return userEmail;
   }
 
   const context = isRecord(item.context) ? item.context : null;
@@ -129,11 +146,10 @@ function targetLabel(item: Record<string, unknown>): string {
       return `${CURRENCY_SYMBOL} ${String(context.amount)}`;
     }
     if (typeof context.new_status === 'string' && context.new_status.trim()) {
-      return `${asString(item.target_type, 'record')} → ${context.new_status}`;
+      return `${type} → ${context.new_status}`;
     }
   }
 
-  const type = asString(item.target_type, 'record');
   const id = asString(item.target_id);
   if (id && id !== 'batch') {
     return `${type} · ${id.slice(0, 8)}`;

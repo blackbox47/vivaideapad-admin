@@ -39,7 +39,6 @@ export default function ContentReviewOverview() {
     filtered,
     totalCount,
     awaitingCount,
-    highRiskCount,
     isLoading,
     isError,
     error,
@@ -136,7 +135,7 @@ export default function ContentReviewOverview() {
       >
         <PageHeader
           title="Content review"
-          description="Evaluate live concept submissions with context, history and originality signals."
+          description="Evaluate live concept submissions with context and contributor history."
         />
 
         <ReviewKpiCards
@@ -144,12 +143,6 @@ export default function ContentReviewOverview() {
           items={[
             { id: 'total', label: 'Total submissions', value: totalCount },
             { id: 'awaiting', label: 'Awaiting review', value: awaitingCount },
-            {
-              id: 'high-risk',
-              label: 'High AI-risk flags',
-              value: highRiskCount,
-              tone: 'danger',
-            },
           ]}
         />
 

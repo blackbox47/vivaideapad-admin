@@ -165,7 +165,6 @@ export default function SubmissionReviewPanel({
     ? `Due ${formatDisplayDate(detail.revisionDueAt)}`
     : null;
 
-  const riskLabel = submission.risk || 'Medium';
   const approvedCountText = `${submission.approvedCount ?? 0} approved (${submission.approvalRate || '0%'} rate)`;
 
   const summaryText =
@@ -265,10 +264,6 @@ export default function SubmissionReviewPanel({
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-full bg-amber-50 border border-amber-200/60 text-amber-700 font-semibold text-xs flex items-center gap-1">
-              <span className="material-symbols-outlined text-[13px]">flag</span>
-              AI risk: {riskLabel}
-            </span>
             <span className="px-2.5 py-0.5 rounded-full bg-purple-50 border border-purple-100 text-purple-700 font-medium text-xs">
               {approvedCountText}
             </span>

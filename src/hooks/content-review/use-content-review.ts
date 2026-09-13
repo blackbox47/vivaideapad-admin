@@ -20,7 +20,6 @@ interface UseContentReviewResult {
   filtered: ContentSubmission[];
   totalCount: number;
   awaitingCount: number;
-  highRiskCount: number;
   isLoading: boolean;
   isError: boolean;
   error: string | null;
@@ -69,7 +68,6 @@ export default function useContentReview({
     totalCount: submissions.length,
     awaitingCount: submissions.filter((item) => item.status === 'Under Review')
       .length,
-    highRiskCount: submissions.filter((item) => item.risk === 'High').length,
     isLoading: isLoading && !data,
     isError,
     error: getApiErrorMessage(error),
