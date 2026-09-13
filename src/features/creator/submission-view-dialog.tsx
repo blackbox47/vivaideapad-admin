@@ -7,13 +7,16 @@ import { Button } from '@/components/ui/button';
 import type { MyIdea } from '@/models/creator/my-ideas-model';
 import { CREATOR_ROUTES } from '@/utils/constants/routes';
 import { formatDisplayDate } from '@/utils/helpers/format-display-date';
+import { sanitizeHtml } from '@/utils/helpers/sanitize-html';
 
 interface SubmissionViewDialogProps {
   idea: MyIdea;
   onClose: () => void;
 }
 
-function primaryAction(idea: MyIdea): { label: string; href: string } {
+function primaryAction(
+  idea: MyIdea,
+): { label: string; href: string } | null {
   if (idea.status === 'Draft') {
     return {
       label: 'Continue editing',
@@ -26,6 +29,9 @@ function primaryAction(idea: MyIdea): { label: string; href: string } {
       href: `${CREATOR_ROUTES.submitIdea}?id=${encodeURIComponent(idea.id)}`,
     };
   }
+  if (idea.status === 'Rejected') {
+    return null;
+  }
   return { label: 'View in wallet', href: CREATOR_ROUTES.rewards };
 }
 
@@ -36,6 +42,11 @@ export default function SubmissionViewDialog({
   const navigate = useNavigate();
   const action = primaryAction(idea);
   const feedback = idea.feedback?.trim() ?? '';
+  const isHtmlBody = /<[a-z][\s\S]*>/i.test(idea.body || '');
+  const showReviewerFeedback =
+    idea.status === 'Revision Requested' ||
+    idea.status === 'Rejected' ||
+    feedback.length > 0;
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -88,16 +99,31 @@ export default function SubmissionViewDialog({
           </span>
         </div>
 
-        <p className="rounded-[14px] bg-surface-subtle p-4 text-sm leading-[1.7] text-foreground">
-          {idea.body}
-        </p>
+        {isHtmlBody ? (
+          <div
+            className="rounded-[14px] bg-surface-subtle p-4 text-sm leading-[1.7] text-foreground [&_p]:mb-2 [&_p:last-child]:mb-0"
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(idea.body) }}
+          />
+        ) : (
+          <p className="rounded-[14px] bg-surface-subtle p-4 text-sm leading-[1.7] text-foreground">
+            {idea.body}
+          </p>
+        )}
 
-        {feedback.length > 0 ? (
+        {showReviewerFeedback ? (
           <div className="mt-3.5 rounded-[14px] border border-border p-4">
             <strong className="mb-1.5 block text-[12px] font-extrabold tracking-[0.08em] text-brand-sage uppercase">
-              Reviewer note
+              Reviewer feedback
             </strong>
-            <p className="m-0 text-sm leading-[1.6] text-foreground">{feedback}</p>
+            {feedback.length > 0 ? (
+              <p className="m-0 text-sm leading-[1.6] text-foreground whitespace-pre-line">
+                {feedback}
+              </p>
+            ) : (
+              <p className="m-0 text-sm leading-[1.6] text-muted-foreground">
+                No reviewer feedback was provided.
+              </p>
+            )}
           </div>
         ) : null}
 
@@ -132,16 +158,18 @@ export default function SubmissionViewDialog({
           >
             Close
           </Button>
-          <Button
-            type="button"
-            onClick={() => {
-              onClose();
-              navigate({ to: action.href });
-            }}
-            className="h-auto rounded-full bg-primary px-5 py-3 font-bold text-primary-foreground hover:bg-brand-forest"
-          >
-            {action.label}
-          </Button>
+          {action ? (
+            <Button
+              type="button"
+              onClick={() => {
+                onClose();
+                navigate({ to: action.href });
+              }}
+              className="h-auto rounded-full bg-primary px-5 py-3 font-bold text-primary-foreground hover:bg-brand-forest"
+            >
+              {action.label}
+            </Button>
+          ) : null}
         </div>
       </div>
     </div>
