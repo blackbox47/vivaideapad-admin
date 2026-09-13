@@ -1,4 +1,5 @@
 import type { MyIdea } from '@/models/creator/my-ideas-model';
+import type { PaginationMeta } from '@/utils/helpers/api-pagination';
 
 export const OPPORTUNITY_CATEGORIES = [
   'All',
@@ -25,8 +26,16 @@ export interface CreatorTopic {
   deadline: string;
 }
 
+export interface CreatorTopicsListParams {
+  categoryId?: string;
+  page?: number;
+  limit?: number;
+}
+
 export interface CreatorTopicsResponse {
   topics: CreatorTopic[];
+  total: number;
+  meta: PaginationMeta;
 }
 
 export interface SubmissionAttachmentItem {

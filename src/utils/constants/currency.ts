@@ -3,3 +3,4 @@
  */
 export const CURRENCY_SYMBOL = '৳';
 export const CURRENCY_SIGN = CURRENCY_SYMBOL;
+export const MIN_WITHDRAWAL_AMOUNT = 500;

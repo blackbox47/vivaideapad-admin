@@ -60,10 +60,7 @@ export default function CreatorDashboardOverview() {
       <CreatorStatsCards stats={data?.stats ?? []} isLoading={isLoading} />
 
       <div className="grid gap-4 sm:gap-[18px] lg:grid-cols-[minmax(0,1.35fr)_minmax(250px,0.65fr)]">
-        <ContinueCreating
-          items={data?.inProgress ?? []}
-          isLoading={isLoading}
-        />
+        <ContinueCreating />
         <RecentActivity items={data?.activity ?? []} isLoading={isLoading} />
       </div>
     </div>

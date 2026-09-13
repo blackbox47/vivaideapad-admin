@@ -19,6 +19,7 @@ export interface ContentSubmission {
   submitted: string;
   risk: AiRisk;
   status: SubmissionStatus;
+  summary?: string;
   body: string;
   approvedCount: number;
   approvalRate: string;

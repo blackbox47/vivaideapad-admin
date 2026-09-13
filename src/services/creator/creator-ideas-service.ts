@@ -1,5 +1,6 @@
 import type {
   CreatorTopic,
+  CreatorTopicsListParams,
   CreatorTopicsResponse,
   OpportunityCategory,
   SubmissionAttachmentItem,
@@ -16,6 +17,10 @@ import {
 } from '@/utils/constants/api-end-points';
 import { formatDisplayDate } from '@/utils/helpers/format-display-date';
 import { CURRENCY_SYMBOL } from '@/utils/constants';
+import {
+  buildPaginationMeta,
+  type PaginationMeta,
+} from '@/utils/helpers/api-pagination';
 
 export const creatorIdeasService = baseService.injectEndpoints({
   endpoints: (builder) => ({
@@ -111,7 +116,10 @@ export const creatorIdeasService = baseService.injectEndpoints({
             body.concept_id || body.topicId || '',
           );
           formData.append('title', body.title);
-          formData.append('body', body.body || body.summary || '');
+          formData.append('body', body.body || '');
+          if (body.summary !== undefined) {
+            formData.append('summary', body.summary.trim());
+          }
           if (body.attachments && body.attachments.length > 0) {
             formData.append('attachments', JSON.stringify(body.attachments));
           }
@@ -131,7 +139,8 @@ export const creatorIdeasService = baseService.injectEndpoints({
           body: {
             concept_id: body.concept_id || body.topicId || '',
             title: body.title,
-            body: body.body || body.summary || '',
+            body: body.body || '',
+            summary: body.summary?.trim() || '',
             attachments:
               body.attachments ??
               (body.attachmentUrl ? [{ url: body.attachmentUrl }] : undefined),
@@ -175,7 +184,10 @@ export const creatorIdeasService = baseService.injectEndpoints({
             body.concept_id || body.topicId || '',
           );
           formData.append('title', body.title);
-          formData.append('body', body.body || body.summary || '');
+          formData.append('body', body.body || '');
+          if (body.summary !== undefined) {
+            formData.append('summary', body.summary.trim());
+          }
           if (body.attachments !== undefined) {
             formData.append('attachments', JSON.stringify(body.attachments));
           }
@@ -195,7 +207,8 @@ export const creatorIdeasService = baseService.injectEndpoints({
           body: {
             concept_id: body.concept_id || body.topicId || '',
             title: body.title,
-            body: body.body || body.summary || '',
+            body: body.body || '',
+            summary: body.summary?.trim() || '',
             attachments:
               body.attachments ??
               (body.attachmentUrl ? [{ url: body.attachmentUrl }] : undefined),
@@ -211,44 +224,80 @@ export const creatorIdeasService = baseService.injectEndpoints({
       }),
       invalidatesTags: ['my-ideas', 'creator-dashboard'],
     }),
-    getCreatorTopics: builder.query<CreatorTopicsResponse, void>({
-      query: () => ({ url: CREATOR_TOPICS_URL, method: 'GET' }),
-      transformResponse: (response: unknown): CreatorTopicsResponse => {
+    getCreatorTopics: builder.query<
+      CreatorTopicsResponse,
+      CreatorTopicsListParams
+    >({
+      query: (params) => {
+        const queryParams: Record<string, string | number> = {};
+        if (params.categoryId) {
+          queryParams.category_id = params.categoryId;
+        }
+        if (params.page) {
+          queryParams.page = params.page;
+        }
+        if (params.limit) {
+          queryParams.limit = params.limit;
+        }
+        return {
+          url: CREATOR_TOPICS_URL,
+          method: 'GET',
+          params: queryParams,
+        };
+      },
+      transformResponse: (
+        response: unknown,
+        _meta,
+        arg,
+      ): CreatorTopicsResponse => {
+        const page = arg.page ?? 1;
+        const limit = arg.limit ?? 0;
+
         if (!response || typeof response !== 'object') {
-          return { topics: [] };
+          return emptyCreatorTopicsResponse(page, limit);
         }
 
         const res = response as Record<string, unknown>;
 
         // 1. Mock format: { topics: [...] }
         if (Array.isArray(res.topics)) {
-          return response as CreatorTopicsResponse;
+          const topics = res.topics as CreatorTopic[];
+          const meta = parseCreatorTopicsMeta(res, topics.length, page, limit);
+          return { topics, total: meta.totalItems, meta };
         }
 
-        // 2. Live API paginated format: { data: [...] }
+        // 2. Live API paginated format: { data: [...], meta }
         if (Array.isArray(res.data)) {
-          const topics: CreatorTopic[] = res.data.map((item: Record<string, unknown>) => {
-            const metadata = (item.metadata as Record<string, unknown>) ?? {};
-            return {
-              id: String(item.id ?? ''),
-              title: String(item.title ?? ''),
-              description: String(item.brief ?? item.description ?? ''),
-              reward: item.reward_budget
-                ? `${CURRENCY_SYMBOL}${String(item.reward_budget).replace(/^[৳$Tk\s]*/, '')}`
-                : String(item.reward ?? `${CURRENCY_SYMBOL}0`).replace(/^\$/, CURRENCY_SYMBOL),
-              closesOn: item.close_date ? String(item.close_date).slice(0, 10) : String(item.closesOn ?? ''),
-              category: String(
-                metadata.category_name ?? item.category_name ?? item.category ?? 'Family occasions',
-              ) as Exclude<OpportunityCategory, 'All'>,
-              icon: String(metadata.icon ?? item.icon ?? '✦'),
-              deadline: String(item.deadline ?? 'Active'),
-            };
-          });
-
-          return { topics };
+          const topics = (res.data as Record<string, unknown>[]).map(
+            mapCreatorTopic,
+          );
+          const meta = parseCreatorTopicsMeta(res, topics.length, page, limit);
+          return { topics, total: meta.totalItems, meta };
         }
 
-        return { topics: [] };
+        return emptyCreatorTopicsResponse(page, limit);
+      },
+      serializeQueryArgs: ({ endpointName, queryArgs }) =>
+        `${endpointName}-${queryArgs.categoryId ?? 'all'}-${queryArgs.limit ?? 'default'}`,
+      merge: (currentCache, newItems) => {
+        if (newItems.meta.page <= 1) {
+          currentCache.topics = newItems.topics;
+          currentCache.total = newItems.total;
+          currentCache.meta = newItems.meta;
+          return;
+        }
+
+        const seen = new Set(currentCache.topics.map((topic) => topic.id));
+        for (const topic of newItems.topics) {
+          if (!seen.has(topic.id)) {
+            currentCache.topics.push(topic);
+          }
+        }
+        currentCache.total = newItems.total;
+        currentCache.meta = newItems.meta;
+      },
+      forceRefetch({ currentArg, previousArg }) {
+        return currentArg.page !== previousArg?.page;
       },
       providesTags: ['creator-topics'],
     }),
@@ -262,3 +311,61 @@ export const {
   useSubmitExistingSubmissionMutation,
   useGetCreatorTopicsQuery,
 } = creatorIdeasService;
+
+function mapCreatorTopic(item: Record<string, unknown>): CreatorTopic {
+  const metadata = (item.metadata as Record<string, unknown>) ?? {};
+  return {
+    id: String(item.id ?? ''),
+    title: String(item.title ?? ''),
+    description: String(item.brief ?? item.description ?? ''),
+    reward: item.reward_budget
+      ? `${CURRENCY_SYMBOL}${String(item.reward_budget).replace(/^[৳$Tk\s]*/, '')}`
+      : String(item.reward ?? `${CURRENCY_SYMBOL}0`).replace(/^\$/, CURRENCY_SYMBOL),
+    closesOn: item.close_date
+      ? String(item.close_date).slice(0, 10)
+      : String(item.closesOn ?? ''),
+    category: String(
+      metadata.category_name ??
+        item.category_name ??
+        item.category ??
+        'Family occasions',
+    ) as Exclude<OpportunityCategory, 'All'>,
+    icon: String(metadata.icon ?? item.icon ?? '✦'),
+    deadline: String(item.deadline ?? 'Active'),
+  };
+}
+
+function parseCreatorTopicsMeta(
+  res: Record<string, unknown>,
+  itemCount: number,
+  fallbackPage: number,
+  fallbackLimit: number,
+): PaginationMeta {
+  const metaRaw = (res.meta ?? {}) as Record<string, unknown>;
+  const totalItems =
+    typeof metaRaw.totalItems === 'number'
+      ? metaRaw.totalItems
+      : typeof metaRaw.total === 'number'
+        ? metaRaw.total
+        : typeof res.total === 'number'
+          ? res.total
+          : itemCount;
+  const page = typeof metaRaw.page === 'number' ? metaRaw.page : fallbackPage;
+  const limit =
+    typeof metaRaw.limit === 'number'
+      ? metaRaw.limit
+      : fallbackLimit > 0
+        ? fallbackLimit
+        : itemCount || 1;
+
+  return buildPaginationMeta(totalItems, page, limit);
+}
+
+function emptyCreatorTopicsResponse(
+  page: number,
+  limit: number,
+): CreatorTopicsResponse {
+  const safeLimit = limit > 0 ? limit : 1;
+  const meta = buildPaginationMeta(0, page, safeLimit);
+  return { topics: [], total: 0, meta };
+}

@@ -1,6 +1,6 @@
 import { format, isValid, parse } from 'date-fns';
 
-export const DISPLAY_DATE_FORMAT = 'dd.MM.yyyy';
+export const DISPLAY_DATE_FORMAT = 'dd/MM/yyyy';
 
 function toDate(value: string | Date): Date | undefined {
   if (value instanceof Date) {
@@ -12,8 +12,13 @@ function toDate(value: string | Date): Date | undefined {
     return undefined;
   }
 
-  if (/^\d{2}\.\d{2}\.\d{4}$/.test(trimmed)) {
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(trimmed)) {
     const parsed = parse(trimmed, DISPLAY_DATE_FORMAT, new Date());
+    return isValid(parsed) ? parsed : undefined;
+  }
+
+  if (/^\d{2}\.\d{2}\.\d{4}$/.test(trimmed)) {
+    const parsed = parse(trimmed, 'dd.MM.yyyy', new Date());
     return isValid(parsed) ? parsed : undefined;
   }
 
@@ -31,7 +36,7 @@ function toDate(value: string | Date): Date | undefined {
   return isValid(date) ? date : undefined;
 }
 
-/** Formats a date or ISO/date string as `02.06.2026`. */
+/** Formats a date or ISO/date string as `02/06/2026`. */
 export function formatDisplayDate(
   value: string | Date | null | undefined,
 ): string {

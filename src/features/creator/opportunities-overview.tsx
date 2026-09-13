@@ -1,6 +1,5 @@
 import { AlertCircle } from 'lucide-react';
 import { useTanstackSearchParams } from '@/lib/use-tanstack-search-params';
-import useResetStateOnChange from '@/hooks/ui/use-reset-state-on-change';
 
 import PageHeader from '@/components/layout/page-header';
 import { Button } from '@/components/ui/button';
@@ -15,12 +14,13 @@ import { Skeleton } from '@/components/ui/skeleton';
 import EmptyState from '@/components/shared/empty-state';
 import OpportunityCard from '@/features/creator/opportunity-card';
 import OpportunityFilters from '@/features/creator/opportunity-filters';
+import OpportunityLoadMore from '@/features/creator/opportunity-load-more';
 import useCreatorTopics from '@/hooks/creator/use-creator-topics';
 import {
   OPPORTUNITY_CATEGORIES,
   type OpportunityCategoryFilter,
 } from '@/models/creator/submit-idea-model';
-import { DEFAULT_PAGE_SIZE as PAGE_SIZE } from '@/utils/constants/pagination';
+import { DEFAULT_API_PAGE_SIZE as PAGE_SIZE } from '@/utils/constants/pagination';
 
 function parseCategory(value: string | null): OpportunityCategoryFilter {
   if (
@@ -37,14 +37,22 @@ export default function OpportunitiesOverview() {
   const [searchParams, setSearchParams] = useTanstackSearchParams();
   const category = parseCategory(searchParams.get('category'));
   const search = searchParams.get('q') ?? '';
-  const [visibleCount, setVisibleCount] = useResetStateOnChange(PAGE_SIZE, [
-    category,
-    search,
-  ]);
 
-  const { data, isLoading, isError, error, refetch } = useCreatorTopics({
+  const {
+    data,
+    total,
+    hasMore,
+    remainingCount,
+    loadMore,
+    isLoading,
+    isFetchingMore,
+    isError,
+    error,
+    refetch,
+  } = useCreatorTopics({
     category,
     search,
+    limit: PAGE_SIZE,
   });
 
   const setSearch = (next: string) => {
@@ -77,9 +85,9 @@ export default function OpportunitiesOverview() {
   }
 
   const topics = data?.topics ?? [];
-  const visibleTopics = topics.slice(0, visibleCount);
-  const remainingCount = Math.max(0, topics.length - visibleCount);
-  const countLabel = `${topics.length} ${topics.length === 1 ? 'brief' : 'briefs'}`;
+  const hasClientFilter = category !== 'All' || search.trim().length > 0;
+  const displayCount = hasClientFilter ? topics.length : total;
+  const countLabel = `${displayCount} ${displayCount === 1 ? 'brief' : 'briefs'}`;
 
   return (
     <div className="pb-4">
@@ -113,21 +121,16 @@ export default function OpportunitiesOverview() {
       ) : (
         <>
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {visibleTopics.map((topic) => (
+            {topics.map((topic) => (
               <OpportunityCard key={topic.id} topic={topic} />
             ))}
           </div>
-          {remainingCount > 0 ? (
-            <div className="mt-7 flex justify-center">
-              <Button
-                type="button"
-                variant="outline"
-                className="h-auto rounded-full border border-border bg-card px-6.5 py-3 text-[13px] font-bold text-foreground hover:bg-surface-subtle"
-                onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
-              >
-                Show more briefs · {remainingCount} remaining
-              </Button>
-            </div>
+          {hasMore ? (
+            <OpportunityLoadMore
+              remainingCount={remainingCount}
+              isLoading={isFetchingMore}
+              onLoadMore={loadMore}
+            />
           ) : null}
         </>
       )}

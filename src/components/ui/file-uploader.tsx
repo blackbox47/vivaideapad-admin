@@ -2,6 +2,7 @@ import * as React from 'react';
 import {
   AlertCircle,
   CheckCircle2,
+  Download,
   ExternalLink,
   File as FileIcon,
   FileImage,
@@ -12,6 +13,7 @@ import {
 
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
+import { resolveAvatarUrl } from '@/utils/helpers/resolve-avatar-url';
 
 export interface ExistingAttachmentItem {
   id?: string;
@@ -66,6 +68,77 @@ function formatBytes(bytes: number | string | undefined): string {
   const units = ['B', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(num) / Math.log(1024));
   return `${(num / Math.pow(1024, i)).toFixed(1)} ${units[i]}`;
+}
+
+function isOpenableUrl(url: string | undefined): url is string {
+  if (!url || url === '#' || url === 'undefined') return false;
+  const trimmed = url.trim().toLowerCase();
+  return (
+    !trimmed.startsWith('javascript:') &&
+    !trimmed.startsWith('data:') &&
+    !trimmed.startsWith('vbscript:')
+  );
+}
+
+function resolveFileUrl(url: string | undefined): string | undefined {
+  if (!url) return undefined;
+  const resolved = resolveAvatarUrl(url) ?? url;
+  return isOpenableUrl(resolved) ? resolved : undefined;
+}
+
+function toDownloadUrl(url: string, filename: string): string {
+  if (url.startsWith('blob:')) return url;
+  try {
+    const parsed = new URL(url);
+    parsed.searchParams.set('download', '1');
+    parsed.searchParams.set('filename', filename);
+    return parsed.toString();
+  } catch {
+    return url;
+  }
+}
+
+function FileOpenActions({
+  href,
+  fileName,
+}: {
+  href?: string;
+  fileName: string;
+}) {
+  if (!href) return null;
+
+  const downloadHref = toDownloadUrl(href, fileName);
+  const stopClick = (event: React.MouseEvent) => {
+    event.stopPropagation();
+  };
+
+  return (
+    <span className="inline-flex items-center gap-2">
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={stopClick}
+        title={`View ${fileName}`}
+        aria-label={`View ${fileName}`}
+        className="inline-flex items-center gap-1 font-medium text-brand-forest hover:underline"
+      >
+        View <ExternalLink className="size-3" />
+      </a>
+      <a
+        href={downloadHref}
+        download={fileName}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={stopClick}
+        title={`Download ${fileName}`}
+        aria-label={`Download ${fileName}`}
+        className="inline-flex items-center gap-1 font-medium text-brand-forest hover:underline"
+      >
+        Download <Download className="size-3" />
+      </a>
+    </span>
+  );
 }
 
 function getFileIcon(fileName: string, mimeType?: string) {
@@ -277,6 +350,28 @@ export function FileUploader({
     onRemoveExisting?.(index);
   };
 
+  const localFileUrls = React.useMemo(
+    () => files.map((file) => URL.createObjectURL(file)),
+    [files],
+  );
+
+  React.useEffect(() => {
+    return () => {
+      localFileUrls.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [localFileUrls]);
+
+  const singleFileObjectUrl = React.useMemo(
+    () => (selectedFile ? URL.createObjectURL(selectedFile) : undefined),
+    [selectedFile],
+  );
+
+  React.useEffect(() => {
+    return () => {
+      if (singleFileObjectUrl) URL.revokeObjectURL(singleFileObjectUrl);
+    };
+  }, [singleFileObjectUrl]);
+
   // Single-file display calculation
   const currentFileName =
     selectedFile?.name ||
@@ -286,6 +381,9 @@ export function FileUploader({
       : null);
   const currentFileSize = selectedFile?.size || fileSizeProp;
   const hasSingleFile = Boolean(selectedFile || (typeof value === 'string' && value));
+  const singleFileHref =
+    singleFileObjectUrl ||
+    (typeof value === 'string' ? resolveFileUrl(value) : undefined);
 
   return (
     <div className={cn('w-full space-y-3', containerClassName)}>
@@ -368,15 +466,26 @@ export function FileUploader({
                   <p className="truncate text-sm font-bold text-foreground">
                     {currentFileName}
                   </p>
-                  <p className="text-xs text-muted-foreground">
-                    {currentFileSize
-                      ? formatBytes(currentFileSize)
-                      : 'File selected'}{' '}
-                    ·{' '}
-                    <span className="text-brand-forest font-semibold hover:underline">
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground">
+                    <span>
+                      {currentFileSize
+                        ? formatBytes(currentFileSize)
+                        : 'File selected'}
+                    </span>
+                    <span aria-hidden="true">·</span>
+                    <span className="font-semibold text-brand-forest hover:underline">
                       Click to replace
                     </span>
-                  </p>
+                    {singleFileHref ? (
+                      <>
+                        <span aria-hidden="true">·</span>
+                        <FileOpenActions
+                          href={singleFileHref}
+                          fileName={currentFileName || 'document'}
+                        />
+                      </>
+                    ) : null}
+                  </div>
                 </div>
               </div>
 
@@ -434,18 +543,15 @@ export function FileUploader({
                       <CheckCircle2 className="size-3" /> Saved
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground">
                     {doc.size ? <span>{formatBytes(doc.size)}</span> : null}
-                    {doc.url && (
-                      <a
-                        href={doc.url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-1 text-brand-forest hover:underline font-medium"
-                      >
-                        View <ExternalLink className="size-3" />
-                      </a>
-                    )}
+                    {doc.size && doc.url ? (
+                      <span aria-hidden="true">·</span>
+                    ) : null}
+                    <FileOpenActions
+                      href={resolveFileUrl(doc.url)}
+                      fileName={doc.name || doc.original_name || 'document'}
+                    />
                   </div>
                 </div>
               </div>
@@ -482,9 +588,18 @@ export function FileUploader({
                       New
                     </span>
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    {formatBytes(file.size)}
-                  </p>
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground">
+                    <span>{formatBytes(file.size)}</span>
+                    {localFileUrls[idx] ? (
+                      <>
+                        <span aria-hidden="true">·</span>
+                        <FileOpenActions
+                          href={localFileUrls[idx]}
+                          fileName={file.name}
+                        />
+                      </>
+                    ) : null}
+                  </div>
                 </div>
               </div>
 

@@ -8,6 +8,15 @@ import { CREATOR_IDEAS_URL } from '@/utils/constants/api-end-points';
 import { formatDisplayDate } from '@/utils/helpers/format-display-date';
 import { CURRENCY_SYMBOL } from '@/utils/constants';
 
+function mapDecisionFeedback(item: Record<string, unknown>): string | undefined {
+  const raw = item.feedback ?? item.decision_notes ?? item.decisionNotes;
+  if (typeof raw !== 'string') {
+    return undefined;
+  }
+  const trimmed = raw.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+}
+
 export const myIdeasService = baseService.injectEndpoints({
   endpoints: (builder) => ({
     getMyIdeas: builder.query<MyIdeasResponse, MyIdeasQueryParams>({
@@ -38,6 +47,7 @@ export const myIdeasService = baseService.injectEndpoints({
               submitted: formatDisplayDate(
                 String(idea.submitted ?? idea.created_at ?? ''),
               ),
+              feedback: mapDecisionFeedback(idea),
             } as MyIdea;
           });
           const total = typeof res.total === 'number' ? res.total : ideas.length;
@@ -80,7 +90,7 @@ export const myIdeasService = baseService.injectEndpoints({
                 : `${CURRENCY_SYMBOL}0`,
               comments: 0,
               body: String(item.body ?? ''),
-              feedback: (item.decision_notes as string) ?? undefined,
+              feedback: mapDecisionFeedback(item),
             };
           });
           const total = typeof (res.meta as Record<string, unknown>)?.total === 'number'

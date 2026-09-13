@@ -25,7 +25,7 @@ function formatDueDate(days: number): string {
   const dd = String(target.getDate()).padStart(2, '0');
   const mm = String(target.getMonth() + 1).padStart(2, '0');
   const yyyy = target.getFullYear();
-  return `${dd}.${mm}.${yyyy}`;
+  return `${dd}/${mm}/${yyyy}`;
 }
 
 export default function RequestRevisionModal({
