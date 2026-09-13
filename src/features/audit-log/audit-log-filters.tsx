@@ -1,5 +1,4 @@
 import { Link } from '@tanstack/react-router';
-import { Search } from 'lucide-react';
 
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
