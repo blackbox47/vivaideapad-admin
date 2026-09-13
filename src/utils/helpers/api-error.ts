@@ -38,6 +38,17 @@ export function getApiErrorMessage(error: unknown): string | null {
     return null;
   }
 
+  // RTK Query `unwrap()` rejection: `{ status, data }` where `data` is the
+  // parsed API body (used by some base queries). Prefer nested message.
+  if (typeof error === 'object' && error !== null && 'data' in error) {
+    const fromData = readSpecEnvelope(
+      (error as { data?: unknown }).data,
+    );
+    if (fromData) {
+      return fromData;
+    }
+  }
+
   const spec = readSpecEnvelope(error);
   if (spec) {
     return spec;

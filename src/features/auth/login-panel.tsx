@@ -17,6 +17,7 @@ import {
   type LoginFormValues,
 } from '@/models/auth/auth-schema';
 import { ADMIN_ROUTES, CREATOR_ROUTES } from '@/utils/constants/routes';
+import { getApiErrorMessage } from '@/utils/helpers/api-error';
 
 interface LoginPanelProps {
   role: UserRole;
@@ -104,8 +105,6 @@ export default function LoginPanel({
     isLoggingIn,
     googleLogin,
     isGoogleLoggingIn,
-    loginError,
-    resetLoginError,
   } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useTanstackSearchParams();
@@ -116,13 +115,14 @@ export default function LoginPanel({
     safeRedirectTarget(searchParams.get('from')) ?? homeForRole(role);
 
   const handleGoogleSuccess = async (credential: string) => {
-    resetLoginError();
     try {
       await googleLogin(credential);
       toast.success('Welcome back!');
       navigate({ to: destination, replace: true });
-    } catch {
-      // Error handled via loginError in useAuth
+    } catch (err) {
+      toast.error(
+        getApiErrorMessage(err) ?? 'Google sign-in failed. Please try again.',
+      );
     }
   };
 
@@ -140,13 +140,14 @@ export default function LoginPanel({
   const forgotPasswordPath = CREATOR_ROUTES.forgotPassword;
 
   const onSubmit = async (values: LoginFormValues) => {
-    resetLoginError();
     try {
       await login(values, { asRole: role });
       toast.success('Welcome back!');
       navigate({ to: destination, replace: true });
-    } catch {
-      // Failure surfaced via loginError.
+    } catch (err) {
+      toast.error(
+        getApiErrorMessage(err) ?? 'Sign-in failed. Please try again.',
+      );
     }
   };
 
@@ -263,15 +264,6 @@ export default function LoginPanel({
                 {...register('password')}
               />
             </div>
-
-            {loginError ? (
-              <div
-                className="rounded-lg bg-destructive/10 p-3 text-xs font-semibold text-destructive"
-                role="alert"
-              >
-                {loginError}
-              </div>
-            ) : null}
 
             <div className="pt-2">
               <button

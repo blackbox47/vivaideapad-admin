@@ -3,7 +3,30 @@ import type { BaseQueryFn } from '@reduxjs/toolkit/query';
 import { env } from '@/config/env';
 import type { ApiError, ApiRequest } from '@/models/api/api-model';
 import { sessionExpired } from '@/reducers/auth-slice';
-import { AUTH_REFRESH_URL } from '@/utils/constants/api-end-points';
+import {
+  AUTH_ADMIN_SIGN_IN_URL,
+  AUTH_FORGOT_PASSWORD_URL,
+  AUTH_GOOGLE_SIGN_IN_URL,
+  AUTH_GOOGLE_SIGN_UP_URL,
+  AUTH_REFRESH_URL,
+  AUTH_SIGN_IN_URL,
+  AUTH_SIGN_UP_URL,
+} from '@/utils/constants/api-end-points';
+
+/**
+ * Public auth endpoints that return 401/403 for bad credentials or policy
+ * failures. A 401 here is NOT an expired session — do not attempt refresh
+ * or dispatch `sessionExpired`, or the SPA always shows
+ * "Session expired. Please sign in again."
+ */
+const AUTH_CREDENTIAL_URLS = new Set<string>([
+  AUTH_SIGN_IN_URL,
+  AUTH_ADMIN_SIGN_IN_URL,
+  AUTH_GOOGLE_SIGN_IN_URL,
+  AUTH_GOOGLE_SIGN_UP_URL,
+  AUTH_SIGN_UP_URL,
+  AUTH_FORGOT_PASSWORD_URL,
+]);
 
 function buildQueryString(params: ApiRequest['params']): string {
   if (!params) {
@@ -27,10 +50,10 @@ function readErrorMessage(payload: unknown, fallback: string): string {
       message?: unknown;
       error?: { message?: unknown };
     };
-    if (typeof record.error?.message === 'string') {
+    if (typeof record.error?.message === 'string' && record.error.message) {
       return record.error.message;
     }
-    if (typeof record.message === 'string') {
+    if (typeof record.message === 'string' && record.message) {
       return record.message;
     }
   }
@@ -55,7 +78,9 @@ async function parseBody(response: Response): Promise<unknown> {
  */
 let refreshInFlight: Promise<boolean> | null = null;
 
-async function performRefresh(signal: AbortSignal | undefined): Promise<boolean> {
+async function performRefresh(
+  signal: AbortSignal | undefined,
+): Promise<boolean> {
   const url = `${env.apiBaseUrl.replace(/\/+$/, '')}${AUTH_REFRESH_URL}`;
   try {
     const response = await fetch(url, {
@@ -102,21 +127,34 @@ async function issueRequest(
   });
 }
 
+function toErrorResult(
+  status: number,
+  payload: unknown,
+  fallback: string,
+): { error: ApiError } {
+  return {
+    error: {
+      status,
+      message: readErrorMessage(payload, fallback),
+    },
+  };
+}
+
 /**
  * Single HTTP seam for the app. Components never call `fetch` directly — they
  * consume the typed hooks generated from `baseService.injectEndpoints`.
  *
  * Tokens travel in HttpOnly cookies set by the backend; the SPA never sends
- * an `Authorization` header. On a 401 we fire a single-flight `/auth/refresh`
- * and retry the original request once. If the refresh also fails (or the
- * backend has revoked the session family), we dispatch `sessionExpired` so
- * the store resets and the SPA can redirect to login.
+ * an `Authorization` header. On a 401 from an authenticated API we fire a
+ * single-flight `/auth/refresh` and retry once. Public auth routes skip that
+ * path so credential failures surface their API message.
  */
 export const customFetch: BaseQueryFn<ApiRequest, unknown, ApiError> = async (
   request,
   apiArg,
 ) => {
   const isRefreshRoute = request.url === AUTH_REFRESH_URL;
+  const isCredentialRoute = AUTH_CREDENTIAL_URLS.has(request.url);
 
   try {
     const first = await issueRequest(request, apiArg.signal);
@@ -124,21 +162,21 @@ export const customFetch: BaseQueryFn<ApiRequest, unknown, ApiError> = async (
       return { data: await parseBody(first) };
     }
 
-    if (first.status !== 401 || isRefreshRoute) {
+    // Auth/sign-in style 401s mean bad credentials (or similar) — return the
+    // API body as-is. Never treat them as an expired session.
+    if (first.status !== 401 || isRefreshRoute || isCredentialRoute) {
       const payload = await parseBody(first);
-      return {
-        error: {
-          status: first.status,
-          message: readErrorMessage(payload, first.statusText),
-        },
-      };
+      return toErrorResult(first.status, payload, first.statusText);
     }
 
     const refreshed = await refreshAccessToken(apiArg.signal);
     if (!refreshed) {
       apiArg.dispatch(sessionExpired());
       return {
-        error: { status: 401, message: 'Session expired. Please sign in again.' },
+        error: {
+          status: 401,
+          message: 'Session expired. Please sign in again.',
+        },
       };
     }
 
@@ -147,17 +185,13 @@ export const customFetch: BaseQueryFn<ApiRequest, unknown, ApiError> = async (
     if (retry.ok) {
       return { data: payload };
     }
-    return {
-      error: {
-        status: retry.status,
-        message: readErrorMessage(payload, retry.statusText),
-      },
-    };
+    return toErrorResult(retry.status, payload, retry.statusText);
   } catch (error) {
     return {
       error: {
         status: 0,
-        message: error instanceof Error ? error.message : 'Network request failed',
+        message:
+          error instanceof Error ? error.message : 'Network request failed',
       },
     };
   }

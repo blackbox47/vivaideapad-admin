@@ -12,6 +12,7 @@ import {
   type AdminSignInFormValues,
 } from '@/models/auth/auth-schema';
 import { ADMIN_ROUTES, CREATOR_ROUTES } from '@/utils/constants/routes';
+import { getApiErrorMessage } from '@/utils/helpers/api-error';
 
 interface AdminSignInPanelProps {
   brandName?: string;
@@ -37,17 +38,18 @@ export default function AdminSignInPanel({
       password: '',
     },
   });
-  const { login, isLoggingIn, loginError, resetLoginError } = useAuth();
+  const { login, isLoggingIn } = useAuth();
   const navigate = useNavigate();
 
   const onSubmit = async (values: AdminSignInFormValues) => {
-    resetLoginError();
     try {
       await login(values, { asRole: 'admin' });
       toast.success('Welcome to the admin workspace');
       navigate({ to: ADMIN_ROUTES.dashboard, replace: true });
-    } catch {
-      // Failure surfaced via loginError.
+    } catch (err) {
+      toast.error(
+        getApiErrorMessage(err) ?? 'Sign-in failed. Please try again.',
+      );
     }
   };
 
@@ -149,15 +151,6 @@ export default function AdminSignInPanel({
               Forgot admin password?
             </Link>
           </div>
-
-          {loginError ? (
-            <div
-              className="rounded-lg bg-destructive/10 p-3 text-xs font-semibold text-destructive"
-              role="alert"
-            >
-              {loginError}
-            </div>
-          ) : null}
 
           <button
             type="submit"
