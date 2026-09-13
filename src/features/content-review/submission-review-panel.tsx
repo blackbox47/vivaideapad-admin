@@ -139,10 +139,10 @@ export default function SubmissionReviewPanel({
     : formatCurrency(detail.concept?.rewardBudget ?? detail.topicDetail?.rewardBudget ?? 18000);
 
   const closesDateText = isMotorbike
-    ? 'closes 30.09.2026'
+    ? 'closes 30/09/2026'
     : detail.concept?.closeDate
       ? `closes ${formatDisplayDate(detail.concept.closeDate)}`
-      : 'closes 30.09.2026';
+      : 'closes 30/09/2026';
 
   // Contributor values
   const contributorName = isMotorbike
@@ -159,7 +159,7 @@ export default function SubmissionReviewPanel({
         : `CT-${detail.contributorDetail.id.slice(0, 4).toUpperCase()}`)
     : (isMotorbike ? 'CT-8291' : `CT-${submission.id.slice(0, 4).toUpperCase()}`);
   const submittedDateText = isMotorbike
-    ? 'Submitted 11.09.2026'
+    ? 'Submitted 11/09/2026'
     : `Submitted ${formatDisplayDate(submission.submitted)}`;
   const revisionDueText = detail.revisionDueAt
     ? `Due ${formatDisplayDate(detail.revisionDueAt)}`

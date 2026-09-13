@@ -11,6 +11,7 @@ import {
   type WithdrawRequestFormValues,
 } from '@/models/creator/creator-payout-schema';
 import type { DropdownOption } from '@/utils/types/dropdown-option';
+import { CURRENCY_SYMBOL, MIN_WITHDRAWAL_AMOUNT } from '@/utils/constants';
 
 const BKASH_METHOD = 'bKash';
 
@@ -117,7 +118,8 @@ export default function WithdrawRequestDialog({
         <p className="mb-3.5 text-[13px] text-muted-foreground">
           Available balance:{' '}
           <strong className="text-foreground">{available}</strong>. Minimum
-          withdrawal threshold applies.
+          withdrawal is {CURRENCY_SYMBOL}
+          {MIN_WITHDRAWAL_AMOUNT}.
         </p>
 
         <form onSubmit={handleSubmit(onFormSubmit)} noValidate>
@@ -125,7 +127,7 @@ export default function WithdrawRequestDialog({
             <Input
               id="withdraw-amount"
               type="number"
-              min="0"
+              min={MIN_WITHDRAWAL_AMOUNT}
               step="any"
               placeholder="Enter amount"
               label="Amount"

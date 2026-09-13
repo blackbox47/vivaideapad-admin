@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { isBdMobileNumber } from '@/utils/helpers/bd-mobile';
+import { CURRENCY_SYMBOL, MIN_WITHDRAWAL_AMOUNT } from '@/utils/constants';
 
 export const changePayoutMethodSchema = z.object({
   method: z.literal('bKash'),
@@ -31,6 +32,9 @@ export function createWithdrawRequestSchema(availableAmount: number) {
       .min(1, 'Amount is required.')
       .refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
         message: 'Amount must be a positive number.',
+      })
+      .refine((val) => Number(val) >= MIN_WITHDRAWAL_AMOUNT, {
+        message: `Minimum withdrawal is ${CURRENCY_SYMBOL}${MIN_WITHDRAWAL_AMOUNT}.`,
       })
       .refine((val) => Number(val) <= availableAmount, {
         message: 'Amount cannot exceed your available balance.',

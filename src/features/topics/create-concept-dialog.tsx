@@ -196,7 +196,7 @@ export default function CreateConceptDialog({
                         setValue('closesOn', undefined);
                       }
                     }}
-                    placeholder="02.06.2026"
+                    placeholder="02/06/2026"
                     disabledBefore={today}
                   />
                 )}
@@ -218,7 +218,7 @@ export default function CreateConceptDialog({
                     id="concept-closes"
                     value={field.value}
                     onChange={field.onChange}
-                    placeholder="30.06.2026"
+                    placeholder="30/06/2026"
                     disabledBefore={opensOn ?? today}
                   />
                 )}

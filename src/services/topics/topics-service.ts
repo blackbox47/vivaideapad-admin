@@ -257,8 +257,8 @@ export function parseConceptDate(input: string | undefined): string | undefined 
     return d.toISOString().slice(0, 10);
   }
 
-  // 2. `02.06.2026` / `02-06-2026`
-  const dotted = /^(\d{1,2})[.-](\d{1,2})[.-](\d{4})$/.exec(trimmed);
+  // 2. `02/06/2026` / `02.06.2026` / `02-06-2026`
+  const dotted = /^(\d{1,2})[./-](\d{1,2})[./-](\d{4})$/.exec(trimmed);
   if (dotted) {
     const day = Number(dotted[1]);
     const month = Number(dotted[2]);
