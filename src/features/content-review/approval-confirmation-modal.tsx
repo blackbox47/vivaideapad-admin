@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { Loader2 } from 'lucide-react';
 
 export interface ApprovalConfirmationModalProps {
   isOpen: boolean;
@@ -193,7 +194,11 @@ export default function ApprovalConfirmationModal({
             onClick={onConfirm}
             disabled={isDeciding}
           >
-            <span className="material-symbols-outlined text-[16px]">verified</span>
+            {isDeciding ? (
+              <Loader2 className="size-3.5 animate-spin shrink-0" />
+            ) : (
+              <span className="material-symbols-outlined text-[16px]">verified</span>
+            )}
             <span>
               {isDeciding
                 ? 'Approving…'

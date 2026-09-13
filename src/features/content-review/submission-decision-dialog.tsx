@@ -177,7 +177,7 @@ export default function SubmissionDecisionDialog({
           <div>
             <Textarea
               label="Feedback"
-              required={decision !== 'approve'}
+              required={decision === 'request_revision'}
               rows={4}
               placeholder="Enter feedback"
               errorMessage={errors.feedback?.message}

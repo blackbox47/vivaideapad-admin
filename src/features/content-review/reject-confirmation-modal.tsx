@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Loader2 } from 'lucide-react';
 import { CURRENCY_SYMBOL } from '@/utils/constants';
 
 export interface RejectConfirmationModalProps {
@@ -33,7 +34,6 @@ export default function RejectConfirmationModal({
   impactText = `${CURRENCY_SYMBOL}0.00 released (no reward)`,
 }: RejectConfirmationModalProps) {
   const [feedback, setFeedback] = useState(initialFeedback);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -54,13 +54,7 @@ export default function RejectConfirmationModal({
     : `#${contributorId}`;
 
   const handleConfirm = () => {
-    const trimmed = feedback.trim();
-    if (trimmed.length === 0) {
-      setError('Please provide feedback explaining why this submission is rejected.');
-      return;
-    }
-    setError(null);
-    onConfirm(trimmed);
+    onConfirm(feedback.trim());
   };
 
   return (
@@ -70,11 +64,6 @@ export default function RejectConfirmationModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="reject-confirmation-title"
-      onClick={(e) => {
-        if (e.target === e.currentTarget && !isDeciding) {
-          onClose();
-        }
-      }}
     >
       <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden">
         {/* Close button */}
@@ -106,7 +95,6 @@ export default function RejectConfirmationModal({
             </span>
             &apos;s submission for{' '}
             <span className="font-medium text-slate-700">{topicTitle}</span>.
-            Please provide a clear reason to notify the contributor.
           </p>
         </div>
 
@@ -174,7 +162,8 @@ export default function RejectConfirmationModal({
           <div className="space-y-1.5">
             <div className="flex items-center justify-between text-xs font-bold text-slate-700">
               <label htmlFor="rejection-feedback-input">
-                Feedback to contributor <span className="text-rose-600">*</span>
+                Feedback to contributor{' '}
+                <span className="font-medium text-slate-400">(optional)</span>
               </label>
               <span className="font-normal text-slate-400 text-[11px]">
                 {feedback.length}/500
@@ -189,13 +178,9 @@ export default function RejectConfirmationModal({
               value={feedback}
               onChange={(e) => {
                 setFeedback(e.target.value);
-                setError(null);
               }}
               disabled={isDeciding}
             />
-            {error && (
-              <p className="text-xs text-rose-600 font-medium">{error}</p>
-            )}
           </div>
         </div>
 
@@ -215,7 +200,11 @@ export default function RejectConfirmationModal({
             onClick={handleConfirm}
             disabled={isDeciding}
           >
-            <span className="material-symbols-outlined text-[16px]">block</span>
+            {isDeciding ? (
+              <Loader2 className="size-3.5 animate-spin shrink-0" />
+            ) : (
+              <span className="material-symbols-outlined text-[16px]">block</span>
+            )}
             <span>{isDeciding ? 'Rejecting…' : 'Confirm rejection'}</span>
           </button>
         </div>

@@ -23,7 +23,11 @@ interface ReviewTableProps {
 
 const TITLE_MAX_CHARS = 20;
 
-const DECIDED_STATUSES = new Set(['Approved', 'Rejected']);
+const VIEW_ONLY_STATUSES = new Set([
+  'Approved',
+  'Rejected',
+  'Revision Requested',
+]);
 
 const TITLE_COL_CLASS =
   'w-[9.5rem] max-w-[9.5rem] whitespace-normal md:w-[14rem] md:max-w-[14rem] lg:w-[18rem] lg:max-w-[18rem] xl:w-[22rem] xl:max-w-[22rem]';
@@ -94,7 +98,7 @@ export default function ReviewTable({
                   label: 'View',
                   onClick: () => onView(submission.id),
                 },
-                ...(DECIDED_STATUSES.has(submission.status)
+                ...(VIEW_ONLY_STATUSES.has(submission.status)
                   ? []
                   : [
                       {

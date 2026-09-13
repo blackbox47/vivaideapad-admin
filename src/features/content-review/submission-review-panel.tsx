@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Loader2 } from 'lucide-react';
 
 import StatusBadge from '@/components/shared/status-badge';
 import type {
@@ -514,7 +515,11 @@ export default function SubmissionReviewPanel({
               disabled={isDeciding}
               onClick={() => setIsApproveModalOpen(true)}
             >
-              <span className="material-symbols-outlined text-[16px]">task_alt</span>
+              {isDeciding ? (
+                <Loader2 className="size-3.5 animate-spin shrink-0" />
+              ) : (
+                <span className="material-symbols-outlined text-[16px]">task_alt</span>
+              )}
               <span>{isDeciding ? 'Saving…' : 'Approve & assign reward'}</span>
             </button>
           </div>

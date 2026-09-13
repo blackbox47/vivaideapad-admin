@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Loader2 } from 'lucide-react';
 
 import type { RevisionWindowDays } from '@/models/content-review/content-review-model';
 
@@ -273,7 +274,11 @@ export default function RequestRevisionModal({
             onClick={handleConfirm}
             disabled={isDeciding}
           >
-            <span className="material-symbols-outlined text-[16px]">send</span>
+            {isDeciding ? (
+              <Loader2 className="size-3.5 animate-spin shrink-0" />
+            ) : (
+              <span className="material-symbols-outlined text-[16px]">send</span>
+            )}
             <span>{isDeciding ? 'Sending…' : 'Send revision request'}</span>
           </button>
         </div>

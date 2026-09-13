@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Loader2 } from 'lucide-react';
 
 export interface RejectConfirmationModalProps {
   isOpen: boolean;
@@ -207,7 +208,11 @@ export default function RejectConfirmationModal({
             onClick={handleConfirm}
             disabled={isDeciding}
           >
-            <span className="material-symbols-outlined text-[16px]">cancel</span>
+            {isDeciding ? (
+              <Loader2 className="size-3.5 animate-spin shrink-0" />
+            ) : (
+              <span className="material-symbols-outlined text-[16px]">cancel</span>
+            )}
             <span>{isDeciding ? 'Rejecting…' : 'Confirm rejection'}</span>
           </button>
         </div>
