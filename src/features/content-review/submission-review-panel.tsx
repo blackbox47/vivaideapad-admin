@@ -302,7 +302,7 @@ export default function SubmissionReviewPanel({
               <label className="text-xs font-bold text-slate-700">
                 Summary
               </label>
-              <div className="p-3.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 text-xs leading-relaxed font-normal shadow-sm">
+              <div className="p-3.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 text-xs leading-relaxed font-normal shadow-sm whitespace-pre-line">
                 {summaryText}
               </div>
             </div>

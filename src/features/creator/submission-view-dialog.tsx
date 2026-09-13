@@ -29,10 +29,10 @@ function primaryAction(
       href: `${CREATOR_ROUTES.submitIdea}?id=${encodeURIComponent(idea.id)}`,
     };
   }
-  if (idea.status === 'Rejected') {
-    return null;
+  if (idea.status === 'Approved' || idea.status === 'Published') {
+    return { label: 'View in wallet', href: CREATOR_ROUTES.rewards };
   }
-  return { label: 'View in wallet', href: CREATOR_ROUTES.rewards };
+  return null;
 }
 
 export default function SubmissionViewDialog({

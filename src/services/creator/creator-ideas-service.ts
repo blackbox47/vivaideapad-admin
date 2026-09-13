@@ -111,7 +111,10 @@ export const creatorIdeasService = baseService.injectEndpoints({
             body.concept_id || body.topicId || '',
           );
           formData.append('title', body.title);
-          formData.append('body', body.body || body.summary || '');
+          formData.append('body', body.body || '');
+          if (body.summary !== undefined) {
+            formData.append('summary', body.summary.trim());
+          }
           if (body.attachments && body.attachments.length > 0) {
             formData.append('attachments', JSON.stringify(body.attachments));
           }
@@ -131,7 +134,8 @@ export const creatorIdeasService = baseService.injectEndpoints({
           body: {
             concept_id: body.concept_id || body.topicId || '',
             title: body.title,
-            body: body.body || body.summary || '',
+            body: body.body || '',
+            summary: body.summary?.trim() || '',
             attachments:
               body.attachments ??
               (body.attachmentUrl ? [{ url: body.attachmentUrl }] : undefined),
@@ -175,7 +179,10 @@ export const creatorIdeasService = baseService.injectEndpoints({
             body.concept_id || body.topicId || '',
           );
           formData.append('title', body.title);
-          formData.append('body', body.body || body.summary || '');
+          formData.append('body', body.body || '');
+          if (body.summary !== undefined) {
+            formData.append('summary', body.summary.trim());
+          }
           if (body.attachments !== undefined) {
             formData.append('attachments', JSON.stringify(body.attachments));
           }
@@ -195,7 +202,8 @@ export const creatorIdeasService = baseService.injectEndpoints({
           body: {
             concept_id: body.concept_id || body.topicId || '',
             title: body.title,
-            body: body.body || body.summary || '',
+            body: body.body || '',
+            summary: body.summary?.trim() || '',
             attachments:
               body.attachments ??
               (body.attachmentUrl ? [{ url: body.attachmentUrl }] : undefined),
