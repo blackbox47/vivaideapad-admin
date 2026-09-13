@@ -60,13 +60,18 @@ export const rewardsService = baseService.injectEndpoints({
         // 2. Live backend format: { data: [...], meta: { total, ... } }
         if (Array.isArray(res.data)) {
           const entries: LedgerEntry[] = res.data.map((item: Record<string, unknown>) => {
-            const numAmount = Math.abs(Number(item.amount ?? 0));
+            const signedAmount = Number(item.amount ?? 0);
+            const numAmount = Math.abs(signedAmount);
             const rawType = String(item.type ?? '').toLowerCase();
             let type: LedgerEntryType = 'Reward';
-            if (rawType.includes('payout') || rawType.includes('withdrawal')) {
+            if (
+              rawType.includes('payout') ||
+              rawType.includes('withdrawal') ||
+              rawType.includes('fee') ||
+              ((rawType.includes('adjust') || rawType.includes('manual')) &&
+                signedAmount < 0)
+            ) {
               type = 'Withdrawal';
-            } else if (rawType.includes('adjust') || rawType.includes('manual')) {
-              type = 'Adjustment';
             }
 
             const rawStatus = String(item.status ?? '').toLowerCase();

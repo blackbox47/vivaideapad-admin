@@ -90,8 +90,8 @@ export default function AuditLogFilters({
         <Input
           value={search}
           onChange={(event) => onSearchChange(event.target.value)}
-          placeholder="Search actor, email, action, or category"
-          aria-label="Search audit events by actor, email, action, or category"
+          placeholder="Search by actor, email, or target"
+          aria-label="Search audit events by actor, email, or target"
           className="min-w-65 rounded-full px-4.5 py-2.5 text-[13px] placeholder:text-text-subtle"
         />
       </div>

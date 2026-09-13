@@ -1,4 +1,4 @@
-export type CreatorRewardType = 'Reward' | 'Withdrawal' | 'Adjustment';
+export type CreatorRewardType = 'Reward' | 'Withdrawal';
 
 export type CreatorRewardStatus =
   | 'Available'

@@ -2,29 +2,23 @@ import { Link } from '@tanstack/react-router';
 
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import type {
-  LedgerTypeFilter,
-  LedgerEntryType,
-} from '@/models/rewards/rewards-model';
+import type { LedgerTypeFilter } from '@/models/rewards/rewards-model';
 import { ADMIN_ROUTES } from '@/utils/constants/routes';
 
 const TYPE_FILTERS: Array<{ id: LedgerTypeFilter; label: string }> = [
   { id: 'all', label: 'All' },
   { id: 'Reward', label: 'Reward' },
   { id: 'Withdrawal', label: 'Withdrawal' },
-  { id: 'Adjustment', label: 'Adjustment' },
 ];
 
 const TYPE_SLUG: Record<Exclude<LedgerTypeFilter, 'all'>, string> = {
   Reward: 'reward',
   Withdrawal: 'withdrawal',
-  Adjustment: 'adjustment',
 };
 
 const SLUG_TO_TYPE: Record<string, Exclude<LedgerTypeFilter, 'all'>> = {
   reward: 'Reward',
   withdrawal: 'Withdrawal',
-  adjustment: 'Adjustment',
 };
 
 interface RewardFiltersProps {
@@ -35,11 +29,7 @@ interface RewardFiltersProps {
 }
 
 export function parseRewardType(value: string | null): LedgerTypeFilter {
-  if (!value) {
-    return 'all';
-  }
-
-  if (value === 'all') {
+  if (!value || value === 'all' || value === 'adjustment') {
     return 'all';
   }
 
@@ -50,7 +40,7 @@ function rewardHref(type: LedgerTypeFilter, search: string): string {
   const params = new URLSearchParams();
 
   if (type !== 'all') {
-    params.set('type', TYPE_SLUG[type as Exclude<LedgerEntryType, 'Adjustment'>]);
+    params.set('type', TYPE_SLUG[type]);
   }
 
   const trimmed = search.trim();

@@ -40,7 +40,6 @@ export type ConceptStatusSpec = (typeof CONCEPT_STATUSES_SPEC)[number];
 export const LEDGER_ENTRY_TYPES = [
   'Reward',
   'Withdrawal',
-  'Adjustment',
 ] as const;
 export type LedgerEntryType = (typeof LEDGER_ENTRY_TYPES)[number];
 
