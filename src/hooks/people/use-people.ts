@@ -43,14 +43,16 @@ export default function usePeople(): UsePeopleResult {
     useToggleUserStatusMutation();
 
   const decideApplicant = useCallback(
-    (body: DecideApplicantBody) =>
-      decideApplication({
+    (body: DecideApplicantBody) => {
+      const decision = decisionFromStatus(body.status);
+      return decideApplication({
         id: body.id,
-        body: {
-          decision: decisionFromStatus(body.status),
-          notes: body.comment,
-        },
-      }),
+        body:
+          decision === 'approve_invite'
+            ? { decision }
+            : { decision, notes: body.comment },
+      });
+    },
     [decideApplication],
   );
 

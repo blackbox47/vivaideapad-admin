@@ -15,6 +15,15 @@ export type PlatformUserStatus = 'Active' | 'Invited' | 'Suspended';
 
 export type PeopleTab = 'applicants' | 'invited' | 'rejected' | 'contributors';
 
+export type ApplicantAiRisk = 'Low' | 'Medium' | 'High';
+
+export interface ApplicantTopicDetail {
+  title: string;
+  brief?: string;
+  rewardBudget?: string | number;
+  closeDate?: string | null;
+}
+
 export interface Applicant {
   id: string;
   name: string;
@@ -28,6 +37,8 @@ export interface Applicant {
   consent?: boolean;
   decisionNotes?: string | null;
   referenceNumber?: string;
+  risk?: ApplicantAiRisk;
+  topicDetail?: ApplicantTopicDetail | null;
 }
 
 export interface PlatformUser {

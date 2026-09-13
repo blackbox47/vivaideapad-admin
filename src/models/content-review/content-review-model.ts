@@ -1,5 +1,7 @@
 export type AiRisk = 'Low' | 'Medium' | 'High';
 
+export type RevisionWindowDays = 3 | 7 | 14;
+
 export type SubmissionStatus =
   | 'Under Review'
   | 'Revision Requested'
@@ -20,6 +22,8 @@ export interface ContentSubmission {
   body: string;
   approvedCount: number;
   approvalRate: string;
+  revisionWindowDays?: RevisionWindowDays | null;
+  revisionDueAt?: string | null;
 }
 
 export interface ReviewQueueResponse {
@@ -30,6 +34,7 @@ export interface DecideSubmissionBody {
   id: string;
   status: SubmissionStatus;
   comment?: string;
+  revision_window_days?: RevisionWindowDays;
 }
 
 // ── Spec-aligned additions (REST spec §5.5) ──────────────────────────────
@@ -44,6 +49,8 @@ export interface SubmissionDecisionBody {
   feedback?: string;
   /** Required when `decision === 'approve'`. */
   reward_amount?: number;
+  /** Days the contributor has to resubmit. Used when requesting a revision. */
+  revision_window_days?: RevisionWindowDays;
 }
 
 export interface SubmissionDecisionResponse {

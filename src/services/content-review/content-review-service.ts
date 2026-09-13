@@ -6,6 +6,7 @@ import type {
   RiskScanResponse,
   RiskSignal,
   ReviewQueueResponse,
+  RevisionWindowDays,
   SubmissionAttachmentFile,
   SubmissionDecisionBody,
   SubmissionDecisionResponse,
@@ -29,6 +30,12 @@ export interface SubmissionsListParams {
   search?: string;
   page?: number;
   limit?: number;
+}
+
+function mapRevisionWindowDays(value: unknown): RevisionWindowDays | null {
+  const n = typeof value === 'string' ? Number(value) : value;
+  if (n === 3 || n === 7 || n === 14) return n;
+  return null;
 }
 
 function mapSubmissionAttachment(
@@ -260,6 +267,14 @@ export const contentReviewService = baseService.injectEndpoints({
           contributorAvatar: contributorObj?.avatar_url
             ? String(contributorObj.avatar_url)
             : null,
+          revisionWindowDays: mapRevisionWindowDays(
+            raw.revision_window_days ?? raw.revisionWindowDays,
+          ),
+          revisionDueAt: raw.revision_due_at
+            ? String(raw.revision_due_at)
+            : raw.revisionDueAt
+              ? String(raw.revisionDueAt)
+              : null,
         };
 
         return { submission };

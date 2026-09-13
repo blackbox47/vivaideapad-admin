@@ -10,7 +10,10 @@ import ReviewTable from '@/features/content-review/review-table';
 import SubmissionReviewPanel from '@/features/content-review/submission-review-panel';
 import useContentReview from '@/hooks/content-review/use-content-review';
 import { useGetSubmissionQuery } from '@/services/content-review/content-review-service';
-import type { SubmissionStatus } from '@/models/content-review/content-review-model';
+import type {
+  RevisionWindowDays,
+  SubmissionStatus,
+} from '@/models/content-review/content-review-model';
 import { toast } from '@/components/ui/sonner';
 import PageHeader from '@/components/layout/page-header';
 import { Button } from '@/components/ui/button';
@@ -75,12 +78,25 @@ export default function ContentReviewOverview() {
     initialPageSize: 6,
   });
 
-  const handleDecide = (nextStatus: SubmissionStatus, comment: string) => {
+  const handleDecide = (
+    nextStatus: SubmissionStatus,
+    comment: string,
+    options?: { revisionWindowDays?: RevisionWindowDays },
+  ) => {
     if (!panelId) {
       return;
     }
 
-    void decideSubmission({ id: panelId, status: nextStatus, comment })
+    void decideSubmission({
+      id: panelId,
+      status: nextStatus,
+      comment,
+      ...(nextStatus === 'Revision Requested'
+        ? {
+            revision_window_days: options?.revisionWindowDays ?? 7,
+          }
+        : {}),
+    })
       .unwrap()
       .then(() => {
         setPanelId(null);

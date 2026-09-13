@@ -1,5 +1,6 @@
 import type {
   Applicant,
+  ApplicantAiRisk,
   ApplicantStatus,
 } from '@/models/people/people-model';
 import type { ApplicationDecisionBody } from '@/models/users/users-model';
@@ -56,24 +57,44 @@ function asRecord(value: unknown): Record<string, unknown> | null {
     : null;
 }
 
+function mapApplicantRisk(risk: unknown): ApplicantAiRisk {
+  if (risk === 'Low' || risk === 'Medium' || risk === 'High') {
+    return risk;
+  }
+  if (risk === 'low') return 'Low';
+  if (risk === 'medium') return 'Medium';
+  if (risk === 'high') return 'High';
+  return 'Medium';
+}
+
 function mapApplicationDetail(response: unknown): ApplicationDetailResponse {
   const envelope = asRecord(response) ?? {};
   const raw = asRecord(envelope.application) ?? asRecord(envelope.data) ?? envelope;
   const user = asRecord(raw.user);
   const category = asRecord(raw.category);
+  const concept = asRecord(raw.concept);
 
   const name = String(
     raw.name ?? user?.display_name ?? user?.name ?? raw.email ?? '',
   );
   const email = String(raw.email ?? user?.email ?? '');
   const consentValue = raw.consent;
+  const topicTitle = String(
+    concept?.title ?? raw.topic ?? category?.name ?? 'Uncategorized',
+  );
+  const topicBrief = concept?.brief
+    ? String(concept.brief)
+    : category?.description
+      ? String(category.description)
+      : undefined;
+  const closeDate = concept?.close_date ?? concept?.closeDate;
 
   return {
     application: {
       id: String(raw.id ?? ''),
       name,
       email,
-      topic: String(raw.topic ?? category?.name ?? 'Uncategorized'),
+      topic: topicTitle,
       title: String(raw.title ?? raw.idea_title ?? ''),
       body: String(raw.body ?? raw.idea_description ?? ''),
       submitted: String(raw.submitted ?? raw.created_at ?? ''),
@@ -95,6 +116,18 @@ function mapApplicationDetail(response: unknown): ApplicationDetailResponse {
         : raw.referenceNumber
           ? String(raw.referenceNumber)
           : undefined,
+      risk: mapApplicantRisk(raw.risk),
+      topicDetail: {
+        title: topicTitle,
+        brief: topicBrief,
+        rewardBudget:
+          concept?.reward_budget != null
+            ? String(concept.reward_budget)
+            : concept?.rewardBudget != null
+              ? String(concept.rewardBudget)
+              : undefined,
+        closeDate: closeDate ? String(closeDate) : null,
+      },
     },
   };
 }
@@ -132,7 +165,9 @@ export const applicationsService = baseService.injectEndpoints({
         method: 'POST',
         body: {
           decision: body.decision,
-          notes: body.notes,
+          ...(body.decision === 'approve_invite' || !body.notes
+            ? {}
+            : { notes: body.notes }),
         },
       }),
       invalidatesTags: (_r, _e, { id }) => [

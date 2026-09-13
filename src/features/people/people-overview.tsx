@@ -70,6 +70,8 @@ function mergeApplicant(
     consent: detail.consent ?? listRow.consent,
     decisionNotes: detail.decisionNotes ?? listRow.decisionNotes,
     referenceNumber: detail.referenceNumber || listRow.referenceNumber,
+    risk: detail.risk ?? listRow.risk,
+    topicDetail: detail.topicDetail ?? listRow.topicDetail,
   };
 }
 
@@ -160,7 +162,11 @@ export default function PeopleOverview() {
       return;
     }
 
-    void decideApplicant({ id: reviewId, status, comment })
+    void decideApplicant({
+      id: reviewId,
+      status,
+      ...(status === 'Approved' ? {} : { comment }),
+    })
       .unwrap()
       .then(() => {
         setReviewId(null);

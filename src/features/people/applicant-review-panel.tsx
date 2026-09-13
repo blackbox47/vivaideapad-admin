@@ -1,9 +1,18 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import StatusBadge from '@/components/shared/status-badge';
-import type { Applicant, ApplicantStatus } from '@/models/people/people-model';
+import type {
+  Applicant,
+  ApplicantAiRisk,
+  ApplicantStatus,
+  ApplicantTopicDetail,
+} from '@/models/people/people-model';
+import type { Concept } from '@/models/topics/topics-model';
+import { useGetConceptsQuery } from '@/services/topics/topics-service';
 import { formatDisplayDate } from '@/utils/helpers/format-display-date';
 import { sanitizeHtml } from '@/utils/helpers/sanitize-html';
+import ApprovalConfirmationModal from '@/features/people/approval-confirmation-modal';
+import RejectConfirmationModal from '@/features/people/reject-confirmation-modal';
 
 interface ApplicantReviewPanelProps {
   applicant: Applicant;
@@ -21,6 +30,40 @@ function getInitials(name: string): string {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
+function deriveApplicationRisk(text: string): ApplicantAiRisk {
+  const length = text.trim().length;
+  if (length < 80) return 'High';
+  if (length < 220) return 'Medium';
+  return 'Low';
+}
+
+function resolveTopicDetail(
+  applicant: Applicant,
+  concepts: Concept[],
+): ApplicantTopicDetail {
+  const fromApi = applicant.topicDetail;
+  if (fromApi?.brief) {
+    return fromApi;
+  }
+
+  const topicKey = (applicant.topic || '').toLowerCase();
+  const match =
+    concepts.find((concept) => concept.title.toLowerCase() === topicKey) ||
+    concepts.find((concept) => concept.category.toLowerCase() === topicKey) ||
+    (topicKey.includes('onboard')
+      ? concepts.find((concept) => concept.isOnboarding)
+      : undefined);
+
+  if (!match) {
+    return fromApi ?? { title: applicant.topic };
+  }
+
+  return {
+    title: match.title,
+    brief: match.description,
+  };
+}
+
 export default function ApplicantReviewPanel({
   applicant,
   isDeciding,
@@ -29,16 +72,25 @@ export default function ApplicantReviewPanel({
   onClose,
   onDecide,
 }: ApplicantReviewPanelProps) {
-  // Close on Escape key press
+  const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
+  const [isApproveModalOpen, setIsApproveModalOpen] = useState(false);
+
+  // Close on Escape key press (modals take priority if open)
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        onClose();
+        if (isApproveModalOpen) {
+          setIsApproveModalOpen(false);
+        } else if (isRejectModalOpen) {
+          setIsRejectModalOpen(false);
+        } else {
+          onClose();
+        }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onClose]);
+  }, [onClose, isApproveModalOpen, isRejectModalOpen]);
 
   // Lock body scroll while drawer is open
   useEffect(() => {
@@ -49,12 +101,19 @@ export default function ApplicantReviewPanel({
     };
   }, []);
 
-  const handleDecide = (status: ApplicantStatus) => {
-    onDecide(status, '');
-  };
+  const { data: conceptsData } = useGetConceptsQuery({ limit: 100 });
+  const topicDetail = useMemo(
+    () => resolveTopicDetail(applicant, conceptsData?.concepts ?? []),
+    [applicant, conceptsData?.concepts],
+  );
 
   const isHtmlBody = /<[a-z][\s\S]*>/i.test(applicant.body || '');
   const initials = getInitials(applicant.name);
+  const topicTitle = topicDetail.title || applicant.topic;
+  const topicBrief = topicDetail.brief;
+  const riskLabel =
+    applicant.risk ||
+    deriveApplicationRisk(`${applicant.title} ${applicant.body}`);
 
   return (
     <div
@@ -66,9 +125,8 @@ export default function ApplicantReviewPanel({
     >
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity duration-300 cursor-pointer"
+        className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity duration-300"
         aria-hidden="true"
-        onClick={onClose}
       />
 
       {/* Drawer Panel */}
@@ -112,17 +170,15 @@ export default function ApplicantReviewPanel({
             </div>
             <div className="text-xs">
               <span className="font-bold text-slate-800">{applicant.name}</span>
-              <span className="text-slate-400 ml-1.5">{applicant.email}</span>
+              <span className="text-slate-400 ml-1.5">
+                Submitted {formatDisplayDate(applicant.submitted)}
+              </span>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-full bg-slate-100 border border-slate-200/60 text-slate-600 font-medium text-xs flex items-center gap-1">
-              <span className="material-symbols-outlined text-[13px]">calendar_today</span>
-              Submitted {formatDisplayDate(applicant.submitted)}
-            </span>
-            <span className="px-2.5 py-0.5 rounded-full bg-blue-50 border border-blue-100 text-blue-700 font-medium text-xs flex items-center gap-1">
-              <span className="material-symbols-outlined text-[13px]">folder</span>
-              {applicant.topic}
+            <span className="px-2.5 py-0.5 rounded-full bg-amber-50 border border-amber-200/60 text-amber-700 font-semibold text-xs flex items-center gap-1">
+              <span className="material-symbols-outlined text-[13px]">flag</span>
+              AI risk: {riskLabel}
             </span>
           </div>
         </div>
@@ -134,38 +190,16 @@ export default function ApplicantReviewPanel({
               <div className="h-full w-1/3 animate-pulse rounded-full bg-blue-500" />
             </div>
           ) : null}
-          {/* Field 1: Application Details Card */}
-          <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/60 space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-[16px] text-blue-600">badge</span>
-                Application Details
-              </span>
-              <span className="text-[11px] text-slate-400 font-mono">ID: {applicant.id}</span>
-            </div>
-            <div className="grid grid-cols-2 gap-3 text-xs pt-1 border-t border-slate-200/60">
-              <div>
-                <span className="text-[11px] text-slate-400 block mb-0.5">Applicant</span>
-                <strong className="text-slate-900 font-semibold">{applicant.name}</strong>
-              </div>
-              <div>
-                <span className="text-[11px] text-slate-400 block mb-0.5">Email</span>
-                <a
-                  href={`mailto:${applicant.email}`}
-                  className="text-blue-600 hover:underline font-medium break-all"
-                >
-                  {applicant.email}
-                </a>
-              </div>
-              <div>
-                <span className="text-[11px] text-slate-400 block mb-0.5">Applied For</span>
-                <span className="text-slate-800 font-medium">{applicant.topic}</span>
-              </div>
-              <div>
-                <span className="text-[11px] text-slate-400 block mb-0.5">Source</span>
-                <span className="text-slate-800 font-medium">
-                  {applicant.source || '—'}
-                </span>
+          {/* Field 1: Topic */}
+          <div className="space-y-1.5">
+            <div className="p-3.5 rounded-xl border border-slate-200 bg-blue-50/40 hover:bg-blue-50/60 transition-colors">
+              <div className="space-y-1 min-w-0">
+                <p className="font-bold text-slate-900 text-sm">{topicTitle}</p>
+                {topicBrief ? (
+                  <p className="text-xs text-slate-500 leading-relaxed">
+                    {topicBrief}
+                  </p>
+                ) : null}
               </div>
             </div>
           </div>
@@ -237,7 +271,7 @@ export default function ApplicantReviewPanel({
                 className="px-4 py-2 rounded-full border border-slate-200 text-xs font-semibold text-rose-600 hover:bg-rose-50 hover:border-rose-200 transition-colors cursor-pointer disabled:opacity-50"
                 type="button"
                 disabled={isDeciding}
-                onClick={() => handleDecide('Rejected')}
+                onClick={() => setIsRejectModalOpen(true)}
               >
                 Reject
               </button>
@@ -245,7 +279,7 @@ export default function ApplicantReviewPanel({
                 className="px-5 py-2 rounded-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs font-bold shadow-md shadow-blue-500/20 hover:shadow-lg transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
                 type="button"
                 disabled={isDeciding}
-                onClick={() => handleDecide('Approved')}
+                onClick={() => setIsApproveModalOpen(true)}
               >
                 <span className="material-symbols-outlined text-[16px]">task_alt</span>
                 <span>{isDeciding ? 'Saving…' : 'Approve applicant'}</span>
@@ -254,6 +288,38 @@ export default function ApplicantReviewPanel({
           </div>
         )}
       </aside>
+
+      {readOnly ? null : (
+        <>
+          <ApprovalConfirmationModal
+            isOpen={isApproveModalOpen}
+            isDeciding={isDeciding}
+            applicantName={applicant.name}
+            applicantInitials={initials}
+            applicantEmail={applicant.email}
+            topicTitle={topicTitle}
+            applicationTitle={applicant.title}
+            onClose={() => setIsApproveModalOpen(false)}
+            onConfirm={() => {
+              onDecide('Approved', '');
+            }}
+          />
+
+          <RejectConfirmationModal
+            isOpen={isRejectModalOpen}
+            isDeciding={isDeciding}
+            applicantName={applicant.name}
+            applicantInitials={initials}
+            applicantEmail={applicant.email}
+            topicTitle={topicTitle}
+            applicationTitle={applicant.title}
+            onClose={() => setIsRejectModalOpen(false)}
+            onConfirm={(feedback) => {
+              onDecide('Rejected', feedback);
+            }}
+          />
+        </>
+      )}
     </div>
   );
 }

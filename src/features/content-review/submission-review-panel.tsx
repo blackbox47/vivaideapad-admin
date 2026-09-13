@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import StatusBadge from '@/components/shared/status-badge';
 import type {
   ContentSubmission,
+  RevisionWindowDays,
   SubmissionAttachmentFile,
   SubmissionDetail,
   SubmissionStatus,
@@ -22,7 +23,11 @@ interface SubmissionReviewPanelProps {
   /** View-only mode hides the decision footer. */
   readOnly?: boolean;
   onClose: () => void;
-  onDecide: (status: SubmissionStatus, comment: string) => void;
+  onDecide: (
+    status: SubmissionStatus,
+    comment: string,
+    options?: { revisionWindowDays?: RevisionWindowDays },
+  ) => void;
 }
 
 function getInitials(name: string): string {
@@ -155,6 +160,9 @@ export default function SubmissionReviewPanel({
   const submittedDateText = isMotorbike
     ? 'Submitted 11.09.2026'
     : `Submitted ${formatDisplayDate(submission.submitted)}`;
+  const revisionDueText = detail.revisionDueAt
+    ? `Due ${formatDisplayDate(detail.revisionDueAt)}`
+    : null;
 
   const riskLabel = submission.risk || 'Medium';
   const approvedCountText = `${submission.approvedCount ?? 0} approved (${submission.approvalRate || '0%'} rate)`;
@@ -250,6 +258,9 @@ export default function SubmissionReviewPanel({
             <div className="text-xs">
               <span className="font-bold text-slate-800">{contributorName}</span>
               <span className="text-slate-400 ml-1.5">{submittedDateText}</span>
+              {revisionDueText ? (
+                <span className="text-amber-700 ml-1.5">{revisionDueText}</span>
+              ) : null}
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -556,8 +567,10 @@ export default function SubmissionReviewPanel({
             submissionTitle={submission.title || 'Motorbike courier coverage notes'}
             rewardAmount={rewardText}
             onClose={() => setIsRevisionModalOpen(false)}
-            onConfirm={(revisionFeedback) => {
-              onDecide('Revision Requested', revisionFeedback);
+            onConfirm={(revisionFeedback, revisionWindowDays) => {
+              onDecide('Revision Requested', revisionFeedback, {
+                revisionWindowDays,
+              });
             }}
           />
         </>

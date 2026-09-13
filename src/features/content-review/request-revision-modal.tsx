@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 
+import type { RevisionWindowDays } from '@/models/content-review/content-review-model';
+
 export interface RequestRevisionModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (feedback: string) => void;
+  onConfirm: (feedback: string, revisionWindowDays: RevisionWindowDays) => void;
   isDeciding?: boolean;
   contributorName: string;
   contributorInitials: string;
@@ -15,13 +17,6 @@ export interface RequestRevisionModalProps {
   rewardAmount: string;
   initialFeedback?: string;
 }
-
-const DEFAULT_AREAS = [
-  'Clarify telemetry data',
-  'Add GPS timestamp logs',
-  'Update KPI metrics',
-  'Budget breakdown',
-];
 
 function formatDueDate(days: number): string {
   const target = new Date();
@@ -48,12 +43,7 @@ export default function RequestRevisionModal({
   initialFeedback = '',
 }: RequestRevisionModalProps) {
   const [feedback, setFeedback] = useState(initialFeedback);
-  const [error, setError] = useState<string | null>(null);
-  const [selectedDays, setSelectedDays] = useState<number>(7);
-  const [selectedAreas, setSelectedAreas] = useState<string[]>([
-    'Clarify telemetry data',
-    'Add GPS timestamp logs',
-  ]);
+  const [selectedDays, setSelectedDays] = useState<RevisionWindowDays>(7);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -75,20 +65,8 @@ export default function RequestRevisionModal({
 
   const dueDateText = formatDueDate(selectedDays);
 
-  const toggleArea = (area: string) => {
-    setSelectedAreas((prev) =>
-      prev.includes(area) ? prev.filter((item) => item !== area) : [...prev, area],
-    );
-  };
-
   const handleConfirm = () => {
-    const trimmed = feedback.trim();
-    if (trimmed.length === 0) {
-      setError('Please provide feedback & instructions for the requested revisions.');
-      return;
-    }
-    setError(null);
-    onConfirm(trimmed);
+    onConfirm(feedback.trim(), selectedDays);
   };
 
   return (
@@ -243,42 +221,6 @@ export default function RequestRevisionModal({
             </div>
           </div>
 
-          {/* Areas requiring update */}
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-slate-700">
-              Areas requiring update
-            </label>
-            <div className="flex flex-wrap gap-1.5">
-              {DEFAULT_AREAS.map((area) => {
-                const isSelected = selectedAreas.includes(area);
-                return (
-                  <button
-                    key={area}
-                    type="button"
-                    onClick={() => toggleArea(area)}
-                    disabled={isDeciding}
-                    className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors cursor-pointer flex items-center gap-1 ${
-                      isSelected
-                        ? 'bg-blue-50 border border-blue-200 text-blue-700 font-semibold'
-                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                    }`}
-                  >
-                    {isSelected ? (
-                      <>
-                        <span className="material-symbols-outlined text-[13px]">
-                          check
-                        </span>
-                        {area}
-                      </>
-                    ) : (
-                      <>+ {area}</>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
           {/* Feedback & instructions */}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between text-xs">
@@ -287,7 +229,7 @@ export default function RequestRevisionModal({
                 className="font-bold text-slate-700"
               >
                 Feedback &amp; instructions to contributor{' '}
-                <span className="text-rose-600">*</span>
+                <span className="font-medium text-slate-400">(optional)</span>
               </label>
               <span className="text-[11px] text-slate-400 font-normal">
                 {feedback.length}/500
@@ -302,13 +244,9 @@ export default function RequestRevisionModal({
               value={feedback}
               onChange={(e) => {
                 setFeedback(e.target.value);
-                setError(null);
               }}
               disabled={isDeciding}
             />
-            {error && (
-              <p className="text-xs text-rose-600 font-medium">{error}</p>
-            )}
             <p className="text-[11px] text-slate-500 flex items-center gap-1.5 pt-0.5">
               <span className="material-symbols-outlined text-[14px] text-amber-600">
                 info
