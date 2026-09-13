@@ -31,7 +31,11 @@ function filterConcepts(
 
   return concepts.filter((concept) => {
     const matchesStatus =
-      !status || status === 'all' || concept.status === status;
+      !status ||
+      status === 'all' ||
+      (status === 'new'
+        ? Boolean(concept.isOnboarding)
+        : concept.status === status);
     const matchesSearch =
       search.length === 0 ||
       concept.title?.toLowerCase().includes(search) ||
@@ -42,18 +46,25 @@ function filterConcepts(
 }
 
 export default function useTopics(params: ConceptListParams): UseTopicsResult {
-  const { data, isLoading, isError, error, refetch } = useGetConceptsQuery();
+  const { data, isLoading, isError, error, refetch } = useGetConceptsQuery({
+    status: params.status,
+    search: params.search,
+    category_id: params.category_id,
+    page: params.page,
+    limit: params.limit ?? 100,
+  });
 
   const filtered = useMemo((): ConceptListResponse | null => {
     if (!data) {
       return null;
     }
 
+    // Keep client-side filtering as a safety net (esp. search by category label).
     const concepts = filterConcepts(data.concepts, params);
 
     return {
       concepts,
-      total: data.total ?? concepts.length,
+      total: concepts.length,
     };
   }, [data, params.search, params.status]);
 

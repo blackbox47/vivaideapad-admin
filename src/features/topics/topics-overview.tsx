@@ -15,8 +15,11 @@ import { Skeleton } from '@/components/ui/skeleton';
 import EmptyState from '@/components/shared/empty-state';
 import BulkActionBar from '@/features/topics/bulk-action-bar';
 import ConceptCard from '@/features/topics/concept-card';
-import ConceptFilters from '@/features/topics/concept-filters';
+import ConceptFilters, {
+  parseConceptStatus,
+} from '@/features/topics/concept-filters';
 import CreateConceptDialog from '@/features/topics/create-concept-dialog';
+import DeleteConceptsConfirmationModal from '@/features/topics/delete-concepts-confirmation-modal';
 import EditConceptDialog from '@/features/topics/edit-concept-dialog';
 import useCreateConcept from '@/hooks/topics/use-create-concept';
 import useEditConcept from '@/hooks/topics/use-edit-concept';
@@ -32,26 +35,9 @@ import { DEFAULT_PAGE_SIZE as PAGE_SIZE } from '@/utils/constants/pagination';
 import { getApiErrorMessage } from '@/utils/helpers/api-error';
 import { toast } from '@/components/ui/sonner';
 
-const STATUS_FILTERS = [
-  'all',
-  'active',
-  'draft',
-  'archived',
-] as const;
-
-type StatusFilter = (typeof STATUS_FILTERS)[number];
-
-function parseStatus(value: string | null): StatusFilter {
-  if (value && STATUS_FILTERS.includes(value as StatusFilter)) {
-    return value as StatusFilter;
-  }
-
-  return 'all';
-}
-
 export default function TopicsOverview() {
   const [searchParams, setSearchParams] = useTanstackSearchParams();
-  const status = parseStatus(searchParams.get('status'));
+  const status = parseConceptStatus(searchParams.get('status'));
   const search = searchParams.get('q') ?? '';
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -79,6 +65,7 @@ export default function TopicsOverview() {
   } = useEditConcept();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingConcept, setEditingConcept] = useState<Concept | null>(null);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
 
   useEffect(() => {
     setTimeout(() => {
@@ -206,23 +193,12 @@ export default function TopicsOverview() {
     }
   };
 
-  const handleDuplicate = async () => {
+  const handleDeleteRequest = () => {
     if (selectedIds.size === 0) return;
-    try {
-      await bulkActionMutation({
-        action: 'duplicate',
-        ids: Array.from(selectedIds),
-      }).unwrap();
-      toast.success(
-        `Duplicated ${selectedIds.size} ${selectedIds.size === 1 ? 'concept' : 'concepts'}`,
-      );
-      deselectAll();
-    } catch (err) {
-      toast.error(getApiErrorMessage(err) || 'Failed to duplicate concepts');
-    }
+    setIsDeleteConfirmOpen(true);
   };
 
-  const handleDelete = async () => {
+  const handleDeleteConfirm = async () => {
     if (selectedIds.size === 0) return;
     try {
       await bulkActionMutation({
@@ -232,6 +208,7 @@ export default function TopicsOverview() {
       toast.success(
         `Deleted ${selectedIds.size} ${selectedIds.size === 1 ? 'concept' : 'concepts'}`,
       );
+      setIsDeleteConfirmOpen(false);
       deselectAll();
     } catch (err) {
       toast.error(getApiErrorMessage(err) || 'Failed to delete concepts');
@@ -326,10 +303,28 @@ export default function TopicsOverview() {
         onToggleForNewUsers={handleToggleForNewUsers}
         onSetOnboarding={handleSetOnboarding}
         onChangeStatus={handleChangeStatus}
-        onDuplicate={handleDuplicate}
-        onDelete={handleDelete}
+        onDelete={handleDeleteRequest}
         onDeselectAll={deselectAll}
       />
+
+      {isDeleteConfirmOpen ? (
+        <DeleteConceptsConfirmationModal
+          isOpen
+          selectedCount={selectedIds.size}
+          primaryTitle={
+            selectedIds.size === 1
+              ? concepts.find((concept) => selectedIds.has(concept.id))?.title
+              : undefined
+          }
+          isSubmitting={isBulkLoading}
+          onClose={() => {
+            if (!isBulkLoading) {
+              setIsDeleteConfirmOpen(false);
+            }
+          }}
+          onConfirm={handleDeleteConfirm}
+        />
+      ) : null}
 
       {isCreateOpen ? (
         <CreateConceptDialog

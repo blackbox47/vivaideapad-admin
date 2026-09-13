@@ -19,6 +19,7 @@ import type { CreatorRewardEntry } from '@/models/creator/creator-rewards-model'
 import { useGetCreatorProfileQuery } from '@/services/creator/creator-profile-service';
 import { toast } from '@/components/ui/sonner';
 import { toBdLocalMobile } from '@/utils/helpers/bd-mobile';
+import { parseAvailableBalance } from '@/models/creator/creator-payout-schema';
 
 function exportEntries(entries: CreatorRewardEntry[]) {
   const header = 'Date,Description,Type,Status,Amount';
@@ -106,6 +107,12 @@ export default function CreatorRewardsOverview() {
     },
   ];
 
+  const availableBalance =
+    typeof data?.availableValue === 'number'
+      ? data.availableValue
+      : parseAvailableBalance(data?.available ?? '0');
+  const canRequestWithdrawal = availableBalance > 0;
+
   const closeWithdraw = () => {
     resetWithdraw();
     setIsWithdrawOpen(false);
@@ -133,8 +140,17 @@ export default function CreatorRewardsOverview() {
         action={
           <Button
             type="button"
-            onClick={() => setIsWithdrawOpen(true)}
-            className="h-auto rounded-full bg-primary px-5 py-3 font-bold text-primary-foreground hover:bg-brand-forest"
+            disabled={!canRequestWithdrawal || isLoading}
+            title={
+              canRequestWithdrawal
+                ? undefined
+                : 'Withdrawal is unavailable when your available balance is zero or less.'
+            }
+            onClick={() => {
+              if (!canRequestWithdrawal) return;
+              setIsWithdrawOpen(true);
+            }}
+            className="h-auto rounded-full bg-primary px-5 py-3 font-bold text-primary-foreground hover:bg-brand-forest disabled:opacity-50"
           >
             Request withdrawal
           </Button>

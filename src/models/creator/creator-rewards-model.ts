@@ -18,6 +18,8 @@ export interface CreatorRewardEntry {
 
 export interface CreatorRewardsOverview {
   available: string;
+  /** Numeric available balance used for withdrawal eligibility checks. */
+  availableValue?: number;
   pending: string;
   paidToDate: string;
   payoutMethod: string;

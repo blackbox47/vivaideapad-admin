@@ -1,6 +1,5 @@
 import {
   ChevronDown,
-  Copy,
   Trash2,
   UserMinus,
   UserPlus,
@@ -20,7 +19,6 @@ interface BulkActionBarProps {
   onToggleForNewUsers?: () => void;
   onSetOnboarding?: (flag: boolean) => void;
   onChangeStatus: (status: ConceptStatus) => void;
-  onDuplicate: () => void;
   onDelete: () => void;
   onDeselectAll: () => void;
 }
@@ -37,7 +35,6 @@ export default function BulkActionBar({
   onToggleForNewUsers,
   onSetOnboarding,
   onChangeStatus,
-  onDuplicate,
   onDelete,
   onDeselectAll,
 }: BulkActionBarProps) {
@@ -119,16 +116,6 @@ export default function BulkActionBar({
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
-
-        <button
-          type="button"
-          onClick={onDuplicate}
-          disabled={isLoading}
-          className="cursor-pointer rounded-lg p-1.5 text-muted-foreground transition hover:bg-primary/10 hover:text-primary disabled:opacity-50"
-          title="Duplicate selected"
-        >
-          <Copy className="size-4" />
-        </button>
 
         <button
           type="button"
