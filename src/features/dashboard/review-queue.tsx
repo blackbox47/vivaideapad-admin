@@ -54,7 +54,7 @@ export default function ReviewQueue({ items, isLoading }: ReviewQueueProps) {
                     {item.title}
                   </h3>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    {item.author} · AI risk: {item.risk}
+                    {item.author}
                   </p>
                 </div>
 

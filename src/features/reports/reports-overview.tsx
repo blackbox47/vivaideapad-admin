@@ -15,7 +15,6 @@ import ReportsFunnel from '@/features/reports/reports-funnel';
 import ReportsKpiCards from '@/features/reports/reports-kpi-cards';
 import ReportsPayoutActivity from '@/features/reports/reports-payout-activity';
 import ReportsQualityBreakdown from '@/features/reports/reports-quality-breakdown';
-import ReportsRiskSummary from '@/features/reports/reports-risk-summary';
 import ReportsTrend from '@/features/reports/reports-trend';
 import useReports from '@/hooks/reports/use-reports';
 import { CURRENCY_SYMBOL } from '@/utils/constants';
@@ -84,12 +83,6 @@ export default function ReportsOverview() {
         <div className="rounded-[20px] border border-border bg-card p-[22px]">
           <ReportsQualityBreakdown
             rows={data?.qualityBreakdown ?? []}
-            isLoading={isLoading}
-          />
-          <ReportsRiskSummary
-            counts={
-              data?.riskCounts ?? { Low: 0, Medium: 0, High: 0 }
-            }
             isLoading={isLoading}
           />
         </div>

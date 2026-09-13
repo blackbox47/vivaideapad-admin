@@ -4,7 +4,6 @@ import { Loader2 } from 'lucide-react';
 import StatusBadge from '@/components/shared/status-badge';
 import type {
   Applicant,
-  ApplicantAiRisk,
   ApplicantStatus,
   ApplicantTopicDetail,
 } from '@/models/people/people-model';
@@ -29,13 +28,6 @@ function getInitials(name: string): string {
   if (parts.length === 0 || !parts[0]) return 'AP';
   if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-}
-
-function deriveApplicationRisk(text: string): ApplicantAiRisk {
-  const length = text.trim().length;
-  if (length < 80) return 'High';
-  if (length < 220) return 'Medium';
-  return 'Low';
 }
 
 function resolveTopicDetail(
@@ -112,9 +104,6 @@ export default function ApplicantReviewPanel({
   const initials = getInitials(applicant.name);
   const topicTitle = topicDetail.title || applicant.topic;
   const topicBrief = topicDetail.brief;
-  const riskLabel =
-    applicant.risk ||
-    deriveApplicationRisk(`${applicant.title} ${applicant.body}`);
 
   return (
     <div
@@ -175,12 +164,6 @@ export default function ApplicantReviewPanel({
                 Submitted {formatDisplayDate(applicant.submitted)}
               </span>
             </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-full bg-amber-50 border border-amber-200/60 text-amber-700 font-semibold text-xs flex items-center gap-1">
-              <span className="material-symbols-outlined text-[13px]">flag</span>
-              AI risk: {riskLabel}
-            </span>
           </div>
         </div>
 

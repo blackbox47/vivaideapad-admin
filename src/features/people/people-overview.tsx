@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/components/ui/sonner';
+import AccessStatusConfirmationModal from '@/features/people/access-status-confirmation-modal';
 import ApplicantReviewPanel from '@/features/people/applicant-review-panel';
 import ApplicantsTable from '@/features/people/applicants-table';
 import ContributorsTable from '@/features/people/contributors-table';
@@ -26,6 +27,13 @@ import type {
 } from '@/models/people/people-model';
 import { useGetApplicationQuery } from '@/services/applications/applications-service';
 import { getApiErrorMessage } from '@/utils/helpers/api-error';
+
+function getUserInitials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0 || !parts[0]) return 'US';
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
 
 const TABS: PeopleTab[] = [
   'applicants',
@@ -79,6 +87,8 @@ export default function PeopleOverview() {
   const [searchParams] = useTanstackSearchParams();
   const tab = parseTab(searchParams.get('tab'));
   const [reviewId, setReviewId] = useState<string | null>(null);
+  const [pendingAccessUser, setPendingAccessUser] =
+    useState<PlatformUser | null>(null);
   const {
     data,
     isLoading,
@@ -142,14 +152,24 @@ export default function PeopleOverview() {
   const isPendingReview =
     reviewing != null && PENDING_APPLICANT_STATUSES.has(reviewing.status);
 
-  const handleToggle = (user: PlatformUser) => {
-    const nextStatus = user.status === 'Suspended' ? 'Active' : 'Suspended';
+  const handleToggleRequest = (user: PlatformUser) => {
+    setPendingAccessUser(user);
+  };
+
+  const handleToggleConfirm = () => {
+    if (!pendingAccessUser) {
+      return;
+    }
+
+    const nextStatus =
+      pendingAccessUser.status === 'Suspended' ? 'Active' : 'Suspended';
     void toggleUserStatus({
-      id: user.id,
+      id: pendingAccessUser.id,
       status: nextStatus,
     })
       .unwrap()
       .then(() => {
+        setPendingAccessUser(null);
         toast.success(`User marked as ${nextStatus.toLowerCase()}`);
       })
       .catch(() => {
@@ -238,7 +258,7 @@ export default function PeopleOverview() {
           ) : tab === 'contributors' ? (
             <ContributorsTable
               users={contributorUsers}
-              onToggle={handleToggle}
+              onToggle={handleToggleRequest}
               isToggling={isToggling}
             />
           ) : (
@@ -261,6 +281,25 @@ export default function PeopleOverview() {
           readOnly={!isPendingReview}
           onClose={() => setReviewId(null)}
           onDecide={handleDecide}
+        />
+      ) : null}
+
+      {pendingAccessUser ? (
+        <AccessStatusConfirmationModal
+          isOpen
+          userName={pendingAccessUser.name}
+          userInitials={getUserInitials(pendingAccessUser.name)}
+          userEmail={pendingAccessUser.email}
+          nextStatus={
+            pendingAccessUser.status === 'Suspended' ? 'Active' : 'Suspended'
+          }
+          isSubmitting={isToggling}
+          onClose={() => {
+            if (!isToggling) {
+              setPendingAccessUser(null);
+            }
+          }}
+          onConfirm={handleToggleConfirm}
         />
       ) : null}
     </div>

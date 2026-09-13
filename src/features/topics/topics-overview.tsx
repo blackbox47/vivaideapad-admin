@@ -161,23 +161,6 @@ export default function TopicsOverview() {
     }
   };
 
-  const handleSetActive = async () => {
-    if (selectedIds.size === 0) return;
-    try {
-      await bulkActionMutation({
-        action: 'set_status',
-        ids: Array.from(selectedIds),
-        status: 'active',
-      }).unwrap();
-      toast.success(
-        `Set ${selectedIds.size} ${selectedIds.size === 1 ? 'concept' : 'concepts'} to Active`,
-      );
-      deselectAll();
-    } catch (err) {
-      toast.error(getApiErrorMessage(err) || 'Failed to update status');
-    }
-  };
-
   const handleSetOnboarding = async (flag: boolean) => {
     if (selectedIds.size === 0) return;
     try {
@@ -340,7 +323,6 @@ export default function TopicsOverview() {
       <BulkActionBar
         selectedCount={selectedIds.size}
         isLoading={isBulkLoading}
-        onSetActive={handleSetActive}
         onToggleForNewUsers={handleToggleForNewUsers}
         onSetOnboarding={handleSetOnboarding}
         onChangeStatus={handleChangeStatus}
