@@ -72,7 +72,7 @@ export const creatorIdeasService = baseService.injectEndpoints({
           );
           formData.append('title', body.title);
           formData.append('body', body.body || body.summary || '');
-          formData.append('file', body.file);
+          formData.append('file', body.file, body.file.name);
           return {
             url: CREATOR_IDEAS_SUBMIT_URL,
             method: 'POST',
@@ -87,9 +87,6 @@ export const creatorIdeasService = baseService.injectEndpoints({
             concept_id: body.concept_id || body.topicId || '',
             title: body.title,
             body: body.body || body.summary || '',
-            attachments: body.attachmentUrl
-              ? { url: body.attachmentUrl }
-              : undefined,
           },
         };
       },
@@ -130,7 +127,8 @@ export const creatorIdeasService = baseService.injectEndpoints({
           );
           formData.append('title', body.title);
           formData.append('body', body.body || body.summary || '');
-          formData.append('file', body.file);
+          // Browser sends the real filename in the multipart Content-Disposition.
+          formData.append('file', body.file, body.file.name);
           return {
             url: CREATOR_IDEA_DETAIL_URL(id),
             method: 'PATCH',
@@ -138,27 +136,37 @@ export const creatorIdeasService = baseService.injectEndpoints({
           };
         }
 
+        const payload: Record<string, unknown> = {
+          concept_id: body.concept_id || body.topicId || '',
+          title: body.title,
+          body: body.body || body.summary || '',
+        };
+        if (body.clearAttachment) {
+          payload.attachments = null;
+        }
+
         return {
           url: CREATOR_IDEA_DETAIL_URL(id),
           method: 'PATCH',
-          body: {
-            concept_id: body.concept_id || body.topicId || '',
-            title: body.title,
-            body: body.body || body.summary || '',
-            attachments: body.attachmentUrl
-              ? { url: body.attachmentUrl }
-              : undefined,
-          },
+          body: payload,
         };
       },
-      invalidatesTags: ['my-ideas', 'creator-dashboard'],
+      invalidatesTags: (_result, _error, { id }) => [
+        { type: 'submissions', id },
+        'my-ideas',
+        'creator-dashboard',
+      ],
     }),
     submitExistingSubmission: builder.mutation<void, string>({
       query: (id) => ({
         url: CREATOR_IDEA_SUBMIT_FOR_REVIEW_URL(id),
         method: 'POST',
       }),
-      invalidatesTags: ['my-ideas', 'creator-dashboard'],
+      invalidatesTags: (_result, _error, id) => [
+        { type: 'submissions', id },
+        'my-ideas',
+        'creator-dashboard',
+      ],
     }),
     getCreatorTopics: builder.query<CreatorTopicsResponse, void>({
       query: () => ({ url: CREATOR_TOPICS_URL, method: 'GET' }),

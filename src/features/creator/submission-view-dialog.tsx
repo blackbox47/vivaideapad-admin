@@ -1,12 +1,15 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { X } from 'lucide-react';
 
+import RichTextContent from '@/components/shared/rich-text-content';
 import StatusBadge from '@/components/shared/status-badge';
+import SupportingEvidenceLink from '@/components/shared/supporting-evidence-link';
 import { Button } from '@/components/ui/button';
 import type { MyIdea } from '@/models/creator/my-ideas-model';
 import { CREATOR_ROUTES } from '@/utils/constants/routes';
 import { formatDisplayDate } from '@/utils/helpers/format-display-date';
+import { parseSubmissionAttachment } from '@/utils/helpers/parse-submission-attachment';
 
 interface SubmissionViewDialogProps {
   idea: MyIdea;
@@ -36,6 +39,20 @@ export default function SubmissionViewDialog({
   const navigate = useNavigate();
   const action = primaryAction(idea);
   const feedback = idea.feedback?.trim() ?? '';
+  const attachment = useMemo(
+    () =>
+      parseSubmissionAttachment(
+        idea.attachmentUrl
+          ? {
+              url: idea.attachmentUrl,
+              original_name: idea.attachmentName,
+              mime_type: idea.attachmentMimeType,
+              size: idea.attachmentSize,
+            }
+          : null,
+      ),
+    [idea],
+  );
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -88,9 +105,9 @@ export default function SubmissionViewDialog({
           </span>
         </div>
 
-        <p className="rounded-[14px] bg-surface-subtle p-4 text-sm leading-[1.7] text-foreground">
-          {idea.body}
-        </p>
+        <RichTextContent html={idea.body} />
+
+        {attachment ? <SupportingEvidenceLink attachment={attachment} /> : null}
 
         {feedback.length > 0 ? (
           <div className="mt-3.5 rounded-[14px] border border-border p-4">

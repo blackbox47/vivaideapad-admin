@@ -1,12 +1,30 @@
 import { env } from '@/config/env';
-import type {
-  CreatorNotification,
-  CreatorNotificationsResponse,
+import {
+  CREATOR_NOTIFICATION_FILTERS,
+  type CreatorNotification,
+  type CreatorNotificationsResponse,
 } from '@/models/creator/creator-notifications-model';
 import { baseService } from '@/services/core/base-service';
 import { creatorNotificationsService } from '@/services/creator/creator-notifications-service';
 import { CREATOR_NOTIFICATIONS_STREAM_URL } from '@/utils/constants/api-end-points';
+import { parseApiDateTime } from '@/utils/helpers/parse-api-date-time';
 import { toast } from '@/components/ui/sonner';
+
+/** Same cache args the list hook uses — SSE must patch every filter key. */
+function patchCreatorNotificationCaches(
+  dispatch: (action: unknown) => unknown,
+  updater: (draft: CreatorNotificationsResponse) => void,
+): void {
+  for (const filter of CREATOR_NOTIFICATION_FILTERS) {
+    dispatch(
+      creatorNotificationsService.util.updateQueryData(
+        'getCreatorNotifications',
+        { filter },
+        updater,
+      ),
+    );
+  }
+}
 
 /**
  * Wire shape emitted by the backend on
@@ -35,11 +53,12 @@ type StreamEnvelope =
 function wireToCreatorNotification(
   wire: CreatorWireNotification,
 ): CreatorNotification {
+  const occurredAt = parseApiDateTime(wire.created_at);
   return {
     id: wire.id,
     title: wire.title,
     body: wire.body ?? '',
-    time: new Date(wire.created_at).toLocaleTimeString([], {
+    time: new Date(occurredAt).toLocaleTimeString([], {
       hour: '2-digit',
       minute: '2-digit',
     }),
@@ -47,7 +66,7 @@ function wireToCreatorNotification(
     icon: 'bell',
     iconBg: 'bg-primary/10',
     read: wire.read_state === 'read',
-    occurredAt: wire.created_at,
+    occurredAt,
     // Carry routing inputs through so cache mutations from SSE look
     // identical to refetched entries and clicks can route.
     rawType: wire.type,
@@ -88,38 +107,30 @@ export function startCreatorNotificationsStream(store: {
 
     if (envelope.type === 'updated') {
       const incoming = wireToCreatorNotification(envelope.notification);
-      store.dispatch(
-        creatorNotificationsService.util.updateQueryData(
-          'getCreatorNotifications',
-          undefined,
-          (draft: CreatorNotificationsResponse) => {
-            const target = draft.notifications.find(
-              (n) => n.id === incoming.id,
-            );
-            if (target) {
-              target.read = incoming.read;
-            }
-          },
-        ),
-      );
+      patchCreatorNotificationCaches(store.dispatch, (draft) => {
+        const target = draft.notifications.find((n) => n.id === incoming.id);
+        if (target && target.read !== incoming.read) {
+          target.read = incoming.read;
+          if (incoming.read) {
+            draft.unreadCount = Math.max(0, draft.unreadCount - 1);
+          } else {
+            draft.unreadCount += 1;
+          }
+        }
+      });
       return;
     }
 
     if (envelope.type === 'deleted') {
       const id = envelope.notification.id;
-      store.dispatch(
-        creatorNotificationsService.util.updateQueryData(
-          'getCreatorNotifications',
-          undefined,
-          (draft: CreatorNotificationsResponse) => {
-            draft.notifications = draft.notifications.filter(
-              (n) => n.id !== id,
-            );
-            draft.total = Math.max(0, draft.total - 1);
-            if (draft.unreadCount > 0) draft.unreadCount -= 1;
-          },
-        ),
-      );
+      patchCreatorNotificationCaches(store.dispatch, (draft) => {
+        const existing = draft.notifications.find((n) => n.id === id);
+        draft.notifications = draft.notifications.filter((n) => n.id !== id);
+        draft.total = Math.max(0, draft.total - 1);
+        if (existing && !existing.read) {
+          draft.unreadCount = Math.max(0, draft.unreadCount - 1);
+        }
+      });
       store.dispatch(
         baseService.util.invalidateTags(['creator-notifications']),
       );

@@ -15,6 +15,10 @@ export interface MyIdea {
   body: string;
   /** Reviewer note; empty when none has been left. */
   feedback?: string;
+  attachmentUrl?: string;
+  attachmentName?: string;
+  attachmentMimeType?: string;
+  attachmentSize?: number;
 }
 
 export type MyIdeasStatusFilter = 'all' | IdeaStatus;

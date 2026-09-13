@@ -36,6 +36,8 @@ export interface SubmitIdeaBody {
   summary?: string;
   body: string;
   attachmentUrl?: string;
+  /** When true on update, clears `attachments` in the DB. */
+  clearAttachment?: boolean;
   file?: File;
 }
 

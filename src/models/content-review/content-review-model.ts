@@ -20,6 +20,11 @@ export interface ContentSubmission {
   body: string;
   approvedCount: number;
   approvalRate: string;
+  /** Relative or absolute URL from `attachments.url`. */
+  attachmentUrl?: string | null;
+  attachmentName?: string | null;
+  attachmentMimeType?: string | null;
+  attachmentSize?: number | null;
 }
 
 export interface ReviewQueueResponse {

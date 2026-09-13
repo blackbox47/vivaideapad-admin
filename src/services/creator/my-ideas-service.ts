@@ -67,6 +67,10 @@ export const myIdeasService = baseService.injectEndpoints({
               (conceptObj?.title as string) ||
               (item.conceptTitle as string) ||
               '—';
+            const attachments =
+              item.attachments && typeof item.attachments === 'object'
+                ? (item.attachments as Record<string, unknown>)
+                : null;
             return {
               id: String(item.id ?? ''),
               title: String(item.title ?? ''),
@@ -78,6 +82,22 @@ export const myIdeasService = baseService.injectEndpoints({
               comments: 0,
               body: String(item.body ?? ''),
               feedback: (item.decision_notes as string) ?? undefined,
+              attachmentUrl:
+                typeof attachments?.url === 'string'
+                  ? attachments.url
+                  : undefined,
+              attachmentName:
+                typeof attachments?.original_name === 'string'
+                  ? attachments.original_name
+                  : undefined,
+              attachmentMimeType:
+                typeof attachments?.mime_type === 'string'
+                  ? attachments.mime_type
+                  : undefined,
+              attachmentSize:
+                typeof attachments?.size === 'number'
+                  ? attachments.size
+                  : undefined,
             };
           });
           const total = typeof (res.meta as Record<string, unknown>)?.total === 'number'

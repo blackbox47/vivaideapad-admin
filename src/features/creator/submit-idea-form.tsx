@@ -48,7 +48,32 @@ interface SubmitIdeaFormProps {
   selectedTopicId?: string;
   submissionId?: string;
   submission?: SubmissionDetail | null;
-  isLoadingSubmission?: boolean;
+}
+
+function buildDefaultValues(
+  submission: SubmissionDetail | null | undefined,
+  selectedTopicId: string,
+): SubmitIdeaFormValues {
+  if (submission) {
+    return {
+      topicId: submission.conceptId || selectedTopicId || '',
+      title: submission.title || '',
+      // API has no summary column — keep empty unless a client-only value exists.
+      summary: submission.summary || '',
+      body: submission.body || '',
+      attachmentUrl: submission.attachmentUrl || '',
+      confirmedOriginal: true,
+    };
+  }
+
+  return {
+    topicId: selectedTopicId,
+    title: '',
+    summary: '',
+    body: '',
+    attachmentUrl: '',
+    confirmedOriginal: false,
+  };
 }
 
 export default function SubmitIdeaForm({
@@ -57,7 +82,6 @@ export default function SubmitIdeaForm({
   selectedTopicId = '',
   submissionId,
   submission,
-  isLoadingSubmission = false,
 }: SubmitIdeaFormProps) {
   const [serverError, setServerError] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -69,34 +93,25 @@ export default function SubmitIdeaForm({
   const navigate = useNavigate();
 
   const isBusy =
-    isSubmittingNew ||
-    isUpdating ||
-    isSubmittingExisting ||
-    isLoadingTopics ||
-    isLoadingSubmission;
+    isSubmittingNew || isUpdating || isSubmittingExisting || isLoadingTopics;
 
   const {
     register,
     handleSubmit,
     control,
     setValue,
-    reset,
     formState: { errors },
   } = useForm<SubmitIdeaFormValues>({
     resolver: zodResolver(submitIdeaSchema),
-    defaultValues: {
-      topicId: selectedTopicId,
-      title: '',
-      summary: '',
-      body: '',
-      attachmentUrl: '',
-      confirmedOriginal: false,
-    },
+    // Parent remounts this form with `key={submissionId}` only after detail
+    // data is ready, so the first paint already has title/body.
+    defaultValues: buildDefaultValues(submission, selectedTopicId),
   });
 
   const titleValue = useWatch({ control, name: 'title' }) ?? '';
   const summaryValue = useWatch({ control, name: 'summary' }) ?? '';
   const bodyValue = useWatch({ control, name: 'body' }) ?? '';
+  const attachmentUrlValue = useWatch({ control, name: 'attachmentUrl' }) ?? '';
 
   // Plain-text length of the body's HTML for the counter (matches zod).
   const bodyPlainTextLength = useMemo(() => {
@@ -115,20 +130,6 @@ export default function SubmitIdeaForm({
     [topics],
   );
 
-  // Populate form with existing submission data
-  useEffect(() => {
-    if (submission) {
-      reset({
-        topicId: submission.conceptId || selectedTopicId || '',
-        title: submission.title || '',
-        summary: submission.summary || '',
-        body: submission.body || '',
-        attachmentUrl: submission.attachmentUrl || '',
-        confirmedOriginal: true,
-      });
-    }
-  }, [submission, reset, selectedTopicId]);
-
   useEffect(() => {
     if (selectedTopicId) {
       setValue('topicId', selectedTopicId);
@@ -138,7 +139,8 @@ export default function SubmitIdeaForm({
   const handleFileChange = async (file: File | null) => {
     setSelectedFile(file);
     if (!file) {
-      setValue('attachmentUrl', submission?.attachmentUrl ?? '');
+      // Explicit clear — empty string tells the update mutation to null out attachments.
+      setValue('attachmentUrl', '');
       return;
     }
     try {
@@ -153,6 +155,9 @@ export default function SubmitIdeaForm({
     setServerError(null);
     try {
       if (submissionId) {
+        const hadAttachment = Boolean(submission?.attachmentUrl);
+        const keepingAttachment =
+          !selectedFile && Boolean(values.attachmentUrl?.trim());
         await updateSubmission({
           id: submissionId,
           body: {
@@ -161,8 +166,10 @@ export default function SubmitIdeaForm({
             title: values.title.trim(),
             summary: values.summary?.trim(),
             body: values.body,
-            attachmentUrl: values.attachmentUrl?.trim() || undefined,
             file: selectedFile ?? undefined,
+            // Only touch attachments when replacing (multipart) or clearing —
+            // never rewrite metadata when the same file is kept.
+            clearAttachment: hadAttachment && !keepingAttachment && !selectedFile,
           },
         }).unwrap();
         await submitExisting(submissionId).unwrap();
@@ -188,17 +195,6 @@ export default function SubmitIdeaForm({
       setServerError(getApiErrorMessage(err));
     }
   };
-
-  if (isLoadingSubmission) {
-    return (
-      <div className="space-y-4 py-4" aria-busy="true">
-        <div className="h-10 animate-pulse rounded-md bg-surface-subtle" />
-        <div className="h-12 animate-pulse rounded-md bg-surface-subtle" />
-        <div className="h-20 animate-pulse rounded-md bg-surface-subtle" />
-        <div className="h-40 animate-pulse rounded-md bg-surface-subtle" />
-      </div>
-    );
-  }
 
   return (
     <form onSubmit={handleSubmit(onFormSubmit)} noValidate className="space-y-4">
@@ -296,6 +292,7 @@ export default function SubmitIdeaForm({
           name="body"
           render={({ field }) => (
             <RichTextEditor
+              key={submissionId ? `body-${submissionId}` : 'body-new'}
               id="body"
               value={field.value ?? ''}
               onChange={field.onChange}
@@ -321,7 +318,21 @@ export default function SubmitIdeaForm({
         <FileUploader
           id="attachment"
           acceptText="PDF, DOCX, JPG or PNG · up to 10 MB"
-          value={selectedFile}
+          value={selectedFile ?? (attachmentUrlValue || null)}
+          fileName={
+            selectedFile
+              ? undefined
+              : typeof submission?.attachments?.original_name === 'string'
+                ? submission.attachments.original_name
+                : undefined
+          }
+          fileSize={
+            selectedFile
+              ? undefined
+              : typeof submission?.attachments?.size === 'number'
+                ? submission.attachments.size
+                : undefined
+          }
           onChange={handleFileChange}
           disabled={isBusy}
           errorMessage={errors.attachmentUrl?.message}

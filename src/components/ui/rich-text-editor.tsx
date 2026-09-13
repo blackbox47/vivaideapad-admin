@@ -238,15 +238,14 @@ export function RichTextEditor({
     },
   });
 
-  // External-value sync.
-  const lastEmittedRef = React.useRef(value);
+  // Keep the editor in sync when the parent resets / prefills (e.g. edit flow).
+  // Compare against live editor HTML so we don't miss the first external value
+  // after mount, and skip when the change originated from typing (same HTML).
   React.useEffect(() => {
-    if (!editor) return;
-    const currentHtml = editor.getHTML();
-    if (value !== currentHtml && value !== lastEmittedRef.current) {
-      editor.commands.setContent(value || '', { emitUpdate: false });
-    }
-    lastEmittedRef.current = value;
+    if (!editor || editor.isDestroyed) return;
+    const next = value ?? '';
+    if (next === editor.getHTML()) return;
+    editor.commands.setContent(next, { emitUpdate: false });
   }, [value, editor]);
 
   React.useEffect(() => {

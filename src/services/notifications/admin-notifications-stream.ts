@@ -1,12 +1,30 @@
 import { env } from '@/config/env';
-import type {
-  AdminNotification,
-  AdminNotificationsResponse,
+import {
+  ADMIN_NOTIFICATION_FILTERS,
+  type AdminNotification,
+  type AdminNotificationsResponse,
 } from '@/models/notifications/admin-notifications-model';
 import { baseService } from '@/services/core/base-service';
 import { adminNotificationsService } from '@/services/notifications/admin-notifications-service';
 import { ADMIN_NOTIFICATIONS_STREAM_URL } from '@/utils/constants/api-end-points';
+import { parseApiDateTime } from '@/utils/helpers/parse-api-date-time';
 import { toast } from '@/components/ui/sonner';
+
+/** Same cache args the list hook uses — SSE must patch every filter key. */
+function patchAdminNotificationCaches(
+  dispatch: (action: unknown) => unknown,
+  updater: (draft: AdminNotificationsResponse) => void,
+): void {
+  for (const filter of ADMIN_NOTIFICATION_FILTERS) {
+    dispatch(
+      adminNotificationsService.util.updateQueryData(
+        'getAdminNotifications',
+        { filter },
+        updater,
+      ),
+    );
+  }
+}
 
 /**
  * Wire shape emitted by the backend on `GET /admin/notifications/stream`.
@@ -40,11 +58,12 @@ type StreamEnvelope =
 function wireToAdminNotification(
   wire: AdminWireNotification,
 ): AdminNotification {
+  const occurredAt = parseApiDateTime(wire.created_at);
   return {
     id: wire.id,
     title: wire.title,
     body: wire.body ?? '',
-    time: new Date(wire.created_at).toLocaleTimeString([], {
+    time: new Date(occurredAt).toLocaleTimeString([], {
       hour: '2-digit',
       minute: '2-digit',
     }),
@@ -52,7 +71,7 @@ function wireToAdminNotification(
     icon: 'bell',
     iconBg: 'bg-primary/10',
     read: wire.read_state === 'read',
-    occurredAt: wire.created_at,
+    occurredAt,
     // Carry routing inputs through so cache mutations from SSE look
     // identical to refetched entries and clicks can route.
     rawType: wire.type,
@@ -102,38 +121,30 @@ export function startAdminNotificationsStream(store: {
 
     if (envelope.type === 'updated') {
       const incoming = wireToAdminNotification(envelope.notification);
-      store.dispatch(
-        adminNotificationsService.util.updateQueryData(
-          'getAdminNotifications',
-          undefined,
-          (draft: AdminNotificationsResponse) => {
-            const target = draft.notifications.find(
-              (n) => n.id === incoming.id,
-            );
-            if (target) {
-              target.read = incoming.read;
-            }
-          },
-        ),
-      );
+      patchAdminNotificationCaches(store.dispatch, (draft) => {
+        const target = draft.notifications.find((n) => n.id === incoming.id);
+        if (target && target.read !== incoming.read) {
+          target.read = incoming.read;
+          if (incoming.read) {
+            draft.unreadCount = Math.max(0, draft.unreadCount - 1);
+          } else {
+            draft.unreadCount += 1;
+          }
+        }
+      });
       return;
     }
 
     if (envelope.type === 'deleted') {
       const id = envelope.notification.id;
-      store.dispatch(
-        adminNotificationsService.util.updateQueryData(
-          'getAdminNotifications',
-          undefined,
-          (draft: AdminNotificationsResponse) => {
-            draft.notifications = draft.notifications.filter(
-              (n) => n.id !== id,
-            );
-            draft.total = Math.max(0, draft.total - 1);
-            if (draft.unreadCount > 0) draft.unreadCount -= 1;
-          },
-        ),
-      );
+      patchAdminNotificationCaches(store.dispatch, (draft) => {
+        const existing = draft.notifications.find((n) => n.id === id);
+        draft.notifications = draft.notifications.filter((n) => n.id !== id);
+        draft.total = Math.max(0, draft.total - 1);
+        if (existing && !existing.read) {
+          draft.unreadCount = Math.max(0, draft.unreadCount - 1);
+        }
+      });
       // Belt-and-braces: if the cached page doesn't contain the deleted
       // id (different filter, different page), invalidate so a future
       // refetch reconciles state.
