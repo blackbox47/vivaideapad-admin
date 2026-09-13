@@ -29,11 +29,11 @@ interface Props {
  *     `EventSource` constructor would still try to hit the network. Skip
  *     entirely in mock mode so dev work continues without a backend.
  *
- * Session-expiry teardown:
- *   - When the root reducer resets the store on `sessionExpired`, the auth
- *     slice flips `isAuthenticated` to `false`. The store subscription below
- *     closes the `EventSource` so we don't keep retrying against stale
- *     cookies after logout.
+ * Session-expiry / sign-out teardown:
+ *   - When the root reducer resets the store on `sessionExpired` or
+ *     `sessionCleared`, the auth slice flips `isAuthenticated` to `false`.
+ *     The store subscription below closes the `EventSource` so we don't keep
+ *     retrying against stale cookies after logout.
  */
 export function NotificationsStreamBootstrap({ role }: Props) {
   useEffect(() => {

@@ -49,18 +49,18 @@ export default function useAuth(): UseAuthResult {
   const navigate = useNavigate();
   const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
   const role = useAppSelector((state) => state.auth.role);
-  const [requestLogin, { isLoading, error }] = useLoginMutation();
-  const [requestAdminLogin] = useAdminLoginMutation();
-  const [requestGoogleLogin, { isLoading: isGoogleLoggingIn, error: googleError }] =
+  const [requestLogin, { isLoading: isPasswordLoggingIn }] = useLoginMutation();
+  const [requestAdminLogin, { isLoading: isAdminLoggingIn }] =
+    useAdminLoginMutation();
+  const [requestGoogleLogin, { isLoading: isGoogleLoggingIn }] =
     useGoogleLoginMutation();
   const [requestSignOut, { isLoading: isSigningOut }] = useSignOutMutation();
 
   // RTK Query only exposes the latest server-reported error; keep a local
-  // copy so the form can clear it as soon as the user edits an input.
+  // copy so callers can clear it (legacy inline banners). Prefer toast at
+  // the call site for new UI.
   const [localError, setLocalError] = useState<string | null>(null);
-  const serverError =
-    getApiErrorMessage(error) ?? getApiErrorMessage(googleError);
-  const loginError = localError ?? serverError;
+  const loginError = localError;
 
   const googleLogin = useCallback(
     async (credential: string) => {
@@ -131,7 +131,7 @@ export default function useAuth(): UseAuthResult {
 
   return {
     isAuthenticated,
-    isLoggingIn: isLoading,
+    isLoggingIn: isPasswordLoggingIn || isAdminLoggingIn,
     isGoogleLoggingIn,
     isSigningOut,
     loginError,

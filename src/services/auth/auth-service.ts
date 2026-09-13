@@ -58,9 +58,9 @@ export const authService = baseService.injectEndpoints({
     }),
     /**
      * Admin-only sign-in. Hits `POST /auth/admin/sign-in`, which rejects
-     * non-admin (e.g. CONTRIBUTOR) users with the same generic 401 used for
-     * bad credentials. The wire payload is identical to `login`, so the
-     * response types are shared.
+     * non-admin (e.g. CONTRIBUTOR) users with `403 admin_required`.
+     * Contributor login uses `POST /auth/sign-in`, which rejects admins with
+     * `403 contributor_required`.
      */
     adminLogin: builder.mutation<LoginResponse, LoginRequest>({
       query: (body) => ({
