@@ -14,6 +14,27 @@ import {
   ADMIN_NOTIFICATIONS_URL,
 } from '@/utils/constants/api-end-points';
 
+/**
+ * Map a raw backend notification `type` to one of the four UI filter buckets.
+ * This keeps new backend types (e.g. `submission_submitted`) grouped under
+ * the expected admin filter tab without needing a model change.
+ */
+function mapBackendTypeToUiBucket(raw: string): AdminNotificationType {
+  switch (raw) {
+    case 'submission_decision':
+    case 'submission_request_revision':
+    case 'submission_submitted':
+      return 'Review';
+    case 'application_decision':
+      return 'Applicants';
+    case 'payout_status_changed':
+    case 'payout_decision':
+      return 'Payouts';
+    default:
+      return 'System';
+  }
+}
+
 export const adminNotificationsService = baseService.injectEndpoints({
   endpoints: (builder) => ({
     getAdminNotifications: builder.query<
@@ -52,7 +73,7 @@ export const adminNotificationsService = baseService.injectEndpoints({
               time: typeof item.created_at === 'string'
                 ? new Date(item.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                 : '',
-              type: (typeof item.type === 'string' ? item.type : 'System') as AdminNotificationType,
+              type: mapBackendTypeToUiBucket(typeof item.type === 'string' ? item.type : 'System'),
               icon: 'bell',
               iconBg: 'bg-primary/10',
               read: isRead,

@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import type {
   CreatorTopic,
@@ -6,16 +6,24 @@ import type {
   OpportunityCategoryFilter,
 } from '@/models/creator/submit-idea-model';
 import { useGetCreatorTopicsQuery } from '@/services/creator/creator-ideas-service';
+import { DEFAULT_PAGE } from '@/utils/constants/pagination';
 import { getApiErrorMessage } from '@/utils/helpers/api-error';
 
 interface UseCreatorTopicsParams {
   category?: OpportunityCategoryFilter;
   search?: string;
+  /** Page size for API pagination. Omit to use the backend default. */
+  limit?: number;
 }
 
 interface UseCreatorTopicsResult {
   data: CreatorTopicsResponse | null;
+  total: number;
+  hasMore: boolean;
+  remainingCount: number;
+  loadMore: () => void;
   isLoading: boolean;
+  isFetchingMore: boolean;
   isError: boolean;
   error: string | null;
   refetch: () => void;
@@ -48,7 +56,17 @@ function filterTopics(
 export default function useCreatorTopics(
   params: UseCreatorTopicsParams = {},
 ): UseCreatorTopicsResult {
-  const { data, isLoading, isError, error, refetch } = useGetCreatorTopicsQuery();
+  const [page, setPage] = useState(DEFAULT_PAGE);
+  const { data, isLoading, isFetching, isError, error, refetch } =
+    useGetCreatorTopicsQuery({
+      page,
+      ...(params.limit != null ? { limit: params.limit } : {}),
+    });
+
+  const loadedTopics = data?.topics ?? [];
+  const total = data?.total ?? loadedTopics.length;
+  const hasMore = loadedTopics.length < total;
+  const remainingCount = Math.max(0, total - loadedTopics.length);
 
   const filtered = useMemo((): CreatorTopicsResponse | null => {
     if (!data) {
@@ -57,12 +75,21 @@ export default function useCreatorTopics(
 
     return {
       topics: filterTopics(data.topics, params),
+      total: data.total,
+      meta: data.meta,
     };
   }, [data, params.category, params.search]);
 
   return {
     data: filtered,
+    total,
+    hasMore,
+    remainingCount,
+    loadMore: useCallback(() => {
+      setPage((current) => current + 1);
+    }, []),
     isLoading,
+    isFetchingMore: isFetching && !isLoading && page > DEFAULT_PAGE,
     isError,
     error: getApiErrorMessage(error),
     refetch,
