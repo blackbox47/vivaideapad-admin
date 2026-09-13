@@ -13,7 +13,7 @@ import {
 import ChangePayoutMethodDialog from '@/features/creator/change-payout-method-dialog';
 import ProfileAvatarUploader from '@/features/profile/profile-avatar-uploader';
 import ProfileIdentityCard from '@/features/profile/profile-identity-card';
-import ProfileNotificationsCard from '@/features/profile/profile-notifications-card';
+// import ProfileNotificationsCard from '@/features/profile/profile-notifications-card';
 import ProfilePayoutMethodCard from '@/features/profile/profile-payout-method-card';
 import { ScreenLoader } from '@/components/shared/screen-loader';
 import useCreatorProfile from '@/hooks/creator/use-creator-profile';
@@ -35,8 +35,8 @@ export default function CreatorProfileOverview() {
     isChangingPassword,
     passwordFeedback,
     passwordError,
-    toggleNotification,
-    isUpdatingNotifications,
+    // toggleNotification,
+    // isUpdatingNotifications,
     uploadAvatar,
     isUploadingAvatar,
     changePayoutMethod,
@@ -106,13 +106,13 @@ export default function CreatorProfileOverview() {
           />
 
           <div className="flex flex-col gap-4.5">
-            <ProfileNotificationsCard
+            {/* <ProfileNotificationsCard
               preferences={overview.notifications}
               isUpdating={isUpdatingNotifications || isLoading}
               onToggle={(key, value) => {
                 void toggleNotification(key, value);
               }}
-            />
+            /> */}
             <ProfilePayoutMethodCard
               payoutMethod={overview.payoutMethod}
               onChange={() => setIsPayoutOpen(true)}

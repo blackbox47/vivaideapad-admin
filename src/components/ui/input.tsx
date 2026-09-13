@@ -91,8 +91,10 @@ function Input({
             ),
         // Password discs scale with font-size; auth fields otherwise use
         // `md:text-sm`, which makes the hidden dots look undersized.
+        // While empty, keep the input at `text-sm` so the placeholder sits
+        // on the same metrics as other fields (vertically centered).
         type === "password" &&
-          "text-[1.5rem] leading-none tracking-normal md:text-[1.5rem] placeholder:text-sm placeholder:leading-normal",
+          "text-[1.5rem] leading-none tracking-normal md:text-[1.5rem] placeholder-shown:text-sm placeholder-shown:leading-normal md:placeholder-shown:text-sm",
       )}
       {...props}
     />
