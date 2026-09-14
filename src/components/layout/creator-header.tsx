@@ -1,7 +1,7 @@
 import { LogOut, User } from 'lucide-react';
 import { Link, useNavigate } from '@tanstack/react-router';
 
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -12,15 +12,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import useCreatorUser from '@/hooks/auth/use-creator-user';
-import useAuth from '@/hooks/auth/use-auth';
 import NotificationPopover from '@/components/notifications/notification-popover';
+import useAuth from '@/hooks/auth/use-auth';
+import useCreatorUser from '@/hooks/auth/use-creator-user';
 import { CREATOR_ROUTES } from '@/utils/constants/routes';
+import { resolveAvatarUrl } from '@/utils/helpers/resolve-avatar-url';
 
 export default function CreatorHeader() {
   const { user } = useCreatorUser();
   const { logout } = useAuth();
   const navigate = useNavigate();
+  const resolvedAvatarUrl = resolveAvatarUrl(user?.avatarUrl);
 
   return (
     <header className="flex h-16 sm:h-[76px] md:h-[82px] items-center justify-between gap-3">
@@ -56,6 +58,12 @@ export default function CreatorHeader() {
             }
           >
             <Avatar className="size-6.5 after:border-transparent">
+              {resolvedAvatarUrl && (
+                <AvatarImage
+                  src={resolvedAvatarUrl}
+                  alt={user?.name ?? 'Account'}
+                />
+              )}
               <AvatarFallback className="bg-primary text-[10px] font-bold tracking-tight text-primary-foreground">
                 {user?.initials ?? '—'}
               </AvatarFallback>

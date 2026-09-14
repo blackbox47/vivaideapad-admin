@@ -1,7 +1,6 @@
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { formatDisplayDate } from '@/utils/helpers/format-display-date';
-import { CURRENCY_SYMBOL } from '@/utils/constants';
 import type { PublicConceptItem } from '@/services/applications/applications-service';
 
 interface OnboardingTopicCardsProps {
@@ -9,12 +8,6 @@ interface OnboardingTopicCardsProps {
   isLoading: boolean;
   selectedTopicId: string;
   onSelectTopic: (topicId: string) => void;
-}
-
-function formatReward(budget?: string): string {
-  if (!budget) return `${CURRENCY_SYMBOL}0`;
-  const cleaned = String(budget).replace(/^[৳$Tk\s]*/, '');
-  return `${CURRENCY_SYMBOL}${cleaned}`;
 }
 
 export default function OnboardingTopicCards({
@@ -46,8 +39,7 @@ export default function OnboardingTopicCards({
                   <Skeleton className="mt-2 h-3 w-full" />
                   <Skeleton className="mt-1.5 h-3 w-4/5" />
                 </div>
-                <div className="mt-3 flex items-center justify-between border-t border-border pt-3">
-                  <Skeleton className="h-4 w-16" />
+                <div className="mt-3 border-t border-border pt-3">
                   <Skeleton className="h-3 w-20" />
                 </div>
               </article>
@@ -81,10 +73,7 @@ export default function OnboardingTopicCards({
                       {topic.brief || 'No brief provided for this topic.'}
                     </p>
                   </div>
-                  <div className="mt-3 flex items-center justify-between border-t border-border pt-3">
-                    <span className="text-sm font-bold text-foreground">
-                      {formatReward(topic.reward_budget)}
-                    </span>
+                  <div className="mt-3 border-t border-border pt-3">
                     <span className="text-[11px] font-medium lowercase tracking-wide text-muted-foreground">
                       {topic.close_date
                         ? `closes ${formatDisplayDate(topic.close_date)}`
