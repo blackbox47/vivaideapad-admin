@@ -169,7 +169,7 @@ export const creatorIdeasService = baseService.injectEndpoints({
           createdAt: String(res.created_at ?? new Date().toISOString()),
         };
       },
-      invalidatesTags: ['my-ideas', 'creator-dashboard'],
+      invalidatesTags: ['my-ideas', 'creator-dashboard', 'creator-topics'],
     }),
     updateSubmission: builder.mutation<
       SubmitIdeaResponse,
@@ -230,6 +230,7 @@ export const creatorIdeasService = baseService.injectEndpoints({
         { type: 'submissions', id },
         'my-ideas',
         'creator-dashboard',
+        'creator-topics',
       ],
     }),
     getCreatorTopics: builder.query<

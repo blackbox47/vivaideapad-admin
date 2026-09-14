@@ -24,6 +24,7 @@ import type {
 } from '@/models/topics/topics-model';
 import {
   editConceptSchema,
+  sanitizeRewardAmountInput,
   type EditConceptFormValues,
 } from '@/models/topics/topics-schema';
 import type { DropdownOption } from '@/utils/types/dropdown-option';
@@ -107,6 +108,7 @@ export default function EditConceptDialog({
 
   const opensOn = useWatch({ control, name: 'opensOn' });
   const closesOn = useWatch({ control, name: 'closesOn' });
+  const { onChange: onRewardChange, ...rewardField } = register('reward');
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -281,8 +283,16 @@ export default function EditConceptDialog({
                 id="edit-concept-reward"
                 label="Reward amount"
                 placeholder="Enter reward amount"
+                inputMode="decimal"
+                autoComplete="off"
                 errorMessage={errors.reward?.message}
-                {...register('reward')}
+                {...rewardField}
+                onChange={(event) => {
+                  event.target.value = sanitizeRewardAmountInput(
+                    event.target.value,
+                  );
+                  void onRewardChange(event);
+                }}
               />
             </div>
 
