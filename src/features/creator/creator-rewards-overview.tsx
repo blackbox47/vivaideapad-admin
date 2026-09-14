@@ -111,7 +111,7 @@ export default function CreatorRewardsOverview() {
     typeof data?.availableValue === 'number'
       ? data.availableValue
       : parseAvailableBalance(data?.available ?? '0');
-  const canRequestWithdrawal = availableBalance > 0;
+  const canRequestWithdrawal = availableBalance >= 1;
 
   const closeWithdraw = () => {
     resetWithdraw();
@@ -144,7 +144,7 @@ export default function CreatorRewardsOverview() {
             title={
               canRequestWithdrawal
                 ? undefined
-                : 'Withdrawal is unavailable when your available balance is zero or less.'
+                : 'Withdrawal is unavailable when your available balance is less than 1.'
             }
             onClick={() => {
               if (!canRequestWithdrawal) return;
