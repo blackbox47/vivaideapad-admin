@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useNavigate } from '@tanstack/react-router';
-import { ArrowLeft, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { AlertCircle, ArrowLeft, Eye, EyeOff, Loader2 } from 'lucide-react';
 
 import { Input } from '@/components/ui/input';
 import { toast } from '@/components/ui/sonner';
@@ -17,7 +17,10 @@ import {
   type LoginFormValues,
 } from '@/models/auth/auth-schema';
 import { ADMIN_ROUTES, CREATOR_ROUTES } from '@/utils/constants/routes';
-import { getApiErrorMessage } from '@/utils/helpers/api-error';
+import {
+  getApiErrorCode,
+  getApiErrorMessage,
+} from '@/utils/helpers/api-error';
 
 interface LoginPanelProps {
   role: UserRole;
@@ -87,6 +90,10 @@ export default function LoginPanel({
   footer = 'Viva IdeaPad community platform',
 }: LoginPanelProps) {
   const [showPassword, setShowPassword] = useState(false);
+  const [gateNotice, setGateNotice] = useState<{
+    code: string;
+    message: string;
+  } | null>(null);
   const googleButtonContainerRef = useRef<HTMLDivElement>(null);
 
   const {
@@ -114,15 +121,28 @@ export default function LoginPanel({
   const destination =
     safeRedirectTarget(searchParams.get('from')) ?? homeForRole(role);
 
+  const presentAuthError = (err: unknown, fallback: string) => {
+    const code = getApiErrorCode(err);
+    const message = getApiErrorMessage(err) ?? fallback;
+    if (
+      role === 'creator' &&
+      (code === 'account_pending_review' || code === 'account_suspended')
+    ) {
+      setGateNotice({ code, message });
+      return;
+    }
+    setGateNotice(null);
+    toast.error(message);
+  };
+
   const handleGoogleSuccess = async (credential: string) => {
+    setGateNotice(null);
     try {
       await googleLogin(credential);
       toast.success('Welcome back!');
       navigate({ to: destination, replace: true });
     } catch (err) {
-      toast.error(
-        getApiErrorMessage(err) ?? 'Google sign-in failed. Please try again.',
-      );
+      presentAuthError(err, 'Google sign-in failed. Please try again.');
     }
   };
 
@@ -140,14 +160,13 @@ export default function LoginPanel({
   const forgotPasswordPath = CREATOR_ROUTES.forgotPassword;
 
   const onSubmit = async (values: LoginFormValues) => {
+    setGateNotice(null);
     try {
       await login(values, { asRole: role });
       toast.success('Welcome back!');
       navigate({ to: destination, replace: true });
     } catch (err) {
-      toast.error(
-        getApiErrorMessage(err) ?? 'Sign-in failed. Please try again.',
-      );
+      presentAuthError(err, 'Sign-in failed. Please try again.');
     }
   };
 
@@ -214,6 +233,27 @@ export default function LoginPanel({
               Enter your credentials to access your workspace
             </p>
           </div>
+
+          {gateNotice ? (
+            <div className="mb-5 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-3 text-sm text-amber-950">
+              <AlertCircle className="mt-0.5 size-4 shrink-0 text-amber-600" />
+              <div className="space-y-2">
+                <p className="leading-relaxed">{gateNotice.message}</p>
+                {gateNotice.code === 'account_pending_review' ? (
+                  <p className="text-xs leading-relaxed text-amber-900/80">
+                    Need a new link?{' '}
+                    <Link
+                      to={CREATOR_ROUTES.signUp}
+                      className="font-semibold underline-offset-2 hover:underline"
+                    >
+                      Sign up again
+                    </Link>{' '}
+                    with the same email to resend it.
+                  </p>
+                ) : null}
+              </div>
+            </div>
+          ) : null}
 
           <form
             className="space-y-4 md:space-y-5"

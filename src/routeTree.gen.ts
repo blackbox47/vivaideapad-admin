@@ -22,7 +22,9 @@ import { Route as PrivatecreatorRewardsRouteImport } from './routes/_privatecrea
 import { Route as PrivatecreatorSubmissionsRouteImport } from './routes/_privatecreator/submissions'
 import { Route as PubliccreatorForgotPasswordRouteImport } from './routes/_publiccreator/forgot-password'
 import { Route as PubliccreatorLoginRouteImport } from './routes/_publiccreator/login'
+import { Route as PubliccreatorResetPasswordRouteImport } from './routes/_publiccreator/reset-password'
 import { Route as PubliccreatorSignUpRouteImport } from './routes/_publiccreator/sign-up'
+import { Route as PubliccreatorVerifyEmailRouteImport } from './routes/_publiccreator/verify-email'
 import { Route as AdminAdminRouteImport } from './routes/admin/_admin'
 import { Route as AdminLoginRouteImport } from './routes/admin/login'
 import { Route as AdminSignInRouteImport } from './routes/admin/sign-in'
@@ -110,11 +112,23 @@ const PubliccreatorLoginRoute = PubliccreatorLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => PubliccreatorRouteRoute,
 } as any)
+const PubliccreatorResetPasswordRoute =
+  PubliccreatorResetPasswordRouteImport.update({
+    id: '/reset-password',
+    path: '/reset-password',
+    getParentRoute: () => PubliccreatorRouteRoute,
+  } as any)
 const PubliccreatorSignUpRoute = PubliccreatorSignUpRouteImport.update({
   id: '/sign-up',
   path: '/sign-up',
   getParentRoute: () => PubliccreatorRouteRoute,
 } as any)
+const PubliccreatorVerifyEmailRoute =
+  PubliccreatorVerifyEmailRouteImport.update({
+    id: '/verify-email',
+    path: '/verify-email',
+    getParentRoute: () => PubliccreatorRouteRoute,
+  } as any)
 const AdminAdminRoute = AdminAdminRouteImport.update({
   id: '/admin/_admin',
   path: '/admin',
@@ -219,7 +233,9 @@ export interface FileRoutesByFullPath {
   '/submissions': typeof PrivatecreatorSubmissionsRoute
   '/forgot-password': typeof PubliccreatorForgotPasswordRoute
   '/login': typeof PubliccreatorLoginRoute
+  '/reset-password': typeof PubliccreatorResetPasswordRoute
   '/sign-up': typeof PubliccreatorSignUpRoute
+  '/verify-email': typeof PubliccreatorVerifyEmailRoute
   '/admin': typeof AdminAdminRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
   '/admin/sign-in': typeof AdminSignInRoute
@@ -251,7 +267,9 @@ export interface FileRoutesByTo {
   '/submissions': typeof PrivatecreatorSubmissionsRoute
   '/forgot-password': typeof PubliccreatorForgotPasswordRoute
   '/login': typeof PubliccreatorLoginRoute
+  '/reset-password': typeof PubliccreatorResetPasswordRoute
   '/sign-up': typeof PubliccreatorSignUpRoute
+  '/verify-email': typeof PubliccreatorVerifyEmailRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/sign-in': typeof AdminSignInRoute
   '/ideas/new': typeof PrivatecreatorIdeasNewRoute
@@ -285,7 +303,9 @@ export interface FileRoutesById {
   '/_privatecreator/submissions': typeof PrivatecreatorSubmissionsRoute
   '/_publiccreator/forgot-password': typeof PubliccreatorForgotPasswordRoute
   '/_publiccreator/login': typeof PubliccreatorLoginRoute
+  '/_publiccreator/reset-password': typeof PubliccreatorResetPasswordRoute
   '/_publiccreator/sign-up': typeof PubliccreatorSignUpRoute
+  '/_publiccreator/verify-email': typeof PubliccreatorVerifyEmailRoute
   '/admin/_admin': typeof AdminAdminRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
   '/admin/sign-in': typeof AdminSignInRoute
@@ -319,7 +339,9 @@ export interface FileRouteTypes {
     | '/submissions'
     | '/forgot-password'
     | '/login'
+    | '/reset-password'
     | '/sign-up'
+    | '/verify-email'
     | '/admin'
     | '/admin/login'
     | '/admin/sign-in'
@@ -351,7 +373,9 @@ export interface FileRouteTypes {
     | '/submissions'
     | '/forgot-password'
     | '/login'
+    | '/reset-password'
     | '/sign-up'
+    | '/verify-email'
     | '/admin/login'
     | '/admin/sign-in'
     | '/ideas/new'
@@ -384,7 +408,9 @@ export interface FileRouteTypes {
     | '/_privatecreator/submissions'
     | '/_publiccreator/forgot-password'
     | '/_publiccreator/login'
+    | '/_publiccreator/reset-password'
     | '/_publiccreator/sign-up'
+    | '/_publiccreator/verify-email'
     | '/admin/_admin'
     | '/admin/login'
     | '/admin/sign-in'
@@ -508,11 +534,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PubliccreatorLoginRouteImport
       parentRoute: typeof PubliccreatorRouteRoute
     }
+    '/_publiccreator/reset-password': {
+      id: '/_publiccreator/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof PubliccreatorResetPasswordRouteImport
+      parentRoute: typeof PubliccreatorRouteRoute
+    }
     '/_publiccreator/sign-up': {
       id: '/_publiccreator/sign-up'
       path: '/sign-up'
       fullPath: '/sign-up'
       preLoaderRoute: typeof PubliccreatorSignUpRouteImport
+      parentRoute: typeof PubliccreatorRouteRoute
+    }
+    '/_publiccreator/verify-email': {
+      id: '/_publiccreator/verify-email'
+      path: '/verify-email'
+      fullPath: '/verify-email'
+      preLoaderRoute: typeof PubliccreatorVerifyEmailRouteImport
       parentRoute: typeof PubliccreatorRouteRoute
     }
     '/admin/_admin': {
@@ -674,13 +714,17 @@ const PrivatecreatorRouteRouteWithChildren =
 interface PubliccreatorRouteRouteChildren {
   PubliccreatorForgotPasswordRoute: typeof PubliccreatorForgotPasswordRoute
   PubliccreatorLoginRoute: typeof PubliccreatorLoginRoute
+  PubliccreatorResetPasswordRoute: typeof PubliccreatorResetPasswordRoute
   PubliccreatorSignUpRoute: typeof PubliccreatorSignUpRoute
+  PubliccreatorVerifyEmailRoute: typeof PubliccreatorVerifyEmailRoute
 }
 
 const PubliccreatorRouteRouteChildren: PubliccreatorRouteRouteChildren = {
   PubliccreatorForgotPasswordRoute: PubliccreatorForgotPasswordRoute,
   PubliccreatorLoginRoute: PubliccreatorLoginRoute,
+  PubliccreatorResetPasswordRoute: PubliccreatorResetPasswordRoute,
   PubliccreatorSignUpRoute: PubliccreatorSignUpRoute,
+  PubliccreatorVerifyEmailRoute: PubliccreatorVerifyEmailRoute,
 }
 
 const PubliccreatorRouteRouteWithChildren =

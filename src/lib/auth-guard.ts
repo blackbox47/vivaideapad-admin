@@ -55,7 +55,7 @@ export const authGuard = {
     if (!isAuthenticated) {
       throw redirect({
         to: LOGIN_FOR_ROLE[role],
-        search: { from },
+        search: from ? { from } : {},
       });
     }
 

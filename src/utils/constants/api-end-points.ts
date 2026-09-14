@@ -6,6 +6,7 @@ export const AUTH_GOOGLE_SIGN_UP_URL = '/auth/google/sign-up';
 export const AUTH_SIGN_OUT_URL = '/auth/sign-out';
 export const AUTH_REFRESH_URL = '/auth/refresh';
 export const AUTH_FORGOT_PASSWORD_URL = '/auth/password/forgot';
+export const AUTH_RESET_PASSWORD_URL = '/auth/password/reset';
 export const DASHBOARD_OVERVIEW_URL = '/admin/dashboard/overview';
 export const CONCEPTS_URL = '/admin/concepts';
 export const CONCEPTS_BULK_ACTION_URL = '/admin/concepts/bulk-action';
@@ -53,6 +54,9 @@ export const APPLICATION_DECISION_URL = (id: string) =>
 export const PUBLIC_APPLICATIONS_URL = '/public/applications';
 export const PUBLIC_APPLICATION_STATUS_URL = (ref: string) =>
   `/public/applications/${ref}`;
+export const PUBLIC_VERIFY_EMAIL_URL = '/public/verify-email';
+export const PUBLIC_VERIFY_EMAIL_APPLICATION_URL =
+  '/public/verify-email/application';
 export const PUBLIC_CONCEPTS_URL = '/public/concepts';
 export const PUBLIC_CATEGORIES_URL = '/public/categories';
 export const PUBLIC_LANDING_STATS_URL = '/public/landing/stats';

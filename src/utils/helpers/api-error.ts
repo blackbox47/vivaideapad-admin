@@ -9,12 +9,9 @@ function isApiError(error: unknown): error is ApiError {
   );
 }
 
-/**
- * Recognises the spec's RFC 7807 error envelope (`{ error: { code, message,
- * details } }`) on either the wrapper or the inner object. The legacy RTK
- * Query shape `{ status, message }` is recognised by `isApiError`.
- */
-function readSpecEnvelope(error: unknown): string | null {
+function readSpecError(
+  error: unknown,
+): { code: string | null; message: string | null } | null {
   if (!error || typeof error !== 'object') {
     return null;
   }
@@ -22,15 +19,42 @@ function readSpecEnvelope(error: unknown): string | null {
   if (
     candidate.error &&
     typeof candidate.error === 'object' &&
-    candidate.error !== null &&
-    typeof (candidate.error as { message?: unknown }).message === 'string'
+    candidate.error !== null
   ) {
-    return (candidate.error as { message: string }).message;
+    const nested = candidate.error as { code?: unknown; message?: unknown };
+    return {
+      code: typeof nested.code === 'string' ? nested.code : null,
+      message: typeof nested.message === 'string' ? nested.message : null,
+    };
   }
   if (typeof candidate.message === 'string') {
-    return candidate.message;
+    return { code: null, message: candidate.message };
   }
   return null;
+}
+
+/**
+ * Recognises the spec's RFC 7807 error envelope (`{ error: { code, message,
+ * details } }`) on either the wrapper or the inner object. The legacy RTK
+ * Query shape `{ status, message }` is recognised by `isApiError`.
+ */
+function readSpecEnvelope(error: unknown): string | null {
+  return readSpecError(error)?.message ?? null;
+}
+
+export function getApiErrorCode(error: unknown): string | null {
+  if (!error) {
+    return null;
+  }
+
+  if (typeof error === 'object' && error !== null && 'data' in error) {
+    const fromData = readSpecError((error as { data?: unknown }).data);
+    if (fromData?.code) {
+      return fromData.code;
+    }
+  }
+
+  return readSpecError(error)?.code ?? null;
 }
 
 export function getApiErrorMessage(error: unknown): string | null {
@@ -41,9 +65,7 @@ export function getApiErrorMessage(error: unknown): string | null {
   // RTK Query `unwrap()` rejection: `{ status, data }` where `data` is the
   // parsed API body (used by some base queries). Prefer nested message.
   if (typeof error === 'object' && error !== null && 'data' in error) {
-    const fromData = readSpecEnvelope(
-      (error as { data?: unknown }).data,
-    );
+    const fromData = readSpecEnvelope((error as { data?: unknown }).data);
     if (fromData) {
       return fromData;
     }

@@ -93,7 +93,8 @@ export default function ForgotPasswordPanel({
                   <span className="font-semibold text-foreground">
                     {submittedEmail}
                   </span>
-                  , you will receive a reset link shortly.
+                  , you will receive a reset link shortly. The link expires in
+                  one hour.
                 </p>
               </div>
             </div>

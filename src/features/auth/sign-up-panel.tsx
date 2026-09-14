@@ -15,6 +15,7 @@ import {
   type SignUpFormValues,
 } from '@/models/auth/auth-schema';
 import { CREATOR_ROUTES } from '@/utils/constants/routes';
+import { getApiErrorMessage } from '@/utils/helpers/api-error';
 
 interface SignUpPanelProps {
   brandName?: string;
@@ -59,7 +60,7 @@ function GoogleGLogo({ className }: { className?: string }) {
 }
 
 const fieldClassName =
-  'rounded-xl border-border bg-card px-4 py-3 text-base shadow-none placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20 md:text-sm';
+  'rounded-xl border-border bg-card px-3.5 py-2.5 text-base shadow-none placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20 md:text-sm';
 
 export default function SignUpPanel({
   brandName = 'Viva IdeaPad',
@@ -77,7 +78,6 @@ export default function SignUpPanel({
     signUpWithGoogle,
     isSigningUp,
     isGoogleSigningUp,
-    submitError,
     resetSubmitError,
   } = useSignUp();
 
@@ -100,9 +100,15 @@ export default function SignUpPanel({
     resetSubmitError();
     try {
       const res = await signUpWithGoogle(credential);
-      setSubmittedEmail(res.email || 'your Google account email');
-    } catch {
-      // Error handled via submitError
+      const email = res.email || 'your Google account email';
+      setSubmittedEmail(email);
+      toast.success(
+        `Account created. We sent a verification link to ${email}.`,
+      );
+    } catch (err) {
+      toast.error(
+        getApiErrorMessage(err) ?? 'Google sign-up failed. Please try again.',
+      );
     }
   };
 
@@ -124,19 +130,24 @@ export default function SignUpPanel({
     resetSubmitError();
     try {
       await signUpEmail(values);
-      setSubmittedEmail(values.email.trim().toLowerCase());
-    } catch {
-      // Error handled via submitError
+      const email = values.email.trim().toLowerCase();
+      setSubmittedEmail(email);
+      toast.success(
+        `Account created. We sent a verification link to ${email}.`,
+      );
+    } catch (err) {
+      toast.error(
+        getApiErrorMessage(err) ?? 'Sign-up failed. Please try again.',
+      );
     }
   };
 
   return (
     <main
-      className="relative flex min-h-svh w-full flex-col justify-between overflow-y-auto bg-background font-sans md:min-h-0 md:w-1/2 md:items-center md:justify-center md:bg-surface-subtle md:p-12 lg:p-14"
+      className="relative flex min-h-svh w-full flex-col justify-between overflow-y-auto bg-background font-sans md:h-full md:min-h-0 md:w-1/2 md:justify-center md:bg-surface-subtle md:p-8 lg:p-10"
       data-purpose="auth-form-container"
     >
-      {/* Mobile Header: Back button + Brand logo */}
-      <header className="flex w-full items-center justify-between px-5 pt-5 pb-3 md:hidden">
+      <header className="flex w-full shrink-0 items-center justify-between px-5 pt-5 pb-2 md:hidden">
         <Link
           to="/"
           className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground no-underline shadow-xs transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary"
@@ -153,25 +164,23 @@ export default function SignUpPanel({
         </div>
       </header>
 
-      {/* Main content wrapper */}
-      <div className="flex w-full flex-1 flex-col justify-start px-4 pb-8 sm:px-6 md:max-w-sm md:flex-initial md:p-0">
-        {/* Mobile Hero Banner */}
-        <section className="relative mt-2 mb-6 overflow-hidden rounded-3xl border border-border bg-secondary p-6 text-foreground shadow-xs sm:p-7 md:hidden">
+      <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-start px-4 pb-6 sm:px-6 md:flex-initial md:justify-center md:px-0 md:pb-0">
+        <section className="relative mt-2 mb-4 overflow-hidden rounded-3xl border border-border bg-secondary p-5 text-foreground shadow-xs sm:p-6 md:hidden">
           <div
             aria-hidden
             className="pointer-events-none absolute -right-8 -bottom-10 size-44 rounded-full bg-primary/20 blur-2xl"
           />
           <div className="relative z-10 flex flex-col">
-            <div className="mb-4 inline-flex items-center gap-2">
+            <div className="mb-3 inline-flex items-center gap-2">
               <span
                 aria-hidden
                 className="size-2 animate-pulse rounded-full bg-primary"
               />
-              <span className="text-sm font-bold tracking-widest text-primary uppercase">
+              <span className="text-xs font-bold tracking-widest text-primary uppercase">
                 {eyebrow}
               </span>
             </div>
-            <h1 className="mb-3 text-2xl font-extrabold leading-[1.2] tracking-tight text-foreground sm:text-3xl">
+            <h1 className="mb-2 text-2xl font-extrabold leading-[1.2] tracking-tight text-foreground">
               {heroTitle}
             </h1>
             <p className="text-sm leading-relaxed font-normal text-muted-foreground">
@@ -180,43 +189,39 @@ export default function SignUpPanel({
           </div>
         </section>
 
-        {/* Desktop Top Navigation: Back button */}
-        <div className="mb-8 hidden md:block">
+        <div className="mb-4 hidden md:block">
           <Link
             to="/"
-            className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground no-underline shadow-xs transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary"
+            className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3.5 py-1.5 text-xs font-semibold text-foreground no-underline shadow-xs transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary"
           >
             <ArrowLeft className="size-3.5" />
             <span>Back to home</span>
           </Link>
         </div>
 
-        {/* Form Container Card */}
-        <div className="rounded-3xl border border-border bg-card p-6 shadow-xs sm:p-7 md:rounded-none md:border-0 md:bg-transparent md:p-0 md:shadow-none">
+        <div className="rounded-3xl border border-border bg-card p-5 shadow-xs sm:p-6 md:rounded-none md:border-0 md:bg-transparent md:p-0 md:shadow-none">
           {submittedEmail ? (
-            /* Success confirmation panel */
-            <div className="space-y-6">
-              <div className="flex items-start gap-3.5 rounded-xl border border-border bg-card p-4.5 shadow-xs">
+            <div className="space-y-4">
+              <div className="flex items-start gap-3 rounded-xl border border-border bg-card p-4 shadow-xs">
                 <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-primary" />
                 <div>
                   <h2 className="text-sm font-semibold text-foreground">
                     Check your inbox
                   </h2>
                   <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                    We&apos;ve sent a verification link to{' '}
+                    Open the verification link sent to{' '}
                     <span className="font-semibold text-foreground">
                       {submittedEmail}
-                    </span>
-                    . Open it to pick a topic and submit your first idea. An
-                    admin will review your submission before you can sign in.
+                    </span>{' '}
+                    to submit your idea for review.
                   </p>
                 </div>
               </div>
 
-              <div className="space-y-3">
+              <div className="space-y-2.5">
                 <Link
                   to={CREATOR_ROUTES.login}
-                  className="flex h-12 w-full cursor-pointer items-center justify-center rounded-xl bg-primary text-sm font-semibold text-primary-foreground shadow-xs transition-all hover:bg-brand-forest focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
+                  className="flex h-11 w-full cursor-pointer items-center justify-center rounded-xl bg-primary text-sm font-semibold text-primary-foreground shadow-xs transition-all hover:bg-brand-forest focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
                 >
                   Go to sign in
                 </Link>
@@ -226,36 +231,32 @@ export default function SignUpPanel({
                     setSubmittedEmail(null);
                     reset();
                   }}
-                  className="w-full cursor-pointer rounded-xl border border-border bg-card py-3 text-sm font-semibold text-foreground transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary"
+                  className="w-full cursor-pointer rounded-xl border border-border bg-card py-2.5 text-sm font-semibold text-foreground transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary"
                 >
                   Sign up with a different email
                 </button>
               </div>
             </div>
           ) : (
-            /* Registration Form */
             <div>
-              {/* Header Kicker & Title */}
-              <div className="mb-6">
-                <p className="mb-2 text-sm font-semibold tracking-wider text-primary uppercase">
+              <div className="mb-4">
+                <p className="mb-1.5 text-xs font-semibold tracking-wider text-primary uppercase">
                   START CONTRIBUTING
                 </p>
-                <h2 className="text-2xl font-extrabold tracking-tight text-foreground md:text-3xl md:font-bold">
+                <h2 className="text-xl font-extrabold tracking-tight text-foreground md:text-2xl md:font-bold">
                   Create contributor account
                 </h2>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Choose how you&apos;d like to sign up to start drafting and
-                  submitting ideas.
+                <p className="mt-1 text-xs text-muted-foreground md:text-sm">
+                  Sign up with Google or email to start submitting ideas.
                 </p>
               </div>
 
-              {/* Social Sign-up Button (Google) */}
-              <div className="mb-5">
+              <div className="mb-3">
                 <div className="relative flex w-full justify-center">
                   <div
                     ref={googleButtonContainerRef}
                     className={cn(
-                      'min-h-[44px] w-full justify-center flex',
+                      'flex min-h-[40px] w-full justify-center',
                       (!isGsiReady || !env.googleClientId) && 'hidden',
                     )}
                   />
@@ -270,7 +271,7 @@ export default function SignUpPanel({
                         }
                       }}
                       disabled={isGoogleSigningUp || isSigningUp}
-                      className="flex h-11 w-full cursor-pointer items-center justify-center gap-3 rounded-full border border-border bg-white px-4 py-2.5 text-sm font-semibold text-foreground shadow-xs transition-colors hover:bg-muted/40 disabled:opacity-60"
+                      className="flex h-10 w-full cursor-pointer items-center justify-center gap-3 rounded-full border border-border bg-white px-4 py-2 text-sm font-semibold text-foreground shadow-xs transition-colors hover:bg-muted/40 disabled:opacity-60"
                     >
                       <GoogleGLogo className="size-5 shrink-0" />
                       <span>Sign up with Google</span>
@@ -288,147 +289,114 @@ export default function SignUpPanel({
                 </div>
               </div>
 
-              {/* Divider */}
-              <div className="relative my-4 flex items-center">
+              <div className="relative my-3 flex items-center">
                 <div className="flex-grow border-t border-border" />
-                <span className="px-3 text-sm font-medium tracking-wider text-muted-foreground uppercase">
+                <span className="px-3 text-[11px] font-medium tracking-wider text-muted-foreground uppercase">
                   or continue with email
                 </span>
                 <div className="flex-grow border-t border-border" />
               </div>
 
-              {/* Registration Form */}
               <form
-                className="space-y-4 md:space-y-5"
+                className="space-y-3"
                 data-purpose="registration-form"
                 onSubmit={handleSubmit(onSubmit)}
                 noValidate
               >
-                {/* Full Name Field */}
-                <div>
-                  <Input
-                    id="fullName"
-                    label="Full name"
-                    placeholder="e.g. Maya Rahman"
-                    showRequiredIndicator={false}
-                    labelClassName="mb-1.5 text-sm font-semibold tracking-wide text-foreground"
-                    className={fieldClassName}
-                    errorClassName="mt-1.5 text-sm font-semibold text-destructive"
-                    errorMessage={errors.fullName?.message}
-                    {...register('fullName')}
-                  />
-                </div>
+                <Input
+                  id="fullName"
+                  label="Full name"
+                  placeholder="e.g. Maya Rahman"
+                  showRequiredIndicator={false}
+                  labelClassName="mb-1 text-xs font-semibold tracking-wide text-foreground"
+                  className={fieldClassName}
+                  errorClassName="mt-1 text-xs font-semibold text-destructive"
+                  errorMessage={errors.fullName?.message}
+                  {...register('fullName')}
+                />
 
-                {/* Email Address Field */}
-                <div>
-                  <Input
-                    id="email"
-                    label="Email address"
-                    type="email"
-                    autoComplete="email"
-                    placeholder="name@domain.com"
-                    showRequiredIndicator={false}
-                    labelClassName="mb-1.5 text-sm font-semibold tracking-wide text-foreground"
-                    className={fieldClassName}
-                    errorClassName="mt-1.5 text-sm font-semibold text-destructive"
-                    errorMessage={errors.email?.message}
-                    {...register('email')}
-                  />
-                </div>
+                <Input
+                  id="email"
+                  label="Email address"
+                  type="email"
+                  autoComplete="email"
+                  placeholder="name@domain.com"
+                  showRequiredIndicator={false}
+                  labelClassName="mb-1 text-xs font-semibold tracking-wide text-foreground"
+                  className={fieldClassName}
+                  errorClassName="mt-1 text-xs font-semibold text-destructive"
+                  errorMessage={errors.email?.message}
+                  {...register('email')}
+                />
 
-                {/* Password Field */}
-                <div>
-                  <Input
-                    id="password"
-                    label="Password"
-                    type={showPassword ? 'text' : 'password'}
-                    autoComplete="new-password"
-                    placeholder="Create a secure password (min. 8 characters)"
-                    showRequiredIndicator={false}
-                    labelClassName="mb-1.5 text-sm font-semibold tracking-wide text-foreground"
-                    className={`${fieldClassName} pr-11`}
-                    errorClassName="mt-1.5 text-sm font-semibold text-destructive"
-                    errorMessage={errors.password?.message}
-                    rightSlot={
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword((prev) => !prev)}
-                        className="flex cursor-pointer items-center justify-center pr-1 text-muted-foreground transition-colors hover:text-primary"
-                        aria-label={
-                          showPassword ? 'Hide password' : 'Show password'
-                        }
-                        tabIndex={-1}
-                      >
-                        {showPassword ? (
-                          <EyeOff className="size-5 stroke-[1.8]" />
-                        ) : (
-                          <Eye className="size-5 stroke-[1.8]" />
-                        )}
-                      </button>
-                    }
-                    {...register('password')}
-                  />
-                </div>
+                <Input
+                  id="password"
+                  label="Password"
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete="new-password"
+                  placeholder="Min. 8 characters"
+                  showRequiredIndicator={false}
+                  labelClassName="mb-1 text-xs font-semibold tracking-wide text-foreground"
+                  className={`${fieldClassName} pr-11`}
+                  errorClassName="mt-1 text-xs font-semibold text-destructive"
+                  errorMessage={errors.password?.message}
+                  rightSlot={
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((prev) => !prev)}
+                      className="flex cursor-pointer items-center justify-center pr-1 text-muted-foreground transition-colors hover:text-primary"
+                      aria-label={
+                        showPassword ? 'Hide password' : 'Show password'
+                      }
+                      tabIndex={-1}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="size-4 stroke-[1.8]" />
+                      ) : (
+                        <Eye className="size-4 stroke-[1.8]" />
+                      )}
+                    </button>
+                  }
+                  {...register('password')}
+                />
 
-                {/* Terms Checkbox */}
-                <div className="pt-1">
-                  <label className="flex cursor-pointer items-start gap-2.5 select-none">
+                <div>
+                  <label className="flex cursor-pointer items-start gap-2 select-none">
                     <input
                       type="checkbox"
                       id="consent"
                       className="mt-0.5 size-4 rounded border-border text-primary accent-primary focus:ring-primary/20 focus:ring-offset-0"
                       {...register('consent')}
                     />
-                    <span className="text-sm leading-relaxed text-muted-foreground">
-                      I agree to the{' '}
-                      <span className="font-medium text-foreground underline hover:text-primary">
-                        Terms of Service
-                      </span>{' '}
-                      and{' '}
-                      <span className="font-medium text-foreground underline hover:text-primary">
-                        Privacy Policy
-                      </span>
-                      , and confirm my submissions will be original.
+                    <span className="text-xs leading-relaxed text-muted-foreground">
+                      I agree to the Terms and Privacy Policy, and confirm my
+                      submissions will be original.
                     </span>
                   </label>
                   {errors.consent?.message && (
-                    <p className="mt-1 text-sm text-destructive">
+                    <p className="mt-1 text-xs text-destructive">
                       {errors.consent.message}
                     </p>
                   )}
                 </div>
 
-                {/* Submit Error banner */}
-                {submitError && (
-                  <div
-                    className="rounded-lg bg-destructive/10 p-3 text-sm font-semibold text-destructive"
-                    role="alert"
-                  >
-                    {submitError}
-                  </div>
-                )}
-
-                {/* Primary Submit Button */}
-                <div className="pt-2">
-                  <button
-                    type="submit"
-                    disabled={isSigningUp || isGoogleSigningUp}
-                    className="flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-primary text-sm font-semibold text-primary-foreground shadow-xs transition-all hover:bg-brand-forest focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 active:scale-[0.985] disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    {isSigningUp ? (
-                      <>
-                        <Loader2 className="size-4 animate-spin" />
-                        <span>Creating account...</span>
-                      </>
-                    ) : (
-                      'Create account'
-                    )}
-                  </button>
-                </div>
+                <button
+                  type="submit"
+                  disabled={isSigningUp || isGoogleSigningUp}
+                  className="flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-primary text-sm font-semibold text-primary-foreground shadow-xs transition-all hover:bg-brand-forest focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 active:scale-[0.985] disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isSigningUp ? (
+                    <>
+                      <Loader2 className="size-4 animate-spin" />
+                      <span>Creating account...</span>
+                    </>
+                  ) : (
+                    'Create account'
+                  )}
+                </button>
               </form>
 
-              {/* Existing Account Helper */}
-              <div className="mt-6 text-center">
+              <div className="mt-4 text-center">
                 <p className="text-sm text-muted-foreground">
                   Already have an account?{' '}
                   <Link
@@ -444,14 +412,12 @@ export default function SignUpPanel({
         </div>
       </div>
 
-      {/* Bottom Trust Note */}
-      <footer className="w-full px-4 py-4 text-center">
-        <p className="text-sm leading-normal text-muted-foreground">
-          Approved contributors receive a secure onboarding packet and dashboard
-          access upon verification.
+      <footer className="w-full shrink-0 px-4 py-3 text-center md:py-2">
+        <p className="text-xs leading-normal text-muted-foreground">
+          Access unlocks after admin review of your first idea.
         </p>
         {footer ? (
-          <p className="mt-1 text-sm text-muted-foreground md:hidden">
+          <p className="mt-1 text-xs text-muted-foreground md:hidden">
             {footer}
           </p>
         ) : null}
