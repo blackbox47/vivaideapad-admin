@@ -28,7 +28,7 @@ function RootComponent() {
       <DocumentTitle />
       <RouteProgressBar />
       <Outlet />
-      <Toaster position="top-right" />
+      <Toaster position="top-right" closeButton />
       {import.meta.env.DEV ? (
         <TanStackRouterDevtools position="bottom-right" />
       ) : null}

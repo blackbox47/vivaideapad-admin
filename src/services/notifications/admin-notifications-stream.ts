@@ -97,6 +97,7 @@ export function startAdminNotificationsStream(store: {
       );
       toast.info(envelope.notification.title, {
         description: envelope.notification.body ?? undefined,
+        closeButton: true,
       });
       return;
     }
