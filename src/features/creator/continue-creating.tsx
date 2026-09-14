@@ -16,6 +16,9 @@ export default function ContinueCreating() {
     search: '',
   });
   const [viewedIdea, setViewedIdea] = useState<MyIdea | null>(null);
+  const underReviewIdeas = (data?.ideas ?? []).filter(
+    (idea) => idea.status === 'Under Review',
+  );
 
   return (
     <section className="rounded-2xl border border-slate-200/70 bg-card p-5 shadow-xs sm:rounded-[20px] sm:p-5.5 dark:border-border">
@@ -33,7 +36,7 @@ export default function ContinueCreating() {
       </div>
 
       <MyIdeasTable
-        items={data?.ideas ?? []}
+        items={underReviewIdeas}
         isLoading={isLoading}
         onView={setViewedIdea}
         pageSize={DASHBOARD_SUBMISSION_ROWS}
