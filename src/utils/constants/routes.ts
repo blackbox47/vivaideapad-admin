@@ -27,6 +27,8 @@ export const CREATOR_ROUTES = {
   login: '/login',
   signUp: '/sign-up',
   forgotPassword: '/forgot-password',
+  resetPassword: '/reset-password',
+  verifyEmail: '/verify-email',
   opportunities: '/opportunities',
   submissions: '/submissions',
   rewards: '/rewards',

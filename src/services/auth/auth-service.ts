@@ -11,6 +11,7 @@ import {
   AUTH_FORGOT_PASSWORD_URL,
   AUTH_GOOGLE_SIGN_IN_URL,
   AUTH_GOOGLE_SIGN_UP_URL,
+  AUTH_RESET_PASSWORD_URL,
   AUTH_SIGN_IN_URL,
   AUTH_SIGN_OUT_URL,
   AUTH_SIGN_UP_URL,
@@ -81,6 +82,16 @@ export const authService = baseService.injectEndpoints({
     forgotPassword: builder.mutation<void, { email: string }>({
       query: (body) => ({ url: AUTH_FORGOT_PASSWORD_URL, method: 'POST', body }),
     }),
+    resetPassword: builder.mutation<
+      void,
+      { token: string; new_password: string }
+    >({
+      query: (body) => ({
+        url: AUTH_RESET_PASSWORD_URL,
+        method: 'POST',
+        body,
+      }),
+    }),
   }),
 });
 
@@ -93,4 +104,5 @@ export const {
   useAdminLoginMutation,
   useSignOutMutation,
   useForgotPasswordMutation,
+  useResetPasswordMutation,
 } = authService;

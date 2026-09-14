@@ -7,6 +7,7 @@ interface SignUpHeroProps {
   description?: string;
   footer?: string;
   homeLink?: string;
+  className?: string;
 }
 
 export default function SignUpHero({
@@ -16,6 +17,7 @@ export default function SignUpHero({
   description = 'Join writers, creators, and thinkers sharing original perspectives and earning rewards for every accepted concept.',
   footer = 'Viva IdeaPad community platform',
   homeLink = '/',
+  className,
 }: SignUpHeroProps) {
   return (
     <LoginHero
@@ -25,6 +27,7 @@ export default function SignUpHero({
       description={description}
       footer={footer}
       homeLink={homeLink}
+      className={className}
     />
   );
 }

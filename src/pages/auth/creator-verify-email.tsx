@@ -1,12 +1,18 @@
 import SignUpHero from '@/features/auth/sign-up-hero';
-import SignUpPanel from '@/features/auth/sign-up-panel';
+import VerifyEmailPanel from '@/features/auth/verify-email-panel';
 
-export default function CreatorSignUpPage() {
+interface CreatorVerifyEmailPageProps {
+  token: string;
+}
+
+export default function CreatorVerifyEmailPage({
+  token,
+}: CreatorVerifyEmailPageProps) {
   const brandName = 'Viva IdeaPad';
   const eyebrow = 'CONTRIBUTOR ACCESS';
-  const title = 'Turn your ideas into rewarded impact.';
+  const title = 'One idea opens the door.';
   const description =
-    'Join writers, creators, and thinkers sharing original perspectives and earning rewards for every accepted concept.';
+    'Pick an onboarding topic, write your idea, and submit it for review. Once an admin approves it, you can sign in.';
   const footer = 'Viva IdeaPad community platform';
 
   return (
@@ -17,14 +23,9 @@ export default function CreatorSignUpPage() {
         title={title}
         description={description}
         footer={footer}
+        className="md:w-[42%]"
       />
-      <SignUpPanel
-        brandName={brandName}
-        eyebrow={eyebrow}
-        heroTitle={title}
-        heroDescription={description}
-        footer={footer}
-      />
+      <VerifyEmailPanel token={token} brandName={brandName} />
     </div>
   );
 }

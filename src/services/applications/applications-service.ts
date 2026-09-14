@@ -9,6 +9,10 @@ import {
   APPLICATIONS_URL,
   APPLICATION_DECISION_URL,
   APPLICATION_DETAIL_URL,
+  PUBLIC_APPLICATIONS_URL,
+  PUBLIC_CONCEPTS_URL,
+  PUBLIC_VERIFY_EMAIL_APPLICATION_URL,
+  PUBLIC_VERIFY_EMAIL_URL,
 } from '@/utils/constants/api-end-points';
 
 export interface ApplicationsListParams {
@@ -32,6 +36,43 @@ export interface ApplicationDetailResponse {
     actor: string;
     at: string;
   }>;
+}
+
+export interface VerifyEmailTokenResponse {
+  email: string;
+  display_name: string | null;
+  access_status: string;
+  application_status: string | null;
+}
+
+export interface VerifyEmailApplicationBody {
+  token: string;
+  concept_id: string;
+  idea_title: string;
+  idea_summary?: string;
+  idea_description: string;
+  consent: boolean;
+}
+
+export interface VerifyEmailApplicationResponse {
+  reference_number: string;
+  application: unknown;
+}
+
+export interface PublicConceptItem {
+  id: string;
+  title: string;
+  category_id: string;
+  brief?: string;
+  reward_budget?: string;
+  close_date?: string | null;
+  is_onboarding?: boolean;
+}
+
+export interface PublicConceptsParams {
+  isOnboarding?: boolean;
+  page?: number;
+  limit?: number;
 }
 
 function mapApplicantStatus(status: unknown): ApplicantStatus {
@@ -69,7 +110,8 @@ function mapApplicantRisk(risk: unknown): ApplicantAiRisk {
 
 function mapApplicationDetail(response: unknown): ApplicationDetailResponse {
   const envelope = asRecord(response) ?? {};
-  const raw = asRecord(envelope.application) ?? asRecord(envelope.data) ?? envelope;
+  const raw =
+    asRecord(envelope.application) ?? asRecord(envelope.data) ?? envelope;
   const user = asRecord(raw.user);
   const category = asRecord(raw.category);
   const concept = asRecord(raw.concept);
@@ -129,6 +171,22 @@ function mapApplicationDetail(response: unknown): ApplicationDetailResponse {
         closeDate: closeDate ? String(closeDate) : null,
       },
     },
+  };
+}
+
+function mapVerifyEmailToken(response: unknown): VerifyEmailTokenResponse {
+  const raw = asRecord(response) ?? {};
+  return {
+    email: String(raw.email ?? ''),
+    display_name:
+      raw.display_name == null && raw.displayName == null
+        ? null
+        : String(raw.display_name ?? raw.displayName),
+    access_status: String(raw.access_status ?? raw.accessStatus ?? ''),
+    application_status:
+      raw.application_status == null && raw.applicationStatus == null
+        ? null
+        : String(raw.application_status ?? raw.applicationStatus),
   };
 }
 
@@ -194,17 +252,83 @@ export const applicationsService = baseService.injectEndpoints({
       }
     >({
       query: (body) => ({
-        url: '/public/applications',
+        url: PUBLIC_APPLICATIONS_URL,
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['applications'],
+    }),
+    validateVerifyEmailToken: builder.query<VerifyEmailTokenResponse, string>({
+      query: (token) => ({
+        url: PUBLIC_VERIFY_EMAIL_URL,
+        method: 'GET',
+        params: { token },
+      }),
+      transformResponse: mapVerifyEmailToken,
+    }),
+    submitVerifyEmailApplication: builder.mutation<
+      VerifyEmailApplicationResponse,
+      VerifyEmailApplicationBody
+    >({
+      query: (body) => ({
+        url: PUBLIC_VERIFY_EMAIL_APPLICATION_URL,
         method: 'POST',
         body,
       }),
       invalidatesTags: ['applications'],
     }),
     getPublicConcepts: builder.query<
-      { data: Array<{ id: string; title: string; category_id: string }> },
-      void
+      { data: PublicConceptItem[] },
+      PublicConceptsParams | void
     >({
-      query: () => ({ url: '/public/concepts', method: 'GET' }),
+      query: (params) => ({
+        url: PUBLIC_CONCEPTS_URL,
+        method: 'GET',
+        params: {
+          is_onboarding:
+            params?.isOnboarding === undefined
+              ? undefined
+              : params.isOnboarding
+                ? 'true'
+                : 'false',
+          page: params?.page,
+          limit: params?.limit ?? 50,
+        },
+      }),
+      transformResponse: (response: unknown): { data: PublicConceptItem[] } => {
+        const envelope = asRecord(response) ?? {};
+        const rows = Array.isArray(envelope.data) ? envelope.data : [];
+        const data: PublicConceptItem[] = [];
+        for (const item of rows) {
+          const row = asRecord(item);
+          if (!row) continue;
+          const categoryId = String(row.category_id ?? row.categoryId ?? '');
+          const id = String(row.id ?? '');
+          if (!id || !categoryId) continue;
+          data.push({
+            id,
+            title: String(row.title ?? 'Untitled topic'),
+            category_id: categoryId,
+            brief: row.brief != null ? String(row.brief) : undefined,
+            reward_budget:
+              row.reward_budget != null
+                ? String(row.reward_budget)
+                : row.rewardBudget != null
+                  ? String(row.rewardBudget)
+                  : undefined,
+            close_date:
+              row.close_date != null
+                ? String(row.close_date)
+                : row.closeDate != null
+                  ? String(row.closeDate)
+                  : null,
+            is_onboarding: Boolean(
+              row.is_onboarding ?? row.isOnboarding ?? false,
+            ),
+          });
+        }
+        return { data };
+      },
       providesTags: ['concepts'],
     }),
   }),
@@ -216,5 +340,7 @@ export const {
   useGetApplicationQuery,
   useDecideApplicationMutation,
   useSubmitPublicApplicationMutation,
+  useValidateVerifyEmailTokenQuery,
+  useSubmitVerifyEmailApplicationMutation,
   useGetPublicConceptsQuery,
 } = applicationsService;
