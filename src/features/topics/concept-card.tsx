@@ -96,7 +96,7 @@ export default function ConceptCard({
         </p>
         <p className="mb-4 text-xs text-muted-foreground">
           Opens {formatDisplayDate(concept.opensOn)} · Closes{' '}
-          {formatDisplayDate(concept.closesOn)} ·{' '}
+          {formatDisplayDate(concept.closesOn || concept.closeDate) || 'N/A'} ·{' '}
           <strong className="text-foreground">{concept.reward}</strong>
         </p>
       </div>

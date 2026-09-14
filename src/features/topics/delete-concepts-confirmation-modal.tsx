@@ -9,6 +9,8 @@ export interface DeleteConceptsConfirmationModalProps {
   selectedCount: number;
   /** Optional title of the first selected concept for single-delete copy. */
   primaryTitle?: string;
+  /** Number of under-review submissions that will also be removed. */
+  cascadedSubmissionCount?: number;
 }
 
 export default function DeleteConceptsConfirmationModal({
@@ -18,6 +20,7 @@ export default function DeleteConceptsConfirmationModal({
   isSubmitting = false,
   selectedCount,
   primaryTitle,
+  cascadedSubmissionCount = 0,
 }: DeleteConceptsConfirmationModalProps) {
   const isSingle = selectedCount === 1;
 
@@ -108,6 +111,21 @@ export default function DeleteConceptsConfirmationModal({
                 Removed from Topics &amp; concepts
               </span>
             </div>
+            {cascadedSubmissionCount > 0 ? (
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-slate-500 shrink-0">
+                  Under-review submissions
+                </span>
+                <span
+                  className="font-semibold text-rose-600 text-right"
+                  data-purpose="delete-cascade-submissions"
+                >
+                  {cascadedSubmissionCount}{' '}
+                  {cascadedSubmissionCount === 1 ? 'submission' : 'submissions'}{' '}
+                  will also be removed
+                </span>
+              </div>
+            ) : null}
           </div>
         </div>
 
