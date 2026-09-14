@@ -16,6 +16,7 @@ interface DateFieldProps {
   onChange: (date: Date | undefined) => void;
   placeholder?: string;
   disabledBefore?: Date;
+  required?: boolean;
 }
 
 export default function DateField({
@@ -24,6 +25,7 @@ export default function DateField({
   onChange,
   placeholder,
   disabledBefore,
+  required,
 }: DateFieldProps) {
   const fieldRef = useRef<HTMLDivElement>(null);
   const isFocusedRef = useRef(false);
@@ -107,6 +109,7 @@ export default function DateField({
         value={text}
         placeholder={placeholder}
         autoComplete="off"
+        required={required}
         className="pr-10"
         onFocus={() => {
           isFocusedRef.current = true;

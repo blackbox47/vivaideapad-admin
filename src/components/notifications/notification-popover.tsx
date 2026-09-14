@@ -25,10 +25,6 @@ import type { AdminNotification } from '@/models/notifications/admin-notificatio
 import type { CreatorNotification } from '@/models/creator/creator-notifications-model';
 import { cn } from '@/lib/utils';
 import { ADMIN_ROUTES, CREATOR_ROUTES } from '@/utils/constants/routes';
-import {
-  getAdminNotificationLink,
-  getCreatorNotificationLink,
-} from '@/utils/notification-link';
 
 interface NotificationPopoverProps {
   role?: 'admin' | 'creator';
@@ -87,7 +83,7 @@ function AdminNotificationContent({
   onClose: () => void;
 }) {
   const navigate = useNavigate();
-  const { notifications, unreadCount, isLoading, toggleRead, markAllRead, isMarkingAll } =
+  const { notifications, unreadCount, isLoading, activate, markAllRead, isMarkingAll } =
     useAdminNotifications('All');
 
   const handleViewAll = () => {
@@ -97,7 +93,7 @@ function AdminNotificationContent({
 
   /**
    * Single click action for a notification row:
-   * 1. Resolve the target route from the cached link fields.
+   * 1. Resolve the target route and invalidate that page's cache when unread.
    * 2. If a route exists, navigate to it (after closing the popover so the
    *    popover animation doesn't fight the route transition).
    * 3. Mark the notification read so the unread dot clears regardless.
@@ -106,15 +102,7 @@ function AdminNotificationContent({
    * "mark read only" behavior.
    */
   const handleActivate = (item: AdminNotification) => {
-    const target = getAdminNotificationLink({
-      rawType: item.rawType,
-      linkedRecordType: item.linkedRecordType,
-      linkedRecordId: item.linkedRecordId,
-    });
-
-    if (!item.read) {
-      toggleRead(item.id);
-    }
+    const target = activate(item);
 
     if (target) {
       onClose();
@@ -240,7 +228,7 @@ function CreatorNotificationContent({
   onClose: () => void;
 }) {
   const navigate = useNavigate();
-  const { notifications, unreadCount, isLoading, toggleRead, markAllRead, isMarkingAll } =
+  const { notifications, unreadCount, isLoading, activate, markAllRead, isMarkingAll } =
     useCreatorNotifications('All');
 
   const handleViewAll = () => {
@@ -250,19 +238,11 @@ function CreatorNotificationContent({
 
   /**
    * Mirror of `handleActivate` in `AdminNotificationContent`. Routes creator
-   * notifications to the contributor SPA's relevant pages — see
-   * `getCreatorNotificationLink` for the routing table.
+   * notifications to the contributor SPA's relevant pages and invalidates
+   * that page's cache when the row is unread.
    */
   const handleActivate = (item: CreatorNotification) => {
-    const target = getCreatorNotificationLink({
-      rawType: item.rawType,
-      linkedRecordType: item.linkedRecordType,
-      linkedRecordId: item.linkedRecordId,
-    });
-
-    if (!item.read) {
-      toggleRead(item.id);
-    }
+    const target = activate(item);
 
     if (target) {
       onClose();

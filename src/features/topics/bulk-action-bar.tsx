@@ -77,7 +77,7 @@ export default function BulkActionBar({
               className="flex cursor-pointer items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-primary/10 hover:text-primary"
             >
               <UserPlus className="size-3.5 text-primary" />
-              <span>Set as Onboarding (NEW)</span>
+              <span>Set as Onboarding (New)</span>
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() =>
@@ -86,7 +86,7 @@ export default function BulkActionBar({
               className="flex cursor-pointer items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-warning-subtle hover:text-warning"
             >
               <UserMinus className="size-3.5 text-warning" />
-              <span>Remove Onboarding (Not NEW)</span>
+              <span>Remove Onboarding (Not New)</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

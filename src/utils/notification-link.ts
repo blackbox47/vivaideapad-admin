@@ -26,6 +26,26 @@ export interface NotificationLinkInput {
 }
 
 /**
+ * RTK Query tags owned by the admin page a notification routes to.
+ * Used so an unread click refetches that page instead of serving stale cache.
+ */
+export type AdminNotificationPageTag =
+  | 'people'
+  | 'applications'
+  | 'review'
+  | 'submissions'
+  | 'payouts'
+  | 'admins';
+
+/**
+ * RTK Query tags owned by the creator page a notification routes to.
+ */
+export type CreatorNotificationPageTag =
+  | 'my-ideas'
+  | 'creator-rewards'
+  | 'creator-topics';
+
+/**
  * Admin SPA route for a notification.
  *
  * Routing table (Phase 1 of the plan):
@@ -61,6 +81,27 @@ export function getAdminNotificationLink(
 }
 
 /**
+ * Cache tags for the admin destination page of a notification.
+ * Empty when the notification has no routable target.
+ */
+export function getAdminNotificationPageTags(
+  linkedRecordType: string | null | undefined,
+): AdminNotificationPageTag[] {
+  switch (linkedRecordType) {
+    case 'application':
+      return ['people', 'applications'];
+    case 'submission':
+      return ['review', 'submissions'];
+    case 'payout':
+      return ['payouts'];
+    case 'user':
+      return ['admins'];
+    default:
+      return [];
+  }
+}
+
+/**
  * Creator / contributor SPA route for a notification.
  *
  * Routing table:
@@ -88,5 +129,24 @@ export function getCreatorNotificationLink(
       return `/opportunities?focus=${encodeURIComponent(linkedRecordId)}`;
     default:
       return null;
+  }
+}
+
+/**
+ * Cache tags for the creator destination page of a notification.
+ * Empty when the notification has no routable target.
+ */
+export function getCreatorNotificationPageTags(
+  linkedRecordType: string | null | undefined,
+): CreatorNotificationPageTag[] {
+  switch (linkedRecordType) {
+    case 'submission':
+      return ['my-ideas'];
+    case 'payout':
+      return ['creator-rewards'];
+    case 'concept':
+      return ['creator-topics'];
+    default:
+      return [];
   }
 }

@@ -19,7 +19,6 @@ import useCreatorNotifications, {
   parseCreatorNotificationFilter,
 } from '@/hooks/creator/use-creator-notifications';
 import type { CreatorNotification } from '@/models/creator/creator-notifications-model';
-import { getCreatorNotificationLink } from '@/utils/notification-link';
 
 export default function CreatorNotificationsOverview() {
   const [searchParams] = useTanstackSearchParams();
@@ -32,26 +31,18 @@ export default function CreatorNotificationsOverview() {
     isError,
     error,
     refetch,
-    toggleRead,
+    activate,
     markAllRead,
     isMarkingAll,
   } = useCreatorNotifications(filter);
 
   /**
    * Centralised row-activation logic for the creator notifications page.
-   * Mirrors the popover's behavior: route when possible, otherwise
-   * just mark read.
+   * Mirrors the popover: invalidate the destination page when unread,
+   * then route when possible, otherwise just mark read.
    */
   const handleActivate = (notification: CreatorNotification) => {
-    const target = getCreatorNotificationLink({
-      rawType: notification.rawType,
-      linkedRecordType: notification.linkedRecordType,
-      linkedRecordId: notification.linkedRecordId,
-    });
-
-    if (!notification.read) {
-      toggleRead(notification.id);
-    }
+    const target = activate(notification);
 
     if (target) {
       void navigate({ to: target });

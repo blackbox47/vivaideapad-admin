@@ -27,7 +27,7 @@ export default function ReviewQueue() {
     isLoading,
     decideSubmission,
     isDeciding,
-  } = useContentReview({ status: 'all', search: '' });
+  } = useContentReview({ status: 'Under Review', search: '' });
 
   const rows = filtered.slice(0, DASHBOARD_REVIEW_ROWS);
 
