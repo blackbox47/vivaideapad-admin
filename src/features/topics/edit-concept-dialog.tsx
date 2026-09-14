@@ -220,6 +220,9 @@ export default function EditConceptDialog({
                 className="mb-1.5 block text-[12px] font-bold text-foreground"
               >
                 Opening date
+                <span className="ml-0.5 text-destructive" aria-hidden="true">
+                  *
+                </span>
               </Label>
               <Controller
                 control={control}
@@ -235,9 +238,15 @@ export default function EditConceptDialog({
                       }
                     }}
                     placeholder="02/06/2026"
+                    required
                   />
                 )}
               />
+              {errors.opensOn?.message ? (
+                <p className="mt-1 text-[11px] font-medium text-destructive">
+                  {errors.opensOn.message}
+                </p>
+              ) : null}
             </div>
 
             <div>
@@ -270,8 +279,8 @@ export default function EditConceptDialog({
             <div>
               <Input
                 id="edit-concept-reward"
-                label="Reward guidance"
-                placeholder="Enter reward guidance"
+                label="Reward amount"
+                placeholder="Enter reward amount"
                 errorMessage={errors.reward?.message}
                 {...register('reward')}
               />
@@ -307,7 +316,7 @@ export default function EditConceptDialog({
               htmlFor="edit-is-onboarding"
               className="text-[13px] font-medium text-foreground cursor-pointer select-none"
             >
-              Mark as Onboarding challenge (displays NEW chip)
+              Mark as Onboarding challenge (displays New chip)
             </label>
           </div>
 

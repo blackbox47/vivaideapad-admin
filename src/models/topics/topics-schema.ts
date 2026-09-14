@@ -1,6 +1,19 @@
 import { startOfDay } from 'date-fns';
 import { z } from 'zod';
 
+function parseRewardAmount(value: string): number {
+  const cleaned = value.replace(/[^\d.-]/g, '');
+  return Number(cleaned);
+}
+
+const rewardAmountSchema = z
+  .string()
+  .trim()
+  .refine((value) => {
+    const amount = parseRewardAmount(value);
+    return Number.isFinite(amount) && amount > 0;
+  }, 'Reward amount must be greater than 0');
+
 function refineClosingDate(
   data: { opensOn?: Date; closesOn?: Date },
   ctx: z.RefinementCtx,
@@ -29,9 +42,9 @@ export const createConceptSchema = z.object({
     .trim()
     .min(1, 'Description is required.')
     .max(10_000, 'Description must be at most 10,000 characters.'),
-  opensOn: z.date().optional(),
+  opensOn: z.date({ error: 'Opening date is required.' }),
   closesOn: z.date().optional(),
-  reward: z.string(),
+  reward: rewardAmountSchema,
   isOnboarding: z.boolean().optional(),
   status: z.enum(['draft', 'active', 'archived']),
 }).superRefine(refineClosingDate);
@@ -50,9 +63,9 @@ export const editConceptSchema = z.object({
     .trim()
     .min(1, 'Description is required.')
     .max(10_000, 'Description must be at most 10,000 characters.'),
-  opensOn: z.date().optional(),
+  opensOn: z.date({ error: 'Opening date is required.' }),
   closesOn: z.date().optional(),
-  reward: z.string(),
+  reward: rewardAmountSchema,
   isOnboarding: z.boolean().optional(),
   status: z.enum(['draft', 'active', 'archived']),
 }).superRefine(refineClosingDate);

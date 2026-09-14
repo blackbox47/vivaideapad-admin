@@ -16,7 +16,6 @@ import LeaderboardFilters from '@/features/leaderboard/leaderboard-filters';
 import LeaderboardKpiCards from '@/features/leaderboard/leaderboard-kpi-cards';
 import LeaderboardPodium from '@/features/leaderboard/leaderboard-podium';
 import LeaderboardTable from '@/features/leaderboard/leaderboard-table';
-import RecalculateButton from '@/features/leaderboard/recalculate-button';
 import useLeaderboard, { formatPoints } from '@/hooks/leaderboard/use-leaderboard';
 
 export default function LeaderboardOverview() {
@@ -71,7 +70,6 @@ export default function LeaderboardOverview() {
       <PageHeader
         title="Leaderboard"
         description="Configured scoring drives public rank and points."
-        action={<RecalculateButton />}
       />
 
       <LeaderboardKpiCards

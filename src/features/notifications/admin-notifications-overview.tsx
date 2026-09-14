@@ -19,7 +19,6 @@ import useAdminNotifications, {
   parseNotificationFilter,
 } from '@/hooks/notifications/use-admin-notifications';
 import type { AdminNotification } from '@/models/notifications/admin-notifications-model';
-import { getAdminNotificationLink } from '@/utils/notification-link';
 
 export default function AdminNotificationsOverview() {
   const [searchParams] = useTanstackSearchParams();
@@ -32,26 +31,18 @@ export default function AdminNotificationsOverview() {
     isError,
     error,
     refetch,
-    toggleRead,
+    activate,
     markAllRead,
     isMarkingAll,
   } = useAdminNotifications(filter);
 
   /**
    * Centralised row-activation logic for the full notifications page.
-   * Mirrors the popover's behavior: route when possible, otherwise
-   * just mark read.
+   * Mirrors the popover: invalidate the destination page when unread,
+   * then route when possible, otherwise just mark read.
    */
   const handleActivate = (notification: AdminNotification) => {
-    const target = getAdminNotificationLink({
-      rawType: notification.rawType,
-      linkedRecordType: notification.linkedRecordType,
-      linkedRecordId: notification.linkedRecordId,
-    });
-
-    if (!notification.read) {
-      toggleRead(notification.id);
-    }
+    const target = activate(notification);
 
     if (target) {
       void navigate({ to: target });
