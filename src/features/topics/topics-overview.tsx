@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { AlertCircle } from 'lucide-react';
 import { useTanstackSearchParams } from '@/lib/use-tanstack-search-params';
 
@@ -24,7 +24,10 @@ import EditConceptDialog from '@/features/topics/edit-concept-dialog';
 import useCreateConcept from '@/hooks/topics/use-create-concept';
 import useEditConcept from '@/hooks/topics/use-edit-concept';
 import useTopics from '@/hooks/topics/use-topics';
-import { useBulkConceptActionMutation } from '@/services/topics/topics-service';
+import {
+  useBulkConceptActionMutation,
+  usePreviewCascadeQuery,
+} from '@/services/topics/topics-service';
 import type {
   Concept,
   ConceptStatus,
@@ -66,6 +69,16 @@ export default function TopicsOverview() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingConcept, setEditingConcept] = useState<Concept | null>(null);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const selectedIdsArray = useMemo(
+    () => Array.from(selectedIds),
+    [selectedIds],
+  );
+  const { data: cascadePreviewData } = usePreviewCascadeQuery(
+    selectedIdsArray,
+    {
+      skip: !isDeleteConfirmOpen || selectedIdsArray.length === 0,
+    },
+  );
 
   useEffect(() => {
     setTimeout(() => {
@@ -201,13 +214,18 @@ export default function TopicsOverview() {
   const handleDeleteConfirm = async () => {
     if (selectedIds.size === 0) return;
     try {
-      await bulkActionMutation({
+      const result = await bulkActionMutation({
         action: 'delete',
         ids: Array.from(selectedIds),
       }).unwrap();
-      toast.success(
-        `Deleted ${selectedIds.size} ${selectedIds.size === 1 ? 'concept' : 'concepts'}`,
-      );
+      const cascaded = result?.cascaded_submissions ?? 0;
+      const conceptWord =
+        selectedIds.size === 1 ? 'concept' : 'concepts';
+      const cascadedSuffix =
+        cascaded > 0
+          ? ` and ${cascaded} under-review ${cascaded === 1 ? 'submission' : 'submissions'}`
+          : '';
+      toast.success(`Deleted ${selectedIds.size} ${conceptWord}${cascadedSuffix}`);
       setIsDeleteConfirmOpen(false);
       deselectAll();
     } catch (err) {
@@ -315,6 +333,9 @@ export default function TopicsOverview() {
             selectedIds.size === 1
               ? concepts.find((concept) => selectedIds.has(concept.id))?.title
               : undefined
+          }
+          cascadedSubmissionCount={
+            cascadePreviewData?.cascaded_submissions ?? 0
           }
           isSubmitting={isBulkLoading}
           onClose={() => {

@@ -16,11 +16,13 @@ import type {
   ConceptDeleteResponse,
   BulkConceptActionBody,
   BulkConceptActionResponse,
+  CascadePreviewResponse,
 } from '@/models/topics/topics-model';
 import { baseService } from '@/services/core/base-service';
 import {
   CONCEPTS_URL,
   CONCEPTS_BULK_ACTION_URL,
+  CONCEPTS_CASCADE_PREVIEW_URL,
   CONCEPT_DETAIL_URL,
   CONCEPT_STATUS_URL,
 } from '@/utils/constants/api-end-points';
@@ -210,6 +212,14 @@ export const topicsService = baseService.injectEndpoints({
       }),
       invalidatesTags: ['concepts', 'categories'],
     }),
+    previewCascade: builder.query<CascadePreviewResponse, string[]>({
+      query: (ids) => ({
+        url: CONCEPTS_CASCADE_PREVIEW_URL,
+        method: 'POST',
+        body: { ids },
+      }),
+      providesTags: ['concepts', 'submissions'],
+    }),
   }),
 });
 
@@ -222,6 +232,8 @@ export const {
   useTransitionConceptStatusMutation,
   useDeleteConceptMutation,
   useBulkConceptActionMutation,
+  usePreviewCascadeQuery,
+  useLazyPreviewCascadeQuery,
 } = topicsService;
 
 // =====================================================================

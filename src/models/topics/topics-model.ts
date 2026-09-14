@@ -147,7 +147,8 @@ export interface TransitionConceptStatusResponse {
 
 export interface ConceptDeleteResponse {
   id: string;
-  deletedAt: string;
+  cascaded_submissions: number;
+  cascaded_submission_ids: string[];
 }
 
 export type BulkConceptActionType =
@@ -170,4 +171,10 @@ export interface BulkConceptActionResponse {
   success: boolean;
   affected: number;
   duplicated?: unknown[];
+  cascaded_submissions?: number;
+  cascaded_submission_ids?: string[];
+}
+
+export interface CascadePreviewResponse {
+  cascaded_submissions: number;
 }
