@@ -35,6 +35,7 @@ export interface DecideSubmissionBody {
   id: string;
   status: SubmissionStatus;
   comment?: string;
+  reward_amount?: number;
   revision_window_days?: RevisionWindowDays;
 }
 

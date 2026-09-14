@@ -27,7 +27,10 @@ interface SubmissionReviewPanelProps {
   onDecide: (
     status: SubmissionStatus,
     comment: string,
-    options?: { revisionWindowDays?: RevisionWindowDays },
+    options?: {
+      revisionWindowDays?: RevisionWindowDays;
+      rewardAmount?: number;
+    },
   ) => void;
 }
 
@@ -537,7 +540,15 @@ export default function SubmissionReviewPanel({
             rewardButtonText={formatShortReward(rewardText)}
             onClose={() => setIsApproveModalOpen(false)}
             onConfirm={() => {
-              onDecide('Approved', '');
+              const numericReward =
+                detail.concept?.rewardBudget != null
+                  ? Number(detail.concept.rewardBudget)
+                  : detail.topicDetail?.rewardBudget != null
+                    ? Number(detail.topicDetail.rewardBudget)
+                    : isMotorbike
+                      ? 18000
+                      : undefined;
+              onDecide('Approved', '', { rewardAmount: numericReward });
             }}
           />
 

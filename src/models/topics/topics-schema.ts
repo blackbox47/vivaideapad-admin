@@ -2,8 +2,24 @@ import { startOfDay } from 'date-fns';
 import { z } from 'zod';
 
 function parseRewardAmount(value: string): number {
-  const cleaned = value.replace(/[^\d.-]/g, '');
+  const cleaned = value.replace(/[^\d.]/g, '');
   return Number(cleaned);
+}
+
+/**
+ * Keep only a positive numeric string (digits and at most one decimal point).
+ * Used so the reward field cannot accept letters, signs, or extra punctuation.
+ */
+export function sanitizeRewardAmountInput(value: string): string {
+  const cleaned = value.replace(/[^\d.]/g, '');
+  const decimalIndex = cleaned.indexOf('.');
+  if (decimalIndex === -1) {
+    return cleaned;
+  }
+
+  return `${cleaned.slice(0, decimalIndex + 1)}${cleaned
+    .slice(decimalIndex + 1)
+    .replace(/\./g, '')}`;
 }
 
 const rewardAmountSchema = z

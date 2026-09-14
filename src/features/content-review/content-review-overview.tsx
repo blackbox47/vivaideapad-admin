@@ -80,7 +80,10 @@ export default function ContentReviewOverview() {
   const handleDecide = (
     nextStatus: SubmissionStatus,
     comment: string,
-    options?: { revisionWindowDays?: RevisionWindowDays },
+    options?: {
+      revisionWindowDays?: RevisionWindowDays;
+      rewardAmount?: number;
+    },
   ) => {
     if (!panelId) {
       return;
@@ -90,6 +93,9 @@ export default function ContentReviewOverview() {
       id: panelId,
       status: nextStatus,
       comment,
+      ...(options?.rewardAmount != null && options.rewardAmount > 0
+        ? { reward_amount: options.rewardAmount }
+        : {}),
       ...(nextStatus === 'Revision Requested'
         ? {
             revision_window_days: options?.revisionWindowDays ?? 7,
